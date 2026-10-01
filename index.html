@@ -56,7 +56,7 @@ img{max-width:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
 .wrap{max-width:720px;margin:0 auto;padding-inline:16px;padding-block:16px 24px;display:flex;flex-direction:column;gap:16px}
 /* App shell: the page itself never scrolls — only the content area does, so the tab bar can't move between tabs */
-html,body{height:var(--app-h,100%);overflow:hidden}
+html,body{height:var(--app-h,100%);overflow:hidden;overscroll-behavior:none}
 .app{height:100vh;height:100dvh;height:var(--app-h,100dvh);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
 .scroller{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
