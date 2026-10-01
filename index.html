@@ -887,7 +887,7 @@ function renderWallets(){
   const ed=WALLETS.find(w=>state.editing==='w-'+w.id);
   if(ed){
     const cur=walletValue(ed.id);
-    html+=`<form class="wallet-edit" id="wForm"><b>${ed.name}</b><p>${WHELP}</p><div class="row"><input id="wInput" class="num" inputmode="decimal" placeholder="Сумма, ₽" value="${cur===null?'':Math.round(cur*100)/100}" aria-label="${ed.name}"><button class="primary" type="submit">Сохранить</button><button class="linkbtn" type="button" id="wCancel">Отмена</button></div></form>`;
+    html+=`<div class="wmodal"><div class="sheet-bg" data-wclose></div><form class="wallet-edit" id="wForm"><b>${ed.name}</b><p>${WHELP}</p><div class="row"><input id="wInput" class="num" inputmode="decimal" placeholder="Сумма, ₽" value="${cur===null?'':Math.round(cur*100)/100}" aria-label="${ed.name}"><button class="primary" type="submit">Сохранить</button><button class="linkbtn" type="button" id="wCancel">Отмена</button></div></form></div>`;
   }
   const rc=state.recon;
   if(rc){const d=Math.round((rc.to-rc.from)*100)/100;
@@ -908,7 +908,8 @@ function renderWallets(){
   $('moneyActs').innerHTML=state.xferOpen?'':'<button class="linkbtn" id="xOpen">⇄ Перевод между счетами</button>';
   if($('xOpen')) $('xOpen').onclick=()=>{state.xfer.amount=0;state.xferOpen=true;render();$('xAmount')?.focus()};
   if(state.xferOpen) bindXfer();
-  box.querySelectorAll('.wrow').forEach(b=>b.onclick=()=>{state.editing=state.editing==='w-'+b.dataset.w?null:'w-'+b.dataset.w;render();$('wInput')?.focus()});
+  box.querySelectorAll('.wrow')
+    box.querySelectorAll('[data-wclose]').forEach(b=>b.onclick=()=>{state.editing=null;render()});.forEach(b=>b.onclick=()=>{state.editing=state.editing==='w-'+b.dataset.w?null:'w-'+b.dataset.w;render();$('wInput')?.focus()});
   if(ed){
     $('wForm').onsubmit=e=>{e.preventDefault();const v=parseNum($('wInput').value);
       if(!(v>=0)){toast('Введите сумму числом, например 15000');return}
