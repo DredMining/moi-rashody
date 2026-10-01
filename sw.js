@@ -1,12 +1,18 @@
-// Keeps the app opening without internet: always tries the network first, falls back to the saved copy.
-const CACHE = 'moi-rashody-v9';
+// Opens instantly from the saved copy, then quietly fetches the fresh version for next launch.
+const CACHE = 'moi-rashody-v10';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
+const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(k => Promise.all(k.filter(n => n !== CACHE).map(n => caches.delete(n))))); self.clients.claim(); });
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  e.respondWith(fetch(e.request).then(r => {
-    if (r.ok && new URL(e.request.url).origin === location.origin) { const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); }
-    return r;
-  }).catch(() => caches.match(e.request, { ignoreSearch: true }).then(r => r || caches.match('./index.html'))));
+  const url = new URL(e.request.url);
+  const own = url.origin === location.origin;
+  if (!own && !FONT_HOSTS.includes(url.hostname)) return;
+  e.respondWith(caches.open(CACHE).then(async c => {
+    const hit = await c.match(e.request, { ignoreSearch: own });
+    const fresh = fetch(e.request).then(r => { if (r.ok || r.type === 'opaque') c.put(e.request, r.clone()); return r; });
+    if (hit) { if (own) e.waitUntil(fresh.catch(() => {})); return hit; }
+    return fresh.catch(() => own ? c.match('./index.html') : Response.error());
+  }));
 });
