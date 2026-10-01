@@ -418,6 +418,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
           <button class="ghost" id="exportBtn">Скачать CSV за месяц</button>
           <button class="ghost" id="backupBtn">Скачать резервную копию</button>
           <button class="ghost" id="restoreBtn" hidden>Загрузить резервную копию</button>
+          <button class="ghost" id="wipeBtn" style="color:var(--bad);border-color:var(--bad)">Очистить всё</button>
           <input type="file" id="restoreFile" accept=".json,application/json" hidden>
         </div>
       </div>
@@ -570,6 +571,7 @@ function localStore(){
     async remove(id){data.items=data.items.filter(i=>i.id!==id); save()},
     async setSettings(s){data.settings=s; save()},
     async replaceAll(d){data={items:d.items||[],debts:d.debts||[],settings:d.settings||{}}; save()},
+    async clearAll(settings){data={items:[],debts:[],settings}; save()},
     async addDebt(d){data.debts.push({...d,id:nid()}); save()},
     async updateDebt(id,p){data.debts=data.debts.map(d=>d.id===id?{...d,...p}:d); save()},
     async removeDebt(id){data.debts=data.debts.filter(d=>d.id!==id); save()}
@@ -596,7 +598,8 @@ function cloudStore(db,uid){
     async setSettings(s){await ledger.set(s)},
     async addDebt(d){await dcol.doc().set(d)},
     async updateDebt(id,p){await dcol.doc(id).update(p)},
-    async removeDebt(id){await dcol.doc(id).delete()}
+    async removeDebt(id){await dcol.doc(id).delete()},
+    async clearAll(next){for(const i of [...items]) await col.doc(i.id).delete();for(const d of [...debts]) await dcol.doc(d.id).delete();await ledger.set(next)}
   };
 }
 async function initStore(){
@@ -1362,6 +1365,19 @@ $('backupBtn').onclick=async()=>{
   const strip=o=>{const {id,...r}=o;return r};
   const data=JSON.stringify({app:'moi-rashody',version:1,exported:new Date().toISOString(),items:state.items.map(strip),debts:state.debts.map(strip),settings:state.settings},null,1);
   if(await saveFile(`moi-rashody-backup-${iso(new Date())}.json`,data,'application/json')) toast('Резервная копия сохранена');
+};
+/* start over: every record and debt removed, every account at 0; the limit and broker % stay */
+$('wipeBtn').onclick=async()=>{
+  const b=$('wipeBtn');
+  if(!b.dataset.armed){b.dataset.armed='1';b.textContent='Точно? Удалятся все записи и долги. Нажмите ещё раз';setTimeout(()=>{if(b.dataset.armed){delete b.dataset.armed;b.textContent='Очистить всё'}},6000);return}
+  delete b.dataset.armed;b.disabled=true;b.textContent='Очищаю…';
+  const at=Date.now(), st=state.settings, keep={};
+  for(const k of Object.keys(st)) if(/^seed|limitSet$/.test(k)) keep[k]=st[k];
+  const next={...keep,budget:st.budget===undefined?DEFAULT_LIMIT:st.budget,limitSet:true,brokerPct:st.brokerPct||0,
+    wallets:Object.fromEntries(WALLETS.map(w=>[w.id,{amount:0,at}])),tripStart:{amount:0,at},brokerOwed:{amount:0,at}};
+  try{await store.clearAll(next);state.settings=next;state.editing=null;state.xferOpen=false;render();toast('Всё очищено: записи удалены, счета по нулям')}
+  catch(e){toast('Не получилось очистить. Попробуйте ещё раз.')}
+  b.disabled=false;b.textContent='Очистить всё';
 };
 $('restoreBtn').onclick=()=>{
   const b=$('restoreBtn');
