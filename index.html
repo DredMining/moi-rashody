@@ -54,10 +54,10 @@ img{max-width:100%}
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
-.wrap{max-width:720px;margin:0 auto;padding-inline:16px;padding-block:calc(16px + env(safe-area-inset-top,0px)) 24px;display:flex;flex-direction:column;gap:16px}
+.wrap{max-width:720px;margin:0 auto;padding-inline:16px;padding-block:16px 24px;display:flex;flex-direction:column;gap:16px}
 /* App shell: the page itself never scrolls — only the content area does, so the tab bar can't move between tabs */
 html,body{height:100%;overflow:hidden}
-.app{height:100vh;height:100dvh;display:flex;flex-direction:column}
+.app{height:100vh;height:100dvh;height:var(--app-h,100dvh);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
 .scroller{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
 h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance}
@@ -69,7 +69,7 @@ button{cursor:pointer}
 .pos{color:var(--good)} .neg{color:var(--bad)}
 
 /* Tabs */
-.tabs{flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--surface);border-top:1px solid var(--line);padding:4px max(8px,calc((100% - 720px)/2)) max(6px,calc(env(safe-area-inset-bottom,0px) - 28px));z-index:20}
+.tabs{flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--surface);border-top:1px solid var(--line);padding:4px max(8px,calc((100% - 720px)/2)) max(6px,calc(env(safe-area-inset-bottom,0px) - 18px));z-index:20}
 .tabs button{border:0;background:transparent;padding:4px 0 2px;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:12px;font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent}
 .tabs .ico{position:relative;width:60px;height:32px;border-radius:16px;display:grid;place-items:center;transition:background-color .2s ease,color .2s ease}
 .tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
@@ -1364,6 +1364,8 @@ $('prev').onclick=()=>{state.m--;if(state.m<0){state.m=11;state.y--}state.filter
 $('next').onclick=()=>{if(isCurrentMonth())return;state.m++;if(state.m>11){state.m=0;state.y++}state.filter=null;render()};
 function setTab(t){if(t==='ledger'){state.y=now.getFullYear();state.m=now.getMonth();state.filter=null}state.tab=t;state.editing=null;render();$('scroller').scrollTo(0,0);try{history.replaceState(null,'',t==='ledger'?'#':'#'+t)}catch(e){}}
 $('tabLedger').onclick=()=>setTab('ledger');
+/* iPhone home-screen app reports a viewport shorter than the screen by the status-bar height, leaving a gap under the tab bar — size the app to the real screen */
+if(navigator.standalone){const fitScreen=()=>{const tall=innerHeight>innerWidth;const h=tall?Math.max(screen.width,screen.height):Math.min(screen.width,screen.height);document.documentElement.style.setProperty('--app-h',h+'px')};fitScreen();addEventListener('resize',fitScreen);addEventListener('orientationchange',()=>setTimeout(fitScreen,300))}
 $('tabMoney').onclick=()=>setTab('money');
 $('tabDebts').onclick=()=>setTab('debts');
 $('tabHistory').onclick=()=>setTab('history');
