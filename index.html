@@ -13,7 +13,6 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
-:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0;font-size:14px}
 img{max-width:100%}
 [hidden]{display:none!important}
@@ -55,7 +54,11 @@ img{max-width:100%}
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
-.wrap{max-width:720px;margin:0 auto;padding-inline:16px;padding-block:16px calc(96px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:16px}
+.wrap{max-width:720px;margin:0 auto;padding-inline:16px;padding-block:calc(16px + env(safe-area-inset-top,0px)) 24px;display:flex;flex-direction:column;gap:16px}
+/* App shell: the page itself never scrolls — only the content area does, so the tab bar can't move between tabs */
+html,body{height:100%;overflow:hidden}
+.app{height:100vh;height:100dvh;display:flex;flex-direction:column}
+.scroller{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
 h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance}
 h2{font-size:13px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
@@ -66,10 +69,15 @@ button{cursor:pointer}
 .pos{color:var(--good)} .neg{color:var(--bad)}
 
 /* Tabs */
-.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:16px 16px 0 0;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(720px,100%);z-index:20;box-shadow:0 -6px 20px rgb(0 0 0 / .25)}
-.tabs button{border:0;background:transparent;border-radius:9px;padding:7px 2px;white-space:nowrap;line-height:1.15;text-align:center;min-height:44px;font-size:14px;font-weight:600;min-width:0;color:var(--muted);display:flex;gap:6px;justify-content:center;align-items:center}
-.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
-.tabs .badge{flex:none;font-family:var(--f-num);font-size:12px;font-weight:500;opacity:.85}
+.tabs{flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--surface);border-top:1px solid var(--line);padding:6px max(8px,calc((100% - 720px)/2)) calc(6px + env(safe-area-inset-bottom,0px));z-index:20}
+.tabs button{border:0;background:transparent;padding:4px 0 2px;min-width:0;min-height:56px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:12px;font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent}
+.tabs .ico{position:relative;width:60px;height:32px;border-radius:16px;display:grid;place-items:center;transition:background-color .2s ease,color .2s ease}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tabs button[aria-selected="true"]{color:var(--ink);font-weight:600}
+.tabs button[aria-selected="true"] .ico{background:var(--accent-soft);color:var(--accent)}
+.tabs button:active .ico{background:var(--accent-soft)}
+.tabs .badge{position:absolute;top:0;right:8px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--warn);color:#1A1405;font-family:var(--f-num);font-size:11px;font-weight:600;line-height:17px;text-align:center;box-shadow:0 0 0 2px var(--surface)}
+.tabs .badge:empty{display:none}
 
 /* Top */
 .top{display:flex;flex-direction:column;gap:14px}
@@ -326,13 +334,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
 </head>
 <body>
 
+<div class="app">
+<div class="scroller" id="scroller">
 <main class="wrap">
-  <nav class="tabs" role="tablist" aria-label="Разделы">
-    <button role="tab" id="tabLedger" aria-selected="true" aria-controls="viewLedger">Учёт</button>
-    <button role="tab" id="tabMoney" aria-selected="false" aria-controls="viewMoney">Деньги</button>
-    <button role="tab" id="tabHistory" aria-selected="false" aria-controls="viewHistory">Записи</button>
-    <button role="tab" id="tabDebts" aria-selected="false" aria-controls="viewDebts">Долги <span class="badge" id="debtBadge"></span></button>
-  </nav>
 
   <div id="viewLedger" role="tabpanel" aria-labelledby="tabLedger" style="display:flex;flex-direction:column;gap:16px">
   <div class="monthbar" hidden>
@@ -475,6 +479,14 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   </div>
 
 </main>
+</div>
+<nav class="tabs" role="tablist" aria-label="Разделы">
+  <button role="tab" id="tabLedger" aria-selected="true" aria-controls="viewLedger"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></span>Учёт</button>
+  <button role="tab" id="tabMoney" aria-selected="false" aria-controls="viewMoney"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18v3"/><path d="M4 7.5V17a2 2 0 0 0 2 2h13a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H6.5A2.5 2.5 0 0 1 4 7.5"/><circle cx="16" cy="13.5" r="1.2" fill="currentColor" stroke="none"/></svg></span>Деньги</button>
+  <button role="tab" id="tabHistory" aria-selected="false" aria-controls="viewHistory"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1" fill="currentColor" stroke="none"/></svg></span>Записи</button>
+  <button role="tab" id="tabDebts" aria-selected="false" aria-controls="viewDebts"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg><span class="badge" id="debtBadge"></span></span>Долги</button>
+</nav>
+</div>
 <div class="toast" id="toast" hidden></div>
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
   <div class="sheet-bg" data-close></div>
@@ -1350,7 +1362,7 @@ $('form').onsubmit=e=>{
 };
 $('prev').onclick=()=>{state.m--;if(state.m<0){state.m=11;state.y--}state.filter=null;render()};
 $('next').onclick=()=>{if(isCurrentMonth())return;state.m++;if(state.m>11){state.m=0;state.y++}state.filter=null;render()};
-function setTab(t){if(t==='ledger'){state.y=now.getFullYear();state.m=now.getMonth();state.filter=null}state.tab=t;state.editing=null;render();window.scrollTo(0,0);try{history.replaceState(null,'',t==='ledger'?'#':'#'+t)}catch(e){}}
+function setTab(t){if(t==='ledger'){state.y=now.getFullYear();state.m=now.getMonth();state.filter=null}state.tab=t;state.editing=null;render();$('scroller').scrollTo(0,0);try{history.replaceState(null,'',t==='ledger'?'#':'#'+t)}catch(e){}}
 $('tabLedger').onclick=()=>setTab('ledger');
 $('tabMoney').onclick=()=>setTab('money');
 $('tabDebts').onclick=()=>setTab('debts');
