@@ -27,7 +27,7 @@ img{max-width:100%}
   --accent:#5B8CFF; --accent-ink:#FFFFFF; --accent-soft:#1B2A4A;
   --good:#5EDB94; --warn:#FFC94D; --bad:#FF7A7A;
   --p1:#5B8CFF; --p2:#FF9F6B; --p3:#5EDB94; --p4:#B79CFF; --p5:#F48FD8; --p6:#5CD6E6; --p7:#FFD166; --p8:#9AA6BF;
-  --sber:#3DBE79; --tbank:#E6BE55; --vtb:#E8ECF4;
+  --sber:#3DBE79; --tbank:#E6BE55; --vtb:#5B9BFF; --pocket:#EEF1F6; --pillow:#C4A7FF; --spend:#F07F86;
   --out:#7E1F2E; --in:#17624A; --own:#243F75; --trip:#7A5A1E;
   --f-display:"Unbounded", "Golos Text", system-ui, sans-serif;
   --f-body:"Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -40,7 +40,7 @@ img{max-width:100%}
   --accent:#2F5FE0; --accent-ink:#FFFFFF; --accent-soft:#E1E9FB;
   --good:#15803D; --warn:#B45309; --bad:#B42330;
   --p1:#2F5FE0; --p2:#C2410C; --p3:#15803D; --p4:#6D4AA8; --p5:#BE185D; --p6:#0E7490; --p7:#A16207; --p8:#64748B;
-  --sber:#137A45; --tbank:#9A7412; --vtb:#111A2C;
+  --sber:#137A45; --tbank:#9A7412; --vtb:#1D4ED8; --pocket:#111A2C; --pillow:#6D4AA8; --spend:#B42330;
   --out:#7E1A2B; --in:#155C44; --own:#233E73; --trip:#76561A;
   color-scheme:light;
 }}
@@ -49,7 +49,7 @@ img{max-width:100%}
   --accent:#2F5FE0; --accent-ink:#FFFFFF; --accent-soft:#E1E9FB;
   --good:#15803D; --warn:#B45309; --bad:#B42330;
   --p1:#2F5FE0; --p2:#C2410C; --p3:#15803D; --p4:#6D4AA8; --p5:#BE185D; --p6:#0E7490; --p7:#A16207; --p8:#64748B;
-  --sber:#137A45; --tbank:#9A7412; --vtb:#111A2C;
+  --sber:#137A45; --tbank:#9A7412; --vtb:#1D4ED8; --pocket:#111A2C; --pillow:#6D4AA8; --spend:#B42330;
   --out:#7E1A2B; --in:#155C44; --own:#233E73; --trip:#76561A;
   color-scheme:light;
 }
@@ -289,6 +289,9 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:500
 .item .amt{background:none;border:0;color:inherit;font:inherit;font-family:var(--f-num);font-weight:500;padding:6px 0 6px 8px;cursor:pointer;white-space:nowrap}
 .item.in .amt{color:var(--good)}
 .item .what .tag{display:inline-block;vertical-align:middle;white-space:nowrap}
+.item .amt.spend{color:var(--spend)}
+.item .amt.pos{color:var(--good)}
+.item .what .acct{display:inline;font-weight:600}
 .itemacts{grid-column:1/-1;display:flex;gap:16px;align-items:center;justify-content:flex-end;padding-top:4px}
 .accgrid .chip{justify-content:center;padding:7px 2px;font-size:13px;white-space:nowrap;min-width:0}
 .tripline{display:flex;flex-direction:column;gap:8px;padding-top:12px;margin-top:4px;border-top:1px solid var(--line)}
@@ -827,8 +830,8 @@ const WALLETS=[
   {id:'tbank',name:'Т-Банк',color:'var(--tbank)'},
   {id:'sber',name:'Сбербанк',color:'var(--sber)'},
   {id:'vtb',name:'ВТБ',color:'var(--vtb)'},
-  {id:'pocket',name:'Наличка'},
-  {id:'cash',name:'Подушка'},
+  {id:'pocket',name:'Наличка',color:'var(--pocket)'},
+  {id:'cash',name:'Подушка',color:'var(--pillow)'},
   {id:'broker',name:'Брокерский счёт'},
   {id:'piggy',name:'Копильник'}
 ];
@@ -988,17 +991,19 @@ function bindEdits(root){
   });
 }
 /* tap the amount → «Изменить / Удалить» under the row */
+/* account name in the account's own colour, so you see at a glance where the money went from */
+const accTag=id=>{const w=WALLETS.find(x=>x.id===id);return w?`<span class="acct"${w.color?` style="color:${w.color}"`:''}>${esc(ACC_SHORT[id]||w.name)}</span>`:''};
 function itemRow(i){
   if(state.editItem===i.id) return editRow(i);
   const t=typeOf(i), inc=t==='in', id=esc(i.id), open=state.actItem===i.id;
-  let what, amt, cls='';
-  if(t==='debt'){cls='tr';what=`<b>${esc(i.label||'Долг')}</b><span>${esc(WNAME[i.acc]||'—')}</span>`;amt=(i.dir==='back'?'+':'−')+money(+i.amount||0)}
-  else if(t==='tr'){cls='tr';what=`<b>Перевод</b><span>${esc(WNAME[i.from]||'?')} → ${esc(WNAME[i.to]||'?')}</span>`;amt=money(+i.amount||0)}
-  else{cls=inc?'in':'';const sub=[WNAME[i.acc]||'',i.note].filter(Boolean).join(' · ');
-    what=`<b>${esc(nameOf(i))}${isTrip(i)?'<span class="tag trip">командировка</span>':''}</b>${sub?`<span>${esc(sub)}</span>`:''}`;amt=(inc?'+':'−')+money(+i.amount||0)}
+  let what, amt, cls='', acls='';
+  if(t==='debt'){cls='tr';what=`<b>${esc(i.label||'Долг')}</b><span>${accTag(i.acc)||'—'}</span>`;amt=(i.dir==='back'?'+':'−')+money(+i.amount||0);acls=i.dir==='back'?'pos':'spend'}
+  else if(t==='tr'){cls='tr';what=`<b>Перевод</b><span>${accTag(i.from)||'?'} → ${accTag(i.to)||'?'}</span>`;amt=money(+i.amount||0)}
+  else{cls=inc?'in':'';acls=inc?'pos':'spend';const sub=[accTag(i.acc),i.note?esc(i.note):''].filter(Boolean).join(' · ');
+    what=`<b>${esc(nameOf(i))}${isTrip(i)?'<span class="tag trip">командировка</span>':''}</b>${sub?`<span>${sub}</span>`:''}`;amt=(inc?'+':'−')+money(+i.amount||0)}
   return `<div class="item ${cls}"${t==='in'||t==='out'?` style="--c:${cvar(i.cat)}"`:''}><span class="dot"></span>
     <div class="what">${what}</div>
-    <button type="button" class="amt" data-act="${id}" aria-expanded="${open}" aria-label="Действия с записью ${esc(amt)}">${amt}</button>
+    <button type="button" class="amt ${acls}" data-act="${id}" aria-expanded="${open}" aria-label="Действия с записью ${esc(amt)}">${amt}</button>
     ${open?`<div class="itemacts"><button type="button" class="linkbtn" data-open="${id}">Изменить</button><button type="button" class="del" data-id="${id}">Удалить</button></div>`:''}</div>`;
 }
 const byNewest=(a,b)=>b.date.localeCompare(a.date)||(b.created||0)-(a.created||0);
