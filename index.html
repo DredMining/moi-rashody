@@ -786,12 +786,13 @@ function renderTrip(trip){
 
 /* How much the user still owes himself on the broker account: an old debt plus pct of every personal income since it was set, minus what was sent */
 function brokerOwed(){
-  const o=state.settings.brokerOwed, pct=+state.settings.brokerPct||0;
-  if(!o) return null;
+  /* % of every income (except командировочные) adds up until it's sent to the broker */
+  const o=state.settings.brokerOwed||{amount:0,at:0}, pct=+state.settings.brokerPct||0;
+  if(!pct&&!state.settings.brokerOwed) return null;
   const after=state.items.filter(i=>(i.created||0)>(o.at||0)&&!isTrip(i));
-  const due=sum(after.filter(i=>typeOf(i)==='in'&&catOf(i.cat).id!=='dividends'))*pct/100;
+  const due=sum(after.filter(i=>typeOf(i)==='in'))*pct/100;
   const sent=toBroker(after);
-  return o.amount+due-sent;
+  return Math.round(((+o.amount||0)+due-sent)*100)/100;
 }
 function renderBroker(inc,out){
   const box=$('brokerBox'), pct=+state.settings.brokerPct||0;
@@ -811,14 +812,14 @@ function renderBroker(inc,out){
     return '';
   }
   if(!pct){box.innerHTML=`<div><button class="linkbtn" id="pSet">+ Указать процент с дохода на брокер</button></div>`;$('pSet').onclick=()=>{state.editing='pct';render()};return ''}
-  const base=sum(inc.filter(i=>catOf(i.cat).id!=='dividends'));
+  const base=sum(inc);
   const due=base*pct/100, done=toBroker(inMonth().filter(i=>!isTrip(i)));
   const o=brokerOwed();
   box.innerHTML=`<div class="row"><span>На брокер ${fmt.format(pct)}% с каждого дохода${due>0?` · за месяц положено ${moneyR(due)}, отложено ${moneyR(done)}`:''}</span><button class="linkbtn" id="pSet">Изменить %</button></div>
-    <div class="row"><span>${o===null?'Есть старый долг себе на брокер?':o>=1?`Должен себе на брокер ${moneyR(o)}`:'Долгов себе на брокер нет'}</span><button class="linkbtn" id="oSet">${o===null?'Указать':'Сверить'}</button></div>`;
+    <div class="row"><span>${o===null?'Есть старый долг себе на брокер?':o>=0.01?`Должен себе на брокер ${moneyR(o)}`:'Долгов себе на брокер нет'}</span><button class="linkbtn" id="oSet">${o===null?'Указать':'Сверить'}</button></div>`;
   $('pSet').onclick=()=>{state.editing='pct';render()};
   $('oSet').onclick=()=>{state.editing='owed';render()};
-  return o!==null&&o>=1?`<div class="alert"><span>Должен себе на брокер: <b>${moneyR(o)}</b></span><button class="primary" id="oPay" data-v="${Math.round(o*100)/100}">Оплатить</button></div>`:'';
+  return o!==null&&o>=0.01?`<div class="alert"><span>Должен себе на брокер: <b>${moneyR(o)}</b></span><button class="primary" id="oPay" data-v="${Math.round(o*100)/100}">Оплатить</button></div>`:'';
 }
 
 const DEFAULT_LIMIT=30000;
