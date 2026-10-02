@@ -519,6 +519,7 @@ const CATS=[
   {id:'lunch',name:'Питание вне дома',g:'daily',c:'p2',kw:['обед','ужин','завтрак','столовая','кафе','питание']},
   {id:'fastfood',name:'Фастфуд',g:'daily',c:'p5',kw:['фастфуд','шаурма','бургер','пицца']},
   {id:'snack',name:'Сушняк',g:'daily',c:'p7',kw:['сушняк','сок','соки','кофе','тоник','вода','энергетик']},
+  {id:'wb',name:'Wildberries',g:'daily',c:'p4',kw:['wildberries','вайлдберриз','валдберис','вайлдбериз','вб','wb']},
   {id:'grocery',name:'Продукты',g:'daily',c:'p3',kw:['продукты','магазин','хлеб']},
   {id:'health',name:'Здоровье и уход',g:'daily',c:'p4',kw:['анализы','лекарство','аптека','чистка','дерматолог','врач']},
   {id:'subs',name:'Связь и подписки',g:'daily',c:'p8',kw:['впн','vpn','премиум','мегафон','связь','wifi','интернет','телефон','подписка','ии','claude','клод','chatgpt','gpt','чатгпт','нейросеть','нейросети']},
@@ -541,7 +542,7 @@ const CATS=[
   {id:'other',name:'Другое',g:'daily',c:'p8',kw:[],custom:true}
 ];
 const LEGACY={ai:'subs',food:'grocery',cafe:'lunch',transport:'taxi',fun:'other',shop:'other',study:'other',gifts:'other',home:'other',clothes:'other'};
-const ICON={bus:'🚌',taxi:'🚕',lunch:'🍽️',fastfood:'🍔',snack:'🥤',grocery:'🛒',health:'💊',subs:'📱',family:'👨‍👩‍👦',broker:'📈',invest:'🪙',sadaqa:'🤲',
+const ICON={bus:'🚌',taxi:'🚕',lunch:'🍽️',fastfood:'🍔',snack:'🥤',wb:'🛍️',grocery:'🛒',health:'💊',subs:'📱',family:'👨‍👩‍👦',broker:'📈',invest:'🪙',sadaqa:'🤲',
   salary:'💼',stipend:'🎓',side:'🛠️',bonus:'🎁',dividends:'📊',interest:'💰',in_other:'➕',t_taxi:'🚕',t_grocery:'🛒',t_flat:'🏠',t_other:'➕',t_allow:'✈️',other:'➕'};
 const CAT=Object.fromEntries(CATS.map(c=>[c.id,c]));
 const catOf=id=>CAT[id]||CAT[LEGACY[id]]||CAT.other;
