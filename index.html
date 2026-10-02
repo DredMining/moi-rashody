@@ -963,7 +963,7 @@ function barsHtml(list,total){
   return {n:rows.length,html:rows.map(([c,v])=>`<button class="bar ${state.filter&&state.filter!==c?'dim':''}" data-cat="${c}" style="--c:${cvar(c)}" aria-pressed="${state.filter===c}">
     <span class="name"><span class="dot"></span>${esc(CAT[c].name)}</span>
     <span class="val num">${money(v)}<small>${Math.round(v/total*100)}%</small></span>
-    <span class="track"><i style="width:${v/max*100}%"></i></span></button>`).join('')};
+    <span class="track"><i style="width:${Math.min(100,v/total*100)}%"></i></span></button>`).join('')};
 }
 function renderBreakdown(out,inc,tripOut){
   const spent=sum(out)||1;
