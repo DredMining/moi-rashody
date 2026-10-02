@@ -1086,7 +1086,7 @@ function renderCompare(){
   $('cmpA').innerHTML=opt(A);$('cmpB').innerHTML=opt(B);
   $('cmpA').onchange=e=>{state.cmpA=e.target.value;render()};$('cmpB').onchange=e=>{state.cmpB=e.target.value;render()};
   const a=monthStats(A), b=monthStats(B);
-  const nf=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0}), m0=n=>nf.format(Math.round(n));
+  const m0=n=>{const v=Math.round(n*100)/100;return (Number.isInteger(v)?fmt0:fmt2).format(v)};
   /* good = green: income up, spending down; savings shown neutral */
   const delta=(x,y,kind)=>{const d=Math.round((x-y)*100)/100;if(Math.abs(d)<1)return '<span class="d" style="color:var(--muted)">—</span>';
     const good=kind==='out'?d<0:null;return `<span class="d" style="color:${good===null?'var(--muted)':good?'var(--good)':'var(--bad)'}">${d>0?'+':'−'}${m0(Math.abs(d))}</span>`};
