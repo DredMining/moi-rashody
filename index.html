@@ -552,10 +552,11 @@ const accKey=()=>state.type==='in'?'in':state.scope;
 const isTrip=i=>i.scope==='trip'||['trip','tripin'].includes(catOf(i.cat).g);
 const cvar=id=>`var(--${catOf(id).c})`;
 const fmt=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2});
-const money=n=>fmt.format(Math.round(n*100)/100)+' ₽';
-/* whole rubles for headlines and summaries; kopecks stay in records and edit forms */
+/* kopecks are shown everywhere when there are any: 12 000,50 ₽; whole sums stay 12 000 ₽ */
 const fmt0=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0});
-const moneyR=n=>fmt0.format(Math.round(n))+' ₽';
+const fmt2=new Intl.NumberFormat('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
+const money=n=>{const v=Math.round(n*100)/100;return (Number.isInteger(v)?fmt0:fmt2).format(v)+' ₽'};
+const moneyR=money;
 const monthName=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'});
 const dayName=new Intl.DateTimeFormat('ru-RU',{weekday:'short',day:'numeric',month:'long'});
 const shortDate=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long'});
