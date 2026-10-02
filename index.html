@@ -1438,7 +1438,12 @@ initStore();
 </script>
 
 <script>
-if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+if('serviceWorker' in navigator){
+  /* when a new version takes over, reload once so it's used right away, not on the next launch */
+  const hadSW=!!navigator.serviceWorker.controller;let reloaded=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadSW&&!reloaded){reloaded=true;location.reload()}});
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
+}
 </script>
 </body>
 </html>
