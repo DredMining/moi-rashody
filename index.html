@@ -59,9 +59,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 html,body{height:var(--app-h,100%);overflow:hidden;overscroll-behavior:none}
 .app{height:100vh;height:100dvh;height:var(--app-h,100dvh);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
 .scroller{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-  .scroller>.wrap{min-height:calc(100% + 1px)}
-.wmodal{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 14vh) 16px 16px}
-.wmodal>.wallet-edit{position:relative;width:min(440px,100%);padding:16px;border-radius:16px;box-shadow:0 12px 40px rgb(0 0 0 / .45)}
+.scroller>.wrap{min-height:calc(100% + 1px)}
 .num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
 h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance}
 h2{font-size:13px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
@@ -112,7 +110,10 @@ button{cursor:pointer}
 .wallet b{font-family:var(--f-num);font-weight:500;font-size:15px;overflow-wrap:anywhere}
 .wallet small{font-size:11px;color:var(--muted)}
 .wallet.unset b{color:var(--accent);font-family:var(--f-body);font-size:13px;font-weight:600}
-.wallet-edit{grid-column:1/-1;display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+.wallet-edit{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
+.wmodal{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 14vh) 16px 16px}
+.wmodal>.wallet-edit,.wmodal>.recon{position:relative;width:min(440px,100%);box-shadow:0 12px 40px rgb(0 0 0 / .45);animation:up .18s ease-out}
+.wmodal>.wallet-edit b{font-size:17px}
 .wallet-edit .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .wallet-edit input{flex:1 1 140px}
 .wallet-edit p{margin:0;font-size:12px;color:var(--muted)}
@@ -891,9 +892,9 @@ function renderWallets(){
   }
   const rc=state.recon;
   if(rc){const d=Math.round((rc.to-rc.from)*100)/100;
-    html=`<div class="recon"><p><b>${esc(WNAME[rc.id])}</b>: в приложении ${money(rc.from)}, на самом деле ${money(rc.to)}.</p>
+    html=`<div class="wmodal"><div class="sheet-bg" data-wclose></div><div class="recon"><p><b>${esc(WNAME[rc.id])}</b>: в приложении ${money(rc.from)}, на самом деле ${money(rc.to)}.</p>
       <p>Расхождение <b class="${d<0?'neg':'pos'}">${d>0?'+':'−'}${money(Math.abs(d))}</b> — ${d<0?'похоже, какую-то трату не записали':'похоже, какой-то доход не записали'}.</p>
-      <div class="row"><button class="primary" id="rcAdd">${d<0?'Записать как неучтённую трату':'Записать как неучтённый доход'}</button><button class="ghost" id="rcFix">Просто исправить сумму</button><button class="linkbtn" id="rcCancel">Отмена</button></div></div>`+html}
+      <div class="row"><button class="primary" id="rcAdd">${d<0?'Записать как неучтённую трату':'Записать как неучтённый доход'}</button><button class="ghost" id="rcFix">Просто исправить сумму</button><button class="linkbtn" id="rcCancel">Отмена</button></div></div></div>`+html}
   if(state.xferOpen) html+=xferForm();
   box.innerHTML=html;
   if(rc){
@@ -908,8 +909,8 @@ function renderWallets(){
   $('moneyActs').innerHTML=state.xferOpen?'':'<button class="linkbtn" id="xOpen">⇄ Перевод между счетами</button>';
   if($('xOpen')) $('xOpen').onclick=()=>{state.xfer.amount=0;state.xferOpen=true;render();$('xAmount')?.focus()};
   if(state.xferOpen) bindXfer();
-  box.querySelectorAll('.wrow')
-    box.querySelectorAll('[data-wclose]').forEach(b=>b.onclick=()=>{state.editing=null;render()});.forEach(b=>b.onclick=()=>{state.editing=state.editing==='w-'+b.dataset.w?null:'w-'+b.dataset.w;render();$('wInput')?.focus()});
+  box.querySelectorAll('[data-wclose]').forEach(b=>b.onclick=()=>{state.editing=null;state.recon=null;render()});
+  box.querySelectorAll('.wrow').forEach(b=>b.onclick=()=>{state.editing=state.editing==='w-'+b.dataset.w?null:'w-'+b.dataset.w;render();$('wInput')?.focus()});
   if(ed){
     $('wForm').onsubmit=e=>{e.preventDefault();const v=parseNum($('wInput').value);
       if(!(v>=0)){toast('Введите сумму числом, например 15000');return}
