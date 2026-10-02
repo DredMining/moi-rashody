@@ -475,8 +475,11 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
         <h2 id="catH">Куда ушли деньги</h2>
         <div class="bd" id="bdDaily"><h3>Повседневные</h3><div class="bars" id="barsDaily"></div></div>
         <div class="bd" id="bdSep"><h3>Отдельно</h3><div class="bars" id="barsSep"></div></div>
-        <div class="bd" id="bdIn"><h3>Доходы</h3><div class="bars" id="barsIn"></div></div>
         <div class="bd" id="bdTrip"><h3>Командировка</h3><div class="bars" id="barsTrip"></div></div>
+      </section>
+      <section id="incomeBreakdown" aria-labelledby="incH" class="bdwrap">
+        <h2 id="incH">Откуда пришли деньги</h2>
+        <div class="bd" id="bdIn"><div class="bars" id="barsIn"></div></div>
       </section>
     </div>
     <details class="more panel-ish" id="cmpBox">
@@ -978,10 +981,11 @@ function barsHtml(list,total){
 function renderBreakdown(out,inc,tripOut){
   const spent=sum(out)||1;
   const sets=[['Daily',out.filter(i=>catOf(i.cat).g!=='sep'),spent],['Sep',out.filter(i=>catOf(i.cat).g==='sep'),spent],['In',inc,sum(inc)||1],['Trip',tripOut,sum(tripOut)||1]];
-  let any=false;
-  sets.forEach(([k,list,tot])=>{const r=barsHtml(list,tot);$('bars'+k).innerHTML=r.html;$('bd'+k).hidden=!r.n;any=any||r.n});
-  $('breakdown').hidden=!any;
-  $('breakdown').querySelectorAll('.bar').forEach(b=>b.onclick=()=>{state.filter=b.dataset.cat;setTab('history')});
+  let anyOut=false,anyIn=false;
+  sets.forEach(([k,list,tot])=>{const r=barsHtml(list,tot);$('bars'+k).innerHTML=r.html;$('bd'+k).hidden=!r.n;if(k==='In')anyIn=!!r.n;else anyOut=anyOut||!!r.n});
+  $('breakdown').hidden=!anyOut;
+  $('incomeBreakdown').hidden=!anyIn;
+  document.querySelectorAll('#breakdown .bar,#incomeBreakdown .bar').forEach(b=>b.onclick=()=>{state.filter=b.dataset.cat;setTab('history')});
 }
 
 
