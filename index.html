@@ -764,19 +764,18 @@ function renderTrip(trip){
   /* One rule: Т-Банк should hold exactly the trip money left.
      Less → personal spending ate into it, top it up. More → trip expenses were paid from another account, pay that account back. */
   const tb=walletValue(TRIP_ACC), gap=tb===null||!st?0:Math.round((bal-tb)*100)/100;
-  let gapHtml='';
-  if(gap>=1) gapHtml=`<div class="alert"><span>На Т-Банке не хватает командировочных: <b>${moneyR(gap)}</b></span><button class="primary" data-sfrom="sber" data-sto="${TRIP_ACC}" data-sv="${gap}">Перевести</button></div>`;
-  else{
-    /* trip spent from personal money → always pay it back from Т-Банк to Сбер, whatever account it was paid from */
-    let v=0;
-    if(gap<=-1){
-      const since=Math.max(state.settings.wallets?.[TRIP_ACC]?.at||0,st.at||0);
-      if(state.items.some(i=>isTrip(i)&&typeOf(i)==='out'&&i.acc&&i.acc!==TRIP_ACC&&(i.created||0)>since)) v=-gap;
-    }else if(tb===null||!st){
-      v=Math.round(tripSettle().reduce((a,x)=>a+x.v,0)*100)/100;
-    }
-    if(v>=1) gapHtml=`<div class="alert"><span>Верните с Т-Банка на Сбер: <b>${moneyR(v)}</b></span><button class="primary" data-sfrom="${TRIP_ACC}" data-sto="${RETURN_ACC}" data-sv="${v}">Перевести</button></div>`;
+  /* Exactly what Т-Банк owes back: trip spending paid from personal accounts, minus trip income that landed there,
+     minus what was already sent from Т-Банк to Сбер. Stays on screen until it's paid back. */
+  let owed=0;
+  for(const i of state.items){const a=+i.amount||0, t=typeOf(i);
+    if(t==='tr'){if(i.from===TRIP_ACC&&i.to===RETURN_ACC) owed-=a; continue}
+    if(isTrip(i)&&i.acc&&i.acc!==TRIP_ACC) owed+=t==='out'?a:t==='in'?-a:0;
   }
+  owed=Math.max(0,Math.round(owed*100)/100);
+  const short=Math.round((gap+owed)*100)/100;
+  let gapHtml='';
+  if(owed>0) gapHtml+=`<div class="alert"><span>Верните с Т-Банка на Сбер: <b>${moneyR(owed)}</b></span><button class="primary" data-sfrom="${TRIP_ACC}" data-sto="${RETURN_ACC}" data-sv="${owed}">Перевести</button></div>`;
+  if(short>=1) gapHtml+=`<div class="alert"><span>На Т-Банке не хватает командировочных: <b>${moneyR(short)}</b></span><button class="primary" data-sfrom="sber" data-sto="${TRIP_ACC}" data-sv="${short}">Перевести</button></div>`;
   const settleHtml='';
   box.innerHTML=`<span>Командировочные осталось</span><b class="${bal<0?'neg':''}">${any?moneyR(bal):'—'}</b>
     <small>${mOut?`потрачено в этом месяце ${moneyR(mOut)} · `:''}<button class="linkbtn" id="tEdit">${st?'Сверить':'Указать остаток'}</button> · <button class="linkbtn" id="tAllow">+ Пришли командировочные</button></small>`;
