@@ -70,9 +70,9 @@ button{cursor:pointer}
 .pos{color:var(--good)} .neg{color:var(--bad)}
 
 /* Tabs */
-.tabs{flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--surface);border-top:1px solid var(--line);padding:4px max(8px,calc((100% - 720px)/2)) max(6px,calc(env(safe-area-inset-bottom,0px) - 18px));z-index:20}
+.tabs{flex:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--surface);border-top:1px solid var(--line);padding:4px max(8px,calc((100% - 720px)/2)) max(6px,calc(env(safe-area-inset-bottom,0px) - 18px));z-index:20}
 .tabs button{border:0;background:transparent;padding:4px 0 2px;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:12px;font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent}
-.tabs .ico{position:relative;width:60px;height:32px;border-radius:16px;display:grid;place-items:center;transition:background-color .2s ease,color .2s ease}
+.tabs .ico{position:relative;width:56px;height:32px;border-radius:16px;display:grid;place-items:center;transition:background-color .2s ease,color .2s ease}
 .tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .tabs button[aria-selected="true"]{color:var(--ink);font-weight:600}
 .tabs button[aria-selected="true"] .ico{background:var(--accent-soft);color:var(--accent)}
@@ -238,6 +238,7 @@ details.more>summary::-webkit-details-marker{display:none}
 details.more>summary::after{content:'›';transform:rotate(90deg);transition:transform .2s;font-size:18px}
 details.more[open]>summary::after{transform:rotate(-90deg)}
 .morebody{padding:0 16px 16px;display:flex;flex-direction:column;gap:14px}
+#viewStats>.morebody{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
 .bdwrap{display:flex;flex-direction:column;gap:12px}
 .stat small{font-size:11px;color:var(--muted)}
 .wlist{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px}
@@ -391,26 +392,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     <div id="recent"></div>
   </section>
 
-  <details class="more" id="moreBox">
-    <summary>Подробнее за месяц</summary>
-    <div class="morebody">
-      <div class="stats">
-        <div class="stat"><span>Доходы</span><b id="incomeTotal">0 ₽</b></div>
-        <div class="stat"><span>Всего ушло</span><b id="allOut">0 ₽</b></div>
-        <div class="stat wide"><span>Остаток за месяц</span><b id="balance">0 ₽</b><small>доходы минус все расходы, вместе с брокером, копильником и садакой</small></div>
-        <div class="stat wide" id="tripStat"></div>
-      </div>
-      <div class="rule" id="brokerBox"></div>
-      <div class="rule" id="budgetBox"></div>
-      <section id="breakdown" aria-labelledby="catH" class="bdwrap">
-        <h2 id="catH">Куда ушли деньги</h2>
-        <div class="bd" id="bdDaily"><h3>Повседневные</h3><div class="bars" id="barsDaily"></div></div>
-        <div class="bd" id="bdSep"><h3>Отдельно</h3><div class="bars" id="barsSep"></div></div>
-        <div class="bd" id="bdIn"><h3>Доходы</h3><div class="bars" id="barsIn"></div></div>
-        <div class="bd" id="bdTrip"><h3>Командировка</h3><div class="bars" id="barsTrip"></div></div>
-      </section>
-    </div>
-  </details>
 
   </div>
 
@@ -447,13 +428,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
       <div class="listhead" id="listHead"><span id="filterBox"></span></div>
       <div id="list"></div>
     </section>
-    <details class="more panel-ish" id="cmpBox">
-      <summary>Сравнение месяцев</summary>
-      <div class="morebody">
-      <div class="cmp-sel"><select id="cmpA" aria-label="Первый месяц"></select><span>и</span><select id="cmpB" aria-label="Второй месяц"></select></div>
-      <div id="cmp"></div>
-      </div>
-    </details>
   </div>
 
   <div id="viewDebts" role="tabpanel" aria-labelledby="tabDebts" hidden style="flex-direction:column;gap:16px">
@@ -482,6 +456,38 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     </section>
   </div>
 
+  <div id="viewStats" role="tabpanel" aria-labelledby="tabStats" hidden style="flex-direction:column;gap:16px">
+    <div class="monthbar">
+      <button class="iconbtn" id="sPrev" aria-label="Предыдущий месяц">‹</button>
+      <div class="title" id="sTitle">—</div>
+      <button class="iconbtn" id="sNext" aria-label="Следующий месяц">›</button>
+    </div>
+    <div class="morebody">
+      <div class="stats">
+        <div class="stat"><span>Доходы</span><b id="incomeTotal">0 ₽</b></div>
+        <div class="stat"><span>Всего ушло</span><b id="allOut">0 ₽</b></div>
+        <div class="stat wide"><span>Остаток за месяц</span><b id="balance">0 ₽</b><small>доходы минус все расходы, вместе с брокером, копильником и садакой</small></div>
+        <div class="stat wide" id="tripStat"></div>
+      </div>
+      <div class="rule" id="brokerBox"></div>
+      <div class="rule" id="budgetBox"></div>
+      <section id="breakdown" aria-labelledby="catH" class="bdwrap">
+        <h2 id="catH">Куда ушли деньги</h2>
+        <div class="bd" id="bdDaily"><h3>Повседневные</h3><div class="bars" id="barsDaily"></div></div>
+        <div class="bd" id="bdSep"><h3>Отдельно</h3><div class="bars" id="barsSep"></div></div>
+        <div class="bd" id="bdIn"><h3>Доходы</h3><div class="bars" id="barsIn"></div></div>
+        <div class="bd" id="bdTrip"><h3>Командировка</h3><div class="bars" id="barsTrip"></div></div>
+      </section>
+    </div>
+    <details class="more panel-ish" id="cmpBox">
+      <summary>Сравнение месяцев</summary>
+      <div class="morebody">
+      <div class="cmp-sel"><select id="cmpA" aria-label="Первый месяц"></select><span>и</span><select id="cmpB" aria-label="Второй месяц"></select></div>
+      <div id="cmp"></div>
+      </div>
+    </details>
+  </div>
+
 </main>
 </div>
 <nav class="tabs" role="tablist" aria-label="Разделы">
@@ -489,6 +495,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   <button role="tab" id="tabMoney" aria-selected="false" aria-controls="viewMoney"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18v3"/><path d="M4 7.5V17a2 2 0 0 0 2 2h13a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H6.5A2.5 2.5 0 0 1 4 7.5"/><circle cx="16" cy="13.5" r="1.2" fill="currentColor" stroke="none"/></svg></span>Деньги</button>
   <button role="tab" id="tabHistory" aria-selected="false" aria-controls="viewHistory"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1" fill="currentColor" stroke="none"/></svg></span>Записи</button>
   <button role="tab" id="tabDebts" aria-selected="false" aria-controls="viewDebts"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg><span class="badge" id="debtBadge"></span></span>Долги</button>
+  <button role="tab" id="tabStats" aria-selected="false" aria-controls="viewStats"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-6"/></svg></span>Итоги</button>
 </nav>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -674,7 +681,7 @@ function render(){
   renderLedger();
   renderDebts();
 }
-const TABS=[['ledger','tabLedger','viewLedger'],['money','tabMoney','viewMoney'],['history','tabHistory','viewHistory'],['debts','tabDebts','viewDebts']];
+const TABS=[['ledger','tabLedger','viewLedger'],['money','tabMoney','viewMoney'],['history','tabHistory','viewHistory'],['debts','tabDebts','viewDebts'],['stats','tabStats','viewStats']];
 function renderTabs(){
   if(state.tab==='ledger') requestAnimationFrame(fitCatRows);
   for(const [t,tab,view] of TABS){const on=state.tab===t;$(tab).setAttribute('aria-selected',on);$(view).hidden=!on;$(view).style.display=on?'flex':'none'}
@@ -785,9 +792,11 @@ function renderTrip(trip){
 }
 
 /* How much the user still owes himself on the broker account: an old debt plus pct of every personal income since it was set, minus what was sent */
+/* 10% unless the user set another percent (a wipe used to store 0 — treat that as not set) */
+const brokerPctOf=()=>+state.settings.brokerPct||10;
 function brokerOwed(){
   /* % of every income (except командировочные) adds up until it's sent to the broker */
-  const o=state.settings.brokerOwed||{amount:0,at:0}, pct=+state.settings.brokerPct||0;
+  const o=state.settings.brokerOwed||{amount:0,at:0}, pct=brokerPctOf();
   if(!pct&&!state.settings.brokerOwed) return null;
   const after=state.items.filter(i=>(i.created||0)>(o.at||0)&&!isTrip(i));
   const due=sum(after.filter(i=>typeOf(i)==='in'))*pct/100;
@@ -795,7 +804,7 @@ function brokerOwed(){
   return Math.round(((+o.amount||0)+due-sent)*100)/100;
 }
 function renderBroker(inc,out){
-  const box=$('brokerBox'), pct=+state.settings.brokerPct||0;
+  const box=$('brokerBox'), pct=brokerPctOf();
   if(state.editing==='pct'){
     box.innerHTML=`<form class="inline-edit" id="pForm"><input id="pInput" class="num" inputmode="decimal" placeholder="Например, 10" value="${pct||''}" aria-label="Процент с дохода на брокер"><span>%</span><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="pCancel">Отмена</button></form>`;
     $('pInput').focus();
@@ -845,7 +854,7 @@ function renderBudget(spent){
     const ll=$('limitLine');ll.textContent=left>=0?'осталось '+moneyR(left):'превышен на '+moneyR(-left);ll.style.color=left<0?'var(--bad)':'';
     box.innerHTML=`<div class="row"><span>Лимит на месяц ${moneyR(budget)} · не входят брокер, копильник, садака</span><button class="linkbtn" id="bSet">Изменить</button></div>`;
   }
-  $('bSet').onclick=()=>{state.editing='budget';$('moreBox').open=true;render()};
+  $('bSet').onclick=()=>{state.editing='budget';render()};
 }
 
 /* Money on hand: cards and cash are typed by hand; broker and piggy bank start from a typed amount and grow with entries added after it */
@@ -959,7 +968,7 @@ function bindXfer(){
 function barsHtml(list,total){
   const by={};list.forEach(i=>{const id=catOf(i.cat).id;by[id]=(by[id]||0)+(+i.amount||0)});
   const rows=Object.entries(by).sort((a,b)=>b[1]-a[1]);
-  const max=rows.length?rows[0][1]:1;
+  /* bar length = the same share as the % on the right */
   return {n:rows.length,html:rows.map(([c,v])=>`<button class="bar ${state.filter&&state.filter!==c?'dim':''}" data-cat="${c}" style="--c:${cvar(c)}" aria-pressed="${state.filter===c}">
     <span class="name"><span class="dot"></span>${esc(CAT[c].name)}</span>
     <span class="val num">${money(v)}<small>${Math.round(v/total*100)}%</small></span>
@@ -1047,6 +1056,7 @@ function renderList(items){
   renderCompare();
   $('hTitle').textContent=$('monthTitle').textContent;
   $('hNext').disabled=isCurrentMonth();
+  $('sTitle').textContent=$('monthTitle').textContent;$('sNext').disabled=isCurrentMonth();
   const list=$('list'), f=state.filter, af=state.accFilter||null;
   $('accFilter').innerHTML=[['','Все счета'],...ACCS,['broker','Брокер'],['piggy','Копильник']].map(([id,n])=>`<button type="button" class="chip" data-af="${id}" aria-pressed="${(af||'')===id}">${n}</button>`).join('');
   $('accFilter').querySelectorAll('[data-af]').forEach(b=>b.onclick=()=>{state.accFilter=b.dataset.af||null;render()});
@@ -1380,11 +1390,14 @@ $('tabLedger').onclick=()=>setTab('ledger');
 if(navigator.standalone){const fitScreen=()=>{const tall=innerHeight>innerWidth;const h=tall?Math.max(screen.width,screen.height):Math.min(screen.width,screen.height);document.documentElement.style.setProperty('--app-h',h+'px')};fitScreen();addEventListener('resize',fitScreen);addEventListener('orientationchange',()=>setTimeout(fitScreen,300))}
 $('tabMoney').onclick=()=>setTab('money');
 $('tabDebts').onclick=()=>setTab('debts');
+$('tabStats').onclick=()=>setTab('stats');
 $('tabHistory').onclick=()=>setTab('history');
 $('toHistory').onclick=()=>setTab('history');
 $('hPrev').onclick=()=>$('prev').onclick();
 $('hNext').onclick=()=>$('next').onclick();
-if(['#debts','#money','#history'].includes(location.hash)) state.tab=location.hash.slice(1);
+$('sPrev').onclick=()=>$('prev').onclick();
+$('sNext').onclick=()=>$('next').onclick();
+if(['#debts','#money','#history','#stats'].includes(location.hash)) state.tab=location.hash.slice(1);
 
 /* ---------- example data & export ---------- */
 /* save a generated file: through the viewer in Claude, as a normal download elsewhere */
@@ -1404,7 +1417,7 @@ $('wipeBtn').onclick=async()=>{
   delete b.dataset.armed;b.disabled=true;b.textContent='Очищаю…';
   const at=Date.now(), st=state.settings, keep={};
   for(const k of Object.keys(st)) if(/^seed|limitSet$/.test(k)) keep[k]=st[k];
-  const next={...keep,budget:st.budget===undefined?DEFAULT_LIMIT:st.budget,limitSet:true,brokerPct:st.brokerPct||0,
+  const next={...keep,budget:st.budget===undefined?DEFAULT_LIMIT:st.budget,limitSet:true,brokerPct:st.brokerPct||10,
     wallets:Object.fromEntries(WALLETS.map(w=>[w.id,{amount:0,at}])),tripStart:{amount:0,at},brokerOwed:{amount:0,at}};
   try{await store.clearAll(next);state.settings=next;state.editing=null;state.xferOpen=false;render();toast('Всё очищено: записи удалены, счета по нулям')}
   catch(e){toast('Не получилось очистить. Попробуйте ещё раз.')}
