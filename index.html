@@ -544,6 +544,7 @@ const ACCS=[['tbank','Т-Банк'],['sber','Сбербанк'],['vtb','ВТБ']
 const ACC_SHORT={tbank:'Т-Банк',sber:'Сбер',vtb:'ВТБ',pocket:'Наличка',cash:'Подушка'};
 /* командировочные live on Т-Банк: it goes first in trip mode */
 const TRIP_ACC='tbank';
+const RETURN_ACC='sber'; /* trip money spent from personal accounts is always paid back here */
 const accsFor=()=>ACCS;
 /* where each income usually lands: stipend, salary and bonuses come to ВТБ */
 const INCOME_ACC={salary:'vtb',stipend:'vtb',bonus:'vtb',side:'sber'};
@@ -764,11 +765,16 @@ function renderTrip(trip){
   const tb=walletValue(TRIP_ACC), gap=tb===null||!st?0:Math.round((bal-tb)*100)/100;
   let gapHtml='';
   if(gap>=1) gapHtml=`<div class="alert"><span>На Т-Банке не хватает командировочных: <b>${moneyR(gap)}</b></span><button class="primary" data-sfrom="sber" data-sto="${TRIP_ACC}" data-sv="${gap}">Перевести</button></div>`;
-  else if(gap<=-1){
-    const since=Math.max(state.settings.wallets?.[TRIP_ACC]?.at||0,st.at||0);
-    const paid=state.items.filter(i=>isTrip(i)&&typeOf(i)==='out'&&i.acc&&i.acc!==TRIP_ACC&&(i.created||0)>since).sort((a,b)=>(b.created||0)-(a.created||0));
-    if(paid.length){const to=paid[0].acc,v=-gap;
-      gapHtml=`<div class="alert"><span>Верните с Т-Банка на ${esc(WNAME[to])}: <b>${moneyR(v)}</b></span><button class="primary" data-sfrom="${TRIP_ACC}" data-sto="${to}" data-sv="${v}">Перевести</button></div>`}
+  else{
+    /* trip spent from personal money → always pay it back from Т-Банк to Сбер, whatever account it was paid from */
+    let v=0;
+    if(gap<=-1){
+      const since=Math.max(state.settings.wallets?.[TRIP_ACC]?.at||0,st.at||0);
+      if(state.items.some(i=>isTrip(i)&&typeOf(i)==='out'&&i.acc&&i.acc!==TRIP_ACC&&(i.created||0)>since)) v=-gap;
+    }else if(tb===null||!st){
+      v=Math.round(tripSettle().reduce((a,x)=>a+x.v,0)*100)/100;
+    }
+    if(v>=1) gapHtml=`<div class="alert"><span>Верните с Т-Банка на Сбер: <b>${moneyR(v)}</b></span><button class="primary" data-sfrom="${TRIP_ACC}" data-sto="${RETURN_ACC}" data-sv="${v}">Перевести</button></div>`;
   }
   const settleHtml='';
   box.innerHTML=`<span>Командировочные осталось</span><b class="${bal<0?'neg':''}">${any?moneyR(bal):'—'}</b>
@@ -1350,7 +1356,7 @@ async function saveEntry(acc){
     $('amount').value='';$('note').value='';$('note').hidden=true;$('noteBtn').hidden=false;state.customLabel='';
     const [y,m]=p.date.split('-').map(Number);state.y=y;state.m=m-1;renderChips();render();
     toast(scope==='trip'&&acc!==TRIP_ACC
-      ?(type==='out'?`Потрачено с ${WNAME[acc]} — верните ${money(amount)} с Т-Банка на ${WNAME[acc]}`:`Пришло на ${WNAME[acc]} — переведите ${money(amount)} на Т-Банк`)
+      ?(type==='out'?`Потрачено с ${WNAME[acc]} — верните ${money(amount)} с Т-Банка на Сбер`:`Пришло на ${WNAME[acc]} — переведите ${money(amount)} на Т-Банк`)
       :`${type==='in'?'Доход':'Расход'}: ${money(amount)} · ${label||CAT[cat].name} · ${WNAME[acc]||''}`,id?()=>store.remove(id):null);
   }catch(x){$('sheetBody').querySelectorAll('button').forEach(b=>b.disabled=false);toast(x?.code==='quota_exceeded'?'Хранилище заполнено. Удалите старые записи.':'Не получилось сохранить. Попробуйте ещё раз.')}
 }
