@@ -75,13 +75,13 @@ button{cursor:pointer}
 /* Tabs */
 .tabs{flex:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--surface);border-top:1px solid var(--line);padding:4px max(8px,calc((100% - 720px)/2)) max(6px,calc(env(safe-area-inset-bottom,0px) - 18px));z-index:20}
 .tabs button{border:0;background:transparent;padding:4px 0 2px;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:12px;font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent}
-.tabs .ico{position:relative;width:56px;height:32px;border-radius:16px;display:grid;place-items:center;transition:background-color .2s ease,color .2s ease}
+.tabs .ico{position:relative;width:56px;height:36px;border-radius:18px;display:grid;place-items:center;transition:background-color .2s ease,color .2s ease}
 .tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .tabs button[aria-selected="true"]{color:var(--ink);font-weight:600}
 .tabs button[aria-selected="true"] .ico{background:var(--accent-soft);color:var(--accent)}
 .tabs button:active .ico{background:var(--accent-soft)}
-/* Учёт in the middle: a round blue «+», just slightly above the bar */
-.tabs .tab-main .ico{width:42px;height:42px;border-radius:50%;margin-top:-10px;background:var(--accent);color:var(--accent-ink);box-shadow:0 4px 14px rgb(0 0 0 / .28);border:3px solid var(--surface)}
+/* Учёт in the middle: a round blue «+», inside the bar, below its top line */
+.tabs .tab-main .ico{width:38px;height:38px;border-radius:50%;margin-top:-2px;background:var(--accent);color:var(--accent-ink);box-shadow:0 4px 14px rgb(0 0 0 / .28);border:3px solid var(--surface)}
 .tabs .tab-main .ico svg{width:22px;height:22px;stroke-width:2.4}
 .tabs .tab-main[aria-selected="true"] .ico,.tabs .tab-main:active .ico{background:var(--accent);color:var(--accent-ink)}
 .tabs .tab-main:active .ico{transform:scale(.94)}
@@ -203,9 +203,13 @@ input::placeholder{color:var(--muted)}
 /* List */
 .seg3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .seg3 button{font-size:13px;padding:8px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.listsum{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted);padding-bottom:10px;border-bottom:1px solid var(--line)}
-.listsum b{font-family:var(--f-num);font-weight:500;font-size:15px;color:var(--ink)}
-.listsum .pos{color:var(--good,inherit)}
+.listsum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-size:12px;color:var(--muted);padding-bottom:10px;border-bottom:1px solid var(--line)}
+.listsum>span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.listsum>span:nth-child(2){text-align:center}
+.listsum>span:last-child{text-align:right}
+.listsum b{font-family:var(--f-num);font-weight:500;font-size:15px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.listsum .pos{color:var(--good)}
+.listsum .neg{color:var(--bad)}
 .listsum:empty{display:none}
 .listhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .filterchip{font-size:13px;border:1px solid var(--line);border-radius:99px;padding:4px 10px;background:var(--accent-soft);color:var(--ink);display:inline-flex;gap:6px;align-items:center}
@@ -293,7 +297,10 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 @keyframes zpop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.zsheet-panel{animation:none}}
 .zsheet-head{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--surface);padding:12px 0 10px;margin-bottom:4px;border-bottom:1px solid var(--line)}
-.zsheet-head b{font-size:17px}
+.zsheet-head b{font-size:17px;flex:1;min-width:0}
+.zback{border:0;background:none;color:var(--accent);font-weight:600;font-size:15px;padding:8px 8px 8px 0;flex:none}
+.zgo{display:flex;justify-content:space-between;align-items:center;width:100%;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--accent);font-size:15px;font-weight:500;padding:12px;text-align:left}
+.zgo span:last-child{font-size:20px;line-height:1}
 .zcard{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:2px 12px}
 .zrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:15px;line-height:1.3}
 .zrow:last-child{border-bottom:0}
@@ -616,7 +623,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
 <div class="zsheet" id="zakatSheet" hidden role="dialog" aria-modal="true" aria-labelledby="zakatSheetT">
   <div class="sheet-bg" data-zx></div>
   <div class="zsheet-panel">
-    <div class="zsheet-head"><b id="zakatSheetT">🌙 Закят</b><button type="button" class="iconbtn" data-zx aria-label="Закрыть">✕</button></div>
+    <div class="zsheet-head"><button type="button" class="zback" id="zBack" hidden aria-label="Назад к закяту">‹ Назад</button><b id="zakatSheetT">🌙 Закят</b><button type="button" class="iconbtn" data-zx aria-label="Закрыть">✕</button></div>
     <section id="zakatBox" aria-labelledby="zakatSheetT"></section>
   </div>
 </div>
@@ -1396,8 +1403,8 @@ function renderZakat(){
       :'<span>🌙 Закят</span><span>сумма ниже нисаба ›</span>';
     /* why the sum is what it is */
     const bMiss=M.missing.includes('broker'), miss=M.missing.map(id=>WNAME[id]);
-    html+=`<details class="zwhy"><summary>Почему столько</summary>
-      <div class="zcard">${zRow('Карты и наличные',money(cur.cash),'Т-Банк, Сбер, ВТБ, Наличка, Подушка, Копильник')}
+    let sub='';
+    sub+=`<div class="zcard">${zRow('Карты и наличные',money(cur.cash),'Т-Банк, Сбер, ВТБ, Наличка, Подушка, Копильник')}
       ${bMiss?'':zRow('Брокерский счёт',money(cur.broker),M.brokerOwn?`ваша оценка от ${gDate(iso(new Date(M.bo.at)))} и переводы после неё`:'сумма с вкладки «Деньги»')}
       ${cur.rel?zRow('Вам должны',money(cur.rel),'надёжные долги'):''}
       ${cur.doubt?zRow('Сомнительные долги',money(cur.doubt),'только для нисаба, закят — когда вернут'):''}
@@ -1405,19 +1412,28 @@ function renderZakat(){
       ${cur.adv?zRow('Отдано досрочно','+'+money(cur.adv),'считается, как будто ещё у вас'):''}
       ${zRow('Итого облагается',money(cur.base),'','zsum')}${zRow('Закят 2,5%',money(r2(cur.base*ZAKAT_RATE)),'','zsum')}</div>
       ${miss.length?`<div class="zhint">Не вписаны на вкладке «Деньги»: ${miss.join(', ')} — они не учтены.${bMiss?' Стоимость брокерского счёта можно указать в настройках закята.':''}</div>`:''}
-      <div class="zhint"><b>Как считается</b>Ставка 2,5% со всей суммы, а не только сверх нисаба. Деньги, пришедшие в этом году, тоже входят — с них закят отдаётся досрочно, это допустимо. Свои долги не вычитаются (шафиитский мазхаб). Жильё, машина и вещи не облагаются.</div>
-      </details>`;
+      <div class="zhint"><b>Как считается</b>Ставка 2,5% со всей суммы, а не только сверх нисаба. Деньги, пришедшие в этом году, тоже входят — с них закят отдаётся досрочно, это допустимо. Свои долги не вычитаются (шафиитский мазхаб). Жильё, машина и вещи не облагаются.</div>`;
+    const why=sub;
+    html+=`<button type="button" class="zgo" data-zview="why"><span>Почему столько</span><span>›</span></button>`;
     if(z.priceAt&&Date.now()-z.priceAt>30*864e5) html+=`<div class="zhint">Цена ${METAL[metal]} вписана ${gDate(iso(new Date(z.priceAt)))} — обновите её перед сроком.</div>`;
     const hist=zHistory(z);
     const paidSub=r=>r.paid>=r.amount-0.005?'оплачено ✓':`оплачено ${money(r.paid)}`;
-    if(hist.length) html+=`<details class="zwhy"><summary>История по годам</summary><div class="zcard">${hist.slice().reverse().map(r=>r.y
+    const histHtml=!hist.length?'':`<div class="zcard">${hist.slice().reverse().map(r=>r.y
       ?zRow(`Срок ${NB(hijri(r.y.due)||gDate(r.y.due))}`,r.y.below?'—':money(r.amount),r.y.below?`${gDate(r.y.due)} · ниже нисаба, закята не было`:`${gDate(r.y.due)} · облагалось ${money(r.y.base)}${r.y.approx?' (примерно)':''} · ${paidSub(r)}`)
       :zRow(esc(r.x.label||'Закят с долга'),money(r.amount),`${gDate(r.x.date)} · ${paidSub(r)}`)).join('')}</div>
-      ${L.paid?`<p class="zs">Всего выплачено: ${money(L.paid)}</p>`:''}</details>`;
+      ${L.paid?`<p class="zs">Всего выплачено: ${money(L.paid)}</p>`:''}`;
+    if(hist.length) html+=`<button type="button" class="zgo" data-zview="hist"><span>История по годам</span><span>›</span></button>`;
+    /* «Почему столько» and «История» open as their own page inside the window, with «‹ Назад» */
+    if(state.zView==='why') html='<div class="zk">'+why;
+    else if(state.zView==='hist'&&histHtml) html='<div class="zk">'+histHtml;
     const lastY=(z.years||[]).slice().sort((a,b)=>b.due.localeCompare(a.due))[0];
     html+=`<div class="acts"><button class="ghost" id="zSet">Настройки</button>${lastY&&owed>=0.01?`<button class="linkbtn" id="zRe" data-d="${lastY.due}">Пересчитать закят за срок ${gDate(lastY.due)}</button>`:''}</div>`;
   }
-  html+=`<div class="zhint zfine"><b>Расчёт ориентировочный</b>Шафиитский мазхаб, нисаб по ${metal==='gold'?'золоту (Муфтият ЧР считает по серебру)':'серебру, как у Муфтията ЧР'}. По спорным вопросам уточните у имама.</div></div>`;
+  if(!state.zView||setup||!M) html+=`<div class="zhint zfine"><b>Расчёт ориентировочный</b><span>Шафиитский мазхаб, нисаб по ${metal==='gold'?'золоту (Муфтият ЧР считает по серебру)':'серебру, как у Муфтията ЧР'}.</span><span>По спорным вопросам уточните у имама.</span></div>`;
+  html+='</div>';
+  const zv=!setup&&M&&(state.zView==='why'||state.zView==='hist')?state.zView:null;
+  $('zakatSheetT').textContent=zv==='why'?'Почему столько':zv==='hist'?'История по годам':'🌙 Закят';
+  $('zBack').hidden=!zv;
   box.innerHTML=html;
   $('zakatForm').innerHTML=state.editing==='zakat'?zForm(z):'';
   bindZakat(z,M);
@@ -1465,12 +1481,15 @@ function zPaySheet(amount){
   });
 }
 /* the zakat window opens over the current tab (from «Деньги» and from the reminders on «Учёт») */
-function openZakat(){$('zakatSheet').hidden=false;$('zakatSheet').querySelector('.zsheet-panel').scrollTop=0}
-function closeZakat(){$('zakatSheet').hidden=true;if(state.editing==='zakat'){state.editing=null;render()}}
+function openZakat(){state.zView=null;render();$('zakatSheet').hidden=false;$('zakatSheet').querySelector('.zsheet-panel').scrollTop=0}
+function closeZakat(){$('zakatSheet').hidden=true;const re=state.editing==='zakat'||state.zView;state.zView=null;if(state.editing==='zakat')state.editing=null;if(re)render()}
+const zGo=v=>{state.zView=v;render();$('zakatSheet').querySelector('.zsheet-panel').scrollTop=0};
+$('zBack').onclick=()=>zGo(null);
 document.querySelectorAll('[data-zx]').forEach(b=>b.onclick=closeZakat);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('zakatSheet').hidden&&$('sheet').hidden&&state.editing!=='zakat')closeZakat()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('zakatSheet').hidden&&$('sheet').hidden&&state.editing!=='zakat'){if(state.zView)zGo(null);else closeZakat()}});
 function bindZakat(z,M){
   if($('zSet')) $('zSet').onclick=()=>{state.editing='zakat';render()};
+  $('zakatBox').querySelectorAll('[data-zview]').forEach(b=>b.onclick=()=>zGo(b.dataset.zview));
   if($('zPay2')) $('zPay2').onclick=()=>zPaySheet(zLedger(z).owed);
   if($('zRestart')) $('zRestart').onclick=e=>{const nz={...z,start:e.currentTarget.dataset.d};delete nz.dipOk;delete nz.wait;saveSettings({zakat:nz});toast('Год закята начат заново')};
   if($('zWait')) $('zWait').onclick=e=>{const nz={...z,wait:e.currentTarget.dataset.d};delete nz.start;delete nz.dipOk;saveSettings({zakat:nz});toast('Год закята начнётся, когда сумма дойдёт до нисаба')};
@@ -1624,7 +1643,8 @@ function renderList(items){
   const inScope=i=>!sf||(sf==='trip'?isTrip(i):!isTrip(i));
   const shown=items.filter(i=>(!f||(!['tr','debt'].includes(typeOf(i))&&catOf(i.cat).id===f))&&touches(i)&&inScope(i)).sort(byNewest);
   const sOut=sum(shown.filter(i=>typeOf(i)==='out')), sIn=sum(shown.filter(i=>typeOf(i)==='in'));
-  $('listSum').innerHTML=state.ready&&(sOut||sIn)?`<span>Расходы<br><b>${sOut?'−'+money(sOut):'0 ₽'}</b></span><span style="text-align:right">Доходы<br><b class="pos">${sIn?'+'+money(sIn):'0 ₽'}</b></span>`:'';
+  const diff=Math.round((sIn-sOut)*100)/100;
+  $('listSum').innerHTML=state.ready&&(sOut||sIn)?`<span>Доходы<b class="pos">${sIn?'+'+money(sIn):'0\u00a0₽'}</b></span><span>Расходы<b>${sOut?'−'+money(sOut):'0\u00a0₽'}</b></span><span>Разница<b class="${diff<0?'neg':'pos'}">${diff>0?'+':diff<0?'−':''}${money(Math.abs(diff))}</b></span>`:'';
   if(!state.ready){list.innerHTML='<div class="empty"><p>Загружаю записи…</p></div>';return}
   if(!shown.length){list.innerHTML=`<div class="empty"><p>${f||af||sf?'Записей с таким фильтром в этом месяце нет.':'В этом месяце записей нет.'}</p></div>`;return}
   const groups={};shown.forEach(i=>(groups[i.date]??=[]).push(i));
