@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Мои расходы</title>
 <meta name="theme-color" content="#0D1320">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -57,6 +57,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 .wrap{max-width:720px;margin:0 auto;padding-inline:16px;padding-block:16px 24px;display:flex;flex-direction:column;gap:16px}
 /* App shell: the page itself never scrolls — only the content area does, so the tab bar can't move between tabs */
 html,body{height:var(--app-h,100%);overflow:hidden;overscroll-behavior:none}
+/* an app, not a page: a quick second tap never zooms */
+*{touch-action:manipulation}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .app{height:100vh;height:100dvh;height:var(--app-h,100dvh);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
 .scroller{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .scroller>.wrap{min-height:calc(100% + 1px)}
@@ -96,6 +99,7 @@ button{cursor:pointer}
 .stat b{font-family:var(--f-num);font-weight:500;font-size:17px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .stat small{font-size:12px;color:var(--muted)}
 .stat.wide{grid-column:1/-1}
+#tripCard .stat{border:0;background:none;padding:0}
 .money{display:flex;flex-direction:column;gap:8px}
 .moneyhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 .moneyhead .num{font-size:15px;font-weight:500}
@@ -192,6 +196,12 @@ input::placeholder{color:var(--muted)}
 .daysaxis{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-family:var(--f-num)}
 
 /* List */
+.seg3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.seg3 button{font-size:13px;padding:8px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.listsum{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted);padding-bottom:10px;border-bottom:1px solid var(--line)}
+.listsum b{font-family:var(--f-num);font-weight:500;font-size:15px;color:var(--ink)}
+.listsum .pos{color:var(--good,inherit)}
+.listsum:empty{display:none}
 .listhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .filterchip{font-size:13px;border:1px solid var(--line);border-radius:99px;padding:4px 10px;background:var(--accent-soft);color:var(--ink);display:inline-flex;gap:6px;align-items:center}
 .day{display:flex;flex-direction:column}
@@ -267,7 +277,13 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .zk .zfine{font-size:11px}
 .zform label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
 .zform select,.zform input{width:100%;flex:none}
+.zsheet{position:fixed;inset:0;z-index:45;display:flex;align-items:flex-end;justify-content:center}
+.zsheet-panel{position:relative;width:min(720px,100%);max-height:92vh;overflow-y:auto;overscroll-behavior:contain;background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;padding:0 16px calc(24px + env(safe-area-inset-bottom,0px));animation:up .18s ease-out}
+@media (prefers-reduced-motion:reduce){.zsheet-panel{animation:none}}
+.zsheet-head{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--surface);padding:12px 0 10px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+.zsheet-head b{font-size:17px}
 .zline{display:flex;justify-content:space-between;align-items:baseline;gap:10px;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;color:var(--ink);font-size:14px;text-align:left}
+.zline>span:first-child{white-space:nowrap}
 .zline>span:last-child{color:var(--muted);font-size:13px;text-align:right}
 .zline .neg{color:var(--bad);font-weight:600}
 .zpay{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);margin-bottom:12px}
@@ -312,6 +328,7 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .debt .head .left{font-family:var(--f-num);font-weight:500;font-size:16px}
 .debt .meta{font-size:13px;color:var(--muted)}
 .debt .acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#oweTotal{font-family:var(--f-num);font-weight:500;font-size:16px;color:var(--bad)}
 .debt .acts input{width:130px}
 .debt.closed{opacity:.6}
 details summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:500}
@@ -457,8 +474,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
       <div class="title" id="hTitle">—</div>
       <button class="iconbtn" id="hNext" aria-label="Следующий месяц">›</button>
     </div>
+    <div class="seg seg3" id="scopeFilter" role="group" aria-label="Чьи деньги"></div>
     <div class="chips" id="accFilter" role="group" aria-label="Фильтр по счёту"></div>
     <section class="panel" aria-label="Записи за месяц">
+      <div class="listsum" id="listSum"></div>
       <div class="listhead" id="listHead"><span id="filterBox"></span></div>
       <div id="list"></div>
     </section>
@@ -488,6 +507,24 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
       <h2 id="debtListH">Должники</h2>
       <div id="debtList"></div>
     </section>
+    <section class="panel" id="owePanel" aria-labelledby="oweH" hidden>
+      <div class="listhead"><h2 id="oweH">Я должен</h2><b class="num" id="oweTotal"></b></div>
+      <div id="oweList"></div>
+    </section>
+    <details class="more" id="oweAdd">
+      <summary>+ Взял в долг</summary>
+      <div class="morebody">
+      <form class="form" id="oweForm" novalidate>
+        <input id="oName" placeholder="У кого взял" maxlength="60" aria-label="У кого взял" autocomplete="off">
+        <input id="oAmount" class="num" inputmode="decimal" placeholder="Сумма, ₽" aria-label="Сумма" autocomplete="off">
+        <input id="oDate" type="date" aria-label="Когда взял">
+        <input id="oNote" placeholder="Комментарий (необязательно)" maxlength="80" aria-label="Комментарий">
+        <label class="full" style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);grid-column:1/-1">На какой счёт пришли<select id="oAcc"></select></label>
+        <p class="err" id="oweErr" hidden></p>
+        <button class="submit" type="submit">Записать</button>
+      </form>
+      </div>
+    </details>
   </div>
 
   <div id="viewStats" role="tabpanel" aria-labelledby="tabStats" hidden style="flex-direction:column;gap:16px">
@@ -496,27 +533,32 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
       <div class="title" id="sTitle">—</div>
       <button class="iconbtn" id="sNext" aria-label="Следующий месяц">›</button>
     </div>
-    <div class="morebody">
+    <section aria-label="Месяц">
       <div class="stats">
         <div class="stat"><span>Доходы</span><b id="incomeTotal">0 ₽</b></div>
         <div class="stat"><span>Всего ушло</span><b id="allOut">0 ₽</b></div>
         <div class="stat wide"><span>Остаток за месяц</span><b id="balance">0 ₽</b><small>доходы минус все расходы, вместе с брокером, копильником и садакой</small></div>
-        <div class="stat wide" id="tripStat"></div>
       </div>
+    </section>
+    <section class="panel" id="tripCard" aria-labelledby="tripH">
+      <h2 id="tripH">Командировка</h2>
+      <div class="stat wide" id="tripStat"></div>
+    </section>
+    <section class="panel" aria-labelledby="ruleH">
+      <h2 id="ruleH">Брокер и лимит</h2>
       <div class="rule" id="brokerBox"></div>
       <div class="rule" id="budgetBox"></div>
-      <section id="breakdown" aria-labelledby="catH" class="bdwrap">
-        <h2 id="catH">Куда ушли деньги</h2>
-        <div class="bd" id="bdDaily"><h3>Повседневные</h3><div class="bars" id="barsDaily"></div></div>
-        <div class="bd" id="bdSep"><h3>Отдельно</h3><div class="bars" id="barsSep"></div></div>
-        <div class="bd" id="bdTrip"><h3>Командировка</h3><div class="bars" id="barsTrip"></div></div>
-      </section>
-      <section id="incomeBreakdown" aria-labelledby="incH" class="bdwrap">
-        <h2 id="incH">Откуда пришли деньги</h2>
-        <div class="bd" id="bdIn"><div class="bars" id="barsIn"></div></div>
-      </section>
-      <section id="zakatBox" aria-labelledby="zH" class="bdwrap"></section>
-    </div>
+    </section>
+    <section id="breakdown" aria-labelledby="catH" class="panel bdwrap">
+      <h2 id="catH">Куда ушли деньги</h2>
+      <div class="bd" id="bdDaily"><h3>Повседневные</h3><div class="bars" id="barsDaily"></div></div>
+      <div class="bd" id="bdSep"><h3>Отдельно</h3><div class="bars" id="barsSep"></div></div>
+      <div class="bd" id="bdTrip"><h3>Командировка</h3><div class="bars" id="barsTrip"></div></div>
+    </section>
+    <section id="incomeBreakdown" aria-labelledby="incH" class="panel bdwrap">
+      <h2 id="incH">Откуда пришли деньги</h2>
+      <div class="bd" id="bdIn"><div class="bars" id="barsIn"></div></div>
+    </section>
     <details class="more panel-ish" id="cmpBox">
       <summary>Сравнение месяцев</summary>
       <div class="morebody">
@@ -537,6 +579,14 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
 </nav>
 </div>
 <div class="toast" id="toast" hidden></div>
+<div class="zsheet" id="zakatSheet" hidden role="dialog" aria-modal="true" aria-labelledby="zakatSheetT">
+  <div class="sheet-bg" data-zx></div>
+  <div class="zsheet-panel">
+    <div class="zsheet-head"><b id="zakatSheetT">🌙 Закят</b><button type="button" class="iconbtn" data-zx aria-label="Закрыть">✕</button></div>
+    <section id="zakatBox" aria-labelledby="zakatSheetT"></section>
+  </div>
+</div>
+<div id="zakatForm"></div>
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
   <div class="sheet-bg" data-close></div>
   <div class="sheet-panel">
@@ -730,7 +780,7 @@ const TABS=[['ledger','tabLedger','viewLedger'],['money','tabMoney','viewMoney']
 function renderTabs(){
   if(state.tab==='ledger') requestAnimationFrame(fitCatRows);
   for(const [t,tab,view] of TABS){const on=state.tab===t;$(tab).setAttribute('aria-selected',on);$(view).hidden=!on;$(view).style.display=on?'flex':'none'}
-  const open=state.debts.filter(d=>debtLeft(d)>0);
+  const open=state.debts.filter(d=>!d.mine&&debtLeft(d)>0);
   $('debtBadge').textContent=open.length?String(open.length):'';
 }
 
@@ -754,7 +804,7 @@ function renderLedger(){
   /* only things that need an action today go above the form */
   const al=$('alerts');al.innerHTML=zakatAlert+tripAlert+brokerAlert;
   if($('zPay')) $('zPay').onclick=()=>zPaySheet(zLedger(zset()).owed);
-  if($('zDipGo')) $('zDipGo').onclick=()=>{setTab('stats');$('zakatBox')?.scrollIntoView?.({block:'start'})};
+  if($('zDipGo')) $('zDipGo').onclick=openZakat;
   al.querySelectorAll('[data-sfrom]').forEach(x=>x.onclick=()=>{state.xfer={from:x.dataset.sfrom,to:x.dataset.sto,amount:+x.dataset.sv};state.xferOpen=true;setTab('money');$('xForm')?.scrollIntoView?.({block:'center'})});
   if($('oPay')) $('oPay').onclick=e=>{state.xfer={from:'vtb',to:'broker',amount:+e.currentTarget.dataset.v};state.xferOpen=true;setTab('money');$('xForm')?.scrollIntoView?.({block:'center'})};
   renderWallets();
@@ -949,7 +999,7 @@ const WNAME=Object.fromEntries(WALLETS.map(w=>[w.id,w.name]));
 function walletDelta(i,id){
   const a=+i.amount||0, t=typeOf(i), c=catOf(i.cat).id;
   if(t==='tr') return (i.from===id?-a:0)+(i.to===id?a:0);
-  if(t==='debt') return i.acc===id?(i.dir==='back'?a:-a):0;
+  if(t==='debt') return i.acc===id?(i.dir==='back'||i.dir==='in'?a:-a):0;
   let v=i.acc===id?(t==='in'?a:-a):0;
   if(t==='out'&&((id==='broker'&&c==='broker')||(id==='piggy'&&c==='invest'))) v+=a;
   return v;
@@ -1145,12 +1195,12 @@ function zBuild(){
   /* debts owed to him, loan by loan: returns and forgiveness go to their own loan (older records by name, oldest loan first),
      never more than the loan really got back */
   const k=n=>String(n||'').trim().toLowerCase();
-  const loans=state.debts.map(d=>({d,id:d.id,name:k(d.name),dd:d.date||iso(new Date(d.created||0)),amount:+d.amount||0,cap:Math.min(+d.amount||0,(+d.returned||0)+(+d.forgiven||0)),got:[],used:0}));
+  const loans=state.debts.filter(d=>!d.mine).map(d=>({d,id:d.id,name:k(d.name),dd:d.date||iso(new Date(d.created||0)),amount:+d.amount||0,cap:Math.min(+d.amount||0,(+d.returned||0)+(+d.forgiven||0)),got:[],used:0}));
   const byId=Object.fromEntries(loans.map(l=>[l.id,l]));
   /* «Дал в долг» records: a loan without one was saved with «уже учёл» — the money left before the typed balances, so before
      the loan date it still counts as money; a record without a loan is a loan deleted from «Долги» */
   const has=new Set(), orphan=[];
-  const gave=state.items.filter(i=>typeof i.date==='string'&&typeOf(i)==='debt'&&i.dir!=='back')
+  const gave=state.items.filter(i=>typeof i.date==='string'&&typeOf(i)==='debt'&&(i.dir||'out')==='out')
     .map(i=>({i,name:k(String(i.label||'').replace(/^Дал в долг:\s*/,'')),v:+i.amount||0,c:i.created||0,l:null}));
   const tie=(r,l)=>{if(l){has.add(l);r.l=l}};
   for(const r of gave) if(r.i.debt&&byId[r.i.debt]&&!has.has(byId[r.i.debt])) tie(r,byId[r.i.debt]);
@@ -1273,7 +1323,7 @@ function renderZakat(){
   if(!zBusy&&state.synced!==false){const next=zRoll(M0);if(next){zBusy=true;setTimeout(()=>{saveSettings({zakat:next}).finally(()=>{zBusy=false;render()})},0)}}
   const z=zset(), M=M0, T=iso(now), nisab=zNisab(z), L=zLedger(z), metal=zMetal(z);
   const owed=L.owed;let dip=null, line='';
-  let html='<h2 id="zH">Закят</h2><div class="zk">';
+  let html='<div class="zk">';
   const setup=!(z.price>0)||!(z.start||z.wait);
   if(setup){
     html+=`<p class="zs">Приложение посчитает закят по всем счетам, напомнит о сроке и запишет выплаты. Нужно один раз указать цену грамма ${METAL[metal]} и примерную дату, когда ваши деньги дошли до нисаба.</p>
@@ -1331,10 +1381,10 @@ function renderZakat(){
     html+=`<div class="acts"><button class="ghost" id="zSet">Настройки</button>${lastY&&owed>=0.01?`<button class="linkbtn" id="zRe" data-d="${lastY.due}">Пересчитать закят за срок ${gDate(lastY.due)}</button>`:''}</div>`;
   }
   html+=`<p class="zs zfine">Расчёт ориентировочный: шафиитский мазхаб, нисаб по ${metal==='gold'?'золоту (Муфтият ЧР считает по серебру)':'серебру, как у Муфтията ЧР'}. По спорным вопросам уточните у имама.</p></div>`;
-  if(state.editing==='zakat') html+=zForm(z);
   box.innerHTML=html;
+  $('zakatForm').innerHTML=state.editing==='zakat'?zForm(z):'';
   bindZakat(z,M);
-  const zl=$('zakatLine');if(zl){zl.innerHTML=line;zl.hidden=!line;zl.onclick=()=>{setTab('stats');$('zakatBox')?.scrollIntoView?.({block:'start'})}}
+  const zl=$('zakatLine');if(zl){zl.innerHTML=line;zl.hidden=!line;zl.onclick=openZakat}
   return (owed>=0.01?`<div class="alert"><span>Закят к оплате: <b>${moneyR(owed)}</b></span><button class="primary" id="zPay">Оплатить</button></div>`:'')
     +(dip?`<div class="alert"><span>${dip.ended?'Срок закята наступил, но сумма за год опускалась ниже нисаба':'Сумма опускалась ниже нисаба — проверьте год закята'}</span><button class="ghost" id="zDipGo">Посмотреть</button></div>`:'');
 }
@@ -1377,8 +1427,12 @@ function zPaySheet(amount){
     state.pend.amount=r2(v);saveEntry(b.dataset.zacc,{keepForm:true});
   });
 }
+/* the zakat window opens over the current tab (from «Деньги» and from the reminders on «Учёт») */
+function openZakat(){$('zakatSheet').hidden=false;$('zakatSheet').querySelector('.zsheet-panel').scrollTop=0}
+function closeZakat(){$('zakatSheet').hidden=true;if(state.editing==='zakat'){state.editing=null;render()}}
+document.querySelectorAll('[data-zx]').forEach(b=>b.onclick=closeZakat);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('zakatSheet').hidden&&$('sheet').hidden&&state.editing!=='zakat')closeZakat()});
 function bindZakat(z,M){
-  const box=$('zakatBox');
   if($('zSet')) $('zSet').onclick=()=>{state.editing='zakat';render()};
   if($('zPay2')) $('zPay2').onclick=()=>zPaySheet(zLedger(z).owed);
   if($('zRestart')) $('zRestart').onclick=e=>{const nz={...z,start:e.currentTarget.dataset.d};delete nz.dipOk;delete nz.wait;saveSettings({zakat:nz});toast('Год закята начат заново')};
@@ -1389,7 +1443,7 @@ function bindZakat(z,M){
     const zz={...z,years:ys,...(y0&&y0.price>0?{price:y0.price,metal:y0.metal}:{})}, y={...zCalc(d,zz,M),start:y0?.start,at:Date.now()};
     if(!b.dataset.armed){b.dataset.armed='1';b.textContent=`Было ${money(+y0?.amount||0)} → станет ${money(y.amount)}${y.approx?' (примерно)':''}. Нажмите ещё раз`;setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent=`Пересчитать закят за срок ${gDate(d)}`}},5000);return}
     saveSettings({zakat:{...z,years:[...ys,y]}});toast(`Срок ${gDate(d)}: закят ${money(y.amount)}`)};
-  box.querySelectorAll('[data-zclose]').forEach(b=>b.onclick=()=>{state.editing=null;render()});
+  document.querySelectorAll('#zakatForm [data-zclose]').forEach(b=>b.onclick=()=>{state.editing=null;render()});
   const f=$('zForm');if(!f) return;
   const metalSel=$('zMetal'), upd=()=>{const m=metalSel.value, p=parseNum($('zPrice').value);
     $('zPriceL').textContent=`Цена грамма ${METAL[m]}, ₽`;$('zNis').textContent=p>0?money(r2(NISAB_G[m]*p)):'—';
@@ -1493,7 +1547,7 @@ function itemRow(i){
   if(state.editItem===i.id) return editRow(i);
   const t=typeOf(i), inc=t==='in', id=esc(i.id), open=state.actItem===i.id;
   let what, amt, cls='', acls='';
-  if(t==='debt'){cls='tr';what=`<b>${esc(i.label||'Долг')}</b><span>${accTag(i.acc)||'—'}</span>`;amt=(i.dir==='back'?'+':'−')+money(+i.amount||0);acls=i.dir==='back'?'pos':'spend'}
+  if(t==='debt'){cls='tr';what=`<b>${esc(i.label||'Долг')}</b><span>${accTag(i.acc)||'—'}</span>`;amt=(i.dir==='back'||i.dir==='in'?'+':'−')+money(+i.amount||0);acls=i.dir==='back'||i.dir==='in'?'pos':'spend'}
   else if(t==='tr'){cls='tr';what=`<b>Перевод</b><span>${accTag(i.from)||'?'} → ${accTag(i.to)||'?'}</span>`;amt=money(+i.amount||0)}
   else{cls=inc?'in':'';acls=inc?'pos':'spend';const sub=[accTag(i.acc),i.note?esc(i.note):''].filter(Boolean).join(' · ');
     what=`<b>${esc(nameOf(i))}${isTrip(i)?'<span class="tag trip">командировка</span>':''}</b>${sub?`<span>${sub}</span>`:''}`;amt=(inc?'+':'−')+money(+i.amount||0)}
@@ -1520,19 +1574,25 @@ function renderList(items){
   $('hTitle').textContent=$('monthTitle').textContent;
   $('hNext').disabled=isCurrentMonth();
   $('sTitle').textContent=$('monthTitle').textContent;$('sNext').disabled=isCurrentMonth();
-  const list=$('list'), f=state.filter, af=state.accFilter||null;
-  $('accFilter').innerHTML=[['','Все счета'],...ACCS,['broker','Брокер'],['piggy','Копильник']].map(([id,n])=>`<button type="button" class="chip" data-af="${id}" aria-pressed="${(af||'')===id}">${n}</button>`).join('');
+  const list=$('list'), f=state.filter, af=state.accFilter||null, sf=state.scopeFilter||'';
+  /* personal money and trip money apart, then by account */
+  $('scopeFilter').innerHTML=[['','Все'],['own','Личное'],['trip','Командировка']].map(([v,n])=>`<button type="button" data-sf="${v}" aria-pressed="${sf===v}">${n}</button>`).join('');
+  $('scopeFilter').querySelectorAll('[data-sf]').forEach(b=>b.onclick=()=>{state.scopeFilter=b.dataset.sf;render()});
+  $('accFilter').innerHTML=[['','Все счета'],...ACCS.map(([id])=>[id,ACC_SHORT[id]]),['broker','Брокер'],['piggy','Копильник']].map(([id,n])=>`<button type="button" class="chip" data-af="${id}" aria-pressed="${(af||'')===id}">${n}</button>`).join('');
   $('accFilter').querySelectorAll('[data-af]').forEach(b=>b.onclick=()=>{state.accFilter=b.dataset.af||null;render()});
   $('listHead').hidden=!f;
   $('filterBox').innerHTML=f?`<span class="filterchip">${esc(CAT[f]?.name||'Другое')} <button class="linkbtn" id="clrF" aria-label="Сбросить фильтр">✕</button></span>`:'';
   if(f)$('clrF').onclick=()=>{state.filter=null;render()};
   const touches=i=>!af||(typeOf(i)==='tr'?(i.from===af||i.to===af):(i.acc===af||(af==='broker'&&catOf(i.cat).id==='broker'&&typeOf(i)==='out')||(af==='piggy'&&catOf(i.cat).id==='invest'&&typeOf(i)==='out')));
-  const shown=items.filter(i=>(!f||(!['tr','debt'].includes(typeOf(i))&&catOf(i.cat).id===f))&&touches(i)).sort(byNewest);
+  const inScope=i=>!sf||(sf==='trip'?isTrip(i):!isTrip(i));
+  const shown=items.filter(i=>(!f||(!['tr','debt'].includes(typeOf(i))&&catOf(i.cat).id===f))&&touches(i)&&inScope(i)).sort(byNewest);
+  const sOut=sum(shown.filter(i=>typeOf(i)==='out')), sIn=sum(shown.filter(i=>typeOf(i)==='in'));
+  $('listSum').innerHTML=state.ready&&(sOut||sIn)?`<span>Расходы<br><b>${sOut?'−'+money(sOut):'0 ₽'}</b></span><span style="text-align:right">Доходы<br><b class="pos">${sIn?'+'+money(sIn):'0 ₽'}</b></span>`:'';
   if(!state.ready){list.innerHTML='<div class="empty"><p>Загружаю записи…</p></div>';return}
-  if(!shown.length){list.innerHTML=`<div class="empty"><p>${f||af?'Записей с таким фильтром в этом месяце нет.':'В этом месяце записей нет.'}</p></div>`;return}
+  if(!shown.length){list.innerHTML=`<div class="empty"><p>${f||af||sf?'Записей с таким фильтром в этом месяце нет.':'В этом месяце записей нет.'}</p></div>`;return}
   const groups={};shown.forEach(i=>(groups[i.date]??=[]).push(i));
   list.innerHTML=Object.entries(groups).map(([d,arr])=>{
-    const o=sum(arr.filter(i=>typeOf(i)==='out'&&!isTrip(i))), p=sum(arr.filter(i=>typeOf(i)==='in'&&!isTrip(i)));
+    const own=i=>sf==='trip'?isTrip(i):!isTrip(i), o=sum(arr.filter(i=>typeOf(i)==='out'&&own(i))), p=sum(arr.filter(i=>typeOf(i)==='in'&&own(i)));
     return `<div class="day"><div class="dayhead"><span>${dayName.format(isoToDate(d))}</span><span class="num">${p?`<span class="pos">+${money(p)}</span> `:''}${o?'−'+money(o):''}</span></div>${arr.map(itemRow).join('')}</div>`;
   }).join('');
   bindEdits(list);armDeletes(list,id=>{state.editItem=null;return store.remove(id)},'Запись удалена');
@@ -1584,14 +1644,16 @@ function armDeletes(root,fn,done){
 /* ---------- debts ---------- */
 const debtLeft=d=>Math.max(0,(+d.amount||0)-(+d.returned||0)-(+d.forgiven||0));
 function renderDebts(){
-  const open=state.debts.filter(d=>debtLeft(d)>0).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
-  const closed=state.debts.filter(d=>debtLeft(d)<=0).sort((a,b)=>(b.closedAt||0)-(a.closedAt||0));
+  renderOwe();
+  const debts=state.debts.filter(d=>!d.mine);
+  const open=debts.filter(d=>debtLeft(d)>0).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  const closed=debts.filter(d=>debtLeft(d)<=0).sort((a,b)=>(b.closedAt||0)-(a.closedAt||0));
   const total=open.reduce((s,d)=>s+debtLeft(d),0);
   $('debtTotal').textContent=moneyR(total);
   const people=new Set(open.map(d=>d.name.trim().toLowerCase())).size;
   $('debtSub').textContent=open.length?`${people} ${plural(people,'человек','человека','человек')} ещё не вернули`:'Никто ничего не должен';
   /* in a person's group, buttons show only for the loan that was tapped (or the only one) */
-  const showActs=d=>state.openDebtItem===d.id||state.debts.filter(x=>debtLeft(x)>0&&x.name.trim().toLowerCase()===d.name.trim().toLowerCase()).length===1;
+  const showActs=d=>state.openDebtItem===d.id||debts.filter(x=>debtLeft(x)>0&&x.name.trim().toLowerCase()===d.name.trim().toLowerCase()).length===1;
   const one=(d,isOpen,inGroup)=>{
     const left=debtLeft(d), ret=+d.returned||0, when=d.date?shortDate.format(isoToDate(d.date)):'';
     return `<div class="debt ${isOpen?'':'closed'}">
@@ -1654,6 +1716,53 @@ function renderDebts(){
   });
   armDeletes(list,id=>store.removeDebt(id),'Запись о долге удалена');
 }
+/* money I owe someone (rare): borrowed money came into an account, paying it back takes it out.
+   Not subtracted from zakat (Shafi'i), not income or spending. */
+function renderOwe(){
+  const mine=state.debts.filter(d=>d.mine), open=mine.filter(d=>debtLeft(d)>0).sort((a,b)=>String(a.date).localeCompare(String(b.date))), closed=mine.filter(d=>debtLeft(d)<=0).sort((a,b)=>(b.closedAt||0)-(a.closedAt||0));
+  const panel=$('owePanel'), list=$('oweList');panel.hidden=!mine.length;
+  $('oweTotal').textContent=open.length?moneyR(open.reduce((s,d)=>s+debtLeft(d),0)):'';
+  if(!mine.length){list.innerHTML='';return}
+  state.payAcc=state.payAcc||{};
+  const one=(d,isOpen)=>{const left=debtLeft(d), ret=+d.returned||0, when=d.date?shortDate.format(isoToDate(d.date)):'';
+    const meta=[when,ret>0&&isOpen?`отдал ${moneyR(ret)} из ${moneyR(+d.amount||0)}`:'',d.note?esc(d.note):''].filter(Boolean).join(' · ');
+    return `<div class="debt ${isOpen?'':'closed'}"><div class="head"><b>${esc(d.name)}</b><span class="left">${isOpen?moneyR(left):(+d.forgiven>0?'простили':'отдал')}</span></div>
+      ${meta?`<div class="meta">${meta}</div>`:''}
+      <div class="acts">${isOpen?(state.editing==='o-'+d.id
+        ?`<form class="inline-edit" data-opart="${esc(d.id)}"><input class="num" inputmode="decimal" placeholder="Сколько отдал" aria-label="Сколько отдал ${esc(d.name)}"><button class="primary" type="submit">Записать</button><button class="linkbtn" type="button" data-ocancel>Отмена</button></form>`
+        :`<select data-oacc="${esc(d.id)}" aria-label="С какого счёта отдал ${esc(d.name)}">${ACCS.map(([v,n])=>`<option value="${v}" ${(state.payAcc[d.id]||'tbank')===v?'selected':''}>${n}</option>`).join('')}</select><button class="primary" data-ofull="${esc(d.id)}">Отдал всё</button><button class="ghost" data-opartbtn="${esc(d.id)}">Отдал часть</button><button class="linkbtn" data-oforgive="${esc(d.id)}">Мне простили</button>`):''}
+        <button class="del" data-id="${esc(d.id)}" aria-label="Удалить запись о долге">Удалить</button></div></div>`};
+  list.innerHTML=open.map(d=>one(d,true)).join('')+(closed.length?`<details><summary>Закрытые (${closed.length})</summary>${closed.map(d=>one(d,false)).join('')}</details>`:'');
+  const payRec=(d,v)=>({type:'debt',dir:'pay',amount:Math.round(v*100)/100,acc:state.payAcc[d.id]||'tbank',date:iso(now),label:'Отдал долг: '+d.name,debt:d.id,created:Date.now()});
+  list.querySelectorAll('[data-oacc]').forEach(sel=>sel.onchange=()=>state.payAcc[sel.dataset.oacc]=sel.value);
+  list.querySelectorAll('[data-ofull]').forEach(b=>b.onclick=async()=>{const d=state.debts.find(x=>x.id===b.dataset.ofull), left=debtLeft(d);b.disabled=true;
+    try{await store.add(payRec(d,left));await store.updateDebt(d.id,{returned:+d.amount||0,closedAt:Date.now()});toast(`Отдал ${d.name} ${money(left)} с ${WNAME[state.payAcc[d.id]||'tbank']}`)}catch(e){b.disabled=false;toast('Не получилось сохранить. Попробуйте ещё раз.')}});
+  list.querySelectorAll('[data-oforgive]').forEach(b=>b.onclick=async()=>{const d=state.debts.find(x=>x.id===b.dataset.oforgive), left=debtLeft(d);
+    if(!b.dataset.armed){b.dataset.armed='1';b.textContent=`Точно простили ${money(left)}?`;setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent='Мне простили'}},4000);return}
+    b.disabled=true;try{await store.updateDebt(d.id,{forgiven:(+d.forgiven||0)+left,closedAt:Date.now()});toast(`${d.name} простил ${money(left)}`)}catch(e){b.disabled=false;toast('Не получилось сохранить. Попробуйте ещё раз.')}});
+  list.querySelectorAll('[data-opartbtn]').forEach(b=>b.onclick=()=>{state.editing='o-'+b.dataset.opartbtn;render();list.querySelector('form[data-opart] input')?.focus()});
+  list.querySelectorAll('form[data-opart]').forEach(f=>{f.querySelector('[data-ocancel]').onclick=()=>{state.editing=null;render()};
+    f.onsubmit=async e=>{e.preventDefault();const d=state.debts.find(x=>x.id===f.dataset.opart), v=parseNum(f.querySelector('input').value);
+      if(!(v>0)){toast('Введите сумму больше нуля');return}
+      const take=Math.min(v,debtLeft(d)), ret=(+d.returned||0)+take, patch={returned:ret};if(ret>=(+d.amount||0)) patch.closedAt=Date.now();
+      state.editing=null;try{await store.add(payRec(d,take));await store.updateDebt(d.id,patch);toast(`${d.name}: отдал ${money(take)}`)}catch(x){toast('Не получилось сохранить. Попробуйте ещё раз.')}}});
+  armDeletes(list,id=>store.removeDebt(id),'Запись о долге удалена');
+}
+$('oDate').value=iso(now);$('oDate').max=iso(now);
+$('oAcc').innerHTML=[...ACCS.map(([v,n])=>`<option value="${v}" ${v==='tbank'?'selected':''}>${n}</option>`),'<option value="">Не зачислять — уже учёл</option>'].join('');
+$('oweForm').onsubmit=async e=>{
+  e.preventDefault();
+  const err=$('oweErr'), name=$('oName').value.trim(), amount=parseNum($('oAmount').value);
+  if(!name){err.textContent='Впишите, у кого взяли.';err.hidden=false;$('oName').focus();return}
+  if(!(amount>0)){err.textContent='Впишите сумму больше нуля.';err.hidden=false;$('oAmount').focus();return}
+  err.hidden=true;
+  try{
+    const amt=Math.round(amount*100)/100, date=$('oDate').value||iso(now), acc=$('oAcc').value;
+    const did=await store.addDebt({name,amount:amt,returned:0,date,note:$('oNote').value.trim(),mine:true,created:Date.now()});
+    if(acc) await store.add({type:'debt',dir:'in',amount:amt,acc,date,label:'Взял в долг: '+name,...(did?{debt:did}:{}),created:Date.now()});
+    $('oName').value='';$('oAmount').value='';$('oNote').value='';$('oweAdd').open=false;toast(`Записано: должен ${name} ${money(amount)}`);
+  }catch(x){err.textContent='Не получилось сохранить. Проверьте соединение и попробуйте снова.';err.hidden=false}
+};
 $('dDate').value=iso(now);$('dDate').max=iso(now);
 $('dAcc').innerHTML=[...ACCS.map(([v,n])=>`<option value="${v}" ${v==='cash'?'selected':''}>${n}</option>`),'<option value="">Не списывать — уже учёл</option>'].join('');
 $('debtForm').onsubmit=async e=>{
@@ -1769,7 +1878,7 @@ function refreshToday(){
   if(iso(t)===iso(now)) return;
   const wasCurrent=isCurrentMonth();
   now=t;
-  $('date').max=iso(now);$('dDate').max=iso(now);
+  $('date').max=iso(now);$('dDate').max=iso(now);$('oDate').max=iso(now);$('oDate').value=iso(now);
   if(!dateTouched) $('date').value=iso(now);
   dateLabel();
   $('dDate').value=iso(now);
@@ -1923,7 +2032,7 @@ $('restoreFile').onchange=async e=>{
 $('exportBtn').onclick=async()=>{
   const rows=inMonth().sort((a,b)=>a.date.localeCompare(b.date));
   const q=s=>`"${String(s??'').replace(/"/g,'""')}"`;
-  const csv='\ufeffДата;Тип;Раздел;Категория;Счёт;Сумма;Комментарий\n'+rows.map(i=>{const t=typeOf(i);return [i.date,t==='in'?'Доход':t==='tr'?'Перевод':t==='debt'?(i.dir==='back'?'Вернули долг':'Дал в долг'):'Расход',t==='tr'?'':isTrip(i)?'Командировка':'Личное',q(t==='tr'?'':nameOf(i)),q(t==='tr'?`${WNAME[i.from]} → ${WNAME[i.to]}`:WNAME[i.acc]||''),String(i.amount).replace('.',','),q(i.note)].join(';')}).join('\n');
+  const csv='\ufeffДата;Тип;Раздел;Категория;Счёт;Сумма;Комментарий\n'+rows.map(i=>{const t=typeOf(i);return [i.date,t==='in'?'Доход':t==='tr'?'Перевод':t==='debt'?({back:'Вернули долг',in:'Взял в долг',pay:'Отдал долг'}[i.dir]||'Дал в долг'):'Расход',t==='tr'?'':isTrip(i)?'Командировка':'Личное',q(t==='tr'?'':nameOf(i)),q(t==='tr'?`${WNAME[i.from]} → ${WNAME[i.to]}`:WNAME[i.acc]||''),String(i.amount).replace('.',','),q(i.note)].join(';')}).join('\n');
   await saveFile(`moi-rashody-${monthKey()}.csv`,csv,'text/csv');
 };
 
