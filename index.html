@@ -104,10 +104,15 @@ button{cursor:pointer}
 .stat b{font-family:var(--f-num);font-weight:500;font-size:17px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .stat small{font-size:12px;color:var(--muted)}
 .stat.wide{grid-column:1/-1}
-.panel.mcard{gap:0;padding:4px 14px 10px}
+.panel.mcard{gap:0;padding:4px 14px 12px}
+.mcard .mrow>span{display:flex;align-items:center;gap:8px}
+.mcard .mrow>span::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--good)}
+.mcard .mrow:nth-child(2)>span::before{background:var(--bad)}
+.mcard .mrow.mtotal{margin:8px -8px 0;padding:10px 8px 10px 24px;border-radius:12px;background:var(--bg)}
+.mcard .mtotal>span::before{display:none}
 .mcard .mrow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
 .mcard .mrow b{font-family:var(--f-num);font-weight:500;font-size:16px;font-variant-numeric:tabular-nums;white-space:nowrap}
-.mcard .mtotal{border-bottom:0;padding-bottom:2px}
+.mcard .mtotal{border-bottom:0}
 .mcard .mtotal span{font-weight:600}
 .mcard .mtotal b{font-size:19px;font-weight:600}
 .mcard small{font-size:11px;color:var(--muted);line-height:1.35}
@@ -587,8 +592,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     <section class="panel mcard" aria-label="Месяц">
       <div class="mrow"><span>Доходы</span><b class="pos" id="incomeTotal">0 ₽</b></div>
       <div class="mrow"><span>Расходы</span><b class="neg" id="allOut">0 ₽</b></div>
-      <div class="mrow mtotal"><span>Остаток за месяц</span><b id="balance">0 ₽</b></div>
-      <small>доходы минус все расходы, вместе с брокером, копильником и садакой</small>
+      <div class="mrow mtotal"><span>Разница</span><b id="balance">0 ₽</b></div>
     </section>
     <section id="breakdown" aria-labelledby="catH" class="panel bdwrap">
       <h2 id="catH">Куда ушли деньги</h2>
