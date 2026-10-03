@@ -104,6 +104,13 @@ button{cursor:pointer}
 .stat b{font-family:var(--f-num);font-weight:500;font-size:17px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .stat small{font-size:12px;color:var(--muted)}
 .stat.wide{grid-column:1/-1}
+.mcard{gap:0;padding:6px 16px 14px}
+.mcard .mrow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:15px}
+.mcard .mrow b{font-family:var(--f-num);font-weight:500;font-size:19px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mcard .mtotal{border-bottom:0;padding-bottom:4px}
+.mcard .mtotal span{font-weight:600}
+.mcard .mtotal b{font-size:24px;font-weight:600}
+.mcard small{font-size:12px;color:var(--muted)}
 #tripCard .stat{border:0;background:none;padding:0}
 .money{display:flex;flex-direction:column;gap:8px}
 .moneyhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
@@ -121,7 +128,8 @@ button{cursor:pointer}
 .wallet.unset b{color:var(--accent);font-family:var(--f-body);font-size:13px;font-weight:600}
 .wallet-edit{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
 .wmodal{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 14vh) 16px 16px;overflow-y:auto;overscroll-behavior:contain}
-.wmodal:has(.zform){padding-top:calc(env(safe-area-inset-top,0px) + 4vh)}
+.wmodal:has(.zform){padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
+.wmodal>.zform{margin:auto 0;border-radius:20px}
 .wmodal>.wallet-edit,.wmodal>.recon{position:relative;width:min(440px,100%);box-shadow:0 12px 40px rgb(0 0 0 / .45);animation:up .18s ease-out}
 .wmodal>.wallet-edit b{font-size:17px}
 .wallet-edit .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -203,27 +211,18 @@ input::placeholder{color:var(--muted)}
 /* List */
 .seg3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .seg3 button{font-size:13px;padding:8px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.listsum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-size:12px;color:var(--muted);padding-bottom:10px;border-bottom:1px solid var(--line)}
-.listsum>span{display:flex;flex-direction:column;gap:2px;min-width:0}
-.listsum>span:nth-child(2){text-align:center}
-.listsum>span:last-child{text-align:right}
-.listsum b{font-family:var(--f-num);font-weight:500;font-size:15px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.listsum .pos{color:var(--good)}
-.listsum .neg{color:var(--bad)}
-.listsum:empty{display:none}
 .listhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .filterchip{font-size:13px;border:1px solid var(--line);border-radius:99px;padding:4px 10px;background:var(--accent-soft);color:var(--ink);display:inline-flex;gap:6px;align-items:center}
 .day{display:flex;flex-direction:column}
 .dayhead{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted);padding-block:10px 6px;border-bottom:1px solid var(--line)}
 /* Записи: each day is its own card, the date stands out */
 .recs{display:flex;flex-direction:column;gap:12px;min-width:0}
-.recs .listsum{display:grid;padding:12px 14px;border-bottom:1px solid var(--line)}
 .recs #list{display:flex;flex-direction:column;gap:12px}
 .recs .day{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:4px 16px 2px}
 .recs .dayhead{align-items:baseline;font-size:15px;font-weight:600;color:var(--ink);padding-block:12px 10px}
 .recs .dayhead>span:first-child::first-letter{text-transform:uppercase}
-.recs .dayhead .num{font-size:14px;font-weight:500;color:var(--muted)}
-.recs .listsum:empty{display:none}
+.recs .dayhead .num{font-size:14px;font-weight:500;color:var(--muted);display:flex;gap:10px}
+.recs .dayhead .num .pos{color:var(--good)}
 .recs .empty{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
 .item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding-block:10px;border-bottom:1px solid var(--line)}
 .item:last-child{border-bottom:0}
@@ -530,7 +529,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     <div class="seg seg3" id="scopeFilter" role="group" aria-label="Чьи деньги"></div>
     <div class="chips" id="accFilter" role="group" aria-label="Фильтр по счёту"></div>
     <section class="recs" aria-label="Записи за месяц">
-      <div class="listsum panel" id="listSum"></div>
       <div class="listhead" id="listHead"><span id="filterBox"></span></div>
       <div id="list"></div>
     </section>
@@ -586,21 +584,11 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
       <div class="title" id="sTitle">—</div>
       <button class="iconbtn" id="sNext" aria-label="Следующий месяц">›</button>
     </div>
-    <section aria-label="Месяц">
-      <div class="stats">
-        <div class="stat"><span>Доходы</span><b id="incomeTotal">0 ₽</b></div>
-        <div class="stat"><span>Всего ушло</span><b id="allOut">0 ₽</b></div>
-        <div class="stat wide"><span>Остаток за месяц</span><b id="balance">0 ₽</b><small>доходы минус все расходы, вместе с брокером, копильником и садакой</small></div>
-      </div>
-    </section>
-    <section class="panel" id="tripCard" aria-labelledby="tripH">
-      <h2 id="tripH">Командировка</h2>
-      <div class="stat wide" id="tripStat"></div>
-    </section>
-    <section class="panel" aria-labelledby="ruleH">
-      <h2 id="ruleH">Брокер и лимит</h2>
-      <div class="rule" id="brokerBox"></div>
-      <div class="rule" id="budgetBox"></div>
+    <section class="panel mcard" aria-label="Месяц">
+      <div class="mrow"><span>Доходы</span><b class="pos" id="incomeTotal">0 ₽</b></div>
+      <div class="mrow"><span>Всего ушло</span><b class="neg" id="allOut">0 ₽</b></div>
+      <div class="mrow mtotal"><span>Остаток за месяц</span><b id="balance">0 ₽</b></div>
+      <small>доходы минус все расходы, вместе с брокером, копильником и садакой</small>
     </section>
     <section id="breakdown" aria-labelledby="catH" class="panel bdwrap">
       <h2 id="catH">Куда ушли деньги</h2>
@@ -611,6 +599,15 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     <section id="incomeBreakdown" aria-labelledby="incH" class="panel bdwrap">
       <h2 id="incH">Откуда пришли деньги</h2>
       <div class="bd" id="bdIn"><div class="bars" id="barsIn"></div></div>
+    </section>
+    <section class="panel" id="tripCard" aria-labelledby="tripH">
+      <h2 id="tripH">Командировка</h2>
+      <div class="stat wide" id="tripStat"></div>
+    </section>
+    <section class="panel" aria-labelledby="ruleH">
+      <h2 id="ruleH">Брокер и лимит</h2>
+      <div class="rule" id="brokerBox"></div>
+      <div class="rule" id="budgetBox"></div>
     </section>
     <details class="more panel-ish" id="cmpBox">
       <summary>Сравнение месяцев</summary>
@@ -848,7 +845,7 @@ function renderLedger(){
   $('total').textContent=moneyR(inLimit);
   $('incomeTotal').textContent=moneyR(earned);
   $('allOut').textContent=moneyR(spent);
-  const b=$('balance');b.textContent=(bal>0?'+':bal<0?'−':'')+moneyR(Math.abs(bal));b.className='';
+  const b=$('balance');b.textContent=(bal>0?'+':bal<0?'−':'')+moneyR(Math.abs(bal));b.className=bal>0?'pos':bal<0?'neg':'';
   const tripAlert=renderTrip(trip)||'';
   renderTripLine();
   const brokerAlert=renderBroker(inc,out)||'';
@@ -1656,9 +1653,6 @@ function renderList(items){
   const touches=i=>!af||(typeOf(i)==='tr'?(i.from===af||i.to===af):(i.acc===af||(af==='broker'&&catOf(i.cat).id==='broker'&&typeOf(i)==='out')||(af==='piggy'&&catOf(i.cat).id==='invest'&&typeOf(i)==='out')));
   const inScope=i=>!sf||(sf==='trip'?isTrip(i):!isTrip(i));
   const shown=items.filter(i=>(!f||(!['tr','debt'].includes(typeOf(i))&&catOf(i.cat).id===f))&&touches(i)&&inScope(i)).sort(byNewest);
-  const sOut=sum(shown.filter(i=>typeOf(i)==='out')), sIn=sum(shown.filter(i=>typeOf(i)==='in'));
-  const diff=Math.round((sIn-sOut)*100)/100;
-  $('listSum').innerHTML=state.ready&&(sOut||sIn)?`<span>Доходы<b class="pos">${sIn?'+'+money(sIn):'0\u00a0₽'}</b></span><span>Расходы<b>${sOut?'−'+money(sOut):'0\u00a0₽'}</b></span><span>Разница<b class="${diff<0?'neg':'pos'}">${diff>0?'+':diff<0?'−':''}${money(Math.abs(diff))}</b></span>`:'';
   if(!state.ready){list.innerHTML='<div class="empty"><p>Загружаю записи…</p></div>';return}
   if(!shown.length){list.innerHTML=`<div class="empty"><p>${f||af||sf?'Записей с таким фильтром в этом месяце нет.':'В этом месяце записей нет.'}</p></div>`;return}
   const groups={};shown.forEach(i=>(groups[i.date]??=[]).push(i));
