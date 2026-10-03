@@ -111,7 +111,8 @@ button{cursor:pointer}
 .wallet small{font-size:11px;color:var(--muted)}
 .wallet.unset b{color:var(--accent);font-family:var(--f-body);font-size:13px;font-weight:600}
 .wallet-edit{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
-.wmodal{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 14vh) 16px 16px}
+.wmodal{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 14vh) 16px 16px;overflow-y:auto;overscroll-behavior:contain}
+.wmodal:has(.zform){padding-top:calc(env(safe-area-inset-top,0px) + 4vh)}
 .wmodal>.wallet-edit,.wmodal>.recon{position:relative;width:min(440px,100%);box-shadow:0 12px 40px rgb(0 0 0 / .45);animation:up .18s ease-out}
 .wmodal>.wallet-edit b{font-size:17px}
 .wallet-edit .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -246,11 +247,17 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .zk .zl>span{min-width:0}
 .zk .zl small{display:block;font-size:12px;color:var(--muted)}
 .zk .zl>b{font-family:var(--f-num);font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
-.zk .zl>b small{display:inline;font-family:inherit}
+.zk .zl>b small{display:block;font-family:inherit}
 .zk .zl.big>b{font-size:22px}
 .zk .zl .neg{color:var(--bad)}
-.zk .zs{margin:0;font-size:12px;color:var(--muted);line-height:1.45}
-.zk .zs b{color:var(--ink);font-weight:500}
+.zs{margin:0;font-size:12px;color:var(--muted);line-height:1.45}
+.zs b{color:var(--ink);font-weight:500}
+.sheet-body .zs{margin-top:12px}
+.zpast{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:0;display:flex;flex-direction:column;gap:8px;font-size:13px}
+.zpast legend{font-size:12px;color:var(--muted);padding:0 4px}
+.zform .zpast label{display:flex;flex-direction:row;align-items:flex-start;gap:8px;font-size:13px;color:var(--ink)}
+.zform .zpast input{width:auto;flex:none;margin-top:2px}
+.debt .head .tag{display:inline-block;white-space:nowrap;overflow-wrap:normal;vertical-align:middle}
 .zk .acts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .zk .zwarn{display:flex;flex-direction:column;gap:8px;border-left:3px solid var(--warn);padding:2px 0 2px 10px;font-size:13px}
 .zk .zwarn p{margin:0}
@@ -590,7 +597,7 @@ const fmt=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2});
 /* kopecks are shown everywhere when there are any: 12 000,50 ₽; whole sums stay 12 000 ₽ */
 const fmt0=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0});
 const fmt2=new Intl.NumberFormat('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
-const money=n=>{const v=Math.round(n*100)/100;return (Number.isInteger(v)?fmt0:fmt2).format(v)+' ₽'};
+const money=n=>{const v=Math.round(n*100)/100;return (Number.isInteger(v)?fmt0:fmt2).format(v)+'\u00a0₽'};
 const moneyR=money;
 const monthName=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'});
 const dayName=new Intl.DateTimeFormat('ru-RU',{weekday:'short',day:'numeric',month:'long'});
@@ -636,16 +643,17 @@ function localStore(){
 function cloudStore(db,uid){
   const ledger=db.doc(`data/users/${uid}/ledger`);
   const col=ledger.collection('expenses'), dcol=ledger.collection('debts');
-  let items=[],debts=[],settings={},settingsLoaded=false,itemsLoaded=false,cb=()=>{};
-  const emit=()=>cb({items,debts,settings,settingsLoaded,itemsLoaded});
+  let items=[],debts=[],settings={},settingsLoaded=false,itemsLoaded=false,debtsLoaded=false,settingsFresh=false,cb=()=>{};
+  /* synced: records, debts and settings all came from the server (not the offline copy) — zakat saves a year only then */
+  const emit=()=>cb({items,debts,settings,settingsLoaded,itemsLoaded,synced:itemsLoaded&&debtsLoaded&&settingsFresh});
   const fail=()=>toast('Не удалось обновить данные. Обновите страницу.');
   return {
     kind:'cloud',
     subscribe(fn){
       cb=fn;
       col.onSnapshot(s=>{items=s.docs.map(d=>({...d.data(),id:d.id}));if(!s.metadata?.fromCache)itemsLoaded=true; emit()},fail);
-      dcol.onSnapshot(s=>{debts=s.docs.map(d=>({...d.data(),id:d.id})); emit()},fail);
-      ledger.onSnapshot(s=>{if(s.metadata?.fromCache&&!s.exists)return;settings=s.exists?{...s.data()}:{};settingsLoaded=true; emit()},()=>{});
+      dcol.onSnapshot(s=>{debts=s.docs.map(d=>({...d.data(),id:d.id}));if(!s.metadata?.fromCache)debtsLoaded=true; emit()},fail);
+      ledger.onSnapshot(s=>{if(s.metadata?.fromCache&&!s.exists)return;settings=s.exists?{...s.data()}:{};settingsLoaded=true;if(!s.metadata?.fromCache)settingsFresh=true; emit()},()=>{});
     },
     async add(it){const ref=col.doc();await ref.set(it);return ref.id},
     async update(id,p){await col.doc(id).update(p)},
@@ -675,7 +683,7 @@ async function initStore(){
     :'Записи хранятся только в этом браузере на этом устройстве. Раз в месяц скачивайте резервную копию.';
   $('restoreBtn').hidden=s.kind!=='local';
   let migrated=false;
-  s.subscribe(d=>{state.items=d.items||[];state.debts=d.debts||[];state.settings=d.settings||{};state.ready=true;render();
+  s.subscribe(d=>{state.items=d.items||[];state.debts=d.debts||[];state.settings=d.settings||{};state.synced=d.synced!==false;state.ready=true;render();
     if(migrated||d.settingsLoaded===false) return;
     migrated=true;
     const st=state.settings, patch={};
@@ -736,7 +744,7 @@ function renderLedger(){
   const zakatAlert=renderZakat()||'';
   /* only things that need an action today go above the form */
   const al=$('alerts');al.innerHTML=zakatAlert+tripAlert+brokerAlert;
-  if($('zPay')) $('zPay').onclick=()=>zPaySheet(zLedger(zset().years,zset().extra).owed);
+  if($('zPay')) $('zPay').onclick=()=>zPaySheet(zLedger(zset()).owed);
   if($('zDipGo')) $('zDipGo').onclick=()=>{setTab('stats');$('zakatBox')?.scrollIntoView?.({block:'start'})};
   al.querySelectorAll('[data-sfrom]').forEach(x=>x.onclick=()=>{state.xfer={from:x.dataset.sfrom,to:x.dataset.sto,amount:+x.dataset.sv};state.xferOpen=true;setTab('money');$('xForm')?.scrollIntoView?.({block:'center'})});
   if($('oPay')) $('oPay').onclick=e=>{state.xfer={from:'vtb',to:'broker',amount:+e.currentTarget.dataset.v};state.xferOpen=true;setTab('money');$('xForm')?.scrollIntoView?.({block:'center'})};
@@ -1008,13 +1016,15 @@ function bindXfer(){
    one date for everything (money that came in during the year is paid early); 2.5% of all accounts, the broker account at its full value,
    reliable debts owed to him every year; doubtful debts count toward nisab but their zakat is paid when the money comes back, for every year;
    his own debts are not subtracted, unpaid zakat of past years is. All of it lives in settings.zakat and on debts (doubtful) — no record changes. */
-const ZAKAT_RATE=0.025, NISAB_G={silver:595,gold:85}, METAL={silver:'серебра',gold:'золота'};
+const ZAKAT_RATE=0.025, NISAB_G={silver:595,gold:85}, METAL={silver:'серебра',gold:'золота'}, METAL_BY={silver:'серебру',gold:'золоту'};
 const ZAKAT_ACCS=['tbank','sber','vtb','pocket','cash','piggy'];
 const r2=n=>Math.round(n*100)/100;
 const zset=()=>state.settings.zakat||{};
+const zMetal=z=>z.metal==='gold'?'gold':'silver';
 const addDays=(s,n)=>{const d=isoToDate(s);d.setDate(d.getDate()+n);return iso(d)};
+const NB=s=>String(s).replace(/ /g,' ');
 const fullDate=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric'});
-const gDate=s=>fullDate.format(isoToDate(s)).replace(' г.','');
+const gDate=s=>NB(fullDate.format(isoToDate(s)).replace(' г.',''));
 /* Hijri dates through the phone's own calendar (Umm al-Qura), no internet needed */
 const HCAL=(()=>{for(const c of ['islamic-umalqura','islamic','islamic-civil']){try{if(/^islamic/.test(new Intl.DateTimeFormat('en-u-ca-'+c,{timeZone:'UTC'}).resolvedOptions().calendar))return c}catch(e){}}return ''})();
 const hNum=HCAL?new Intl.DateTimeFormat('en-u-ca-'+HCAL,{year:'numeric',month:'numeric',day:'numeric',timeZone:'UTC'}):null;
@@ -1022,7 +1032,7 @@ const hLong=HCAL?new Intl.DateTimeFormat('ru-RU-u-ca-'+HCAL,{year:'numeric',mont
 const utcNoon=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(Date.UTC(y,m-1,d,12))};
 function hParts(s){const o={};for(const p of hNum.formatToParts(utcNoon(s)))if(p.type==='year'||p.type==='month'||p.type==='day')o[p.type[0]]=parseInt(p.value,10);return o}
 const hijri=s=>hLong?hLong.format(utcNoon(s)).replace(/\s*(г\.)?\s*(AH|н\. ?э\.|ДХ)?$/,'').trim():'';
-const bothDates=s=>hijri(s)?`${hijri(s)} (${gDate(s)})`:gDate(s);
+const bothDates=s=>hijri(s)?`${NB(hijri(s))} (${gDate(s)})`:gDate(s);
 /* end of the lunar year: the same Hijri day a year later; if that month has no such day — its last day (paying a day early is fine) */
 function hawlEnd(s){
   if(!hNum) return addDays(s,354);
@@ -1031,98 +1041,129 @@ function hawlEnd(s){
     if(q.y>p.y+1||(q.y===p.y+1&&(q.m>p.m||(q.m===p.m&&q.d>=p.d)))) return q.y===p.y+1&&q.m===p.m?t:addDays(s,k-1)}
   return addDays(s,354);
 }
-const zNisab=z=>NISAB_G[z.metal==='gold'?'gold':'silver']*(+z.price||0);
+/* nisab and every comparison with it in whole kopecks: no rounding up, no float noise */
+const zNisab=z=>r2(NISAB_G[zMetal(z)]*(+z.price||0));
+const atNisab=(v,n)=>n>0&&Math.round(v*100)>=Math.round(n*100);
 const zPays=()=>state.items.filter(i=>typeOf(i)==='out'&&catOf(i.cat).id==='zakat');
-/* zakat that fell due before `dueBefore` (lunar years + zakat from debts that came back) against payments made up to `paidUpTo` */
-function zLedger(years,extra,dueBefore,paidUpTo){
+/* zakat that fell due before day D: the lunar years plus zakat from debts that came back */
+function zDue(z,D){
   let due=0;
-  for(const y of years||[]) if(!dueBefore||y.due<dueBefore) due+=+y.amount||0;
-  for(const x of extra||[]) if(!dueBefore||x.date<dueBefore) due+=+x.amount||0;
-  const paid=sum(zPays().filter(i=>!paidUpTo||(typeof i.date==='string'&&i.date<=paidUpTo)));
-  return {due:r2(due),paid:r2(paid),owed:r2(Math.max(0,due-paid)),adv:r2(Math.max(0,paid-due))};
+  for(const y of z.years||[]) if(!D||y.due<D) due+=+y.amount||0;
+  for(const x of z.extra||[]) if(!D||x.date<D) due+=+x.amount||0;
+  return r2(due);
 }
-/* money on the accounts on any day since the app knows the balances: the typed amounts plus every record after them */
-function zMoney(){
+function zLedger(z){const due=zDue(z),paid=r2(sum(zPays()));return {due,paid,owed:r2(Math.max(0,due-paid)),adv:r2(Math.max(0,paid-due))}}
+/* running totals by date, read with a binary search */
+function cumBy(map){const ds=Object.keys(map).sort(),cs=[];let c=0;for(const d of ds){c+=map[d];cs.push(c)}
+  return D=>{let lo=0,hi=ds.length;while(lo<hi){const m=(lo+hi)>>1;if(ds[m]<=D)lo=m+1;else hi=m}return lo?cs[lo-1]:0}}
+/* everything zakat needs to know about any past day, built once per change of records, debts or balances */
+let zMemo=null;
+function zModel(){
+  const key=[state.items,state.items.length,state.debts,state.debts.length,state.settings.wallets,state.settings.zakat?.broker,iso(now)];
+  if(zMemo&&zMemo.key.every((x,i)=>x===key[i])) return zMemo.m;
+  const m=zBuild();zMemo={key,m};return m;
+}
+function zBuild(){
   const ws=state.settings.wallets||{}, z=zset(), bases=[], missing=[];
   for(const id of ZAKAT_ACCS){const w=ws[id];if(w&&typeof w.amount==='number')bases.push([id,w]);else missing.push(id)}
-  const bo=z.broker&&typeof z.broker.amount==='number'?z.broker:null, bw=bo||ws.broker;
-  if(bw&&typeof bw.amount==='number')bases.push(['broker',bw]);else missing.push('broker');
+  /* the broker value typed in the zakat settings is used only while it is newer than the one on «Деньги» */
+  const wb=ws.broker&&typeof ws.broker.amount==='number'?ws.broker:null;
+  const bo=z.broker&&typeof z.broker.amount==='number'&&(!wb||(z.broker.at||0)>=(wb.at||0))?z.broker:null, bw=bo||wb;
+  if(bw)bases.push(['broker',bw]);else missing.push('broker');
   if(!bases.length) return null;
-  let base=0,bBase=0,from='';const delta={},bDelta={};
+  /* each account on day D: the typed amount, minus records already in it that are dated after D, plus newer records dated up to D */
+  let base=0,bBase=0,first='';const delta={},bDelta={};
   for(const [id,w] of bases){
-    base+=w.amount;if(id==='broker')bBase=w.amount;
-    const d=iso(new Date(w.at||0));if(d>from)from=d;
+    const t=w.at||0;let b=w.amount;
     for(const i of state.items){
-      if((i.created||0)<=(w.at||0)||typeof i.date!=='string')continue;
+      if(typeof i.date!=='string')continue;
       const v=walletDelta(i,id);if(!v)continue;
+      if((i.created||0)<=t)b-=v;
       delta[i.date]=(delta[i.date]||0)+v;if(id==='broker')bDelta[i.date]=(bDelta[i.date]||0)+v;
+      if(!first||i.date<first)first=i.date;
     }
+    base+=b;if(id==='broker')bBase=b;
+    const d=iso(new Date(t));if(!first||d<first)first=d;
   }
-  const dates=Object.keys(delta).sort(), bDates=Object.keys(bDelta).sort();
-  const run=(b,ds,m,D)=>{let v=b;for(const d of ds){if(d>D)break;v+=m[d]}return v};
-  return {from,missing,brokerOwn:!!bo,at:D=>run(base,dates,delta,D),broker:D=>bases.some(([id])=>id==='broker')?run(bBase,bDates,bDelta,D):0};
-}
-/* what others owed him at the end of day D: debts given minus what came back or was forgiven, split by the «сомнительный» mark */
-function debtsAt(D){
-  const k=n=>String(n||'').trim().toLowerCase(), g={};
-  for(const d of state.debts){if(!d.date||d.date>D)continue;const x=g[k(d.name)]||(g[k(d.name)]={amt:0,list:[]});x.amt+=+d.amount||0;x.list.push(d)}
+  /* debts owed to him, loan by loan: returns and forgiveness go to their own loan (older records by name, oldest loan first),
+     never more than the loan really got back, so a deleted loan's records can't eat a new one */
+  const k=n=>String(n||'').trim().toLowerCase();
+  const loans=state.debts.map(d=>({d,id:d.id,name:k(d.name),dd:d.date||iso(new Date(d.created||0)),amount:+d.amount||0,cap:Math.min(+d.amount||0,(+d.returned||0)+(+d.forgiven||0)),got:[],used:0}));
+  const byId=Object.fromEntries(loans.map(l=>[l.id,l])), recs=[];
   for(const i of state.items){
-    if(typeof i.date!=='string'||i.date>D)continue;
+    if(typeof i.date!=='string')continue;
     let n=null;
     if(typeOf(i)==='debt'&&i.dir==='back') n=String(i.label||'').replace(/^Вернул долг:\s*/,'');
     else if(typeOf(i)==='out'&&catOf(i.cat).id==='sadaqa'&&/^прощён долг: /.test(i.note||'')) n=i.note.replace(/^прощён долг: /,'');
-    if(n!==null&&g[k(n)]) g[k(n)].amt-=+i.amount||0;
+    else continue;
+    recs.push({date:i.date,v:+i.amount||0,debt:i.debt,name:k(n),c:i.created||0});
   }
-  let rel=0,doubt=0;const ids=[];
-  for(const x of Object.values(g)){
-    const left=Math.max(0,x.amt);if(left<0.01)continue;
-    const w=x.list.reduce((s,d)=>s+(+d.amount||0),0)||1;
-    for(const d of x.list){const v=left*(+d.amount||0)/w;if(d.doubtful){doubt+=v;ids.push(d.id)}else rel+=v}
-  }
-  return {rel:r2(rel),doubt:r2(doubt),ids};
+  recs.sort((a,b)=>a.date.localeCompare(b.date)||a.c-b.c);
+  const give=(l,date,v)=>{v=Math.min(v,l.cap-l.used);if(v>0.005){l.got.push({date,v});l.used+=v;return v}return 0};
+  for(const r of recs) if(r.debt&&byId[r.debt]) give(byId[r.debt],r.date,r.v);
+  const byDate=(a,b)=>a.dd.localeCompare(b.dd);
+  for(const r of recs){if(r.debt&&byId[r.debt])continue;let left=r.v;
+    for(const l of loans.filter(l=>l.name===r.name&&l.dd<=r.date).sort(byDate)){if(left<=0.005)break;left-=give(l,r.date,left)}}
+  /* what the records don't explain (typed by hand) goes on the day the loan was closed, or today */
+  for(const l of loans) give(l,l.d.closedAt?iso(new Date(l.d.closedAt)):iso(now),l.cap-l.used);
+  const dTot={};
+  for(const l of loans){dTot[l.dd]=(dTot[l.dd]||0)+l.amount;for(const g of l.got)dTot[g.date]=(dTot[g.date]||0)-g.v;if(!first||l.dd<first)first=l.dd}
+  const debtsAt=D=>{let rel=0,doubt=0;const ids=[];
+    for(const l of loans){if(l.dd>D)continue;const v=l.amount-l.got.reduce((s,g)=>g.date<=D?s+g.v:s,0);if(v<0.005)continue;
+      if(l.d.doubtful){doubt+=v;ids.push(l.id)}else rel+=v}
+    return {rel:r2(rel),doubt:r2(doubt),ids}};
+  const pay={};for(const i of zPays()) if(typeof i.date==='string') pay[i.date]=(pay[i.date]||0)+(+i.amount||0);
+  const W=cumBy(delta), BW=cumBy(bDelta), DT=cumBy(dTot), P=cumBy(pay), hasB=bases.some(([id])=>id==='broker');
+  return {from:first,missing,brokerOwn:!!bo,bo,
+    at:D=>base+W(D), broker:D=>hasB?bBase+BW(D):0, debtsAt, paid:D=>P(D),
+    /* money + all debts + zakat already paid (paid zakat is either last year's debt or given early — both count back) */
+    pool0:D=>base+W(D)+DT(D)+P(D)};
 }
-/* the zakat sum on day E: everything for the nisab check; reliable money for the 2.5% */
-/* dueBefore: zakat that fell due before this day counts as unpaid debt (for «now» — everything due up to today) */
+/* everything for the nisab check on day D: money + all debts − zakat still owed + zakat given early */
+const zPool=(z,M,D)=>M.pool0(D)-zDue(z,D);
+/* the zakat sum on day E. dueBefore: zakat that fell due before this day counts as unpaid debt (for «now» — up to today) */
 function zCalc(E,z,M,dueBefore){
-  const nisab=zNisab(z), D=E<M.from?M.from:E;
-  const tot=M.at(D), broker=M.broker(D), db=debtsAt(E), L=zLedger(z.years,z.extra,dueBefore||E,E);
-  const forNisab=tot+db.rel+db.doubt-L.owed+L.adv, base=Math.max(0,tot+db.rel-L.owed+L.adv), ok=nisab>0&&forNisab>=nisab;
-  return {due:E,nisab:r2(nisab),price:+z.price,metal:z.metal==='gold'?'gold':'silver',cash:r2(tot-broker),broker:r2(broker),rel:db.rel,doubt:db.doubt,ids:ok?db.ids:[],
-    owedPrev:L.owed,adv:L.adv,forNisab:r2(forNisab),base:r2(base),amount:ok?r2(base*ZAKAT_RATE):0,below:!ok,approx:E<M.from};
+  const nisab=zNisab(z), tot=M.at(E), broker=M.broker(E), db=M.debtsAt(E), due=zDue(z,dueBefore||E), paid=M.paid(E);
+  const owed=Math.max(0,due-paid), adv=Math.max(0,paid-due);
+  const forNisab=tot+db.rel+db.doubt-owed+adv, base=Math.max(0,tot+db.rel-owed+adv), ok=atNisab(forNisab,nisab);
+  return {due:E,nisab,price:+z.price,metal:zMetal(z),cash:r2(tot-broker),broker:r2(broker),rel:db.rel,doubt:db.doubt,ids:ok?db.ids:[],
+    owedPrev:r2(owed),adv:r2(adv),forNisab:r2(forNisab),base:r2(base),amount:ok?r2(base*ZAKAT_RATE):0,below:!ok,approx:E<M.from};
 }
-const zPool=(z,M,D)=>zCalc(D,z,M).forNisab;
+/* Shafi'i: the money must stay at nisab the whole year. First day in this year it was lower, and when it got back.
+   «Ошибка в записях» hides only the drop it was pressed on (dipOk.upTo); older versions kept a plain date — the whole year */
+function zDip(z,M){
+  if(!z.start) return null;
+  const T=iso(now), end=hawlEnd(z.start), nisab=zNisab(z), last=addDays(end,-1)<T?addDays(end,-1):T;
+  const ok=z.dipOk, skipTo=ok&&typeof ok==='object'&&ok.start===z.start?ok.upTo:(ok===z.start?last:null);
+  let D=z.start<M.from?M.from:z.start;if(skipTo&&skipTo>=D)D=addDays(skipTo,1);
+  for(;D<=last;D=addDays(D,1)){
+    const v=zPool(z,M,D);if(atNisab(v,nisab))continue;
+    let back=null;for(let E=addDays(D,1);E<=T;E=addDays(E,1)) if(atNisab(zPool(z,M,E),nisab)){back=E;break}
+    return {d:D,v:r2(v),back,ended:end<=T};
+  }
+  return null;
+}
 /* moves the year forward when its end has come: saves what was due (once), starts the next year on the same Hijri date.
-   Below nisab on that day → no zakat, and the next year starts on the first day the money reaches nisab again. */
-function zRoll(){
-  const z0=zset(), M=zMoney(), T=iso(now);
+   A drop below nisab inside that year must be settled first. Below nisab on the due day → no zakat, the next year starts
+   on the first day the money reaches nisab again. */
+function zRoll(M){
+  const z0=zset(), T=iso(now);
   if(!M||!(z0.price>0)||!(z0.start||z0.wait)) return null;
   const z={...z0,years:[...(z0.years||[])]};let changed=false;
   for(let g=0;g<8;g++){
     if(z.start){
       const E=hawlEnd(z.start);if(E>T)break;
       let y=z.years.find(x=>x.due===E);
-      if(!y){y={...zCalc(E,z,M),start:z.start,at:Date.now()};z.years.push(y)}
+      if(!y){if(zDip(z,M))break;y={...zCalc(E,z,M),start:z.start,at:Date.now()};z.years.push(y)}
       if(y.below){z.wait=E;delete z.start}else z.start=E;
       delete z.dipOk;changed=true;continue;
     }
-    /* waiting for the money to reach nisab: the year starts on that day by itself */
     const nisab=zNisab(z);let found=null;
-    for(let D=z.wait<M.from?M.from:z.wait;D<=T;D=addDays(D,1)) if(zPool(z,M,D)>=nisab){found=D;break}
+    for(let D=z.wait<M.from?M.from:z.wait;D<=T;D=addDays(D,1)) if(atNisab(zPool(z,M,D),nisab)){found=D;break}
     if(!found)break;
     z.start=found;delete z.wait;changed=true;
   }
   return changed?z:null;
-}
-/* Shafi'i: the money must stay at nisab the whole year. First day in this year it was lower, and when it got back */
-function zDip(z,M){
-  if(!z.start||z.dipOk===z.start) return null;
-  const T=iso(now), end=hawlEnd(z.start), nisab=zNisab(z), last=addDays(end,-1)<T?addDays(end,-1):T;
-  for(let D=z.start<M.from?M.from:z.start;D<=last;D=addDays(D,1)){
-    const v=zPool(z,M,D);if(v>=nisab)continue;
-    let back=null;for(let E=addDays(D,1);E<=T;E=addDays(E,1)) if(zPool(z,M,E)>=nisab){back=E;break}
-    return {d:D,v,back};
-  }
-  return null;
 }
 /* paid zakat goes to the oldest unpaid year first */
 function zHistory(z){
@@ -1139,16 +1180,20 @@ function zDebtBack(d,v){
   saveSettings({zakat:{...z,extra:[...(z.extra||[]),{date:iso(now),amount,label:`Долг ${d.name.trim()}: закят за ${n} ${plural(n,'год','года','лет')}`,debt:d.id}]}});
   return {n,amount};
 }
+/* lunar years that have already ended since a chosen start date, and the start of the year running now */
+function zPast(start){let s=start,n=0;const T=iso(now);while(n<60){const e=hawlEnd(s);if(e>T)break;s=e;n++}return {n,cur:s}}
 let zBusy=false;
 function renderZakat(){
   const box=$('zakatBox');if(!box||!state.ready) return '';
-  if(!zBusy){const next=zRoll();if(next){zBusy=true;setTimeout(()=>{saveSettings({zakat:next}).finally(()=>zBusy=false)},0)}}
-  const z=zset(), M=zMoney(), T=iso(now), nisab=zNisab(z), L=zLedger(z.years,z.extra);
+  const M0=zModel();
+  /* cloud: wait until records, debts and settings all came from the server before saving a year */
+  if(!zBusy&&state.synced!==false){const next=zRoll(M0);if(next){zBusy=true;setTimeout(()=>{saveSettings({zakat:next}).finally(()=>zBusy=false)},0)}}
+  const z=zset(), M=M0, T=iso(now), nisab=zNisab(z), L=zLedger(z), metal=zMetal(z);
   const owed=L.owed;let dip=null;
   let html='<h2 id="zH">Закят</h2><div class="zk">';
   const setup=!(z.price>0)||!(z.start||z.wait);
   if(setup){
-    html+=`<p class="zs">Приложение посчитает закят по всем счетам, напомнит о сроке и запишет выплаты. Нужно один раз указать цену грамма серебра и примерную дату, когда ваши деньги дошли до нисаба.</p>
+    html+=`<p class="zs">Приложение посчитает закят по всем счетам, напомнит о сроке и запишет выплаты. Нужно один раз указать цену грамма ${METAL[metal]} и примерную дату, когда ваши деньги дошли до нисаба.</p>
       ${M?'':'<p class="zs">Сначала впишите, сколько денег на счетах, на вкладке «Деньги».</p>'}
       <div class="acts"><button class="primary" id="zSet">Настроить закят</button></div>`;
   }else if(!M){
@@ -1159,56 +1204,68 @@ function renderZakat(){
       <div class="acts"><button class="primary" id="zPay2">Оплатить</button><span class="zs">можно частями — остаток останется в напоминании</span></div>`;
     else if(L.due>0||L.paid>0) html+=`<div class="zl"><span>Долгов по закяту нет</span><b>✓</b></div>`;
     html+=`<div class="zl"><span>Облагается сейчас</span><b>${money(cur.base)}</b></div>
-      <div class="zl"><span>Нисаб · ${NISAB_G[cur.metal]} г ${METAL[cur.metal]} × ${money(cur.price)}</span><b>${money(nisab)}</b></div>`;
+      <div class="zl"><span>Нисаб · ${NISAB_G[metal]} г ${METAL[metal]} × ${money(+z.price)}</span><b>${money(nisab)}</b></div>`;
     if(z.start){
-      html+=`<div class="zl"><span>${cur.below?'Ниже нисаба — если так останется, закята не будет':'Закят к сроку, если сумма не изменится'}</span><b>${cur.below?'—':money(cur.amount)}</b></div>
-        <p class="zs">Год закята: с ${bothDates(z.start)}<br>Срок: <b>${bothDates(end)}</b>${days>0?` · через ${days} ${plural(days,'день','дня','дней')}`:''}</p>`;
       dip=zDip(z,M);
+      html+=dip&&dip.ended
+        ?`<p class="zs"><b>Срок наступил ${bothDates(end)}</b>, но за год сумма опускалась ниже нисаба — решите ниже, как быть с этим годом.</p>`
+        :`<div class="zl"><span>${cur.below?'Ниже нисаба — если так останется, закята не будет':'Закят к сроку, если сумма не изменится'}</span><b>${cur.below?'—':money(cur.amount)}</b></div>
+        <p class="zs">Год закята: с ${bothDates(z.start)}<br>Срок: <b>${bothDates(end)}</b>${days>0?` · через ${days} ${plural(days,'день','дня','дней')}`:''}</p>`;
       if(dip) html+=`<div class="zwarn"><p><b>${gDate(dip.d)}</b> сумма была ${money(dip.v)} — ниже нисаба. По шафиитскому мазхабу год закята тогда начинается заново${dip.back?`: с ${bothDates(dip.back)}, когда сумма снова дошла до нисаба`:', когда сумма снова дойдёт до нисаба'}.</p>
-        <div class="acts">${dip.back?`<button class="primary" id="zRestart" data-d="${dip.back}">Начать год с ${gDate(dip.back)}</button>`:`<button class="primary" id="zWait" data-d="${dip.d}">Ждать нисаба</button>`}<button class="linkbtn" id="zDipOk">Ошибка в записях, оставить</button></div>
-        <p class="zs">Проверка идёт по записям приложения и по нынешней цене ${METAL[cur.metal]}.</p></div>`;
+        <div class="acts">${dip.back?`<button class="primary" id="zRestart" data-d="${dip.back}">Начать год с ${gDate(dip.back)}</button>`:`<button class="primary" id="zWait" data-d="${dip.d}">Ждать нисаба</button>`}<button class="linkbtn" id="zDipOk" data-upto="${dip.back?addDays(dip.back,-1):T}">Ошибка в записях, оставить</button></div>
+        <p class="zs">Проверка идёт по записям приложения и по нынешней цене ${METAL[metal]}.</p></div>`;
     }else{
       html+=`<p class="zs">Сумма ниже нисаба. Год закята начнётся сам в тот день, когда денег станет не меньше ${money(nisab)}.</p>`;
     }
     /* why the sum is what it is */
-    const miss=M.missing.filter(id=>id!=='broker'||!cur.broker).map(id=>WNAME[id]);
+    const bMiss=M.missing.includes('broker'), miss=M.missing.map(id=>WNAME[id]);
     html+=`<details class="zwhy"><summary>Почему столько</summary><div class="zlist">
       <div class="zl"><span>Карты, наличные, Подушка, Копильник</span><b>${money(cur.cash)}</b></div>
-      <div class="zl"><span>Брокерский счёт ${M.brokerOwn?`<small>по вашей оценке от ${gDate(iso(new Date(z.broker.at)))}</small>`:'<small>по записям приложения</small>'}</span><b>${money(cur.broker)}</b></div>
+      ${bMiss?'':`<div class="zl"><span>Брокерский счёт ${M.brokerOwn?`<small>по вашей оценке от ${gDate(iso(new Date(M.bo.at)))}, плюс переводы после неё</small>`:'<small>сумма с вкладки «Деньги»</small>'}</span><b>${money(cur.broker)}</b></div>`}
       ${cur.rel?`<div class="zl"><span>Вам должны (надёжные долги)</span><b>${money(cur.rel)}</b></div>`:''}
       ${cur.doubt?`<div class="zl"><span>Сомнительные долги <small>— только для нисаба, закят с них когда вернут</small></span><b>${money(cur.doubt)}</b></div>`:''}
-      ${cur.owedPrev?`<div class="zl"><span>Неоплаченный закят прошлого срока</span><b>−${money(cur.owedPrev)}</b></div>`:''}
+      ${cur.owedPrev?`<div class="zl"><span>Неоплаченный закят</span><b>−${money(cur.owedPrev)}</b></div>`:''}
       ${cur.adv?`<div class="zl"><span>Уже отдано досрочно <small>— считается, как будто ещё у вас</small></span><b>+${money(cur.adv)}</b></div>`:''}
-      <div class="zl"><span>С этой суммы 2,5%</span><b>${money(cur.base)} → ${money(r2(cur.base*ZAKAT_RATE))}</b></div>
-      ${miss.length?`<p class="zs">Не вписаны на вкладке «Деньги»: ${miss.join(', ')} — они не учтены.</p>`:''}
+      <div class="zl"><span>2,5% с этой суммы</span><b>${money(cur.base)}<small>→ ${money(r2(cur.base*ZAKAT_RATE))}</small></b></div>
+      ${miss.length?`<p class="zs">Не вписаны на вкладке «Деньги»: ${miss.join(', ')} — они не учтены.${bMiss?' Стоимость брокерского счёта можно указать в настройках закята.':''}</p>`:''}
       <p class="zs">Ставка 2,5% со всей суммы, а не только сверх нисаба. Деньги, пришедшие в этом году, тоже входят — с них закят отдаётся досрочно, это допустимо. Свои долги не вычитаются (шафиитский мазхаб). Жильё, машина и вещи не облагаются.</p>
       </div></details>`;
-    if(z.priceAt&&Date.now()-z.priceAt>30*864e5) html+=`<p class="zs">Цена ${METAL[cur.metal]} вписана ${gDate(iso(new Date(z.priceAt)))} — обновите её перед сроком.</p>`;
+    if(z.priceAt&&Date.now()-z.priceAt>30*864e5) html+=`<p class="zs">Цена ${METAL[metal]} вписана ${gDate(iso(new Date(z.priceAt)))} — обновите её перед сроком.</p>`;
     const hist=zHistory(z);
+    const paidTxt=r=>r.paid>=r.amount-0.005?' ✓':`<small>оплачено ${money(r.paid)}</small>`;
     if(hist.length) html+=`<details class="zwhy"><summary>История по годам</summary><div class="zlist">${hist.slice().reverse().map(r=>r.y
-      ?`<div class="zl"><span>Срок ${bothDates(r.y.due)}${r.y.below?' <small>— ниже нисаба, закята не было</small>':`<small>облагалось ${money(r.y.base)}${r.y.approx?' (примерно)':''}</small>`}</span><b>${r.y.below?'—':money(r.amount)+(r.paid>=r.amount-0.005?' ✓':` <small>оплачено ${money(r.paid)}</small>`)}</b></div>`
-      :`<div class="zl"><span>${esc(r.x.label||'Закят с долга')} <small>${gDate(r.x.date)}</small></span><b>${money(r.amount)}${r.paid>=r.amount-0.005?' ✓':` <small>оплачено ${money(r.paid)}</small>`}</b></div>`).join('')}
+      ?`<div class="zl"><span>Срок ${bothDates(r.y.due)}${r.y.below?' <small>— ниже нисаба, закята не было</small>':`<small>облагалось ${money(r.y.base)}${r.y.approx?' (примерно)':''}</small>`}</span><b>${r.y.below?'—':money(r.amount)+paidTxt(r)}</b></div>`
+      :`<div class="zl"><span>${esc(r.x.label||'Закят с долга')} <small>${gDate(r.x.date)}</small></span><b>${money(r.amount)}${paidTxt(r)}</b></div>`).join('')}
       ${L.paid?`<p class="zs">Всего выплачено: ${money(L.paid)}</p>`:''}</div></details>`;
     const lastY=(z.years||[]).slice().sort((a,b)=>b.due.localeCompare(a.due))[0];
-    html+=`<div class="acts"><button class="ghost" id="zSet">Настройки</button>${lastY&&owed>=0.01?`<button class="linkbtn" id="zRe" data-d="${lastY.due}">Пересчитать срок ${gDate(lastY.due)}</button>`:''}</div>`;
+    html+=`<div class="acts"><button class="ghost" id="zSet">Настройки</button>${lastY&&owed>=0.01?`<button class="linkbtn" id="zRe" data-d="${lastY.due}">Пересчитать закят за срок ${gDate(lastY.due)}</button>`:''}</div>`;
   }
-  html+=`<p class="zs zfine">Расчёт ориентировочный: шафиитский мазхаб, нисаб по серебру, как у Муфтията ЧР. По спорным вопросам уточните у имама.</p></div>`;
-  if(state.editing==='zakat') html+=zForm(z,M);
+  html+=`<p class="zs zfine">Расчёт ориентировочный: шафиитский мазхаб, нисаб по ${metal==='gold'?'золоту (Муфтият ЧР считает по серебру)':'серебру, как у Муфтията ЧР'}. По спорным вопросам уточните у имама.</p></div>`;
+  if(state.editing==='zakat') html+=zForm(z);
   box.innerHTML=html;
   bindZakat(z,M);
   return (owed>=0.01?`<div class="alert"><span>Закят к оплате: <b>${moneyR(owed)}</b></span><button class="primary" id="zPay">Оплатить</button></div>`:'')
-    +(dip?`<div class="alert"><span>Сумма опускалась ниже нисаба — проверьте год закята</span><button class="ghost" id="zDipGo">Посмотреть</button></div>`:'');
+    +(dip?`<div class="alert"><span>${dip.ended?'Срок закята наступил, но сумма за год опускалась ниже нисаба':'Сумма опускалась ниже нисаба — проверьте год закята'}</span><button class="ghost" id="zDipGo">Посмотреть</button></div>`:'');
 }
-function zForm(z,M){
-  const metal=z.metal==='gold'?'gold':'silver', bApp=walletValue('broker');
+const zStartHint=s=>s?'По хиджре: '+hijri(s):'Если не помните точно — выберите более раннюю дату: заплатить раньше можно, позже нельзя.';
+function zPastHtml(start,z){
+  if(!start||start===z.start) return '';
+  const p=zPast(start);if(!p.n) return '';
+  return `<fieldset class="zpast"><legend>С этой даты прошло ${p.n} ${plural(p.n,'лунный год','лунных года','лунных лет')}. Закят за ${p.n>1?'них':'него'}:</legend>
+    <label><input type="radio" name="zPast" value="paid"> уже отдан — считать текущий год с ${gDate(p.cur)}</label>
+    <label><input type="radio" name="zPast" value="charge"> не отдан — начислить ${p.n>1?'за каждый год':''} (примерно, по записям приложения)</label></fieldset>`;
+}
+function zForm(z){
+  const metal=zMetal(z), M=zModel(), bNow=M&&!M.missing.includes('broker')?M.broker(iso(now)):walletValue('broker');
   return `<div class="wmodal"><div class="sheet-bg" data-zclose></div><form class="wallet-edit zform" id="zForm" novalidate><b>Настройки закята</b>
     <label>Нисаб считать по<select id="zMetal"><option value="silver" ${metal==='silver'?'selected':''}>серебру — 595 г (как Муфтият ЧР)</option><option value="gold" ${metal==='gold'?'selected':''}>золоту — 85 г</option></select></label>
-    <label><span id="zPriceL">Цена грамма ${METAL[metal]}, ₽</span><input id="zPrice" class="num" inputmode="decimal" placeholder="Например, 215" value="${z.price||''}"></label>
+    <label><span id="zPriceL">Цена грамма ${METAL[metal]}, ₽</span><input id="zPrice" class="num" inputmode="decimal" placeholder="Например, 215" value="${z.price?String(z.price).replace('.',','):''}"></label>
     <p>Учётная цена ЦБ: cbr.ru → «Драгоценные металлы». Нисаб = <span id="zNis">${z.price?money(zNisab(z)):'—'}</span></p>
     <label>Когда ваши деньги дошли до нисаба<input id="zStart" type="date" max="${iso(now)}" value="${z.start||''}"></label>
-    <p id="zStartH">${z.start?'По хиджре: '+hijri(z.start):'Если не помните точно — выберите более раннюю дату: заплатить раньше можно, позже нельзя.'}</p>
-    <label>Брокерский счёт сейчас (бумаги + свободные деньги), ₽<input id="zBroker" class="num" inputmode="decimal" placeholder="${bApp===null?'Как в приложении брокера':'Сейчас в приложении: '+money(bApp)}" value=""></label>
-    <p>${z.broker?`Ваша оценка ${money(z.broker.amount)} от ${gDate(iso(new Date(z.broker.at)))}, дальше прибавляются переводы на брокер. `:''}Акции считаются по полной стоимости. Пусто — останется как есть.</p>
+    <p id="zStartH">${zStartHint(z.start)}</p>
+    <div id="zPastBox"></div>
+    <label>Брокерский счёт сейчас (бумаги + свободные деньги), ₽<input id="zBroker" class="num" inputmode="decimal" placeholder="${bNow===null?'Как в приложении брокера':'Сейчас в расчёте: '+money(bNow)}" value=""></label>
+    <p>${M?.brokerOwn?`В расчёте ваша оценка ${money(M.bo.amount)} от ${gDate(iso(new Date(M.bo.at)))} и переводы после неё. `:'Сейчас берётся сумма с вкладки «Деньги». '}Акции считаются по полной стоимости. Пусто — останется как есть.</p>
     <p class="err" id="zErr" hidden></p>
     <div class="row"><button class="primary" type="submit">Сохранить</button><button class="linkbtn" type="button" data-zclose>Отмена</button></div></form></div>`;
 }
@@ -1222,35 +1279,43 @@ function zPaySheet(amount){
     <p class="zs">Намерение — закят. Можно частями: остаток останется в напоминании.</p>`;
   $('sheetBody').querySelectorAll('[data-zacc]').forEach(b=>b.onclick=()=>{
     const v=parseNum($('zAmt').value);if(!(v>0)){toast('Впишите сумму больше нуля');$('zAmt').focus();return}
-    state.pend.amount=r2(v);saveEntry(b.dataset.zacc);
+    state.pend.amount=r2(v);saveEntry(b.dataset.zacc,{keepForm:true});
   });
 }
 function bindZakat(z,M){
   const box=$('zakatBox');
-  const open=()=>{state.editing='zakat';render();$('zPrice')?.focus()};
-  if($('zSet')) $('zSet').onclick=open;
-  if($('zPay2')) $('zPay2').onclick=()=>zPaySheet(zLedger(z.years,z.extra).owed);
+  if($('zSet')) $('zSet').onclick=()=>{state.editing='zakat';render()};
+  if($('zPay2')) $('zPay2').onclick=()=>zPaySheet(zLedger(z).owed);
   if($('zRestart')) $('zRestart').onclick=e=>{const nz={...z,start:e.currentTarget.dataset.d};delete nz.dipOk;delete nz.wait;saveSettings({zakat:nz});toast('Год закята начат заново')};
   if($('zWait')) $('zWait').onclick=e=>{const nz={...z,wait:e.currentTarget.dataset.d};delete nz.start;delete nz.dipOk;saveSettings({zakat:nz});toast('Год закята начнётся, когда сумма дойдёт до нисаба')};
-  if($('zDipOk')) $('zDipOk').onclick=()=>saveSettings({zakat:{...z,dipOk:z.start}});
-  if($('zRe')) $('zRe').onclick=e=>{const d=e.currentTarget.dataset.d, ys=(z.years||[]).filter(y=>y.due!==d), y0=(z.years||[]).find(y=>y.due===d);
-    const zz={...z,years:ys}, y={...zCalc(d,zz,M),start:y0?.start,at:Date.now()};
+  if($('zDipOk')) $('zDipOk').onclick=e=>saveSettings({zakat:{...z,dipOk:{start:z.start,upTo:e.currentTarget.dataset.upto}}});
+  /* recount a finished year with its own price and metal; two taps, it changes what is owed */
+  if($('zRe')) $('zRe').onclick=e=>{const b=e.currentTarget, d=b.dataset.d, ys=(z.years||[]).filter(y=>y.due!==d), y0=(z.years||[]).find(y=>y.due===d);
+    const zz={...z,years:ys,...(y0&&y0.price>0?{price:y0.price,metal:y0.metal}:{})}, y={...zCalc(d,zz,M),start:y0?.start,at:Date.now()};
+    if(!b.dataset.armed){b.dataset.armed='1';b.textContent=`Было ${money(+y0?.amount||0)} → станет ${money(y.amount)}${y.approx?' (примерно)':''}. Нажмите ещё раз`;setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent=`Пересчитать закят за срок ${gDate(d)}`}},5000);return}
     saveSettings({zakat:{...z,years:[...ys,y]}});toast(`Срок ${gDate(d)}: закят ${money(y.amount)}`)};
   box.querySelectorAll('[data-zclose]').forEach(b=>b.onclick=()=>{state.editing=null;render()});
   const f=$('zForm');if(!f) return;
   const metalSel=$('zMetal'), upd=()=>{const m=metalSel.value, p=parseNum($('zPrice').value);
-    $('zPriceL').textContent=`Цена грамма ${METAL[m]}, ₽`;$('zNis').textContent=p>0?money(NISAB_G[m]*p):'—';
-    const s=$('zStart').value;$('zStartH').textContent=s?'По хиджре: '+hijri(s):'Если не помните точно — выберите более раннюю дату: заплатить раньше можно, позже нельзя.'};
+    $('zPriceL').textContent=`Цена грамма ${METAL[m]}, ₽`;$('zNis').textContent=p>0?money(r2(NISAB_G[m]*p)):'—';
+    const s=$('zStart').value;$('zStartH').textContent=zStartHint(s);
+    const pb=$('zPastBox'), h=zPastHtml(s,z);if(pb.dataset.h!==h){pb.dataset.h=h;pb.innerHTML=h}};
   metalSel.onchange=upd;$('zPrice').oninput=upd;$('zStart').oninput=upd;$('zStart').onchange=upd;
-  f.onsubmit=e=>{e.preventDefault();const err=$('zErr');
+  f.onsubmit=e=>{e.preventDefault();const err=$('zErr'), bad=(t,el)=>{err.textContent=t;err.hidden=false;el?.focus?.()};
     const metal=metalSel.value, price=parseNum($('zPrice').value), start=$('zStart').value, bv=$('zBroker').value.trim(), b=parseNum(bv);
-    if(!(price>0)){err.textContent='Впишите цену грамма числом, например 215.';err.hidden=false;$('zPrice').focus();return}
-    if(!start&&!z.start&&!z.wait){err.textContent='Укажите дату, когда деньги дошли до нисаба.';err.hidden=false;$('zStart').focus();return}
-    if(start&&start>iso(now)){err.textContent='Дата не может быть позже сегодняшней.';err.hidden=false;return}
-    if(bv&&!(b>=0)){err.textContent='Брокерский счёт — числом, например 150000.';err.hidden=false;$('zBroker').focus();return}
+    if(!(price>0)) return bad('Впишите цену грамма числом, например 215.',$('zPrice'));
+    if(!start&&!z.start&&!z.wait) return bad('Укажите дату, когда деньги дошли до нисаба.',$('zStart'));
+    if(start&&start>iso(now)) return bad('Дата не может быть позже сегодняшней.',$('zStart'));
+    if(bv&&!(b>=0)) return bad('Брокерский счёт — числом, например 150000.',$('zBroker'));
     const nz={...z,metal,price:r2(price)};
     if(price!==+z.price||metal!==z.metal) nz.priceAt=Date.now();
-    if(start&&start!==z.start){nz.start=start;delete nz.wait;delete nz.dipOk}
+    if(start&&start!==z.start){
+      const p=zPast(start), ch=f.querySelector('[name="zPast"]:checked')?.value;
+      if(p.n&&!ch) return bad('Отметьте, отдан ли закят за прошедшие годы.');
+      /* years saved after the new start are counted again from it (payments stay and are matched again) */
+      nz.years=(z.years||[]).filter(y=>y.due<=start);
+      nz.start=p.n&&ch==='paid'?p.cur:start;delete nz.wait;delete nz.dipOk;
+    }
     if(bv) nz.broker={amount:r2(b),at:Date.now()};
     state.editing=null;saveSettings({zakat:nz});toast('Закят: настройки сохранены');
   };
@@ -1445,7 +1510,7 @@ function renderDebts(){
   list.querySelectorAll('[data-dg]').forEach(b=>b.onclick=()=>{state.openDebt=state.openDebt===b.dataset.dg?null:b.dataset.dg;state.openDebtItem=null;render()});
   list.querySelectorAll('[data-di]').forEach(h=>h.onclick=()=>{state.openDebtItem=state.openDebtItem===h.dataset.di?null:h.dataset.di;render()});
   list.querySelectorAll('[data-racc]').forEach(sel=>sel.onchange=()=>state.retAcc[sel.dataset.racc]=sel.value);
-  const backRec=(d,v)=>({type:'debt',dir:'back',amount:Math.round(v*100)/100,acc:state.retAcc[d.id]||'cash',date:iso(now),label:'Вернул долг: '+d.name,created:Date.now()});
+  const backRec=(d,v)=>({type:'debt',dir:'back',amount:Math.round(v*100)/100,acc:state.retAcc[d.id]||'cash',date:iso(now),label:'Вернул долг: '+d.name,debt:d.id,created:Date.now()});
   list.querySelectorAll('[data-full]').forEach(b=>b.onclick=async()=>{
     const d=state.debts.find(x=>x.id===b.dataset.full);b.disabled=true;
     try{const left=debtLeft(d);await store.add(backRec(d,left));await store.updateDebt(d.id,{returned:+d.amount||0,closedAt:Date.now()});const zk=zDebtBack(d,left);toast(`${d.name} вернул ${money(left)} на ${WNAME[state.retAcc[d.id]||'cash']}`+(zk?` · закят с долга за ${zk.n} ${plural(zk.n,'год','года','лет')}: ${money(zk.amount)}`:''))}catch(e){b.disabled=false;toast('Не получилось сохранить. Попробуйте ещё раз.')}
@@ -1457,7 +1522,7 @@ function renderDebts(){
     if(!b.dataset.armed){b.dataset.armed='1';b.textContent=`Точно простить ${money(left)}?`+(zn?` Закят с долга ${money(r2(left*ZAKAT_RATE*zn))} останется к оплате`:'');b.style.color='var(--bad)';setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent='Простить → садака';b.style.color=''}},4000);return}
     b.disabled=true;
     try{
-      await store.add({type:'out',amount:Math.round(left*100)/100,cat:'sadaqa',acc:'',date:iso(now),note:'прощён долг: '+d.name,created:Date.now()});
+      await store.add({type:'out',amount:Math.round(left*100)/100,cat:'sadaqa',acc:'',date:iso(now),note:'прощён долг: '+d.name,debt:d.id,created:Date.now()});
       await store.updateDebt(d.id,{forgiven:(+d.forgiven||0)+left,closedAt:Date.now()});
       /* Shafi'i: forgiving doesn't remove the zakat on a debt for the years it was owed — that part belongs to the poor */
       const zk=zDebtBack(d,left);
@@ -1651,7 +1716,8 @@ function stepAcc(){
     return `<button type="button" class="tile" data-acc="${id}" aria-pressed="${def===id}"><span class="nm"${w?.color?` style="color:${w.color}"`:''}>${ACC_SHORT[id]||n}</span><small>${v===null?'':moneyR(v)}</small></button>`}).join('')}</div>`;
   $('sheetBody').querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>saveEntry(b.dataset.acc));
 }
-async function saveEntry(acc){
+/* keepForm: paying from a reminder (zakat) leaves whatever is typed in the entry form alone */
+async function saveEntry(acc,opt={}){
   const p=state.pend;if(!p)return;
   const {type,scope,amount,cat}=p, label=CAT[cat].custom?(p.label||''):'';
   const note=[p.guessed||label===p.word?'':p.word,p.note].filter(Boolean).join(' · ');
@@ -1661,10 +1727,12 @@ async function saveEntry(acc){
   $('sheetBody').querySelectorAll('button').forEach(b=>b.disabled=true);
   try{
     const id=await store.add(rec);
-    if(!(type==='in'&&cat==='dividends')) state.accBy[type==='in'?'in':scope]=acc;
-    state.cat[`${type}-${scope}`]=cat;
+    if(!opt.keepForm){
+      if(!(type==='in'&&cat==='dividends')) state.accBy[type==='in'?'in':scope]=acc;
+      state.cat[`${type}-${scope}`]=cat;
+    }
     closeSheet();
-    $('amount').value='';$('note').value='';$('note').hidden=true;$('noteBtn').hidden=false;state.customLabel='';
+    if(!opt.keepForm){$('amount').value='';$('note').value='';$('note').hidden=true;$('noteBtn').hidden=false;state.customLabel=''}
     const [y,m]=p.date.split('-').map(Number);state.y=y;state.m=m-1;renderChips();render();
     toast(scope==='trip'&&acc!==TRIP_ACC
       ?(type==='out'?`Потрачено с ${WNAME[acc]} — верните ${money(amount)} с Т-Банка на Сбер`:`Пришло на ${WNAME[acc]} — переведите ${money(amount)} на Т-Банк`)
@@ -1707,7 +1775,7 @@ async function saveFile(filename,data,type){
 }
 $('backupBtn').onclick=async()=>{
   const strip=o=>{const {id,...r}=o;return r};
-  const data=JSON.stringify({app:'moi-rashody',version:1,exported:new Date().toISOString(),items:state.items.map(strip),debts:state.debts.map(strip),settings:state.settings},null,1);
+  const data=JSON.stringify({app:'moi-rashody',version:1,exported:new Date().toISOString(),items:state.items.map(strip),debts:state.debts,settings:state.settings},null,1);
   if(await saveFile(`moi-rashody-backup-${iso(new Date())}.json`,data,'application/json')) toast('Резервная копия сохранена');
 };
 /* start over: every record and debt removed, every account at 0; the limit and broker % stay */
