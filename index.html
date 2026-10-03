@@ -706,7 +706,7 @@ const catOf=id=>CAT[id]||CAT[LEGACY[id]]||CAT.other;
 const typeOf=i=>i.type==='in'?'in':i.type==='transfer'?'tr':i.type==='debt'?'debt':'out';
 const nameOf=i=>i.label||catOf(i.cat).name;
 const ACCS=[['tbank','Т-Банк'],['sber','Сбербанк'],['vtb','ВТБ'],['pocket','Наличка'],['cash','Подушка']];
-const ACC_SHORT={tbank:'Т-Банк',sber:'Сбер',vtb:'ВТБ',pocket:'Наличка',cash:'Подушка'};
+const ACC_SHORT={tbank:'Т-Банк',sber:'Сбер',vtb:'ВТБ',pocket:'Наличка',cash:'Подушка',broker:'Брокер'};
 /* командировочные live on Т-Банк: it goes first in trip mode */
 const TRIP_ACC='tbank';
 const RETURN_ACC='sber'; /* trip money spent from personal accounts is always paid back here */
@@ -1137,7 +1137,7 @@ function renderWallets(){
     $('rcCancel').onclick=()=>{state.recon=null;render()};
   }
   $('moneyActs').innerHTML=state.xferOpen?'':'<button class="linkbtn" id="xOpen">⇄ Перевод между счетами</button>';
-  if($('xOpen')) $('xOpen').onclick=()=>{state.xfer.amount=0;state.xferOpen=true;render();$('xAmount')?.focus()};
+  if($('xOpen')) $('xOpen').onclick=()=>{state.xfer.amount=0;state.xfer.note='';state.xferOpen=true;render();$('xAmount')?.focus()};
   if(state.xferOpen) bindXfer();
   box.querySelectorAll('[data-wclose]').forEach(b=>b.onclick=()=>{state.editing=null;state.recon=null;render()});
   box.querySelectorAll('.wrow').forEach(b=>b.onclick=()=>{state.editing=state.editing==='w-'+b.dataset.w?null:'w-'+b.dataset.w;render();$('wInput')?.focus()});
@@ -1160,6 +1160,7 @@ function xferForm(){
     <label>Откуда<select id="xFrom">${opt(state.xfer.from)}</select></label>
     <label>Куда<select id="xTo">${opt(state.xfer.to)}</select></label>
     <label class="full">Сумма<input id="xAmount" class="num" inputmode="decimal" placeholder="0" autocomplete="off" value="${esc(state.xfer.amount||'')}"></label>
+    <label class="full">Комментарий<input id="xNote" maxlength="80" placeholder="Необязательно" autocomplete="off" value="${esc(state.xfer.note||'')}"></label>
     <p class="err full" id="xErr" hidden></p>
     <div class="row"><button class="primary" type="submit">Перевести</button><button class="linkbtn" type="button" id="xCancel">Отмена</button></div>
     <small class="full" style="color:var(--muted);font-size:12px">Перевод не считается ни доходом, ни расходом. Перевод на брокерский счёт засчитывается в ваш процент на брокер.</small></form>`;
@@ -1169,13 +1170,14 @@ function bindXfer(){
   $('xTo').onchange=e=>state.xfer.to=e.target.value;
   $('xCancel').onclick=()=>{state.xferOpen=false;render()};
   $('xAmount').oninput=e=>state.xfer.amount=e.target.value;
+  $('xNote').oninput=e=>state.xfer.note=e.target.value;
   $('xForm').onsubmit=async e=>{
     e.preventDefault();
-    const from=$('xFrom').value,to=$('xTo').value,v=parseNum($('xAmount').value),err=$('xErr');
+    const from=$('xFrom').value,to=$('xTo').value,v=parseNum($('xAmount').value),note=$('xNote').value.trim(),err=$('xErr');
     if(from===to){err.textContent='Выберите два разных счёта.';err.hidden=false;return}
     if(!(v>0)){err.textContent='Введите сумму больше нуля.';err.hidden=false;$('xAmount').focus();return}
     state.xfer={from,to};state.xferOpen=false;
-    try{await store.add({type:'transfer',from,to,amount:Math.round(v*100)/100,date:iso(new Date()),created:Date.now()});toast(`Перевод: ${WNAME[from]} → ${WNAME[to]}, ${money(v)}`)}
+    try{await store.add({type:'transfer',from,to,amount:Math.round(v*100)/100,date:iso(new Date()),...(note?{note}:{}),created:Date.now()});toast(`Перевод: ${WNAME[from]} → ${WNAME[to]}, ${money(v)}`)}
     catch(x){toast('Не получилось сохранить перевод. Попробуйте ещё раз.')}
   };
 }
@@ -1595,7 +1597,8 @@ const EDIT_ACCS=()=>[...ACCS,['broker','Брокерский счёт'],['piggy'
 function editRow(i){
   const t=typeOf(i), opt=(list,sel)=>list.map(([v,n])=>`<option value="${esc(v)}" ${v===sel?'selected':''}>${esc(n)}</option>`).join('');
   let f=`<label>Сумма<input name="amount" class="num" inputmode="decimal" value="${+i.amount||0}" autocomplete="off"></label><label>Дата<input name="date" type="date" value="${esc(i.date)}"></label>`;
-  if(t==='tr') f+=`<label>Откуда<select name="from">${opt(EDIT_ACCS(),i.from)}</select></label><label>Куда<select name="to">${opt(EDIT_ACCS(),i.to)}</select></label>`;
+  if(t==='tr') f+=`<label>Откуда<select name="from">${opt(EDIT_ACCS(),i.from)}</select></label><label>Куда<select name="to">${opt(EDIT_ACCS(),i.to)}</select></label>
+    <label class="full">Комментарий<input name="note" value="${esc(i.note||'')}" maxlength="80"></label>`;
   else if(t==='debt') f+=`<label class="full">${i.dir==='back'?'Куда вернули':'С какого счёта дал'}<select name="acc">${opt(EDIT_ACCS(),i.acc)}</select></label>`;
   else{
     const cur=catOf(i.cat), pool=poolFor(t==='in'?'in':'out',isTrip(i)?'trip':'own');
@@ -1623,8 +1626,8 @@ function bindEdits(root){
       if(E.from){if(E.from.value===E.to.value) return fail('Выберите два разных счёта.');p.from=E.from.value;p.to=E.to.value}
       if(E.acc) p.acc=E.acc.value||'';
       if(E.cat){p.cat=E.cat.value;const c=CAT[p.cat];
-        if(c.custom){const l=E.label.value.trim();if(!l) return fail('Впишите, на что потратили.');p.label=l} else p.label='';
-        p.note=E.note.value.trim()}
+        if(c.custom){const l=E.label.value.trim();if(!l) return fail('Впишите, на что потратили.');p.label=l} else p.label=''}
+      if(E.note) p.note=E.note.value.trim();
       state.editItem=null;
       try{await store.update(i.id,p);render();toast('Запись исправлена')}catch(x){state.editItem=i.id;render();toast('Не получилось сохранить. Попробуйте ещё раз.')}
     };
@@ -1638,7 +1641,7 @@ function itemRow(i){
   const t=typeOf(i), inc=t==='in', id=esc(i.id), open=state.actItem===i.id;
   let what, amt, cls='', acls='';
   if(t==='debt'){cls='tr';what=`<b>${esc(i.label||'Долг')}</b><span>${accTag(i.acc)||'—'}</span>`;amt=(i.dir==='back'||i.dir==='in'?'+':'−')+money(+i.amount||0);acls=i.dir==='back'||i.dir==='in'?'pos':'spend'}
-  else if(t==='tr'){cls='tr';what=`<b>Перевод</b><span>${accTag(i.from)||'?'} → ${accTag(i.to)||'?'}</span>`;amt=money(+i.amount||0)}
+  else if(t==='tr'){cls='tr';what=`<b>Перевод</b><span>${accTag(i.from)||'?'} → ${accTag(i.to)||'?'}</span>${i.note?`<span>${esc(i.note)}</span>`:''}`;amt=money(+i.amount||0)}
   else{cls=inc?'in':'';acls=inc?'pos':'spend';const sub=[accTag(i.acc),i.note?esc(i.note):''].filter(Boolean).join(' · ');
     what=`<b>${esc(nameOf(i))}${isTrip(i)?'<span class="tag trip">командировка</span>':''}</b>${sub?`<span>${sub}</span>`:''}`;amt=(inc?'+':'−')+money(+i.amount||0)}
   return `<div class="item ${cls}">
