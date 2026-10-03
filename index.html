@@ -177,7 +177,6 @@ input,select{width:100%;border:1px solid var(--line);background:var(--bg);border
 .moneyacts{display:flex;justify-content:flex-end}
 .settle{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;background:var(--accent-soft);border-left:3px solid var(--trip);border-radius:0;padding:8px 10px;font-size:13px}
 .settle b{font-family:var(--f-num);font-weight:500}
-.item.tr .dot{background:transparent;border:2px solid var(--muted)}
 .item.tr .amt{color:var(--muted)}
 input::placeholder{color:var(--muted)}
 .catgroups{grid-column:1/-1;display:flex;flex-direction:column;gap:10px}
@@ -230,12 +229,8 @@ input::placeholder{color:var(--muted)}
 .recs .dayhead .num{font-size:14px;font-weight:500;color:var(--muted);display:flex;gap:10px}
 .recs .dayhead .num .pos{color:var(--good)}
 .recs .empty{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
-.item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding-block:10px;border-bottom:1px solid var(--line)}
+.item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding-block:10px;border-bottom:1px solid var(--line)}
 .item:last-child{border-bottom:0}
-.item .dot{width:10px;height:10px;border-radius:50%;background:var(--c)}
-.item>.ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:18px;line-height:1;flex:none;background:var(--accent-soft);background:color-mix(in srgb,var(--c,var(--muted)) 20%,transparent)}
-.item.tr>.ic{background:var(--bg);border:1px solid var(--line);color:var(--muted);font-size:17px}
-.item.in .dot{border-radius:3px}
 .item .what{min-width:0;background:none;border:0;padding:0;text-align:left;cursor:pointer;color:inherit;font:inherit;display:block}
 .item-edit{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;padding:12px;margin-block:6px;border:1px solid var(--accent);border-radius:12px;background:var(--bg)}
 .item-edit label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);min-width:0}
@@ -1629,9 +1624,7 @@ function itemRow(i){
   else if(t==='tr'){cls='tr';what=`<b>Перевод</b><span>${accTag(i.from)||'?'} → ${accTag(i.to)||'?'}</span>`;amt=money(+i.amount||0)}
   else{cls=inc?'in':'';acls=inc?'pos':'spend';const sub=[accTag(i.acc),i.note?esc(i.note):''].filter(Boolean).join(' · ');
     what=`<b>${esc(nameOf(i))}${isTrip(i)?'<span class="tag trip">командировка</span>':''}</b>${sub?`<span>${sub}</span>`:''}`;amt=(inc?'+':'−')+money(+i.amount||0)}
-  /* the category's own icon on a soft tint of its colour (the old dots repeated 8 colours over 30 categories) */
-  const ic=t==='tr'?'⇄':t==='debt'?'🤝':(ICON[catOf(i.cat).id]||'•');
-  return `<div class="item ${cls}"${t==='in'||t==='out'?` style="--c:${cvar(i.cat)}"`:''}><span class="ic" aria-hidden="true">${ic}</span>
+  return `<div class="item ${cls}">
     <div class="what">${what}</div>
     <button type="button" class="amt ${acls}" data-act="${id}" aria-expanded="${open}" aria-label="Действия с записью ${esc(amt)}">${amt}</button>
     ${open?`<div class="itemacts"><button type="button" class="linkbtn" data-open="${id}">Изменить</button><button type="button" class="del" data-id="${id}">Удалить</button></div>`:''}</div>`;
