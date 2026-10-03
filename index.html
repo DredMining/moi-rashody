@@ -267,6 +267,9 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .zk .zfine{font-size:11px}
 .zform label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
 .zform select,.zform input{width:100%;flex:none}
+.zline{display:flex;justify-content:space-between;align-items:baseline;gap:10px;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;color:var(--ink);font-size:14px;text-align:left}
+.zline>span:last-child{color:var(--muted);font-size:13px;text-align:right}
+.zline .neg{color:var(--bad);font-weight:600}
 .zpay{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);margin-bottom:12px}
 .zpay input{font-size:22px}
 .stat small{font-size:11px;color:var(--muted)}
@@ -387,6 +390,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
       <div class="sumtop"><span>Командировочные</span><span id="tripOf"></span></div>
       <div class="meter trip" id="tripMeter"><i></i></div>
       <span class="sub" id="tripLeftLine"></span>
+      <span class="sub" id="tripSplit" hidden></span>
     </div>
   </section>
   <div class="alerts" id="alerts"></div>
@@ -429,6 +433,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
       <span class="lbl">Всего денег</span>
       <span class="big" id="moneyTotal">—</span>
     </section>
+    <button type="button" class="zline" id="zakatLine" hidden></button>
     <div class="wallets" id="wallets"></div>
     <div class="moneyacts" id="moneyActs"></div>
     <details class="more">
@@ -561,12 +566,15 @@ const CATS=[
   {id:'invest',name:'Копильник',g:'sep',c:'p7',kw:['инвестиции','копилка','копильник']},
   {id:'sadaqa',name:'Садака',g:'sep',c:'p4',kw:['садака']},
   {id:'zakat',name:'Закят',g:'sep',c:'p3',kw:['закят']},
+  {id:'trip_extra',name:'Докинул на командировку',g:'sep',c:'p6',kw:[],auto:true},
   {id:'salary',name:'Зарплата',g:'in',c:'p3',kw:['зп','зарплата']},
   {id:'stipend',name:'Стипендия',g:'in',c:'p1',kw:['стипендия','стипедия']},
   {id:'side',name:'Подработка',g:'in',c:'p4',kw:['ггнту','подработка','гид']},
   {id:'bonus',name:'Премии',g:'in',c:'p5',kw:['премия','премии']},
   {id:'dividends',name:'Дивиденды',g:'in',c:'p6',kw:['дивиденды','дивы']},
-  {id:'interest',name:'Проценты',g:'in',c:'p7',kw:['%','проценты']},
+  {id:'interest',name:'% с продаж',g:'in',c:'p7',kw:['%','проценты','процент','продажи','продаж','комиссия']},
+  /* auto: written by «Командировка закончилась», not offered in the pickers */
+  {id:'trip_left',name:'Остаток командировочных',g:'in',c:'p6',kw:[],auto:true},
   {id:'gift',name:'Подарок',g:'in',c:'p2',kw:['подарок','подарили','подарила','подарил']},
   {id:'in_other',name:'Другой доход',g:'in',c:'p8',kw:[],custom:true},
   {id:'t_taxi',name:'Такси',g:'trip',c:'p6',kw:['такси','билет']},
@@ -578,7 +586,7 @@ const CATS=[
 ];
 const LEGACY={ai:'subs',food:'grocery',cafe:'lunch',transport:'taxi',fun:'other',shop:'other',study:'other',gifts:'other',home:'other',clothes:'other'};
 const ICON={bus:'🚌',taxi:'🚕',lunch:'🍽️',fastfood:'🍔',snack:'🥤',wb:'🛍️',grocery:'🛒',health:'💊',subs:'📱',family:'👨‍👩‍👦',broker:'📈',invest:'🪙',sadaqa:'🤲',zakat:'🌙',
-  salary:'💼',stipend:'🎓',side:'🛠️',bonus:'🎁',dividends:'📊',interest:'💰',gift:'💝',in_other:'➕',t_taxi:'🚕',t_grocery:'🛒',t_flat:'🏠',t_other:'➕',t_allow:'✈️',other:'➕'};
+  salary:'💼',stipend:'🎓',side:'🛠️',bonus:'🎁',dividends:'📊',interest:'💰',gift:'💝',trip_left:'🧳',trip_extra:'🧳',in_other:'➕',t_taxi:'🚕',t_grocery:'🛒',t_flat:'🏠',t_other:'➕',t_allow:'✈️',other:'➕'};
 const CAT=Object.fromEntries(CATS.map(c=>[c.id,c]));
 const catOf=id=>CAT[id]||CAT[LEGACY[id]]||CAT.other;
 const typeOf=i=>i.type==='in'?'in':i.type==='transfer'?'tr':i.type==='debt'?'debt':'out';
@@ -777,6 +785,22 @@ function tripSettle(){
   }
   return Object.entries(owe).map(([acc,v])=>({acc,v:Math.round(v*100)/100})).filter(x=>Math.abs(x.v)>=1);
 }
+/* trip spending paid from personal accounts that Т-Банк still has to pay back to Сбер (since the last «Командировка закончилась») */
+function tripOwed(){
+  const end=+state.settings.tripEnd||0;let owed=0;
+  for(const i of state.items){if(end&&(i.created||0)<=end)continue;const a=+i.amount||0, t=typeOf(i);
+    if(t==='tr'){if(i.from===TRIP_ACC&&i.to===RETURN_ACC) owed-=a; continue}
+    if(isTrip(i)&&i.acc&&i.acc!==TRIP_ACC) owed+=t==='out'?a:t==='in'?-a:0;
+  }
+  return Math.max(0,Math.round(owed*100)/100);
+}
+/* what lies on Т-Банк: the trip money left (and what it owes back to Сбер) — the rest is his own */
+function tbankSplit(){
+  const st=state.settings.tripStart, tb=walletValue(TRIP_ACC);
+  if(tb===null||!(st||state.items.some(isTrip))) return null;
+  const bal=tripBalance(), owed=tripOwed();
+  return {tb,bal,owed,trip:Math.max(0,bal),own:Math.round((tb-Math.max(0,bal)-owed)*100)/100};
+}
 /* second bar in the summary card: how much trip money is left of what was there */
 function renderTripLine(){
   const st=state.settings.tripStart, box=$('tripLine');
@@ -787,6 +811,9 @@ function renderTripLine(){
   $('tripOf').textContent=avail>0?'было '+moneyR(avail):'';
   $('tripMeter').firstElementChild.style.width=(avail>0?Math.min(100,spentT/avail*100):0)+'%';
   const l=$('tripLeftLine');l.textContent=left>=0?'осталось '+moneyR(left):'перерасход '+moneyR(-left);l.style.color=left<0?'var(--bad)':'';
+  const sp=tbankSplit(), ts=$('tripSplit');
+  ts.hidden=!sp||!(sp.trip>0);
+  if(sp&&sp.trip>0) ts.textContent=`на Т-Банке ${moneyR(sp.tb)}: командировочные ${moneyR(sp.trip)}`+(sp.owed>0?` + вернуть на Сбер ${moneyR(sp.owed)}`:'')+(sp.own>=0.5?` + свои ${moneyR(sp.own)}`:sp.own<=-0.5?` — не хватает ${moneyR(-sp.own)}`:'');
 }
 function renderTrip(trip){
   const box=$('tripStat'), st=state.settings.tripStart;
@@ -813,20 +840,29 @@ function renderTrip(trip){
   const tb=walletValue(TRIP_ACC), gap=tb===null||!st?0:Math.round((bal-tb)*100)/100;
   /* Exactly what Т-Банк owes back: trip spending paid from personal accounts, minus trip income that landed there,
      minus what was already sent from Т-Банк to Сбер. Stays on screen until it's paid back. */
-  let owed=0;
-  for(const i of state.items){const a=+i.amount||0, t=typeOf(i);
-    if(t==='tr'){if(i.from===TRIP_ACC&&i.to===RETURN_ACC) owed-=a; continue}
-    if(isTrip(i)&&i.acc&&i.acc!==TRIP_ACC) owed+=t==='out'?a:t==='in'?-a:0;
-  }
-  owed=Math.max(0,Math.round(owed*100)/100);
+  const owed=tripOwed();
   const short=Math.round((gap+owed)*100)/100;
   let gapHtml='';
   if(owed>0) gapHtml+=`<div class="alert"><span>Верните с Т-Банка на Сбер: <b>${moneyR(owed)}</b></span><button class="primary" data-sfrom="${TRIP_ACC}" data-sto="${RETURN_ACC}" data-sv="${owed}">Перевести</button></div>`;
   if(short>=1) gapHtml+=`<div class="alert"><span>На Т-Банке не хватает командировочных: <b>${moneyR(short)}</b></span><button class="primary" data-sfrom="sber" data-sto="${TRIP_ACC}" data-sv="${short}">Перевести</button></div>`;
   const settleHtml='';
   box.innerHTML=`<span>Командировочные осталось</span><b class="${bal<0?'neg':''}">${any?moneyR(bal):'—'}</b>
-    <small>${mOut?`потрачено в этом месяце ${moneyR(mOut)} · `:''}<button class="linkbtn" id="tEdit">${st?'Сверить':'Указать остаток'}</button> · <button class="linkbtn" id="tAllow">+ Пришли командировочные</button></small>`;
+    <small>${mOut?`потрачено в этом месяце ${moneyR(mOut)} · `:''}<button class="linkbtn" id="tEdit">${st?'Сверить':'Указать остаток'}</button> · <button class="linkbtn" id="tAllow">+ Пришли командировочные</button>${any&&Math.abs(bal)>=0.01?` · <button class="linkbtn" id="tEnd">Командировка закончилась</button>`:''}</small>`;
   $('tEdit').onclick=()=>{state.editing='trip';render()};
+  /* trip over: what is left becomes his income (10% to the broker as with any income); an overspend paid from his own money
+     becomes his expense outside the monthly limit. The next trip starts from zero; nothing is owed between accounts any more. */
+  if($('tEnd')) $('tEnd').onclick=async e=>{
+    const b=e.currentTarget, v=Math.round(bal*100)/100;
+    if(!b.dataset.armed){b.dataset.armed='1';b.textContent=v>0?`Остаток ${money(v)} станет вашим доходом. Нажмите ещё раз`:`Перерасход ${money(-v)} — записать как ваш расход. Нажмите ещё раз`;b.style.color='var(--bad)';
+      setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent='Командировка закончилась';b.style.color=''}},5000);return}
+    b.disabled=true;const at=Date.now(), d=iso(now);
+    try{
+      if(v>0) await store.add({type:'in',cat:'trip_left',amount:v,acc:'',date:d,note:'командировка закончилась — остаток теперь мой',created:at});
+      else await store.add({type:'out',cat:'trip_extra',amount:-v,acc:'',date:d,note:'командировочных не хватило — докинул свои',created:at});
+      await saveSettings({tripStart:{amount:0,at:Date.now()},tripEnd:Date.now()});
+      toast(v>0?`Остаток ${money(v)} записан в доходы · 10% на брокер`:`Докинул на командировку ${money(-v)} — записано в расходы, в лимит не входит`);
+    }catch(x){b.disabled=false;toast('Не получилось сохранить. Попробуйте ещё раз.')}
+  };
   $('tAllow').onclick=()=>{state.editing='allow';render()};
   return gapHtml;
 }
@@ -873,7 +909,7 @@ function renderBroker(inc,out){
 
 const DEFAULT_LIMIT=30000;
 /* savings and charity don't count toward the monthly spending limit */
-const NOT_IN_LIMIT=['invest','broker','sadaqa','zakat'];
+const NOT_IN_LIMIT=['invest','broker','sadaqa','zakat','trip_extra'];
 function renderBudget(spent){
   const box=$('budgetBox'), budget=state.settings.budget===undefined?DEFAULT_LIMIT:(+state.settings.budget||0);
   if(state.editing==='budget'){
@@ -1217,15 +1253,17 @@ function renderZakat(){
   /* cloud: wait until records, debts and settings all came from the server before saving a year */
   if(!zBusy&&state.synced!==false){const next=zRoll(M0);if(next){zBusy=true;setTimeout(()=>{saveSettings({zakat:next}).finally(()=>{zBusy=false;render()})},0)}}
   const z=zset(), M=M0, T=iso(now), nisab=zNisab(z), L=zLedger(z), metal=zMetal(z);
-  const owed=L.owed;let dip=null;
+  const owed=L.owed;let dip=null, line='';
   let html='<h2 id="zH">Закят</h2><div class="zk">';
   const setup=!(z.price>0)||!(z.start||z.wait);
   if(setup){
     html+=`<p class="zs">Приложение посчитает закят по всем счетам, напомнит о сроке и запишет выплаты. Нужно один раз указать цену грамма ${METAL[metal]} и примерную дату, когда ваши деньги дошли до нисаба.</p>
       ${M?'':'<p class="zs">Сначала впишите, сколько денег на счетах, на вкладке «Деньги».</p>'}
       <div class="acts"><button class="primary" id="zSet">Настроить закят</button></div>`;
+    line='<span>🌙 Закят</span><span>настроить ›</span>';
   }else if(!M){
     html+=`<p class="zs">Впишите, сколько денег на счетах, на вкладке «Деньги» — без этого закят не посчитать.</p><div class="acts"><button class="ghost" id="zSet">Настройки</button></div>`;
+    line='<span>🌙 Закят</span><span>впишите счета ›</span>';
   }else{
     const cur=zCalc(T,z,M,addDays(T,1)), end=z.start?hawlEnd(z.start):null, days=end?Math.round((isoToDate(end)-isoToDate(T))/864e5):0;
     if(owed>=0.01) html+=`<div class="zl big"><span>К оплате</span><b class="neg">${money(owed)}</b></div>
@@ -1245,6 +1283,11 @@ function renderZakat(){
     }else{
       html+=`<p class="zs">Сумма ниже нисаба. Год закята начнётся сам в тот день, когда денег станет не меньше ${money(nisab)}.</p>`;
     }
+    /* one line on «Деньги» */
+    line=owed>=0.01?`<span>🌙 Закят к оплате</span><span class="neg">${money(owed)} ›</span>`
+      :dip?'<span>🌙 Закят</span><span>проверьте год ›</span>'
+      :z.start?`<span>🌙 Закят</span><span>срок ${gDate(end)} · ${cur.below?'сейчас ниже нисаба':'около '+money(cur.amount)} ›</span>`
+      :'<span>🌙 Закят</span><span>сумма ниже нисаба ›</span>';
     /* why the sum is what it is */
     const bMiss=M.missing.includes('broker'), miss=M.missing.map(id=>WNAME[id]);
     html+=`<details class="zwhy"><summary>Почему столько</summary><div class="zlist">
@@ -1272,6 +1315,7 @@ function renderZakat(){
   if(state.editing==='zakat') html+=zForm(z);
   box.innerHTML=html;
   bindZakat(z,M);
+  const zl=$('zakatLine');if(zl){zl.innerHTML=line;zl.hidden=!line;zl.onclick=()=>{setTab('stats');$('zakatBox')?.scrollIntoView?.({block:'start'})}}
   return (owed>=0.01?`<div class="alert"><span>Закят к оплате: <b>${moneyR(owed)}</b></span><button class="primary" id="zPay">Оплатить</button></div>`:'')
     +(dip?`<div class="alert"><span>${dip.ended?'Срок закята наступил, но сумма за год опускалась ниже нисаба':'Сумма опускалась ниже нисаба — проверьте год закята'}</span><button class="ghost" id="zDipGo">Посмотреть</button></div>`:'');
 }
@@ -1659,7 +1703,7 @@ function renderChips(){
   const opened=state.catsOpen||(state.catsOpen={});
   $('catChips').innerHTML=groups.map(([label,g])=>{
     /* «Отдельно» keeps a fixed order: Садака, Закят, Брокер in the row, Семья and Копильник behind ⋯ */
-    const list=g==='sep'?['sadaqa','zakat','broker','family','invest'].map(id=>CAT[id]):CATS.filter(c=>c.g===g&&!c.custom).sort(byUse);
+    const list=g==='sep'?['sadaqa','zakat','broker','family','invest'].map(id=>CAT[id]):CATS.filter(c=>c.g===g&&!c.custom&&!c.auto).sort(byUse);
     const plus=CATS.find(c=>c.g===g&&c.custom), isOpen=!!opened[g];
     const plain=list.map(c=>`<button type="button" class="chip" data-cat="${c.id}" style="--c:${cvar(c.id)}" aria-pressed="${cur===c.id}"><span class="dot"></span>${c.name}</button>`).join('');
     return `<div class="cgroup">${label?`<h3>${label}</h3>`:''}<div class="chips ${isOpen?'':'one'}" data-g="${g}" role="group" aria-label="${label||'Категория'}">${plain}${plus&&isOpen?`<button type="button" class="chip plus" data-cat="${plus.id}" aria-pressed="${cur===plus.id}" aria-label="${t==='in'?'Другой доход':'Другое'} — вписать своё">+</button>`:''}<button type="button" class="chip more" data-more="${g}" aria-expanded="${isOpen}" aria-label="${isOpen?'Свернуть список':'Показать все категории'}">${isOpen?'Свернуть':'⋯'}</button></div></div>`;
@@ -1730,7 +1774,7 @@ function stepCat(){
   const groups=p.scope==='trip'?[['','trip']]:p.type==='in'?[['','in']]:[['','daily'],['Отдельно','sep']];
   sheetFrame(p.type==='in'?'Что за доход?':'На что?',null);
   $('sheetBody').innerHTML=groups.map(([h,g])=>{
-    const list=g==='sep'?['sadaqa','zakat','broker','family','invest'].map(id=>CAT[id]):CATS.filter(c=>c.g===g).sort((a,b)=>(!!a.custom-!!b.custom)||byUse(a,b));
+    const list=g==='sep'?['sadaqa','zakat','broker','family','invest'].map(id=>CAT[id]):CATS.filter(c=>c.g===g&&!c.auto).sort((a,b)=>(!!a.custom-!!b.custom)||byUse(a,b));
     return `${h?`<h3>${h}</h3>`:''}<div class="tiles">${list.map(c=>tile(c,false)).join('')}</div>`;
   }).join('');
   $('sheetBody').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{p.cat=b.dataset.pick;afterCat()});
@@ -1766,6 +1810,9 @@ async function saveEntry(acc,opt={}){
   if(scope==='trip') rec.scope='trip';
   if(label) rec.label=label;
   $('sheetBody').querySelectorAll('button').forEach(b=>b.disabled=true);
+  /* personal spending from Т-Банк while trip money lies there: say whether it came out of his own part */
+  const sp=scope==='own'&&type==='out'&&acc===TRIP_ACC?tbankSplit():null;
+  const tbNote=sp&&sp.trip>0?(sp.own-amount>=-0.005?` — из своих, своих на Т-Банке осталось ${money(Math.max(0,sp.own-amount))}`:` — задели командировочные на ${money(amount-Math.max(0,sp.own))}, переведите со Сбера`):'';
   try{
     const id=await store.add(rec);
     if(!opt.keepForm){
@@ -1777,7 +1824,7 @@ async function saveEntry(acc,opt={}){
     const [y,m]=p.date.split('-').map(Number);state.y=y;state.m=m-1;renderChips();render();
     toast(scope==='trip'&&acc!==TRIP_ACC
       ?(type==='out'?`Потрачено с ${WNAME[acc]} — верните ${money(amount)} с Т-Банка на Сбер`:`Пришло на ${WNAME[acc]} — переведите ${money(amount)} на Т-Банк`)
-      :`${type==='in'?'Доход':'Расход'}: ${money(amount)} · ${label||CAT[cat].name} · ${WNAME[acc]||''}`,id?()=>store.remove(id):null);
+      :`${type==='in'?'Доход':'Расход'}: ${money(amount)} · ${label||CAT[cat].name} · ${WNAME[acc]||''}${tbNote}`,id?()=>store.remove(id):null);
   }catch(x){$('sheetBody').querySelectorAll('button').forEach(b=>b.disabled=false);toast(x?.code==='quota_exceeded'?'Хранилище заполнено. Удалите старые записи.':'Не получилось сохранить. Попробуйте ещё раз.')}
 }
 $('form').onsubmit=e=>{
