@@ -409,6 +409,11 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:500
 .item .what .acct{display:inline;font-weight:600}
 .itemacts{grid-column:1/-1;display:flex;gap:16px;align-items:center;justify-content:flex-end;padding-top:4px}
 .accgrid .chip{justify-content:center;padding:7px 2px;font-size:13px;white-space:nowrap;min-width:0}
+.tsplit{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.tsrow{display:flex;justify-content:space-between;gap:10px}
+.tsrow b{font-family:var(--f-num);font-weight:500;color:var(--ink);white-space:nowrap}
+.tsrow.tstop{color:var(--ink);font-weight:500}
+.tsrow.neg b{color:var(--bad)}
 .tripline{display:flex;flex-direction:column;gap:8px;padding-top:12px;margin-top:4px;border-top:1px solid var(--line)}
 .meter.trip i{background:var(--trip)}
 .sheet{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center}
@@ -460,7 +465,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
       <div class="sumtop"><span>Командировочные</span><span id="tripOf"></span></div>
       <div class="meter trip" id="tripMeter"><i></i></div>
       <span class="sub" id="tripLeftLine"></span>
-      <span class="sub" id="tripSplit" hidden></span>
+      <div class="tsplit" id="tripSplit" hidden></div>
     </div>
   </section>
   <div class="alerts" id="alerts"></div>
@@ -921,7 +926,11 @@ function renderTripLine(){
   const l=$('tripLeftLine');l.textContent=left>=0?'осталось '+moneyR(left):'перерасход '+moneyR(-left);l.style.color=left<0?'var(--bad)':'';
   const sp=tbankSplit(), ts=$('tripSplit');
   ts.hidden=!sp||!(sp.trip>0);
-  if(sp&&sp.trip>0) ts.textContent=`на Т-Банке ${moneyR(sp.tb)}: командировочные ${moneyR(sp.trip)}`+(sp.owed>0?` + вернуть на Сбер ${moneyR(sp.owed)}`:'')+(sp.own>=0.5?` + свои ${moneyR(sp.own)}`:sp.own<=-0.5?` — не хватает ${moneyR(-sp.own)}`:'');
+  /* one line each: what lies on Т-Банк, of it trip money, of it my own (and what goes back to Сбер / is missing) */
+  const tl=(a,b,c)=>`<span class="tsrow${c?' '+c:''}"><span>${a}</span><b>${b}</b></span>`;
+  if(sp&&sp.trip>0) ts.innerHTML=tl('На Т-Банке',moneyR(sp.tb),'tstop')+tl('Командировочные',moneyR(sp.trip))
+    +(sp.owed>0?tl('Вернуть на Сбер',moneyR(sp.owed)):'')
+    +(sp.own>=0.5?tl('Мои деньги',moneyR(sp.own)):sp.own<=-0.5?tl('Не хватает',moneyR(-sp.own),'neg'):'');
 }
 function renderTrip(trip){
   const box=$('tripStat'), st=state.settings.tripStart;
