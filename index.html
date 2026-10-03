@@ -1735,7 +1735,11 @@ $('restoreFile').onchange=async e=>{
     const d=JSON.parse(await f.text());
     if(d.app!=='moi-rashody'||!Array.isArray(d.items)) throw 0;
     let n=0;const id=()=>'r'+(n++).toString(36)+Math.random().toString(36).slice(2,7);
-    await store.replaceAll({items:d.items.map(i=>({...i,id:id()})),debts:(d.debts||[]).map(x=>({...x,id:id()})),settings:d.settings||{}});
+    /* debts get new ids — the zakat years that remember doubtful debts follow them */
+    const dmap={}, debts=(d.debts||[]).map(x=>{const nid=id();if(x.id)dmap[x.id]=nid;return {...x,id:nid}});
+    const st=d.settings||{}, zk=st.zakat;
+    const settings=zk?{...st,zakat:{...zk,years:(zk.years||[]).map(y=>({...y,ids:(y.ids||[]).map(i=>dmap[i]||i)})),extra:(zk.extra||[]).map(x=>x.debt?{...x,debt:dmap[x.debt]||x.debt}:x)}}:st;
+    await store.replaceAll({items:d.items.map(i=>({...i,id:id()})),debts,settings});
     const nd=(d.debts||[]).length;toast(`Загружено: ${d.items.length} ${plural(d.items.length,'запись','записи','записей')}, ${nd} ${plural(nd,'долг','долга','долгов')}`);
   }catch(x){toast('Это не резервная копия «Моих расходов». Выберите файл .json, скачанный из приложения.')}
 };
