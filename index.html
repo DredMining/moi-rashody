@@ -80,9 +80,9 @@ button{cursor:pointer}
 .tabs button[aria-selected="true"]{color:var(--ink);font-weight:600}
 .tabs button[aria-selected="true"] .ico{background:var(--accent-soft);color:var(--accent)}
 .tabs button:active .ico{background:var(--accent-soft)}
-/* Учёт in the middle: a round blue «+», a little above the bar */
-.tabs .tab-main .ico{width:52px;height:52px;border-radius:50%;margin-top:-20px;background:var(--accent);color:var(--accent-ink);box-shadow:0 4px 14px rgb(0 0 0 / .28);border:3px solid var(--surface)}
-.tabs .tab-main .ico svg{width:26px;height:26px;stroke-width:2.4}
+/* Учёт in the middle: a round blue «+», just slightly above the bar */
+.tabs .tab-main .ico{width:42px;height:42px;border-radius:50%;margin-top:-10px;background:var(--accent);color:var(--accent-ink);box-shadow:0 4px 14px rgb(0 0 0 / .28);border:3px solid var(--surface)}
+.tabs .tab-main .ico svg{width:22px;height:22px;stroke-width:2.4}
 .tabs .tab-main[aria-selected="true"] .ico,.tabs .tab-main:active .ico{background:var(--accent);color:var(--accent-ink)}
 .tabs .tab-main:active .ico{transform:scale(.94)}
 .tabs .badge{position:absolute;top:0;right:8px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--warn);color:#1A1405;font-family:var(--f-num);font-size:11px;font-weight:600;line-height:17px;text-align:center;box-shadow:0 0 0 2px var(--surface)}
@@ -276,11 +276,16 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .zk .acts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .zk .zwarn{display:flex;flex-direction:column;gap:8px;border-left:3px solid var(--warn);padding:2px 0 2px 10px;font-size:13px}
 .zk .zwarn p{margin:0}
-.zk .zwhy summary{font-size:13px;color:var(--accent);font-weight:500;cursor:pointer}
+.zk .zwhy>summary{display:flex;justify-content:space-between;align-items:center;list-style:none;font-size:14px;color:var(--accent);font-weight:500;cursor:pointer;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.zk .zwhy>summary::-webkit-details-marker{display:none}
+.zk .zwhy>summary::after{content:'›';transform:rotate(90deg);transition:transform .2s;font-size:18px;line-height:1}
+.zk .zwhy[open]>summary::after{transform:rotate(-90deg)}
 .zk .zlist{display:flex;flex-direction:column;gap:8px;margin-top:8px}
 .zk .zlist .zl{font-size:13px}
 .zk .zfine{font-size:11px}
-.zform label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.zform label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500;color:var(--ink)}
+.zform>p{color:var(--ink);opacity:.85;font-size:12.5px;line-height:1.45}
+.zform .zpast legend{color:var(--ink)}
 .zform select,.zform input{width:100%;flex:none}
 .zsheet{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
 /* a card in the middle of the screen, over the page */
@@ -289,6 +294,23 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 @media (prefers-reduced-motion:reduce){.zsheet-panel{animation:none}}
 .zsheet-head{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--surface);padding:12px 0 10px;margin-bottom:4px;border-bottom:1px solid var(--line)}
 .zsheet-head b{font-size:17px}
+.zcard{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:2px 12px}
+.zrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:15px;line-height:1.3}
+.zrow:last-child{border-bottom:0}
+.zrow>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.zrow small{font-size:12px;color:var(--muted);line-height:1.35}
+.zrow>b{font-family:var(--f-num);font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+.zrow.zsum>div>span{font-weight:600}
+.zrow.zsum>b{font-weight:600}
+.zdates .zd{align-items:flex-end;text-align:right}
+.zdates .zd b{font-weight:600;font-size:15px}
+.zdue{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--bg);border:1px solid var(--line);border-left:3px solid var(--bad);border-radius:14px;padding:12px}
+.zdue>div{display:flex;flex-direction:column}
+.zdue span{font-size:13px;color:var(--muted)}
+.zdue b{font-family:var(--f-num);font-weight:600;font-size:24px;color:var(--bad);white-space:nowrap}
+.zhint{display:flex;flex-direction:column;gap:3px;background:var(--accent-soft);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.45;color:var(--ink)}
+.zhint b{font-weight:600}
+.zwhy[open]{display:flex;flex-direction:column;gap:10px}
 .zline{display:flex;justify-content:space-between;align-items:baseline;gap:10px;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;color:var(--ink);font-size:14px;text-align:left}
 .zline>span:first-child{white-space:nowrap}
 .zline>span:last-child{color:var(--muted);font-size:13px;text-align:right}
@@ -335,6 +357,11 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .debt .head .left{font-family:var(--f-num);font-weight:500;font-size:16px}
 .debt .meta{font-size:13px;color:var(--muted)}
 .debt .acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.dedit{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dedit label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);min-width:0}
+.dedit .full{grid-column:1/-1}
+.dedit .row{display:flex;gap:12px;align-items:center}
+.dedit .err{margin:0}
 #oweTotal{font-family:var(--f-num);font-weight:500;font-size:16px;color:var(--bad)}
 .debt .acts input{width:130px}
 .debt.closed{opacity:.6}
@@ -578,8 +605,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
 </main>
 </div>
 <nav class="tabs" role="tablist" aria-label="Разделы">
-  <button role="tab" id="tabMoney" aria-selected="false" aria-controls="viewMoney"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18v3"/><path d="M4 7.5V17a2 2 0 0 0 2 2h13a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H6.5A2.5 2.5 0 0 1 4 7.5"/><circle cx="16" cy="13.5" r="1.2" fill="currentColor" stroke="none"/></svg></span>Деньги</button>
   <button role="tab" id="tabHistory" aria-selected="false" aria-controls="viewHistory"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1" fill="currentColor" stroke="none"/></svg></span>Записи</button>
+  <button role="tab" id="tabMoney" aria-selected="false" aria-controls="viewMoney"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18v3"/><path d="M4 7.5V17a2 2 0 0 0 2 2h13a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H6.5A2.5 2.5 0 0 1 4 7.5"/><circle cx="16" cy="13.5" r="1.2" fill="currentColor" stroke="none"/></svg></span>Деньги</button>
   <button role="tab" id="tabLedger" class="tab-main" aria-selected="true" aria-controls="viewLedger"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Учёт</button>
   <button role="tab" id="tabStats" aria-selected="false" aria-controls="viewStats"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-6"/></svg></span>Итоги</button>
   <button role="tab" id="tabDebts" aria-selected="false" aria-controls="viewDebts"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg><span class="badge" id="debtBadge"></span></span>Долги</button>
@@ -1322,6 +1349,9 @@ function zDebtBack(d,v){
 }
 /* lunar years that have already ended since a chosen start date, and the start of the year running now */
 function zPast(start){let s=start,n=0;const T=iso(now);while(n<60){const e=hawlEnd(s);if(e>T)break;s=e;n++}return {n,cur:s}}
+/* one line of the zakat window: name (with a small note under it) on the left, the sum on the right */
+const zRow=(label,value,sub,cls)=>`<div class="zrow${cls?' '+cls:''}"><div><span>${label}</span>${sub?`<small>${sub}</small>`:''}</div><b>${value}</b></div>`;
+const zDateRow=(label,d,extra)=>`<div class="zrow"><div><span>${label}</span></div><div class="zd"><b>${NB(hijri(d)||gDate(d))}</b><small>${hijri(d)?gDate(d):''}${extra?(hijri(d)?' · ':'')+extra:''}</small></div></div>`;
 let zBusy=false;
 function renderZakat(){
   const box=$('zakatBox');if(!box||!state.ready) return '';
@@ -1342,22 +1372,22 @@ function renderZakat(){
     line='<span>🌙 Закят</span><span>впишите счета ›</span>';
   }else{
     const cur=zCalc(T,z,M,addDays(T,1)), end=z.start?hawlEnd(z.start):null, days=end?Math.round((isoToDate(end)-isoToDate(T))/864e5):0;
-    if(owed>=0.01) html+=`<div class="zl big"><span>К оплате</span><b class="neg">${money(owed)}</b></div>
-      <div class="acts"><button class="primary" id="zPay2">Оплатить</button><span class="zs">можно частями — остаток останется в напоминании</span></div>`;
-    else if(L.due>0||L.paid>0) html+=`<div class="zl"><span>Долгов по закяту нет</span><b>✓</b></div>`;
-    html+=`<div class="zl"><span>Облагается сейчас</span><b>${money(cur.base)}</b></div>
-      <div class="zl"><span>Нисаб · ${NISAB_G[metal]} г ${METAL[metal]} × ${money(+z.price)}</span><b>${money(nisab)}</b></div>`;
+    if(owed>=0.01) html+=`<div class="zdue"><div><span>К оплате</span><b>${money(owed)}</b></div><button class="primary" id="zPay2">Оплатить</button></div>
+      <p class="zs">Можно частями — остаток останется в напоминании.</p>`;
+    else if(L.due>0||L.paid>0) html+=`<div class="zcard">${zRow('Долгов по закяту нет','✓')}</div>`;
+    if(z.start) dip=zDip(z,M);
+    const ended=dip&&dip.ended;
+    html+=`<div class="zcard">${zRow('Облагается сейчас',money(cur.base))}${zRow('Нисаб',money(nisab),`${NISAB_G[metal]} г ${METAL[metal]} × ${money(+z.price)}`)}
+      ${z.start&&!ended?zRow('Закят к сроку',cur.below?'—':money(cur.amount),cur.below?'сейчас ниже нисаба — закята не будет':'если сумма не изменится'):''}</div>`;
     if(z.start){
-      dip=zDip(z,M);
-      html+=dip&&dip.ended
-        ?`<p class="zs"><b>Срок наступил ${bothDates(end)}</b>, но за год сумма опускалась ниже нисаба — решите ниже, как быть с этим годом.</p>`
-        :`<div class="zl"><span>${cur.below?'Ниже нисаба — если так останется, закята не будет':'Закят к сроку, если сумма не изменится'}</span><b>${cur.below?'—':money(cur.amount)}</b></div>
-        <p class="zs">Год закята: с ${bothDates(z.start)}<br>Срок: <b>${bothDates(end)}</b>${days>0?` · через ${days} ${plural(days,'день','дня','дней')}`:''}</p>`;
+      html+=ended
+        ?`<div class="zwarn"><p><b>Срок наступил ${bothDates(end)}</b>, но за год сумма опускалась ниже нисаба — решите ниже, как быть с этим годом.</p></div>`
+        :`<div class="zcard zdates">${zDateRow('Начало года',z.start)}${zDateRow('Срок',end,days>0?`через ${days} ${plural(days,'день','дня','дней')}`:'')}</div>`;
       if(dip) html+=`<div class="zwarn"><p><b>${gDate(dip.d)}</b> сумма была ${money(dip.v)} — ниже нисаба. По шафиитскому мазхабу год закята тогда начинается заново${dip.back?`: с ${bothDates(dip.back)}, когда сумма снова дошла до нисаба`:', когда сумма снова дойдёт до нисаба'}.</p>
         <div class="acts">${dip.back?`<button class="primary" id="zRestart" data-d="${dip.back}">Начать год с ${gDate(dip.back)}</button>`:`<button class="primary" id="zWait" data-d="${dip.d}">Ждать нисаба</button>`}<button class="linkbtn" id="zDipOk" data-upto="${dip.back?addDays(dip.back,-1):T}">Ошибка в записях, оставить</button></div>
         <p class="zs">Проверка идёт по записям приложения и по нынешней цене ${METAL[metal]}.</p></div>`;
     }else{
-      html+=`<p class="zs">Сумма ниже нисаба. Год закята начнётся сам в тот день, когда денег станет не меньше ${money(nisab)}.</p>`;
+      html+=`<div class="zhint">Сумма ниже нисаба. Год закята начнётся сам в тот день, когда денег станет не меньше ${money(nisab)}.</div>`;
     }
     /* one line on «Деньги» */
     line=owed>=0.01?`<span>🌙 Закят к оплате</span><span class="neg">${money(owed)} ›</span>`
@@ -1366,28 +1396,28 @@ function renderZakat(){
       :'<span>🌙 Закят</span><span>сумма ниже нисаба ›</span>';
     /* why the sum is what it is */
     const bMiss=M.missing.includes('broker'), miss=M.missing.map(id=>WNAME[id]);
-    html+=`<details class="zwhy"><summary>Почему столько</summary><div class="zlist">
-      <div class="zl"><span>Карты, наличные, Подушка, Копильник</span><b>${money(cur.cash)}</b></div>
-      ${bMiss?'':`<div class="zl"><span>Брокерский счёт ${M.brokerOwn?`<small>по вашей оценке от ${gDate(iso(new Date(M.bo.at)))}, плюс переводы после неё</small>`:'<small>сумма с вкладки «Деньги»</small>'}</span><b>${money(cur.broker)}</b></div>`}
-      ${cur.rel?`<div class="zl"><span>Вам должны (надёжные долги)</span><b>${money(cur.rel)}</b></div>`:''}
-      ${cur.doubt?`<div class="zl"><span>Сомнительные долги <small>— только для нисаба, закят с них когда вернут</small></span><b>${money(cur.doubt)}</b></div>`:''}
-      ${cur.owedPrev?`<div class="zl"><span>Неоплаченный закят</span><b>−${money(cur.owedPrev)}</b></div>`:''}
-      ${cur.adv?`<div class="zl"><span>Уже отдано досрочно <small>— считается, как будто ещё у вас</small></span><b>+${money(cur.adv)}</b></div>`:''}
-      <div class="zl"><span>2,5% с этой суммы</span><b>${money(cur.base)}<small>→ ${money(r2(cur.base*ZAKAT_RATE))}</small></b></div>
-      ${miss.length?`<p class="zs">Не вписаны на вкладке «Деньги»: ${miss.join(', ')} — они не учтены.${bMiss?' Стоимость брокерского счёта можно указать в настройках закята.':''}</p>`:''}
-      <p class="zs">Ставка 2,5% со всей суммы, а не только сверх нисаба. Деньги, пришедшие в этом году, тоже входят — с них закят отдаётся досрочно, это допустимо. Свои долги не вычитаются (шафиитский мазхаб). Жильё, машина и вещи не облагаются.</p>
-      </div></details>`;
-    if(z.priceAt&&Date.now()-z.priceAt>30*864e5) html+=`<p class="zs">Цена ${METAL[metal]} вписана ${gDate(iso(new Date(z.priceAt)))} — обновите её перед сроком.</p>`;
+    html+=`<details class="zwhy"><summary>Почему столько</summary>
+      <div class="zcard">${zRow('Карты и наличные',money(cur.cash),'Т-Банк, Сбер, ВТБ, Наличка, Подушка, Копильник')}
+      ${bMiss?'':zRow('Брокерский счёт',money(cur.broker),M.brokerOwn?`ваша оценка от ${gDate(iso(new Date(M.bo.at)))} и переводы после неё`:'сумма с вкладки «Деньги»')}
+      ${cur.rel?zRow('Вам должны',money(cur.rel),'надёжные долги'):''}
+      ${cur.doubt?zRow('Сомнительные долги',money(cur.doubt),'только для нисаба, закят — когда вернут'):''}
+      ${cur.owedPrev?zRow('Неоплаченный закят','−'+money(cur.owedPrev)):''}
+      ${cur.adv?zRow('Отдано досрочно','+'+money(cur.adv),'считается, как будто ещё у вас'):''}
+      ${zRow('Итого облагается',money(cur.base),'','zsum')}${zRow('Закят 2,5%',money(r2(cur.base*ZAKAT_RATE)),'','zsum')}</div>
+      ${miss.length?`<div class="zhint">Не вписаны на вкладке «Деньги»: ${miss.join(', ')} — они не учтены.${bMiss?' Стоимость брокерского счёта можно указать в настройках закята.':''}</div>`:''}
+      <div class="zhint"><b>Как считается</b>Ставка 2,5% со всей суммы, а не только сверх нисаба. Деньги, пришедшие в этом году, тоже входят — с них закят отдаётся досрочно, это допустимо. Свои долги не вычитаются (шафиитский мазхаб). Жильё, машина и вещи не облагаются.</div>
+      </details>`;
+    if(z.priceAt&&Date.now()-z.priceAt>30*864e5) html+=`<div class="zhint">Цена ${METAL[metal]} вписана ${gDate(iso(new Date(z.priceAt)))} — обновите её перед сроком.</div>`;
     const hist=zHistory(z);
-    const paidTxt=r=>r.paid>=r.amount-0.005?' ✓':`<small>оплачено ${money(r.paid)}</small>`;
-    if(hist.length) html+=`<details class="zwhy"><summary>История по годам</summary><div class="zlist">${hist.slice().reverse().map(r=>r.y
-      ?`<div class="zl"><span>Срок ${bothDates(r.y.due)}${r.y.below?' <small>— ниже нисаба, закята не было</small>':`<small>облагалось ${money(r.y.base)}${r.y.approx?' (примерно)':''}</small>`}</span><b>${r.y.below?'—':money(r.amount)+paidTxt(r)}</b></div>`
-      :`<div class="zl"><span>${esc(r.x.label||'Закят с долга')} <small>${gDate(r.x.date)}</small></span><b>${money(r.amount)}${paidTxt(r)}</b></div>`).join('')}
-      ${L.paid?`<p class="zs">Всего выплачено: ${money(L.paid)}</p>`:''}</div></details>`;
+    const paidSub=r=>r.paid>=r.amount-0.005?'оплачено ✓':`оплачено ${money(r.paid)}`;
+    if(hist.length) html+=`<details class="zwhy"><summary>История по годам</summary><div class="zcard">${hist.slice().reverse().map(r=>r.y
+      ?zRow(`Срок ${NB(hijri(r.y.due)||gDate(r.y.due))}`,r.y.below?'—':money(r.amount),r.y.below?`${gDate(r.y.due)} · ниже нисаба, закята не было`:`${gDate(r.y.due)} · облагалось ${money(r.y.base)}${r.y.approx?' (примерно)':''} · ${paidSub(r)}`)
+      :zRow(esc(r.x.label||'Закят с долга'),money(r.amount),`${gDate(r.x.date)} · ${paidSub(r)}`)).join('')}</div>
+      ${L.paid?`<p class="zs">Всего выплачено: ${money(L.paid)}</p>`:''}</details>`;
     const lastY=(z.years||[]).slice().sort((a,b)=>b.due.localeCompare(a.due))[0];
     html+=`<div class="acts"><button class="ghost" id="zSet">Настройки</button>${lastY&&owed>=0.01?`<button class="linkbtn" id="zRe" data-d="${lastY.due}">Пересчитать закят за срок ${gDate(lastY.due)}</button>`:''}</div>`;
   }
-  html+=`<p class="zs zfine">Расчёт ориентировочный: шафиитский мазхаб, нисаб по ${metal==='gold'?'золоту (Муфтият ЧР считает по серебру)':'серебру, как у Муфтията ЧР'}. По спорным вопросам уточните у имама.</p></div>`;
+  html+=`<div class="zhint zfine"><b>Расчёт ориентировочный</b>Шафиитский мазхаб, нисаб по ${metal==='gold'?'золоту (Муфтият ЧР считает по серебру)':'серебру, как у Муфтията ЧР'}. По спорным вопросам уточните у имама.</div></div>`;
   box.innerHTML=html;
   $('zakatForm').innerHTML=state.editing==='zakat'?zForm(z):'';
   bindZakat(z,M);
@@ -1412,7 +1442,7 @@ function zForm(z){
   return `<div class="wmodal"><div class="sheet-bg" data-zclose></div><form class="wallet-edit zform" id="zForm" novalidate><b>Настройки закята</b>
     <label>Нисаб считать по<select id="zMetal"><option value="silver" ${metal==='silver'?'selected':''}>серебру — 595 г (как Муфтият ЧР)</option><option value="gold" ${metal==='gold'?'selected':''}>золоту — 85 г</option></select></label>
     <label><span id="zPriceL">Цена грамма ${METAL[metal]}, ₽</span><input id="zPrice" class="num" inputmode="decimal" placeholder="Например, 215" value="${z.price?String(z.price).replace('.',','):''}"></label>
-    <p>Учётная цена ЦБ: cbr.ru → «Драгоценные металлы». Нисаб = <span id="zNis">${z.price?money(zNisab(z)):'—'}</span></p>
+    <div class="zhint"><span>Учётная цена ЦБ: cbr.ru → «Драгоценные металлы»</span><span>Нисаб: <b id="zNis">${z.price?money(zNisab(z)):'—'}</b></span></div>
     <label>Когда ваши деньги дошли до нисаба<input id="zStart" type="date" max="${iso(now)}" value="${z.start||''}"></label>
     <p id="zStartH">${zStartHint(z.start)}</p>
     <div id="zPastBox"></div>
@@ -1666,10 +1696,10 @@ function renderDebts(){
     return `<div class="debt ${isOpen?'':'closed'}">
       <div class="head"${inGroup?` data-di="${esc(d.id)}" role="button" tabindex="0" style="cursor:pointer"`:''}><b>${esc(inGroup?(when||'Без даты'):d.name)}${d.doubtful&&isOpen?'<span class="tag">сомнительный</span>':''}</b><span class="left">${isOpen?moneyR(left):(+d.forgiven>0?'прощён':'вернул')}</span></div>
       ${[inGroup?'':when,ret>0&&isOpen?`вернул ${moneyR(ret)} из ${moneyR(+d.amount||0)}`:'',d.note?esc(d.note):''].filter(Boolean).length?`<div class="meta">${[inGroup?'':when,ret>0&&isOpen?`вернул ${moneyR(ret)} из ${moneyR(+d.amount||0)}`:'',d.note?esc(d.note):''].filter(Boolean).join(' · ')}</div>`:''}
-      ${inGroup&&!showActs(d)?'':`<div class="acts">${isOpen?(state.editing==='d-'+d.id
+      ${inGroup&&!showActs(d)?'':state.editing==='de-'+d.id?debtEditForm(d):`<div class="acts">${isOpen?(state.editing==='d-'+d.id
         ?`<form class="inline-edit" data-part="${esc(d.id)}"><input class="num" inputmode="decimal" placeholder="Сколько вернул" aria-label="Сколько вернул ${esc(d.name)}"><button class="primary" type="submit">Записать</button><button class="linkbtn" type="button" data-cancel>Отмена</button></form>`
         :`<select data-racc="${esc(d.id)}" aria-label="Куда вернул ${esc(d.name)}">${ACCS.map(([v,n])=>`<option value="${v}" ${(state.retAcc[d.id]||'cash')===v?'selected':''}>${n}</option>`).join('')}</select><button class="primary" data-full="${esc(d.id)}">Вернул всё</button><button class="ghost" data-partbtn="${esc(d.id)}">Вернул часть</button><button class="linkbtn" data-forgive="${esc(d.id)}">Простить → садака</button><button class="linkbtn" data-doubt="${esc(d.id)}">${d.doubtful?'Снять «сомнительный»':'Сомнительный'}</button>`):(+d.forgiven>0?`<span class="meta">Прощено ${money(+d.forgiven)} — записано в садаку</span>`:'')}
-        <button class="del" data-id="${esc(d.id)}" aria-label="Удалить запись о долге">Удалить</button></div>`}
+        <button class="linkbtn" data-dedit="${esc(d.id)}">Изменить</button><button class="del" data-id="${esc(d.id)}" aria-label="Удалить запись о долге">Удалить</button></div>`}
     </div>`;
   };
   const list=$('debtList');
@@ -1721,6 +1751,7 @@ function renderDebts(){
       try{await store.add(backRec(d,take));await store.updateDebt(d.id,patch);const zk=zDebtBack(d,take);toast(`${d.name}: вернул ${money(v)}`+(zk?` · закят с этой суммы: ${money(zk.amount)}`:''))}catch(x){toast('Не получилось сохранить. Попробуйте ещё раз.')}
     };
   });
+  bindDebtEdit(list);
   armDeletes(list,id=>store.removeDebt(id),'Запись о долге удалена');
 }
 /* money I owe someone (rare): borrowed money came into an account, paying it back takes it out.
@@ -1735,10 +1766,10 @@ function renderOwe(){
     const meta=[when,ret>0&&isOpen?`отдал ${moneyR(ret)} из ${moneyR(+d.amount||0)}`:'',d.note?esc(d.note):''].filter(Boolean).join(' · ');
     return `<div class="debt ${isOpen?'':'closed'}"><div class="head"><b>${esc(d.name)}</b><span class="left">${isOpen?moneyR(left):(+d.forgiven>0?'простили':'отдал')}</span></div>
       ${meta?`<div class="meta">${meta}</div>`:''}
-      <div class="acts">${isOpen?(state.editing==='o-'+d.id
+      ${state.editing==='de-'+d.id?debtEditForm(d):`<div class="acts">${isOpen?(state.editing==='o-'+d.id
         ?`<form class="inline-edit" data-opart="${esc(d.id)}"><input class="num" inputmode="decimal" placeholder="Сколько отдал" aria-label="Сколько отдал ${esc(d.name)}"><button class="primary" type="submit">Записать</button><button class="linkbtn" type="button" data-ocancel>Отмена</button></form>`
         :`<select data-oacc="${esc(d.id)}" aria-label="С какого счёта отдал ${esc(d.name)}">${ACCS.map(([v,n])=>`<option value="${v}" ${(state.payAcc[d.id]||'tbank')===v?'selected':''}>${n}</option>`).join('')}</select><button class="primary" data-ofull="${esc(d.id)}">Отдал всё</button><button class="ghost" data-opartbtn="${esc(d.id)}">Отдал часть</button><button class="linkbtn" data-oforgive="${esc(d.id)}">Мне простили</button>`):''}
-        <button class="del" data-id="${esc(d.id)}" aria-label="Удалить запись о долге">Удалить</button></div></div>`};
+        <button class="linkbtn" data-dedit="${esc(d.id)}">Изменить</button><button class="del" data-id="${esc(d.id)}" aria-label="Удалить запись о долге">Удалить</button></div>`}</div>`};
   list.innerHTML=open.map(d=>one(d,true)).join('')+(closed.length?`<details><summary>Закрытые (${closed.length})</summary>${closed.map(d=>one(d,false)).join('')}</details>`:'');
   const payRec=(d,v)=>({type:'debt',dir:'pay',amount:Math.round(v*100)/100,acc:state.payAcc[d.id]||'tbank',date:iso(now),label:'Отдал долг: '+d.name,debt:d.id,created:Date.now()});
   list.querySelectorAll('[data-oacc]').forEach(sel=>sel.onchange=()=>state.payAcc[sel.dataset.oacc]=sel.value);
@@ -1753,7 +1784,42 @@ function renderOwe(){
       if(!(v>0)){toast('Введите сумму больше нуля');return}
       const take=Math.min(v,debtLeft(d)), ret=(+d.returned||0)+take, patch={returned:ret};if(ret>=(+d.amount||0)) patch.closedAt=Date.now();
       state.editing=null;try{await store.add(payRec(d,take));await store.updateDebt(d.id,patch);toast(`${d.name}: отдал ${money(take)}`)}catch(x){toast('Не получилось сохранить. Попробуйте ещё раз.')}}});
+  bindDebtEdit(list);
   armDeletes(list,id=>store.removeDebt(id),'Запись о долге удалена');
+}
+/* fixing a debt typed wrong (sum, date, name, note); its «Дал в долг» / «Взял в долг» record follows, so the account stays right */
+function debtEditForm(d){
+  return `<form class="dedit" data-deform="${esc(d.id)}" novalidate>
+    <label class="full">${d.mine?'У кого взял':'Имя'}<input name="who" maxlength="60" value="${esc(d.name)}" autocomplete="off"></label>
+    <label>Сумма, ₽<input name="amount" class="num" inputmode="decimal" value="${String(+d.amount||0).replace('.',',')}" autocomplete="off"></label>
+    <label>Дата<input name="date" type="date" max="${iso(now)}" value="${esc(d.date||'')}"></label>
+    <label class="full">Комментарий<input name="note" maxlength="80" value="${esc(d.note||'')}"></label>
+    <p class="err full" hidden></p>
+    <div class="row full"><button class="primary" type="submit">Сохранить</button><button class="linkbtn" type="button" data-decancel>Отмена</button></div></form>`;
+}
+function bindDebtEdit(list){
+  list.querySelectorAll('[data-dedit]').forEach(b=>b.onclick=()=>{state.editing='de-'+b.dataset.dedit;render();list.querySelector('form[data-deform] input[name=amount]')?.focus()});
+  list.querySelectorAll('form[data-deform]').forEach(f=>{
+    f.querySelector('[data-decancel]').onclick=()=>{state.editing=null;render()};
+    f.onsubmit=async e=>{e.preventDefault();
+      const d=state.debts.find(x=>x.id===f.dataset.deform), err=f.querySelector('.err'), bad=t=>{err.textContent=t;err.hidden=false};
+      const name=f.elements.who.value.trim(), amount=Math.round(parseNum(f.elements.amount.value)*100)/100, date=f.elements.date.value||d.date, note=f.elements.note.value.trim();
+      const back=(+d.returned||0)+(+d.forgiven||0);
+      if(!name) return bad('Впишите имя.');
+      if(!(amount>0)) return bad('Впишите сумму больше нуля.');
+      if(amount<back-0.005) return bad(`Уже ${d.mine?'отдано':'вернули'} ${money(back)} — сумма не может быть меньше.`);
+      const patch={name,amount,date,note,closedAt:amount-back>0.005?0:(d.closedAt||Date.now())};
+      /* the account record made with this debt: linked by id, older ones by name, date and sum */
+      const dir=d.mine?'in':'out', pre=d.mine?'Взял в долг: ':'Дал в долг: ';
+      const rec=state.items.find(i=>typeOf(i)==='debt'&&i.dir===dir&&i.debt===d.id)||state.items.find(i=>typeOf(i)==='debt'&&(i.dir||'out')===dir&&!i.debt&&i.label===pre+d.name&&i.date===d.date&&Math.abs((+i.amount||0)-(+d.amount||0))<0.01);
+      state.editing=null;
+      try{
+        await store.updateDebt(d.id,patch);
+        if(rec) await store.update(rec.id,{amount,date,label:pre+name});
+        toast(`${name}: ${money(amount)}`+(Math.abs(amount-(+d.amount||0))>0.005?` (было ${money(+d.amount||0)})`:''));
+      }catch(x){toast('Не получилось сохранить. Попробуйте ещё раз.')}
+    };
+  });
 }
 $('oDate').value=iso(now);$('oDate').max=iso(now);
 $('oAcc').innerHTML=[...ACCS.map(([v,n])=>`<option value="${v}" ${v==='tbank'?'selected':''}>${n}</option>`),'<option value="">Не зачислять — уже учёл</option>'].join('');
