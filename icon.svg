@@ -1,21 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
   <defs>
-    <linearGradient id="bg" x1="112" y1="912" x2="912" y2="112" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#5EDB94"/>
-      <stop offset="0.5" stop-color="#5CC3E2"/>
-      <stop offset="1" stop-color="#5B8CFF"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1A2540"/>
+      <stop offset="1" stop-color="#0A0F1A"/>
     </linearGradient>
-    <radialGradient id="sheen" cx="512" cy="0" r="760" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.16"/>
-      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.5">
+      <stop offset="0" stop-color="#5EDB94" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#5EDB94" stop-opacity="0"/>
     </radialGradient>
   </defs>
   <rect x="0" y="0" width="1024" height="1024" fill="url(#bg)"/>
-  <rect x="0" y="0" width="1024" height="1024" fill="url(#sheen)"/>
-  <g transform="translate(43 -3)" fill="#0D1320" stroke="#0D1320" stroke-width="16" stroke-linejoin="round">
-    <path fill-rule="evenodd" d="M327 210 H512 A145 145 0 0 1 512 500 H327 Z M419 302 H512 A53 53 0 0 1 512 408 H419 Z"/>
-    <rect x="327" y="210" width="92" height="610"/>
-    <rect x="217" y="408" width="110" height="92"/>
-    <path d="M217 654 H541 L605.3 589.7 L581.2 565.6 L721.2 538.8 L694.4 678.8 L670.3 654.7 L592.5 732.5 A46 46 0 0 1 560 746 H217 Z"/>
+  <rect x="0" y="0" width="1024" height="1024" fill="url(#glow)"/>
+  <defs>
+    <linearGradient id="gInc" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7BEAAE"/>
+      <stop offset="1" stop-color="#45C67F"/>
+    </linearGradient>
+    <linearGradient id="gExp" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF9F6B"/>
+      <stop offset="1" stop-color="#FF6F7A"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <rect x="248" y="339" width="128" height="215" rx="34" fill="url(#gInc)"/>
+    <rect x="248" y="590" width="128" height="190" rx="34" fill="url(#gExp)"/>
+    <rect x="448" y="284" width="128" height="270" rx="34" fill="url(#gInc)"/>
+    <rect x="448" y="590" width="128" height="150" rx="34" fill="url(#gExp)"/>
+    <rect x="648" y="224" width="128" height="330" rx="34" fill="url(#gInc)"/>
+    <rect x="648" y="590" width="128" height="120" rx="34" fill="url(#gExp)"/>
   </g>
+  <rect x="218" y="567" width="588" height="10" rx="5" fill="#E6ECF7" opacity="0.85"/>
 </svg>
