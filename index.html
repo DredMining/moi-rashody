@@ -432,7 +432,16 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:500
 .tile[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
 .tile small{font-family:var(--f-num);color:var(--muted);font-size:12px}
 .accs{grid-template-columns:repeat(2,minmax(0,1fr))}
-.accs .tile{flex-direction:row;justify-content:space-between;padding:14px;font-size:15px;text-align:left}
+.accs .tile{flex-direction:column;justify-content:center;gap:4px;padding:12px 6px 10px;font-size:14px;text-align:center}
+.accs .tile .am{width:34px;height:34px}
+.accs .tile:last-child:nth-child(odd){grid-column:1/-1}
+.am{display:inline-grid;place-items:center}
+.am svg{width:100%;height:100%;display:block}
+.accsel{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:118px;border:1px dashed var(--line);border-radius:16px;padding:12px}
+.accsel .am.big{width:64px;height:64px}
+.accsel b{font-size:18px;font-weight:600}
+.accsel-empty{color:var(--muted);font-size:14px}
+.submit:disabled{opacity:.45}
 .accs .tile .nm{font-weight:600}
 .toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:30;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;max-width:calc(100% - 32px);z-index:10}
 /* date fields: phone browsers give them a fixed native width that overflows the card */
@@ -1498,12 +1507,11 @@ function zPaySheet(amount){
   sheetFrame('Оплата закята',null);
   $('sheetSub').textContent='к оплате '+money(amount);
   $('sheetBody').innerHTML=`<label class="zpay">Сколько отдаёте сейчас<input id="zAmt" class="num" inputmode="decimal" value="${String(r2(amount)).replace('.',',')}"></label>
-    <h3>Откуда</h3><div class="tiles accs">${ACCS.map(([id,n])=>{const w=WALLETS.find(x=>x.id===id),v=walletValue(id);
-    return `<button type="button" class="tile" data-zacc="${id}"><span class="nm"${w?.color?` style="color:${w.color}"`:''}>${ACC_SHORT[id]||n}</span><small>${v===null?'':moneyR(v)}</small></button>`}).join('')}</div>
+    ${accPicker('zPayGo','Оплатить')}
     <p class="zs">Намерение — закят. Можно частями: остаток останется в напоминании.</p>`;
-  $('sheetBody').querySelectorAll('[data-zacc]').forEach(b=>b.onclick=()=>{
+  bindAccPicker('zPayGo',acc=>{const v=parseNum($('zAmt').value);return `Оплатить ${v>0?money(r2(v))+' ':''}· ${ACC_SHORT[acc]}`},acc=>{
     const v=parseNum($('zAmt').value);if(!(v>0)){toast('Впишите сумму больше нуля');$('zAmt').focus();return}
-    state.pend.amount=r2(v);saveEntry(b.dataset.zacc,{keepForm:true});
+    state.pend.amount=r2(v);saveEntry(acc,{keepForm:true});
   });
 }
 /* the zakat window opens over the current tab (from «Деньги» and from the reminders on «Учёт») */
@@ -2038,14 +2046,38 @@ function afterCat(labelDone){
   if(p.type==='in'&&p.cat==='dividends'){saveEntry('broker');return}
   stepAcc();
 }
+/* account marks drawn here (no internet needed): Сбер green with a tick, Т-Банк yellow shield «Т», ВТБ blue, cash, a pillow */
+const ACC_MARK={
+  sber:'<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#21A038"/><path d="M11 20.5l6 6 12-13" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  tbank:'<svg viewBox="0 0 40 40"><path d="M6 5h28v17c0 7-6 12-14 14C12 34 6 29 6 22z" fill="#FFDD2D"/><path d="M13 12h14v4h-5v12h-4V16h-5z" fill="#1A1A1A"/></svg>',
+  vtb:'<svg viewBox="0 0 40 40"><rect x="2" y="6" width="36" height="28" rx="7" fill="#0A2896"/><path d="M8 14h6l-1 2H7zM6 19h6l-1 2H5zM4 24h6l-1 2H3z" fill="#00AAFF"/><text x="25" y="25" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="11" fill="#fff">ВТБ</text></svg>',
+  pocket:'<svg viewBox="0 0 40 40"><rect x="3" y="10" width="34" height="20" rx="4" fill="#3BAA5C"/><rect x="7" y="14" width="26" height="12" rx="2" fill="none" stroke="#D8F3DF" stroke-width="1.6"/><circle cx="20" cy="20" r="4" fill="#D8F3DF"/></svg>',
+  cash:'<svg viewBox="0 0 40 40"><path d="M6 13c0-3 2-5 5-5 3 1 15 1 18 0 3 0 5 2 5 5-1 4-1 10 0 14 0 3-2 5-5 5-3-1-15-1-18 0-3 0-5-2-5-5 1-4 1-10 0-14z" fill="#B79CFF"/><path d="M12 14c5 1 11 1 16 0M12 26c5-1 11-1 16 0" fill="none" stroke="#EDE5FF" stroke-width="1.6" stroke-linecap="round"/></svg>'
+};
+const PICK_ACCS=['sber','tbank','vtb','pocket','cash'];
+const ACC_NAME={sber:'Сбербанк',tbank:'Т-Банк',vtb:'ВТБ',pocket:'Наличка',cash:'Подушка'};
+/* pick an account: all tiles alike, the one tapped shows big in the middle, nothing is saved until «Записать» */
+function accPicker(go,label){
+  return `<div class="accsel" aria-live="polite"><span class="accsel-empty">Выберите счёт</span></div>
+    <div class="tiles accs">${PICK_ACCS.map(id=>{const v=walletValue(id);
+      return `<button type="button" class="tile" data-acc="${id}" aria-pressed="false"><span class="am">${ACC_MARK[id]}</span><span class="nm">${ACC_SHORT[id]}</span><small>${v===null?'':moneyR(v)}</small></button>`}).join('')}</div>
+    <button type="button" class="submit" id="${go}" disabled>${label}</button>`;
+}
+function bindAccPicker(go,label,onGo){
+  const body=$('sheetBody'), sel=body.querySelector('.accsel'), btn=$(go);let acc=null;
+  body.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{acc=b.dataset.acc;
+    body.querySelectorAll('[data-acc]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+    sel.innerHTML=`<span class="am big">${ACC_MARK[acc]}</span><b>${ACC_NAME[acc]}</b>`;
+    btn.disabled=false;btn.textContent=label(acc)});
+  btn.onclick=()=>{if(acc)onGo(acc)};
+}
 function stepAcc(){
-  const p=state.pend, k=p.type==='in'?'in':p.scope;
-  const def=p.type==='in'&&INCOME_ACC[p.cat]?INCOME_ACC[p.cat]:state.accBy[k];
+  const p=state.pend;
   sheetFrame(p.type==='in'?'Куда пришли?':'Откуда?',p.guessed?null:()=>CAT[p.cat].custom?stepLabel():stepCat());
   $('sheetSub').textContent+=' · '+(p.label||CAT[p.cat].name);
-  $('sheetBody').innerHTML=`<div class="tiles accs">${ACCS.map(([id,n])=>{const w=WALLETS.find(x=>x.id===id),v=walletValue(id);
-    return `<button type="button" class="tile" data-acc="${id}" aria-pressed="${def===id}"><span class="nm"${w?.color?` style="color:${w.color}"`:''}>${ACC_SHORT[id]||n}</span><small>${v===null?'':moneyR(v)}</small></button>`}).join('')}</div>`;
-  $('sheetBody').querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>saveEntry(b.dataset.acc));
+  const sign=p.type==='in'?'+':'−';
+  $('sheetBody').innerHTML=accPicker('accGo','Записать');
+  bindAccPicker('accGo',acc=>`Записать ${sign}${money(p.amount)} · ${ACC_SHORT[acc]}`,acc=>saveEntry(acc));
 }
 /* keepForm: paying from a reminder (zakat) leaves whatever is typed in the entry form alone */
 async function saveEntry(acc,opt={}){
