@@ -215,6 +215,16 @@ input::placeholder{color:var(--muted)}
 .filterchip{font-size:13px;border:1px solid var(--line);border-radius:99px;padding:4px 10px;background:var(--accent-soft);color:var(--ink);display:inline-flex;gap:6px;align-items:center}
 .day{display:flex;flex-direction:column}
 .dayhead{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted);padding-block:10px 6px;border-bottom:1px solid var(--line)}
+/* Записи: each day is its own card, the date stands out */
+.recs{display:flex;flex-direction:column;gap:12px;min-width:0}
+.recs .listsum{display:grid;padding:12px 14px;border-bottom:1px solid var(--line)}
+.recs #list{display:flex;flex-direction:column;gap:12px}
+.recs .day{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:4px 16px 2px}
+.recs .dayhead{align-items:baseline;font-size:15px;font-weight:600;color:var(--ink);padding-block:12px 10px}
+.recs .dayhead>span:first-child::first-letter{text-transform:uppercase}
+.recs .dayhead .num{font-size:14px;font-weight:500;color:var(--muted)}
+.recs .listsum:empty{display:none}
+.recs .empty{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
 .item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding-block:10px;border-bottom:1px solid var(--line)}
 .item:last-child{border-bottom:0}
 .item .dot{width:10px;height:10px;border-radius:50%;background:var(--c)}
@@ -517,8 +527,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     </div>
     <div class="seg seg3" id="scopeFilter" role="group" aria-label="Чьи деньги"></div>
     <div class="chips" id="accFilter" role="group" aria-label="Фильтр по счёту"></div>
-    <section class="panel" aria-label="Записи за месяц">
-      <div class="listsum" id="listSum"></div>
+    <section class="recs" aria-label="Записи за месяц">
+      <div class="listsum panel" id="listSum"></div>
       <div class="listhead" id="listHead"><span id="filterBox"></span></div>
       <div id="list"></div>
     </section>
@@ -1075,7 +1085,7 @@ function renderWallets(){
       :`<button class="wrow" data-w="${w.id}" aria-label="${w.name}: ${moneyR(v)}, изменить">${name}<span class="wv"><b>${moneyR(v)}</b>${stale?`<small>сверено ${shortDate.format(new Date(at))}</small>`:''}</span></button>`;
   };
   const W=Object.fromEntries(WALLETS.map(w=>[w.id,w]));
-  let html=[['Карты',['tbank','sber','vtb']],['Наличные',['pocket','cash']],['Накопления',['broker','piggy']]]
+  let html=[['Карты',['sber','tbank','vtb']],['Наличные',['pocket','cash']],['Накопления',['broker','piggy']]]
     .map(([h,ids])=>`<div class="wgroup"><h3>${h}</h3><div class="wlist">${ids.map(id=>tile(W[id])).join('')}</div></div>`).join('');
   const ed=WALLETS.find(w=>state.editing==='w-'+w.id);
   if(ed){
