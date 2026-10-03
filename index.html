@@ -104,14 +104,19 @@ button{cursor:pointer}
 .stat b{font-family:var(--f-num);font-weight:500;font-size:17px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .stat small{font-size:12px;color:var(--muted)}
 .stat.wide{grid-column:1/-1}
-.panel.mcard{gap:0;padding:4px 14px 12px}
-.mcard .mrow>span{display:flex;align-items:center;gap:8px}
-.mcard .mrow>span::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--good)}
-.mcard .mrow:nth-child(2)>span::before{background:var(--bad)}
-.mcard .mtotal>span::before{background:var(--warn)}
-.mcard .mrow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
-.mcard .mrow b{font-family:var(--f-num);font-weight:500;font-size:16px;font-variant-numeric:tabular-nums;white-space:nowrap}
-.mcard .mtotal{border-bottom:0}
+.panel.mcard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:12px 6px}
+.mcard .mcol{display:flex;flex-direction:column;gap:3px;min-width:0;padding:0 8px}
+.mcard .mcol+.mcol{border-left:1px solid var(--line)}
+.mcard .mdiff{align-items:center;text-align:center}
+.mcard .mout{align-items:flex-end;text-align:right}
+.mcard .mcol>span{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.mcard .mcol>span::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--good);flex:none}
+.mcard .mdiff>span::before{background:var(--warn)}
+.mcard .mout>span::before{background:var(--bad)}
+.mcard .mcol>b{font-family:var(--f-num);font-weight:500;font-size:min(16px,3.6vw);font-variant-numeric:tabular-nums;white-space:nowrap}
+/* «Куда ушли деньги»: each part is a block of its own inside the card */
+#breakdown .bd{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px}
+#breakdown .bd h3{margin:0 0 2px;font-size:12px}
 #tripCard .stat{border:0;background:none;padding:0}
 .money{display:flex;flex-direction:column;gap:8px}
 .moneyhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
@@ -586,9 +591,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
       <button class="iconbtn" id="sNext" aria-label="Следующий месяц">›</button>
     </div>
     <section class="panel mcard" aria-label="Месяц">
-      <div class="mrow"><span>Доходы</span><b class="pos" id="incomeTotal">0 ₽</b></div>
-      <div class="mrow"><span>Расходы</span><b class="neg" id="allOut">0 ₽</b></div>
-      <div class="mrow mtotal"><span>Разница</span><b id="balance">0 ₽</b></div>
+      <div class="mcol min"><span>Доходы</span><b class="pos" id="incomeTotal">0 ₽</b></div>
+      <div class="mcol mdiff"><span>Разница</span><b id="balance">0 ₽</b></div>
+      <div class="mcol mout"><span>Расходы</span><b class="neg" id="allOut">0 ₽</b></div>
     </section>
     <section id="breakdown" aria-labelledby="catH" class="panel bdwrap">
       <h2 id="catH">Куда ушли деньги</h2>
@@ -846,6 +851,7 @@ function renderLedger(){
   $('incomeTotal').textContent=moneyR(earned);
   $('allOut').textContent=moneyR(spent);
   const b=$('balance');b.textContent=(bal>0?'+':bal<0?'−':'')+moneyR(Math.abs(bal));b.className=bal>0?'pos':bal<0?'neg':'';
+  requestAnimationFrame(fitMonth);
   const tripAlert=renderTrip(trip)||'';
   renderTripLine();
   const brokerAlert=renderBroker(inc,out)||'';
@@ -862,6 +868,13 @@ function renderLedger(){
   renderList(items);
 }
 
+/* the three month sums share one line: the same font for all three, a bit smaller until the longest fits with room */
+function fitMonth(){
+  const els=[...document.querySelectorAll('.mcard .mcol>b')];if(!els.length||!els[0].clientWidth) return;
+  let f=16;els.forEach(e=>e.style.fontSize=f+'px');
+  while(f>11&&els.some(e=>e.scrollWidth>e.clientWidth-6)){f-=0.5;els.forEach(e=>e.style.fontSize=f+'px')}
+}
+window.addEventListener('resize',()=>fitMonth());
 /* % of every personal income (командировочные excluded) goes to the broker account */
 /* Trip money is a running balance, not per month: a trip can span two months */
 function tripBalance(){

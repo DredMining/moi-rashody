@@ -1,5 +1,5 @@
 // Opens instantly from the saved copy, then quietly fetches the fresh version for next launch.
-const CACHE = 'moi-rashody-v47';
+const CACHE = 'moi-rashody-v48';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
