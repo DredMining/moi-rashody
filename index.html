@@ -567,6 +567,7 @@ const CATS=[
   {id:'bonus',name:'Премии',g:'in',c:'p5',kw:['премия','премии']},
   {id:'dividends',name:'Дивиденды',g:'in',c:'p6',kw:['дивиденды','дивы']},
   {id:'interest',name:'Проценты',g:'in',c:'p7',kw:['%','проценты']},
+  {id:'gift',name:'Подарок',g:'in',c:'p2',kw:['подарок','подарили','подарила','подарил']},
   {id:'in_other',name:'Другой доход',g:'in',c:'p8',kw:[],custom:true},
   {id:'t_taxi',name:'Такси',g:'trip',c:'p6',kw:['такси','билет']},
   {id:'t_grocery',name:'Продукты',g:'trip',c:'p3',kw:['продукты','магазин','еда']},
@@ -577,7 +578,7 @@ const CATS=[
 ];
 const LEGACY={ai:'subs',food:'grocery',cafe:'lunch',transport:'taxi',fun:'other',shop:'other',study:'other',gifts:'other',home:'other',clothes:'other'};
 const ICON={bus:'🚌',taxi:'🚕',lunch:'🍽️',fastfood:'🍔',snack:'🥤',wb:'🛍️',grocery:'🛒',health:'💊',subs:'📱',family:'👨‍👩‍👦',broker:'📈',invest:'🪙',sadaqa:'🤲',zakat:'🌙',
-  salary:'💼',stipend:'🎓',side:'🛠️',bonus:'🎁',dividends:'📊',interest:'💰',in_other:'➕',t_taxi:'🚕',t_grocery:'🛒',t_flat:'🏠',t_other:'➕',t_allow:'✈️',other:'➕'};
+  salary:'💼',stipend:'🎓',side:'🛠️',bonus:'🎁',dividends:'📊',interest:'💰',gift:'💝',in_other:'➕',t_taxi:'🚕',t_grocery:'🛒',t_flat:'🏠',t_other:'➕',t_allow:'✈️',other:'➕'};
 const CAT=Object.fromEntries(CATS.map(c=>[c.id,c]));
 const catOf=id=>CAT[id]||CAT[LEGACY[id]]||CAT.other;
 const typeOf=i=>i.type==='in'?'in':i.type==='transfer'?'tr':i.type==='debt'?'debt':'out';
