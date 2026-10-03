@@ -2060,11 +2060,11 @@ const ACC_MARK={
 const PICK_ACCS=['sber','tbank','vtb','pocket','cash'];
 const ACC_NAME={sber:'Сбербанк',tbank:'Т-Банк',vtb:'ВТБ',pocket:'Наличка',cash:'Подушка'};
 /* pick an account: all tiles alike, the one tapped shows big in the middle, nothing is saved until «Записать» */
-function accPicker(go,label){
+function accPicker(go,label,extra=''){
   return `<div class="accsel" aria-live="polite"><span class="accsel-empty">Выберите счёт</span></div>
     <div class="tiles accs">${PICK_ACCS.map(id=>{const v=walletValue(id);
       return `<button type="button" class="tile" data-acc="${id}" aria-pressed="false"><span class="am">${ACC_MARK[id]}</span><span class="nm">${ACC_SHORT[id]}</span><small>${v===null?'':moneyR(v)}</small></button>`}).join('')}</div>
-    <button type="button" class="submit" id="${go}" disabled>${label}</button>`;
+    ${extra}<button type="button" class="submit" id="${go}" disabled>${label}</button>`;
 }
 function bindAccPicker(go,label,onGo){
   const body=$('sheetBody'), sel=body.querySelector('.accsel'), btn=$(go);let acc=null;
@@ -2074,19 +2074,24 @@ function bindAccPicker(go,label,onGo){
     btn.disabled=false;btn.textContent=label(acc)});
   btn.onclick=()=>{if(acc)onGo(acc)};
 }
+function entryNote(p){const label=CAT[p.cat].custom?(p.label||''):'';return [p.guessed||label===p.word?'':p.word,p.note].filter(Boolean).join(' · ')}
 function stepAcc(){
   const p=state.pend;
   sheetFrame(p.type==='in'?'Куда пришли?':'Откуда?',p.guessed?null:()=>CAT[p.cat].custom?stepLabel():stepCat());
   $('sheetSub').textContent+=' · '+(p.label||CAT[p.cat].name);
   const sign=p.type==='in'?'+':'−';
-  $('sheetBody').innerHTML=accPicker('accGo','Записать');
-  bindAccPicker('accGo',acc=>`Записать ${sign}${money(p.amount)} · ${ACC_SHORT[acc]}`,acc=>saveEntry(acc));
+  /* comment right here, before «Записать»: whatever was typed after the amount or under «+ комментарий» is already in it */
+  if(!p.noteTyped) p.sheetNote=entryNote(p);
+  $('sheetBody').innerHTML=accPicker('accGo','Записать',`<input id="accNote" maxlength="80" enterkeyhint="done" placeholder="Комментарий — необязательно" autocomplete="off" aria-label="Комментарий" value="${esc(p.sheetNote)}">`);
+  $('accNote').oninput=e=>{p.sheetNote=e.target.value;p.noteTyped=true};
+  $('accNote').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();e.target.blur()}};
+  bindAccPicker('accGo',acc=>`Записать ${sign}${money(p.amount)} · ${ACC_SHORT[acc]}`,acc=>saveEntry(acc,{note:$('accNote').value.trim()}));
 }
 /* keepForm: paying from a reminder (zakat) leaves whatever is typed in the entry form alone */
 async function saveEntry(acc,opt={}){
   const p=state.pend;if(!p)return;
   const {type,scope,amount,cat}=p, label=CAT[cat].custom?(p.label||''):'';
-  const note=[p.guessed||label===p.word?'':p.word,p.note].filter(Boolean).join(' · ');
+  const note=opt.note!==undefined?opt.note:entryNote(p);
   const rec={type,amount,cat,date:p.date,note,created:Date.now(),acc};
   if(scope==='trip') rec.scope='trip';
   if(label) rec.label=label;
