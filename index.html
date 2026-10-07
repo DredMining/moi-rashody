@@ -224,10 +224,13 @@ input::placeholder{color:var(--muted)}
 .recs{display:flex;flex-direction:column;gap:12px;min-width:0}
 .recs #list{display:flex;flex-direction:column;gap:12px}
 .recs .day{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:4px 16px 2px}
-.recs .dayhead{align-items:baseline;font-size:15px;font-weight:600;color:var(--ink);padding-block:12px 10px}
+.recs .dayhead{align-items:center;font-size:15px;font-weight:600;color:var(--ink);padding-block:12px 10px}
 .recs .dayhead>span:first-child::first-letter{text-transform:uppercase}
-.recs .dayhead .num{font-size:14px;font-weight:500;color:var(--muted);display:flex;gap:10px}
-.recs .dayhead .num .pos{color:var(--good)}
+.recs .dayhead>span:first-child{white-space:nowrap}
+.recs .dayhead .num{font-size:13px;font-weight:600;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+/* day totals as small blocks: what came in — green, what went out — red */
+.recs .dayhead .num>span{--c:var(--spend);color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);border:1px solid color-mix(in srgb,var(--c) 40%,transparent);border-radius:8px;padding:2px 8px;white-space:nowrap}
+.recs .dayhead .num>.pos{--c:var(--good)}
 .recs .empty{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
 .item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding-block:10px;border-bottom:1px solid var(--line)}
 .item:last-child{border-bottom:0}
@@ -1684,7 +1687,7 @@ function renderList(items){
   const groups={};shown.forEach(i=>(groups[i.date]??=[]).push(i));
   list.innerHTML=Object.entries(groups).map(([d,arr])=>{
     const own=i=>sf==='trip'?isTrip(i):!isTrip(i), o=sum(arr.filter(i=>typeOf(i)==='out'&&own(i))), p=sum(arr.filter(i=>typeOf(i)==='in'&&own(i)));
-    return `<div class="day"><div class="dayhead"><span>${dayName.format(isoToDate(d))}</span><span class="num">${p?`<span class="pos">+${money(p)}</span> `:''}${o?'−'+money(o):''}</span></div>${arr.map(itemRow).join('')}</div>`;
+    return `<div class="day"><div class="dayhead"><span>${dayName.format(isoToDate(d))}</span><span class="num">${p?`<span class="pos">+${money(p)}</span>`:''}${o?`<span class="out">−${money(o)}</span>`:''}</span></div>${arr.map(itemRow).join('')}</div>`;
   }).join('');
   bindEdits(list);armDeletes(list,id=>{state.editItem=null;return store.remove(id)},'Запись удалена');
 }
