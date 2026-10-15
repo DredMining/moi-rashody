@@ -170,6 +170,11 @@ button{cursor:pointer}
 /* the ring follows the plate's own rounded edge, inside the 6px between plates */
 .bars .bar:focus-visible{outline-offset:1px}
 #tripCard .stat{border:0;background:none;padding:0}
+/* Итоги shows one part at a time, picked under the month card */
+#viewStats[data-view="out"] [data-sv]:not([data-sv="out"]),#viewStats[data-view="in"] [data-sv]:not([data-sv="in"]),
+#viewStats[data-view="broker"] [data-sv]:not([data-sv="broker"]),#viewStats[data-view="cmp"] [data-sv]:not([data-sv="cmp"]){display:none}
+#cmpBox>summary{display:none}
+.sv-empty{margin:0;padding:16px;text-align:center;font-size:14px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
 /* the trip links: each a 44px button of its own, «Отчёт по прошлой командировке» and «Командировка закончилась» each on a line apart */
 #tripStat .tacts{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
 #tripStat .tacts #tEnd,#tripStat .tacts #tRep{flex-basis:100%;margin:4px 0 0 -6px}
@@ -287,14 +292,14 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .dayhead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted);padding-block:10px 6px;border-bottom:1px solid var(--line)}
 /* Записи: each day is its own card, the date stands out */
 .recs{display:flex;flex-direction:column;gap:12px;min-width:0}
-.recs #list{display:flex;flex-direction:column;gap:12px}
-.recs .day{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:4px 16px 2px}
-.recs .dayhead{align-items:center;font-size:15px;font-weight:600;color:var(--ink);padding-block:12px 10px}
+.recs #list{display:flex;flex-direction:column;gap:8px}
+.recs .day{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:2px 14px 0}
+.recs .dayhead{align-items:center;font-size:14px;font-weight:600;color:var(--ink);padding-block:8px 6px}
 /* the day is a heading (h3) for a screen reader; it looks like the rest of its line */
 .dayhead>h3{font:inherit;letter-spacing:normal;text-transform:none;color:inherit}
 .recs .dayhead>h3::first-letter{text-transform:uppercase}
 .recs .dayhead>h3{white-space:nowrap}
-.recs .dayhead .num{font-size:13px;font-weight:600;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
+.recs .dayhead .num{font-size:12px;font-weight:600;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
 /* day totals as small blocks: what came in — green, what went out — red */
 .recs .dayhead .num>span{--c:var(--spend);color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);border:1px solid color-mix(in srgb,var(--c) 40%,transparent);border-radius:8px;padding:2px 8px;white-space:nowrap}
 .recs .dayhead .num>.pos{--c:var(--good);color:var(--good-ink)}
@@ -302,7 +307,7 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .recs .dayhead .num>.trip{color:#FFFFFF;background:var(--trip);border-color:var(--trip)}
 .recs .empty{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
 /* the sum keeps its line while there is room; on a very narrow screen it breaks rather than push the row off the screen */
-.item{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,auto);gap:10px;align-items:center;padding-block:10px;border-bottom:1px solid var(--line)}
+.item{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,auto);gap:10px;align-items:center;padding-block:6px;border-bottom:1px solid var(--line);font-size:14px}
 .item:last-child{border-bottom:0}
 /* small category icon on a soft tint of its colour */
 .item>.ic{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:14px;line-height:1;flex:none;background:var(--accent-soft);background:color-mix(in srgb,var(--c,var(--muted)) 20%,transparent)}
@@ -373,6 +378,10 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 #sysAlerts .upd>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #sysAlerts .upd .linkbtn{flex:none;font-weight:600}
 .storenote{margin:0;font-size:12px;color:var(--muted);text-align:center;line-height:1.45}
+/* «Данные и резервная копия»: the four buttons two to a line; what shows up only now and then takes a whole line */
+.bkgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.bkgrid>button{min-width:0}
+#wipeBk,#brokenDlBtn{grid-column:1/-1}
 /* «Очистить всё» asks: the warning and «Сначала скачать копию» are scrolled into view with the card's edge under them */
 #wipeBk{scroll-margin-bottom:16px}
 .extras{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
@@ -539,7 +548,7 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .debt .acts>.inline-edit input,.dg>.acts>.inline-edit input{flex:1 1 120px;width:auto}
 .item .what b{font-weight:500;display:block;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto}
 /* the line under the name (its own span, not the «командировка» tag inside the name) */
-.item .what>span{font-size:13px;color:var(--muted);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .what>span{font-size:12px;color:var(--muted);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* with the day in front (Последние записи) the account goes onto a second line rather than out of sight */
 .item .what>span.dd{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2}
 .item .amt{font-weight:500}
@@ -583,7 +592,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:500
 .qchip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:8px 10px;font-size:13px;display:inline-flex;gap:6px;align-items:center}
 .qchip b{font-family:var(--f-num);font-weight:500}
 .qchip .dot{width:8px;height:8px;border-radius:50%;background:var(--c)}
-.item .amt{background:none;border:0;color:inherit;font:inherit;font-family:var(--f-num);font-weight:500;padding:6px 0 6px 8px;min-height:44px;margin-block:-4px;cursor:pointer;overflow-wrap:anywhere;text-align:right}
+.item .amt{background:none;border:0;color:inherit;font:inherit;font-family:var(--f-num);font-weight:500;padding:6px 0 6px 8px;min-height:40px;margin-block:-6px;cursor:pointer;overflow-wrap:anywhere;text-align:right}
 .item.in .amt{color:var(--good)}
 .item .what .tag{display:inline-block;vertical-align:middle;white-space:nowrap}
 .item .amt.spend{color:var(--spend)}
@@ -741,10 +750,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     <details class="more">
       <summary>Данные и резервная копия</summary>
       <div class="morebody foot">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
-          <button class="ghost" id="exportBtn">Скачать CSV за месяц</button>
-          <button class="ghost" id="backupBtn">Скачать резервную копию</button>
-          <button class="ghost" id="restoreBtn">Загрузить резервную копию</button>
+        <div class="bkgrid">
+          <button class="ghost" id="exportBtn" aria-label="Скачать CSV за месяц">CSV за месяц</button>
+          <button class="ghost" id="backupBtn" aria-label="Скачать резервную копию">Скачать копию</button>
+          <button class="ghost" id="restoreBtn" aria-label="Загрузить резервную копию">Загрузить копию</button>
           <button class="ghost" id="wipeBtn" style="color:var(--bad);border-color:var(--bad)">Очистить всё</button>
           <button class="primary" id="wipeBk" hidden>Сначала скачать копию</button>
           <button class="ghost" id="brokenDlBtn" hidden>Скачать повреждённые данные</button>
@@ -823,25 +832,27 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
       <div class="mcol mdiff"><span>Разница</span><b id="balance">0 ₽</b></div>
       <div class="mcol mout"><span>Расходы</span><b class="neg" id="allOut">0 ₽</b></div>
     </section>
-    <section id="breakdown" aria-label="Куда ушли деньги" class="bdwrap">
+    <div class="seg seg3" id="statSeg" role="group" aria-label="Что показать"></div>
+    <p class="sv-empty" id="svEmpty" hidden></p>
+    <section id="breakdown" data-sv="out" aria-label="Куда ушли деньги" class="bdwrap">
       <div class="bd" id="bdDaily"><h3>Повседневные</h3><div class="bars" id="barsDaily"></div></div>
       <div class="bd" id="bdSep"><h3>Отдельно</h3><div class="bars" id="barsSep"></div></div>
       <div class="bd" id="bdTrip"><h3>Командировка</h3><div class="bars" id="barsTrip"></div></div>
     </section>
-    <section id="incomeBreakdown" aria-labelledby="incH" class="bdwrap">
+    <section id="incomeBreakdown" data-sv="in" aria-labelledby="incH" class="bdwrap">
       <h2 id="incH">Доходы по источникам</h2>
       <div class="bd" id="bdIn"><div class="bars" id="barsIn"></div></div>
     </section>
-    <section class="panel" id="tripCard" aria-labelledby="tripH">
+    <section class="panel" id="tripCard" data-sv="out" aria-labelledby="tripH">
       <h2 id="tripH">Командировка</h2>
       <div class="stat wide" id="tripStat"></div>
     </section>
-    <section class="panel" aria-labelledby="ruleH">
+    <section class="panel" data-sv="broker" aria-labelledby="ruleH">
       <h2 id="ruleH">Брокер и лимит</h2>
       <div class="rule" id="brokerBox"></div>
       <div class="rule" id="budgetBox"></div>
     </section>
-    <details class="more panel-ish" id="cmpBox">
+    <details class="more panel-ish" id="cmpBox" data-sv="cmp">
       <summary>Сравнение месяцев</summary>
       <div class="morebody">
       <div class="cmp-sel"><select id="cmpA" aria-label="Первый месяц"></select><span>и</span><select id="cmpB" aria-label="Второй месяц"></select></div>
@@ -1220,6 +1231,7 @@ function render(){
   /* held: where the tap left it — after the redraw and whatever its handler brought into view right after (inView; the top is not that) */
   if(!top){if(sc.scrollTop!==y)sc.scrollTop=y;held=y;const fix=()=>{if(g===rGen&&held>0&&sc.scrollTop<1)sc.scrollTop=held};
     queueMicrotask(()=>{if(sc.scrollTop>=1)held=sc.scrollTop;else fix()});requestAnimationFrame(()=>{fix();requestAnimationFrame(fix)})}
+  try{renderStatSeg()}catch(e){console.error(e)}
   requestAnimationFrame(fitBig);
   dlgSync();
 }
@@ -2618,6 +2630,16 @@ function monthStats(k){
     broker:toBroker(own),piggy:cs('invest'),sadaqa:cs('sadaqa'),zakat:cs('zakat'),extra:cs('trip_extra'),
     trip:sum(it.filter(i=>isTrip(i)&&typeOf(i)==='out'))};
 }
+/* Итоги: Расходы | Доходы | Брокер | Сравнение — only the picked part is shown; a part with nothing this month says so */
+const SV=[['out','Расходы'],['in','Доходы'],['broker','Брокер'],['cmp','Сравнение']];
+function renderStatSeg(){
+  const v=SV.some(([k])=>k===state.statView)?state.statView:'out', box=$('viewStats');
+  box.dataset.view=v;$('cmpBox').open=true;
+  $('statSeg').innerHTML=SV.map(([k,n])=>`<button type="button" data-svb="${k}" aria-pressed="${k===v}">${n}</button>`).join('');
+  $('statSeg').querySelectorAll('[data-svb]').forEach(b=>b.onclick=()=>{state.statView=b.dataset.svb;fresh();render()});
+  const shown=[...box.querySelectorAll(`[data-sv="${v}"]`)].some(x=>!x.hidden);
+  $('svEmpty').hidden=shown;$('svEmpty').textContent=v==='in'?'Доходов за этот месяц нет.':'Расходов за этот месяц нет.';
+}
 function renderCompare(){
   const cur=`${now.getFullYear()}-${pad(now.getMonth()+1)}`;
   const keys=[...new Set([monthKey(),cur,...state.items.filter(i=>typeof i.date==='string').map(i=>i.date.slice(0,7)).filter(k=>/^\d{4}-(0[1-9]|1[0-2])$/.test(k))])].sort().reverse();
@@ -3318,11 +3340,12 @@ const FILE_ERR='Не получилось сохранить файл. Попр�
    when 10+ records have had no backup for a week. Both say where to keep the copy: iCloud Drive outlives the phone */
 const BK_SAFE='«Поделиться» → «Сохранить в Файлы» → iCloud Drive';
 function renderDataBox(){
-  $('exportBtn').textContent='Скачать CSV за '+monthLbl();
+  /* «CSV за октябрь»: short enough for half a line; the screen reader hears the whole of it */
+  $('exportBtn').textContent='CSV за '+monthLbl().split(' ')[0];$('exportBtn').setAttribute('aria-label','Скачать CSV за '+monthLbl());
   if(!state.ready||!store) return '';
   const lb=+state.settings.lastBackup||0;
   $('brokenDlBtn').hidden=!store.broken().length;
-  $('storeNote').textContent=`Записи хранятся только на этом телефоне, в этом браузере: если удалить иконку приложения с экрана «Домой» или данные сайта, они удалятся вместе с ней. Раз в неделю скачивайте резервную копию и сохраняйте её: ${BK_SAFE} — так она уцелеет, даже если потерять телефон. ${lb?'Последняя была '+dayText(iso(new Date(lb))):'Вы её ещё не скачивали'}.`;
+  $('storeNote').textContent=`Записи хранятся только на этом телефоне. Раз в неделю скачивайте копию в iCloud Drive. ${lb?'Последняя: '+dayText(iso(new Date(lb))):'Копию вы ещё не скачивали'}.`;
   return state.items.length>=10&&!(Date.now()-lb<7*864e5)?`<div class="alert"><span>${lb?'Резервной копии не было больше недели':'Резервной копии ещё нет'}. Скачайте её и сохраните: ${BK_SAFE} — так копия уцелеет, даже если потерять телефон.</span><button class="primary" id="bkGo">Скачать</button></div>`:'';
 }
 $('backupBtn').onclick=async()=>{
@@ -3415,7 +3438,7 @@ function normBackup(d){
 }
 /* the file is read first; if there is anything to lose, the button says what is in it and a second tap replaces */
 let restorePend=null, restoreT;
-const restoreReset=()=>{const b=$('restoreBtn');clearTimeout(restoreT);restorePend=null;b.textContent='Загрузить резервную копию';b.style.color=''};
+const restoreReset=()=>{const b=$('restoreBtn');clearTimeout(restoreT);restorePend=null;b.textContent='Загрузить копию';b.style.color=''};
 const nRec=d=>`${d.items.length} ${plural(d.items.length,'запись','записи','записей')}, ${d.debts.length} ${plural(d.debts.length,'долг','долга','долгов')}`;
 /* the store redraws the screen itself; a drawing error after a good save is not a failed restore */
 async function applyRestore(d){
