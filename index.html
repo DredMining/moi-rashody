@@ -358,6 +358,17 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .sumtop>:last-child{margin-left:auto}
 .sumcard .big{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,9vw,46px);line-height:1.05;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .sumcard .sub{font-size:14px;color:var(--muted)}
+/* Учёт a size smaller: the card, the new record and the last records fit more on the screen
+   (the sum field stays at 16px and over — a smaller one makes the iPhone zoom in when it is tapped) */
+#viewLedger .sumcard{padding:14px;gap:6px}
+#viewLedger .sumtop,#viewLedger h2,#viewLedger .linkbtn{font-size:12px}
+#viewLedger .sumcard .big{font-size:clamp(22px,8vw,40px)}
+#viewLedger .sumcard .sub{font-size:13px}
+#viewLedger .seg button{font-size:14px;min-height:40px;padding:6px}
+#viewLedger .amount input{font-size:20px;padding-block:10px}
+#viewLedger .amount span{font-size:18px}
+#viewLedger .chipbtn{font-size:12px;min-height:40px}
+#viewLedger .submit{font-size:14px;padding:10px}
 #limitLine>.ll{display:block}
 #limitLine .ll>span{white-space:nowrap}
 .alerts{display:flex;flex-direction:column;gap:8px}
@@ -378,6 +389,7 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 #sysAlerts .upd>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #sysAlerts .upd .linkbtn{flex:none;font-weight:600}
 .storenote{margin:0;font-size:12px;color:var(--muted);text-align:center;line-height:1.45}
+.storenote>span{display:block}
 /* «Данные и резервная копия»: the four buttons two to a line; what shows up only now and then takes a whole line */
 .bkgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
 .bkgrid>button{min-width:0}
@@ -3345,7 +3357,8 @@ function renderDataBox(){
   if(!state.ready||!store) return '';
   const lb=+state.settings.lastBackup||0;
   $('brokenDlBtn').hidden=!store.broken().length;
-  $('storeNote').textContent=`Записи хранятся только на этом телефоне. Раз в неделю скачивайте копию в iCloud Drive. ${lb?'Последняя: '+dayText(iso(new Date(lb))):'Копию вы ещё не скачивали'}.`;
+  /* three lines: where the records are, what to do once a week, when the last copy was */
+  $('storeNote').innerHTML=`<span>Записи хранятся только на этом телефоне.</span><span>Раз в неделю скачивайте копию в iCloud Drive.</span><span>${lb?'Последняя копия: '+esc(dayText(iso(new Date(lb)))):'Копию вы ещё не скачивали'}</span>`;
   return state.items.length>=10&&!(Date.now()-lb<7*864e5)?`<div class="alert"><span>${lb?'Резервной копии не было больше недели':'Резервной копии ещё нет'}. Скачайте её и сохраните: ${BK_SAFE} — так копия уцелеет, даже если потерять телефон.</span><button class="primary" id="bkGo">Скачать</button></div>`:'';
 }
 $('backupBtn').onclick=async()=>{
