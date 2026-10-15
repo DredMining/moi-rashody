@@ -148,25 +148,27 @@ button{cursor:pointer}
 .stat b{font-family:var(--f-num);font-weight:500;font-size:17px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .stat small{font-size:12px;color:var(--muted)}
 .stat.wide{grid-column:1/-1}
-.panel.mcard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:12px 6px}
-.mcard .mcol{display:flex;flex-direction:column;gap:3px;min-width:0;padding:0 8px}
+.panel.mcard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:9px 4px}
+.mcard .mcol{display:flex;flex-direction:column;gap:2px;min-width:0;padding:0 6px}
 .mcard .mcol+.mcol{border-left:1px solid var(--line)}
 .mcard .mdiff{align-items:center;text-align:center}
 .mcard .mout{align-items:flex-end;text-align:right}
-.mcard .mcol>span{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
-.mcard .mcol>span::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--good);flex:none}
+.mcard .mcol>span{display:flex;align-items:center;gap:5px;font-size:12px;line-height:1.4;color:var(--muted)}
+.mcard .mcol>span::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--good);flex:none}
 .mcard .mdiff>span::before{background:var(--warn)}
 .mcard .mout>span::before{background:var(--bad)}
-.mcard .mcol>b{font-family:var(--f-num);font-weight:500;font-size:min(16px,3.6vw);font-variant-numeric:tabular-nums;white-space:nowrap;overflow-wrap:normal}
-/* «Куда ушли деньги»: each part is a block of its own inside the card; both cards compact — a row is 40px with the gap.
-   A row's empty top lies under its block's heading (only text there), its empty bottom is the block's lower edge */
-#breakdown,#incomeBreakdown{padding:6px 12px;gap:4px}
-#incomeBreakdown{gap:0;padding-bottom:2px}
-#breakdown>h2,#incomeBreakdown>h2{font-size:12px;line-height:14px}
-#breakdown .bd{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px 10px 0}
-#breakdown .bd h3{margin:0 0 -2px;font-size:11px;line-height:12px}
-/* the ring goes inside the row: it never crosses the heading or the block's edge */
-.bars .bar:focus-visible{outline-offset:-2px}
+.mcard .mcol>b{font-family:var(--f-num);font-weight:500;font-size:min(15px,3.6vw);line-height:1.4;font-variant-numeric:tabular-nums;white-space:nowrap;overflow-wrap:normal}
+/* «Куда ушли деньги» and the incomes: no card around them — each category is a small plate of its own on the page, 6px from the next;
+   each group (Повседневные, Отдельно, Командировка, Доходы по источникам) under a small grey label, 12px from the next group.
+   A plate is a 44px button: the name and the sum on one line, the bar under them */
+#incomeBreakdown{gap:6px}
+.bdwrap .bd{gap:6px}
+#breakdown .bd h3,#incomeBreakdown>h2{margin:0 0 0 2px;font-family:var(--f-body);font-size:11px;font-weight:600;line-height:13px;letter-spacing:.06em;color:var(--muted)}
+.bdwrap .bars{gap:6px}
+.bdwrap .bar{min-height:44px;padding:6px 10px 7px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.bdwrap .bar:active{background:var(--accent-soft)}
+/* the ring follows the plate's own rounded edge, inside the 6px between plates */
+.bars .bar:focus-visible{outline-offset:1px}
 #tripCard .stat{border:0;background:none;padding:0}
 /* the trip links: each a 44px button of its own, «Отчёт по прошлой командировке» and «Командировка закончилась» each on a line apart */
 #tripStat .tacts{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
@@ -490,12 +492,15 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .zpay input{font-size:22px}
 .stat small{font-size:11px;color:var(--muted)}
 .wlist{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px}
-.wrow{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 12px;padding:12px 14px;background:none;border:0;border-bottom:1px solid var(--line);text-align:left;color:inherit;width:100%}
+/* «Деньги»: an account's name 14px, its sum 15px; the row stays a 44px button or more */
+.wrow{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 12px;min-height:44px;padding:12px 14px;background:none;border:0;border-bottom:1px solid var(--line);text-align:left;color:inherit;width:100%}
 .wrow:last-child{border-bottom:0}
-.wrow .wn{font-weight:500;min-width:0;overflow-wrap:anywhere}
+.wrow .wn{font-size:14px;font-weight:500;min-width:0;overflow-wrap:anywhere}
 .wrow .wv{text-align:right;display:flex;flex-direction:column;align-items:flex-end;margin-left:auto;min-width:0}
-.wrow b{font-family:var(--f-num);font-weight:500;font-size:16px}
-.wrow b.none{color:var(--accent);font-family:var(--f-body);font-size:14px;font-weight:500}
+.wrow b{font-family:var(--f-num);font-weight:500;font-size:15px}
+.wrow b.none{color:var(--accent);font-family:var(--f-body);font-size:13px;font-weight:500}
+/* «Всего денег»: a bit smaller than the big sums of Учёт and Долги (fitBig makes it smaller still only while it doesn't fit) */
+#moneyTotal{font-size:clamp(22px,8vw,44px)}
 .whint{margin:0;font-size:13px;color:var(--muted)}
 .wrow small{font-size:11px;color:var(--warn)}
 .dgroup{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;width:100%;background:none;border:0;border-bottom:1px solid var(--line);padding:12px 0;text-align:left;color:inherit;align-items:baseline}
@@ -801,14 +806,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
       <div class="mcol mdiff"><span>Разница</span><b id="balance">0 ₽</b></div>
       <div class="mcol mout"><span>Расходы</span><b class="neg" id="allOut">0 ₽</b></div>
     </section>
-    <section id="breakdown" aria-labelledby="catH" class="panel bdwrap">
-      <h2 id="catH">Куда ушли деньги</h2>
+    <section id="breakdown" aria-label="Куда ушли деньги" class="bdwrap">
       <div class="bd" id="bdDaily"><h3>Повседневные</h3><div class="bars" id="barsDaily"></div></div>
       <div class="bd" id="bdSep"><h3>Отдельно</h3><div class="bars" id="barsSep"></div></div>
       <div class="bd" id="bdTrip"><h3>Командировка</h3><div class="bars" id="barsTrip"></div></div>
     </section>
-    <section id="incomeBreakdown" aria-labelledby="incH" class="panel bdwrap">
-      <h2 id="incH">Откуда пришли деньги</h2>
+    <section id="incomeBreakdown" aria-labelledby="incH" class="bdwrap">
+      <h2 id="incH">Доходы по источникам</h2>
       <div class="bd" id="bdIn"><div class="bars" id="barsIn"></div></div>
     </section>
     <section class="panel" id="tripCard" aria-labelledby="tripH">
@@ -1247,7 +1251,7 @@ function renderLedger(){
   renderList(items);
 }
 
-/* the three month sums share one line: the same font for all three — 16px, a bit smaller only while the text of one doesn't fit its column.
+/* the three month sums share one line: the same font for all three — 15px, a bit smaller only while the text of one doesn't fit its column.
    Still too long at 11px even using the column's side padding (millions on a narrow phone): all three lose the kopecks (the whole sum stays in the title),
    then a sum may go onto a second line before «₽», and only past that between digit groups — a number is never split inside */
 function fitMonth(){
@@ -1256,7 +1260,7 @@ function fitMonth(){
   if(!els.length||!els[0].clientWidth) return;
   const r=document.createRange(), w=e=>{r.selectNodeContents(e);return r.getBoundingClientRect().width}, over=e=>{const p=e.parentElement, s=getComputedStyle(p);
     return w(e)>p.clientWidth-parseFloat(s.paddingLeft)-parseFloat(s.paddingRight)-1}, wide=()=>els.some(e=>w(e)>e.parentElement.clientWidth-4);
-  const fit=()=>{let f=16;els.forEach(e=>e.style.fontSize=f+'px');while(f>11&&els.some(over)){f-=0.5;els.forEach(e=>e.style.fontSize=f+'px')}};
+  const fit=()=>{let f=15;els.forEach(e=>e.style.fontSize=f+'px');while(f>11&&els.some(over)){f-=0.5;els.forEach(e=>e.style.fontSize=f+'px')}};
   const put=g=>els.forEach(e=>e.textContent=g(e.textContent));
   fit();if(!wide()) return;
   put(t=>t.replace(/(\d[\d\u00a0\u202f ]*),(\d\d)/,(m,a,k)=>fmt0.format(Math.round(+a.replace(/\D/g,'')+k/100))));
@@ -1607,7 +1611,7 @@ function renderBroker(inc,out){
        pays it first — that is not an overpayment */
     const ms=monthKey()+'-01', aft=state.items.filter(i=>!isTrip(i)&&typeof i.date==='string'&&i.date>=ms);
     const old=o===null?0:r2(o-brokerDue(aft)+toBroker(aft)), toOld=v=>old>=0.01&&v>=0.01?r2(Math.min(old,v)):0;
-    const last=()=>{if(rest>=0.01) return zRow('Осталось отложить',moneyR(rest),'','zsum');
+    const last=()=>{if(rest>=0.01) return zRow('Ещё перевести на брокер',moneyR(rest),'','zsum');
       const x=-rest, d=toOld(x), ov=r2(x-d), dn=!d?'':ov>=0.01?`ещё ${moneyR(d)} ушло в счёт долга себе`:`и ещё ${moneyR(d)} — в счёт долга себе`;
       return ov>=0.01?zRow('Переплата',moneyR(ov),dn,'zsum zgood'):`<div class="zrow zsum zgood"><div><span>Отложено всё ✓</span>${dn?`<small>${dn}</small>`:''}</div></div>`};
     /* nothing due this month (no income yet): only what was sent or taken out — «Положено 0 ₽» and «Переплата» would mislead */
