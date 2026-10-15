@@ -191,6 +191,8 @@ button{cursor:pointer}
 .wmodal{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 14vh) 16px 16px;overflow-y:auto;overscroll-behavior:contain}
 .wmodal:has(.zform){padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
 .wmodal>.zform{margin:auto 0;border-radius:20px}
+.wmodal:has(.dperson){padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
+.wmodal>.dperson{margin:auto 0}
 .wmodal>.wallet-edit,.wmodal>.recon{position:relative;width:min(440px,100%);box-shadow:0 12px 40px rgb(0 0 0 / .45);animation:up .18s ease-out}
 .wmodal>.wallet-edit b{font-size:17px}
 .wallet-edit .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -503,15 +505,24 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 #moneyTotal{font-size:clamp(22px,8vw,44px)}
 .whint{margin:0;font-size:13px;color:var(--muted)}
 .wrow small{font-size:11px;color:var(--warn)}
-.dgroup{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;width:100%;background:none;border:0;border-bottom:1px solid var(--line);padding:12px 0;text-align:left;color:inherit;align-items:baseline}
-.dgroup b{font-size:16px;font-weight:600;overflow-wrap:anywhere}
-.dgroup .sumv{font-family:var(--f-num);font-size:16px}
-.dgroup small{grid-column:1/-1;color:var(--muted);font-size:13px}
-.dinner{padding-left:12px;border-left:2px solid var(--line);margin-block:4px 8px}
-/* a person's line: the name and what is left in all, under it «Вернул всё» / «Вернул часть» for all of it; the loans open below */
-.dg{border-bottom:1px solid var(--line);padding-bottom:12px;display:flex;flex-direction:column;gap:8px}
-.dg>.dgroup{border-bottom:0;padding-bottom:0}
-.dg>.dinner{margin-block:2px 0}
+/* a person's line: the name, what is left in all, «2 долга · с 5 октября»; a tap opens the person's window */
+.dgroup{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 12px;width:100%;min-height:44px;background:none;border:0;border-bottom:1px solid var(--line);padding:9px 0;text-align:left;color:inherit;align-items:baseline;cursor:pointer}
+.dgroup b{font-size:15px;font-weight:600;overflow-wrap:anywhere}
+.dgroup .sumv{font-family:var(--f-num);font-size:15px}
+.dgroup small{grid-column:1/-1;color:var(--muted);font-size:12px}
+/* the person's window: «Вернул всё» / «Вернул часть» for all of it, then each loan with its buttons */
+.dg{display:flex;flex-direction:column;gap:10px}
+.dperson{position:relative;width:min(440px,100%);background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:12px 16px 16px;box-shadow:0 12px 40px rgb(0 0 0 / .45);animation:up .18s ease-out}
+@media (prefers-reduced-motion:reduce){.dperson{animation:none}}
+.dp-head{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:center;gap:8px}
+.dp-t{display:flex;flex-direction:column;min-width:0}
+.dp-t b{font-size:18px;font-weight:600;overflow-wrap:anywhere}
+.dp-t small{font-size:13px;color:var(--muted)}
+.dp-x{width:44px;height:44px;border:0;border-radius:50%;background:none;color:var(--muted);font-size:26px;line-height:1;cursor:pointer}
+.dp-sum{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:13px;color:var(--muted)}
+.dp-sum b{font-family:var(--f-num);font-size:24px;font-weight:500;color:var(--ink)}
+.dinner{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.dinner>.debt:last-child{border-bottom:0;padding-bottom:0}
 .cmp-note{margin:0;font-size:12px;color:var(--muted)}
 .recon{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--warn);border-radius:12px;padding:12px}
 .recon p{margin:0;font-size:14px}
@@ -2721,46 +2732,54 @@ function renderDebts(){
   $('debtTotal').textContent=moneyR(total);
   const people=debtPeople(open);
   $('debtSub').textContent=open.length?`${people} ${plural(people,'человек','человека','человек')} ещё не ${plural(people,'вернул','вернули','вернули')}`:'Никто ничего не должен';
-  /* in a person's group, buttons show only for the loan that was tapped (or the only one) */
-  const showActs=d=>state.openDebtItem===d.id||debts.filter(x=>debtLeft(x)>0&&nk(x.name)===nk(d.name)).length===1;
-  /* solo: a person's only loan — its «Вернули всё / часть» are the ones on the person's line */
+  /* in a person's window, a loan's own «Вернули всё / часть» show only after «Вернул этот долг» is tapped */
+  const showActs=d=>state.openDebtItem===d.id;
+  /* solo: a person's only loan — its «Вернули всё / часть» are the ones at the top of the person's window */
   const one=(d,isOpen,inGroup,solo)=>{
     const left=debtLeft(d), ret=+d.returned||0, when=d.date?dayText(d.date):'';
     const meta=[inGroup?'':when,ret>0&&isOpen?`вернули ${moneyR(ret)} из ${moneyR(+d.amount||0)}`:'',d.note?esc(d.note):''].filter(Boolean).join(' · ');
+    const own=solo?'':inGroup&&!showActs(d)?`<button class="linkbtn" data-di="${esc(d.id)}" aria-expanded="false">Вернул этот долг</button>`
+      :`${accSel('data-racc',d.id,retAccOf(d),'Куда вернули')}<button class="primary" data-full="${esc(d.id)}">Вернули всё</button><button class="ghost" data-partbtn="${esc(d.id)}">Вернули часть</button>`;
     return `<div class="debt ${isOpen?'':'closed'}">
-      <div class="head"${inGroup?` data-di="${esc(d.id)}" role="button" tabindex="0" aria-expanded="${showActs(d)}" style="cursor:pointer"`:''}><b>${esc(inGroup?(when||'Без даты'):d.name)}${d.doubtful&&isOpen?'<span class="tag">сомнительный</span>':''}</b><span class="left">${isOpen?moneyR(left):(+d.forgiven>0?'прощён':'возвращён')}</span></div>
+      <div class="head"><b>${esc(inGroup?(when||'Без даты'):d.name)}${d.doubtful&&isOpen?'<span class="tag">сомнительный</span>':''}</b><span class="left">${isOpen?moneyR(left):(+d.forgiven>0?'прощён':'возвращён')}</span></div>
       ${meta?`<div class="meta">${meta}</div>`:''}
-      ${inGroup&&!showActs(d)?'':state.editing==='de-'+d.id?debtEditForm(d):`<div class="acts">${isOpen?(state.editing==='d-'+d.id
+      ${state.editing==='de-'+d.id?debtEditForm(d):`<div class="acts">${isOpen?(state.editing==='d-'+d.id
         ?`<form class="inline-edit" data-part="${esc(d.id)}">${accSel('data-racc',d.id,retAccOf(d),'Куда вернули')}<input class="num" inputmode="decimal" placeholder="Сумма, ₽" aria-label="Сколько вернули"><button class="primary" type="submit">Записать</button><button class="linkbtn" type="button" data-cancel>Отмена</button></form>`
-        :`${solo?'':`${accSel('data-racc',d.id,retAccOf(d),'Куда вернули')}<button class="primary" data-full="${esc(d.id)}">Вернули всё</button><button class="ghost" data-partbtn="${esc(d.id)}">Вернули часть</button>`}<button class="linkbtn" data-forgive="${esc(d.id)}">Простить → садака</button><button class="linkbtn" data-doubt="${esc(d.id)}">${d.doubtful?'Снять «сомнительный»':'Сомнительный'}</button>`):(+d.forgiven>0?`<span class="meta">Прощено ${money(+d.forgiven)} — записано в садаку</span>`:'')}
+        :`${own}<button class="linkbtn" data-forgive="${esc(d.id)}">Простить → садака</button><button class="linkbtn" data-doubt="${esc(d.id)}">${d.doubtful?'Снять «сомнительный»':'Сомнительный'}</button>`):(+d.forgiven>0?`<span class="meta">Прощено ${money(+d.forgiven)} — записано в садаку</span>`:'')}
         <button class="linkbtn" data-dedit="${esc(d.id)}">Изменить</button><button class="del" data-id="${esc(d.id)}" aria-label="Удалить запись о долге">Удалить</button></div>`}
     </div>`;
   };
   const list=$('debtList');
   if(!state.ready){list.innerHTML='<div class="empty"><p>Загружаю…</p></div>';return}
-  /* one line per person, named as the newest loan spells it (from a capital letter); tap to see each loan and its buttons */
+  /* one line per person, named as the newest loan spells it (from a capital letter); tap — a window with each loan and its buttons */
   const groups=[];open.forEach(d=>{const k=nk(d.name), c=+d.created||0;let g=groups.find(x=>x.k===k);if(!g){g={k,name:d.name.trim(),c,list:[]};groups.push(g)}else if(c>=g.c){g.name=d.name.trim();g.c=c}g.list.push(d)});
   groups.sort((a,b)=>b.list.reduce((s,d)=>s+debtLeft(d),0)-a.list.reduce((s,d)=>s+debtLeft(d),0));
   /* the person's «Вернул всё / часть» go to this account: picked in the select, else the one his oldest loan was given from */
   const gAcc=g=>state.retAcc['g:'+g.k]||accOf(g.list[0],'cash'), gName=g=>g.name.charAt(0).toUpperCase()+g.name.slice(1);
-  const groupHtml=g=>{const sumL=r2(g.list.reduce((s,d)=>s+debtLeft(d),0)), isOpen=state.openDebt===g.k, first=g.list[0].date, n=g.list.length, nm=esc(gName(g)), k=esc(g.k), sel=accSel('data-racc','g:'+g.k,gAcc(g),'Куда вернул');
-    /* the partner's part of trip spending («Заплатил и за напарника»): every open loan of his came from it */
-    const sub=[n>1?`${n} ${plural(n,'долг','долга','долгов')}`:'',first?'с '+dayText(first):'',g.list.every(d=>d.trip)?'за командировку':''].filter(Boolean).join(' · ');
-    return `<div class="dg"><button type="button" class="dgroup" data-dg="${k}" aria-expanded="${isOpen}"><b>${nm}</b><span class="sumv">${moneyR(sumL)}</span><small>${sub} ${isOpen?'▴':'▾'}</small></button>
+  const gSum=g=>r2(g.list.reduce((s,d)=>s+debtLeft(d),0));
+  /* «2 долга · с 5 октября»; the partner's part of trip spending («Заплатил и за напарника»): every open loan of his came from it */
+  const gSub=g=>{const n=g.list.length, first=g.list[0].date;
+    return [`${n} ${plural(n,'долг','долга','долгов')}`,first?(n>1?'с ':'')+dayText(first):'',g.list.every(d=>d.trip)?'за командировку':''].filter(Boolean).join(' · ')};
+  const groupHtml=g=>`<button type="button" class="dgroup" data-dg="${esc(g.k)}" aria-haspopup="dialog"><b>${esc(gName(g))}</b><span class="sumv">${moneyR(gSum(g))}</span><small>${gSub(g)}</small></button>`;
+  /* the person's window: «Вернул всё / часть» for all of them at once, then each loan with its own buttons */
+  const gModal=g=>{const sumL=gSum(g), n=g.list.length, nm=esc(gName(g)), k=esc(g.k), sel=accSel('data-racc','g:'+g.k,gAcc(g),'Куда вернул');
+    return `<div class="wmodal" role="dialog" aria-modal="true" aria-labelledby="dpT"><div class="sheet-bg" data-dpclose></div><div class="dg dperson">
+      <div class="dp-head"><div class="dp-t"><b id="dpT" tabindex="-1">${nm}</b><small>${gSub(g)}</small></div><button type="button" class="dp-x" data-dpclose aria-label="Закрыть">×</button></div>
+      <div class="dp-sum"><span>Должен</span><b>${moneyR(sumL)}</b></div>
       <div class="acts">${state.editing==='g-'+g.k?`<form class="inline-edit" data-gpart="${k}">${sel}<input class="num" inputmode="decimal" placeholder="Сумма, ₽" aria-label="Сколько вернул ${nm}"><button class="primary" type="submit">Записать</button><button class="linkbtn" type="button" data-gcancel>Отмена</button></form>`
-        :`${sel}<button class="primary" data-gfull="${k}" aria-label="${nm} вернул всё: ${moneyR(sumL)}">Вернул всё</button><button class="ghost" data-gpartbtn="${k}" aria-label="${nm} вернул часть">Вернул часть</button>`}</div>`+
-      (isOpen?`<div class="dinner">${g.list.map(d=>one(d,true,true,n===1)).join('')}</div>`:'')+'</div>'};
+        :`${sel}<button class="primary" data-gfull="${k}" aria-label="${nm} вернул всё: ${moneyR(sumL)}">Вернул всё</button><button class="ghost" data-gpartbtn="${k}" aria-label="${nm} вернул часть">Вернул часть</button>`}</div>
+      <div class="dinner">${g.list.map(d=>one(d,true,true,n===1)).join('')}</div></div></div>`};
+  /* the window goes by itself when the person has nothing left to return */
+  const og=groups.find(g=>g.k===state.openDebt);if(!og)state.openDebt=null;
   list.innerHTML=(open.length?groups.map(groupHtml).join(''):`<div class="empty"><p>Здесь будут люди, которые должны вам деньги. Нажмите «+ Дал в долг».</p></div>`)
-    +(closed.length?closedBox('closedOpen',closed,one):'');
+    +(closed.length?closedBox('closedOpen',closed,one):'')+(og?gModal(og):'');
   bindClosedBox(list);
-  /* a person's group and a loan in it open in place: the list is drawn again, the keyboard focus stays on what was pressed */
-  /* what opened under it (the person's loans, the loan's buttons) is scrolled into view only as far as needed, the row itself stays on screen */
-  const keep=(sel,f)=>{const had=document.activeElement?.matches?.(sel);fresh();f();render();const n=list.querySelector(sel);if(had)n?.focus({preventScroll:true});
-    inView(n?.matches('.dgroup')?n.parentElement.querySelector('.dinner'):null);inView(n?.closest('.debt')||n)};
-  list.querySelectorAll('[data-dg]').forEach(b=>b.onclick=()=>keep(`[data-dg="${CSS.escape(b.dataset.dg)}"]`,()=>{state.openDebt=state.openDebt===b.dataset.dg?null:b.dataset.dg;state.openDebtItem=null}));
-  list.querySelectorAll('[data-di]').forEach(h=>{h.onclick=()=>keep(`[data-di="${CSS.escape(h.dataset.di)}"]`,()=>{state.openDebtItem=state.openDebtItem===h.dataset.di?null:h.dataset.di});
-    /* a row that works as a button: Enter and Space press it */
-    h.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();h.click()}}});
+  const dpClose=()=>{fresh();state.openDebt=null;state.openDebtItem=null;state.editing=null;render()};
+  list.querySelectorAll('[data-dpclose]').forEach(b=>b.onclick=dpClose);
+  list.querySelectorAll('[data-dg]').forEach(b=>b.onclick=()=>{fresh();state.openDebt=b.dataset.dg;state.openDebtItem=null;state.editing=null;render()});
+  /* a loan's own return buttons open in place; the keyboard focus goes to its «Вернули всё» */
+  list.querySelectorAll('[data-di]').forEach(h=>h.onclick=()=>{const id=h.dataset.di;fresh();state.openDebtItem=id;render();
+    const b=list.querySelector(`[data-full="${CSS.escape(id)}"]`);b?.focus({preventScroll:true});inView(b?.closest('.debt'))});
   list.querySelectorAll('[data-racc]').forEach(sel=>sel.onchange=()=>state.retAcc[sel.dataset.racc]=sel.value);
   const backRec=(d,v)=>({type:'debt',dir:'back',amount:Math.round(v*100)/100,acc:retAccOf(d),date:iso(now),label:'Возврат долга: '+d.name,debt:d.id,created:Date.now()});
   const zkNote=(zk,full)=>zk?(full?` · закят с долга за ${zk.n} ${plural(zk.n,'год','года','лет')}: ${money(zk.amount)}`:` · закят с этой суммы: ${money(zk.amount)}`):'';
@@ -3049,8 +3068,8 @@ setInterval(refreshToday,60000);
 let dlgStack=[], dlgInert=[], lastTap=null;
 document.addEventListener('click',e=>{const b=e.target.closest?.('button,[role="button"],summary');if(b)lastTap={el:b,t:performance.now()}},true);
 function dlgOpen(){
-  const w=document.querySelector('#wallets .wmodal'), zf=document.querySelector('#zakatForm .wmodal');
-  return [w&&{k:state.recon?'recon':'w',el:w},!$('zakatSheet').hidden&&{k:'zakat',el:$('zakatSheet')},zf&&{k:'zform',el:zf},!$('sheet').hidden&&{k:'sheet',el:$('sheet')}].filter(Boolean);
+  const w=document.querySelector('#wallets .wmodal'), zf=document.querySelector('#zakatForm .wmodal'), dp=document.querySelector('#debtList .wmodal');
+  return [w&&{k:state.recon?'recon':'w',el:w},dp&&{k:'debt:'+state.openDebt,el:dp},!$('zakatSheet').hidden&&{k:'zakat',el:$('zakatSheet')},zf&&{k:'zform',el:zf},!$('sheet').hidden&&{k:'sheet',el:$('sheet')}].filter(Boolean);
 }
 /* the same button drawn again (the page redraws its lists): found by its id or its data-… */
 const refind=o=>{if(!o||o.isConnected)return o;if(o.id)return $(o.id);const a=[...o.attributes].find(x=>x.name.startsWith('data-'));
@@ -3074,7 +3093,7 @@ function dlgSync(){
 document.addEventListener('keydown',e=>{
   const top=dlgOpen().pop();if(!top)return;
   if(e.key==='Escape'){e.preventDefault();
-    if(top.k==='sheet')closeSheet();else if(top.k==='zakat'){if(state.zView)zGo(null);else closeZakat()}else{state.editing=null;state.recon=null;render()}
+    if(top.k==='sheet')closeSheet();else if(top.k==='zakat'){if(state.zView)zGo(null);else closeZakat()}else{state.editing=null;state.recon=null;if(top.k.startsWith('debt:')){state.openDebt=null;state.openDebtItem=null}render()}
     return}
   if(e.key!=='Tab')return;
   const f=[...top.el.querySelectorAll('button,input,select,textarea,summary,a[href],[tabindex="0"]')].filter(x=>!x.disabled&&x.getClientRects().length&&getComputedStyle(x).visibility!=='hidden'), i=f.indexOf(document.activeElement);
