@@ -158,17 +158,18 @@ button{cursor:pointer}
 .mcard .mdiff>span::before{background:var(--warn)}
 .mcard .mout>span::before{background:var(--bad)}
 .mcard .mcol>b{font-family:var(--f-num);font-weight:500;font-size:min(15px,3.6vw);line-height:1.4;font-variant-numeric:tabular-nums;white-space:nowrap;overflow-wrap:normal}
-/* «Куда ушли деньги» and the incomes: no card around them — each category is a small plate of its own on the page, 6px from the next;
-   each group (Повседневные, Отдельно, Командировка, Доходы по источникам) under a small grey label, 12px from the next group.
-   A plate is a 44px button: the name and the sum on one line, the bar under them */
+/* «Куда ушли деньги» and the incomes: each group (Повседневные, Отдельно, Командировка, Доходы по источникам) is one card under a small
+   grey label, 12px from the next group; its categories are rows split by thin lines.
+   A row is a 44px button: the name and the sum on one line, the bar under them */
 #incomeBreakdown{gap:6px}
 .bdwrap .bd{gap:6px}
 #breakdown .bd h3,#incomeBreakdown>h2{margin:0 0 0 2px;font-family:var(--f-body);font-size:11px;font-weight:600;line-height:13px;letter-spacing:.06em;color:var(--muted)}
-.bdwrap .bars{gap:6px}
-.bdwrap .bar{min-height:44px;padding:6px 10px 7px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.bdwrap .bars{gap:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.bdwrap .bar{min-height:44px;padding:7px 12px 8px;border-bottom:1px solid var(--line)}
+.bdwrap .bar:last-child{border-bottom:0}
 .bdwrap .bar:active{background:var(--accent-soft)}
-/* the ring follows the plate's own rounded edge, inside the 6px between plates */
-.bars .bar:focus-visible{outline-offset:1px}
+/* the ring sits inside the row: the card's edge would cut one drawn outside it */
+.bars .bar:focus-visible{outline-offset:-2px}
 #tripCard .stat{border:0;background:none;padding:0}
 /* Итоги shows one part at a time, picked under the month card */
 #viewStats[data-view="out"] [data-sv]:not([data-sv="out"]),#viewStats[data-view="in"] [data-sv]:not([data-sv="in"]),
