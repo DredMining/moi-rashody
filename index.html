@@ -331,10 +331,6 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .item-edit .ewarn{margin:0;font-size:13px;color:var(--ink);border-left:3px solid var(--warn);padding-left:8px}
 .item-edit label.echk{flex-direction:row;align-items:center;gap:8px;font-size:13px;color:var(--ink);min-height:44px}
 .item-edit .echk input{width:auto;flex:none;min-height:0}
-/* «Семья» stands among «Отдельно» but counts toward the limit */
-.bar .name small.lim,.tile small.lim{font-family:var(--f-body);font-size:11px;color:var(--muted)}
-/* the name and «в лимите» flow as one line of text: on a narrow card «в лимите» goes under it, the name itself stays whole */
-.bar .name small.lim{white-space:nowrap}
 .cmp-sel{display:flex;gap:8px;align-items:center}
 .cmp-sel select{flex:1 1 0;min-width:0;padding-inline:10px}
 .cmp-sel span{color:var(--muted);font-size:13px}
@@ -517,12 +513,12 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .stat small{font-size:11px;color:var(--muted)}
 .wlist{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px}
 /* «Деньги»: an account's name 14px, its sum 15px; the row stays a 44px button or more */
-.wrow{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 12px;min-height:44px;padding:12px 14px;background:none;border:0;border-bottom:1px solid var(--line);text-align:left;color:inherit;width:100%}
+.wrow{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 12px;min-height:40px;padding:10px 14px;background:none;border:0;border-bottom:1px solid var(--line);text-align:left;color:inherit;width:100%}
 .wrow:last-child{border-bottom:0}
-.wrow .wn{font-size:14px;font-weight:500;min-width:0;overflow-wrap:anywhere}
+.wrow .wn{font-size:13px;font-weight:500;min-width:0;overflow-wrap:anywhere}
 .wrow .wv{text-align:right;display:flex;flex-direction:column;align-items:flex-end;margin-left:auto;min-width:0}
-.wrow b{font-family:var(--f-num);font-weight:500;font-size:15px}
-.wrow b.none{color:var(--accent);font-family:var(--f-body);font-size:13px;font-weight:500}
+.wrow b{font-family:var(--f-num);font-weight:500;font-size:14px}
+.wrow b.none{color:var(--accent);font-family:var(--f-body);font-size:12px;font-weight:500}
 /* «Всего денег»: a bit smaller than the big sums of Учёт and Долги (fitBig makes it smaller still only while it doesn't fit) */
 #moneyTotal{font-size:clamp(22px,8vw,44px)}
 .whint{margin:0;font-size:13px;color:var(--muted)}
@@ -685,6 +681,9 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:500
    toast() moves it above an open sheet, or to the top while a window covers the screen or the keyboard is up */
 .toast{position:fixed;left:16px;right:16px;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:70;margin-inline:auto;width:-webkit-fit-content;width:fit-content;max-width:480px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:2px 12px;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;overflow-wrap:anywhere;box-shadow:0 8px 24px rgb(0 0 0 / .3)}
 .toast>span{flex:1 1 auto;min-width:0}
+/* swiped left or right with a finger: it follows the finger and goes off the side (toastSwipe); scrolling up and down stays the page's */
+.toast{touch-action:pan-y;-webkit-user-select:none;user-select:none}
+.toast.out{transition:transform .18s ease-out,opacity .18s ease-out}
 /* hidden: empty and see-through, but still there — a screen reader hears each new message in it */
 .toast[hidden]{display:flex!important;opacity:0;pointer-events:none;padding:0;box-shadow:none}
 /* date fields: phone browsers give them a fixed native width that overflows the card */
@@ -1158,7 +1157,7 @@ function plural(n,a,b,c){const m=n%10,h=n%100;return m===1&&h!==11?a:m>=2&&m<=4&
 let toastT;
 /* zp: the zakat window that made room at its end for the message */
 const zpFree=()=>{const z=document.querySelector('.zsheet-panel');if(z)z.style.paddingBottom=''};
-const toastOff=()=>{const t=$('toast');t.hidden=true;t.replaceChildren();zpFree()};
+const toastOff=()=>{const t=$('toast');t.hidden=true;t.replaceChildren();t.classList.remove('out');t.style.transform=t.style.opacity='';zpFree()};
 /* where the message box goes: above the top edge of an open sheet or small window; when there is no room for it there (a tall
    window, the keyboard) — under the window's title bar, so its ✕ and «‹ Назад» stay free, or under a small window, or at the top
    of what is seen; the zakat window (nothing over it) has its sum and «Оплатить» at the top: there it goes at the bottom, and it gets room
@@ -1186,9 +1185,28 @@ const say=t=>{const s=$('say');if(!s)return;s.textContent='';clearTimeout(s._c);
 function toast(msg,undo,ms,act){const t=$('toast'), ym=[state.y,state.m];t.replaceChildren(Object.assign(document.createElement('span'),{textContent:msg}));
   if(undo){const b=document.createElement('button');b.className='undo';b.textContent='Отменить';b.onclick=async()=>{toastOff();try{await undo();if(state.y!==ym[0]||state.m!==ym[1]){state.y=ym[0];state.m=ym[1];render()}toast('Отменено')}catch(e){toast('Не получилось отменить')}};t.append(b)}
   if(act){const b=document.createElement('button');b.className='undo';b.textContent=act[0];b.onclick=()=>{toastOff();act[1]()};t.append(b)}
-  t.hidden=false;toastPlace(t);clearTimeout(toastT);
+  t.classList.remove('out');t.style.transform=t.style.opacity='';t.hidden=false;toastPlace(t);clearTimeout(toastT);
   /* a long message stays longer: there is time to read it */
   toastT=setTimeout(toastOff,ms||((undo||act?5000:2600)+(msg.length>80?3000:0)))}
+/* the message swiped away: past 70px (or a quick flick) it slides off that side and goes; a shorter move puts it back.
+   While the finger is on it, it doesn't go by itself; let go — it stays 2 more seconds. A swipe that started on «Отменить» doesn't press it */
+(function toastSwipe(){
+  const t=$('toast');let x0=null,y0=0,t0=0,dx=0,moved=false;
+  t.addEventListener('pointerdown',e=>{if(t.hidden||e.button>0)return;x0=e.clientX;y0=e.clientY;t0=performance.now();dx=0;moved=false;t.classList.remove('out');clearTimeout(toastT)});
+  t.addEventListener('pointermove',e=>{if(x0===null)return;dx=e.clientX-x0;
+    if(!moved&&Math.abs(dx)>8&&Math.abs(dx)>Math.abs(e.clientY-y0)){moved=true;try{t.setPointerCapture(e.pointerId)}catch(_){}}
+    if(moved){t.style.transform=`translateX(${dx}px)`;t.style.opacity=String(Math.max(.2,1-Math.abs(dx)/(t.offsetWidth||300)))}});
+  const up=()=>{if(x0===null)return;x0=null;
+    if(!moved){toastT=setTimeout(toastOff,2000);return}
+    /* the click right after this finger is let go of is swallowed (below), a later one — Enter on «Отменить» — is not */
+    setTimeout(()=>moved=false,0);
+    const fast=Math.abs(dx)/Math.max(1,performance.now()-t0)>.5;t.classList.add('out');
+    if(Math.abs(dx)>70||fast&&Math.abs(dx)>24){t.style.transform=`translateX(${(dx>0?1:-1)*(innerWidth)}px)`;t.style.opacity='0';toastT=setTimeout(toastOff,180)}
+    else{t.style.transform=t.style.opacity='';toastT=setTimeout(toastOff,2000)}};
+  t.addEventListener('pointerup',up);t.addEventListener('pointercancel',up);
+  /* the click that ends a swipe is not a press of the button it started on */
+  t.addEventListener('click',e=>{if(moved){e.stopPropagation();e.preventDefault()}},true);
+})();
 /* a tap that changes what is under the finger (a window opens, a form or buttons appear, a row moves): the second tap of the same
    quick double tap lands on the new thing — for a moment it is let go of. Two-step confirmations keep their own 600 ms */
 let freshTill=0;
@@ -2400,7 +2418,7 @@ function barsHtml(list,total,pm){
   const rows=Object.entries(by).filter(r=>r[1]>=0.005).sort((a,b)=>b[1]-a[1]);
   /* bar length = the share */
   return {n:rows.length,html:rows.map(([c,v])=>`<button type="button" class="bar" data-cat="${c}" style="--c:${cvar(c)}" aria-haspopup="dialog">
-    <span class="name"><span class="dot"></span><span>${esc(CAT[c].name)}${c==='family'?' <small class="lim">в лимите</small>':''}</span></span>
+    <span class="name"><span class="dot"></span><span>${esc(CAT[c].name)}</span></span>
     <span class="val num">${money(v)}<small>${esc(pctTxt(pm[c],v))}%</small></span>
     <span class="track"><i style="width:${Math.min(100,v/total*100)}%"></i></span></button>`).join('')};
 }
@@ -2444,7 +2462,7 @@ const EDIT_ACCS=()=>[...ACCS,['broker','Брокерский счёт'],['piggy'
 const SCOPE_TWIN={taxi:'t_taxi',grocery:'t_grocery',fuel:'t_fuel',other:'t_other',t_taxi:'taxi',t_grocery:'grocery',t_fuel:'fuel',t_other:'other'};
 function catOpts(type,scope,sel){
   const pool=poolFor(type,scope).filter(c=>!c.auto||c.id===sel), on=pool.some(c=>c.id===sel)?sel:pool.find(c=>c.id===SCOPE_TWIN[sel])?.id||'';
-  const o=c=>`<option value="${c.id}" ${c.id===on?'selected':''}>${esc(c.name)}${c.id==='family'?' (в лимите)':''}</option>`, sep=pool.filter(c=>c.g==='sep');
+  const o=c=>`<option value="${c.id}" ${c.id===on?'selected':''}>${esc(c.name)}</option>`, sep=pool.filter(c=>c.g==='sep');
   return (on?'':'<option value="" selected disabled>Выберите категорию</option>')+pool.filter(c=>c.g!=='sep').sort((a,b)=>!!a.custom-!!b.custom).map(o).join('')
     +(sep.length?`<optgroup label="Отдельно">${['sadaqa','zakat','broker','family','invest',...sep.map(c=>c.id)].filter((id,n,a)=>a.indexOf(id)===n&&sep.some(c=>c.id===id)).map(id=>o(CAT[id])).join('')}</optgroup>`:'');
 }
@@ -3150,7 +3168,7 @@ function sheetFrame(title,back){
   $('sheet').querySelector('.sheet-panel').scrollTop=0;
 }
 /* a category tile goes straight to the next step: a plain button, not a toggle */
-const tile=c=>`<button type="button" class="tile" data-pick="${c.id}" style="--c:${cvar(c.id)}"><span class="ic" aria-hidden="true">${ICON[c.id]||'•'}</span>${esc(c.custom?(state.pend.type==='in'?'Другой доход':'Другое'):c.name)}${c.id==='family'?'<small class="lim">в лимите</small>':''}</button>`;
+const tile=c=>`<button type="button" class="tile" data-pick="${c.id}" style="--c:${cvar(c.id)}"><span class="ic" aria-hidden="true">${ICON[c.id]||'•'}</span>${esc(c.custom?(state.pend.type==='in'?'Другой доход':'Другое'):c.name)}</button>`;
 function stepCat(){
   const p=state.pend;
   const groups=p.scope==='trip'?[['','trip']]:p.type==='in'?[['','in']]:[['','daily'],['Отдельно','sep']];
