@@ -135,7 +135,7 @@ button{cursor:pointer}
 /* Top */
 .top{display:flex;flex-direction:column;gap:14px}
 .monthbar{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.monthbar .title{font-family:var(--f-display);font-size:18px;font-weight:500;text-transform:capitalize}
+.monthbar .title{font-family:var(--f-display);font-size:16px;font-weight:500;text-transform:capitalize}
 .iconbtn{border:1px solid var(--field-line);background:var(--surface);border-radius:10px;width:44px;height:44px;display:grid;place-items:center;font-size:18px;line-height:1}
 .iconbtn:disabled{opacity:.35;cursor:default}
 .total{display:flex;flex-direction:column;gap:2px}
@@ -148,16 +148,16 @@ button{cursor:pointer}
 .stat b{font-family:var(--f-num);font-weight:500;font-size:17px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .stat small{font-size:12px;color:var(--muted)}
 .stat.wide{grid-column:1/-1}
-.panel.mcard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:9px 4px}
+.panel.mcard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:7px 4px}
 .mcard .mcol{display:flex;flex-direction:column;gap:2px;min-width:0;padding:0 6px}
 .mcard .mcol+.mcol{border-left:1px solid var(--line)}
 .mcard .mdiff{align-items:center;text-align:center}
 .mcard .mout{align-items:flex-end;text-align:right}
-.mcard .mcol>span{display:flex;align-items:center;gap:5px;font-size:12px;line-height:1.4;color:var(--muted)}
+.mcard .mcol>span{display:flex;align-items:center;gap:5px;font-size:11px;line-height:1.4;color:var(--muted)}
 .mcard .mcol>span::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--good);flex:none}
 .mcard .mdiff>span::before{background:var(--warn)}
 .mcard .mout>span::before{background:var(--bad)}
-.mcard .mcol>b{font-family:var(--f-num);font-weight:500;font-size:min(15px,3.6vw);line-height:1.4;font-variant-numeric:tabular-nums;white-space:nowrap;overflow-wrap:normal}
+.mcard .mcol>b{font-family:var(--f-num);font-weight:500;font-size:min(14px,3.4vw);line-height:1.4;font-variant-numeric:tabular-nums;white-space:nowrap;overflow-wrap:normal}
 /* «Куда ушли деньги» and the incomes: each group (Повседневные, Отдельно, Командировка, Доходы по источникам) is one card under a small
    grey label, 12px from the next group; its categories are rows split by thin lines.
    A row is a 44px button: the name and the sum on one line, the bar under them */
@@ -171,6 +171,9 @@ button{cursor:pointer}
 /* the ring sits inside the row: the card's edge would cut one drawn outside it */
 .bars .bar:focus-visible{outline-offset:-2px}
 #tripCard .stat{border:0;background:none;padding:0}
+#tripCard .wmodal b{font-family:var(--f-body);font-weight:600;font-variant-numeric:normal}
+/* its field is one line high (in .wallet-edit a field normally stands in a row) */
+#tripCard .wmodal input{flex:none}
 /* Итоги shows one part at a time, picked under the month card */
 #viewStats[data-view="out"] [data-sv]:not([data-sv="out"]),#viewStats[data-view="in"] [data-sv]:not([data-sv="in"]),
 #viewStats[data-view="broker"] [data-sv]:not([data-sv="broker"]),#viewStats[data-view="cmp"] [data-sv]:not([data-sv="cmp"]){display:none}
@@ -293,14 +296,19 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .dayhead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted);padding-block:10px 6px;border-bottom:1px solid var(--line)}
 /* Записи: each day is its own card, the date stands out */
 .recs{display:flex;flex-direction:column;gap:12px;min-width:0}
-.recs #list{display:flex;flex-direction:column;gap:8px}
+.recs #list{display:flex;flex-direction:column;gap:6px}
+/* Записи: dense rows — more of the month on one screen */
+.recs .item{font-size:13px;gap:8px;padding-block:3px}
+.recs .item>.ic{width:24px;height:24px;font-size:12px}
+.recs .item .what>span{font-size:11px}
+.recs .item .amt{min-height:36px;margin-block:-4px}
 .recs .day{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:2px 14px 0}
-.recs .dayhead{align-items:center;font-size:14px;font-weight:600;color:var(--ink);padding-block:8px 6px}
+.recs .dayhead{align-items:center;font-size:13px;font-weight:600;color:var(--ink);padding-block:6px 4px}
 /* the day is a heading (h3) for a screen reader; it looks like the rest of its line */
 .dayhead>h3{font:inherit;letter-spacing:normal;text-transform:none;color:inherit}
 .recs .dayhead>h3::first-letter{text-transform:uppercase}
 .recs .dayhead>h3{white-space:nowrap}
-.recs .dayhead .num{font-size:12px;font-weight:600;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
+.recs .dayhead .num{font-size:11px;font-weight:600;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
 /* day totals as small blocks: what came in — green, what went out — red */
 .recs .dayhead .num>span{--c:var(--spend);color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);border:1px solid color-mix(in srgb,var(--c) 40%,transparent);border-radius:8px;padding:2px 8px;white-space:nowrap}
 .recs .dayhead .num>.pos{--c:var(--good);color:var(--good-ink)}
@@ -521,13 +529,21 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .wrow b{font-family:var(--f-num);font-weight:500;font-size:14px}
 .wrow b.none{color:var(--accent);font-family:var(--f-body);font-size:12px;font-weight:500}
 /* «Всего денег»: a bit smaller than the big sums of Учёт and Долги (fitBig makes it smaller still only while it doesn't fit) */
-#moneyTotal{font-size:clamp(22px,8vw,44px)}
+#moneyTotal{font-size:clamp(22px,8vw,40px)}
+/* «Всего денег»: a card with a soft accent glow, the sum, then cards / cash / savings in three columns */
+.total.mtot{background:var(--surface);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 70%);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;gap:4px}
+.mparts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:8px;padding-top:10px;border-top:1px solid var(--line)}
+.mparts>div{display:flex;flex-direction:column;gap:2px;min-width:0;padding:0 6px}
+.mparts>div:first-child{padding-left:0}
+.mparts>div+div{border-left:1px solid var(--line)}
+.mparts span{font-size:11px;color:var(--muted)}
+.mparts b{font-family:var(--f-num);font-weight:500;font-size:min(14px,3.4vw);white-space:nowrap}
 .whint{margin:0;font-size:13px;color:var(--muted)}
 .wrow small{font-size:11px;color:var(--warn)}
 /* a person's line: the name, what is left in all, «2 долга · с 5 октября»; a tap opens the person's window */
 .dgroup{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 12px;width:100%;min-height:44px;background:none;border:0;border-bottom:1px solid var(--line);padding:9px 0;text-align:left;color:inherit;align-items:baseline;cursor:pointer}
-.dgroup b{font-size:15px;font-weight:600;overflow-wrap:anywhere}
-.dgroup .sumv{font-family:var(--f-num);font-size:15px}
+.dgroup b{font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.dgroup .sumv{font-family:var(--f-num);font-size:14px}
 .dgroup small{grid-column:1/-1;color:var(--muted);font-size:12px}
 /* the person's window: «Вернул всё» / «Вернул часть» for all of it, then each loan with its buttons */
 .dg{display:flex;flex-direction:column;gap:10px}
@@ -535,11 +551,11 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 @media (prefers-reduced-motion:reduce){.dperson{animation:none}}
 .dp-head{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:center;gap:8px}
 .dp-t{display:flex;flex-direction:column;min-width:0}
-.dp-t b{font-size:18px;font-weight:600;overflow-wrap:anywhere}
-.dp-t small{font-size:13px;color:var(--muted)}
+.dp-t b{font-size:16px;font-weight:600;overflow-wrap:anywhere}
+.dp-t small{font-size:12px;color:var(--muted)}
 .dp-x{width:44px;height:44px;border:0;border-radius:50%;background:none;color:var(--muted);font-size:26px;line-height:1;cursor:pointer}
 .dp-sum{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:13px;color:var(--muted)}
-.dp-sum b{font-family:var(--f-num);font-size:24px;font-weight:500;color:var(--ink)}
+.dp-sum b{font-family:var(--f-num);font-size:20px;font-weight:500;color:var(--ink)}
 .dinner{display:flex;flex-direction:column;border-top:1px solid var(--line)}
 .dinner>.debt:last-child{border-bottom:0;padding-bottom:0}
 /* a loan's buttons in the person's window: close together, a few to a line */
@@ -547,6 +563,13 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .dperson .debt .acts{gap:0 16px}
 .dperson .debt .acts>.linkbtn{min-height:32px;padding:6px 0;margin:0}
 .dperson .debt .acts>.del{min-height:32px;padding:6px 0}
+.dperson{padding:10px 14px 14px}
+.dperson.dg{gap:8px}
+.dperson .debt .head b,.dperson .debt .head .left{font-size:14px}
+.dperson .debt .meta{font-size:12px}
+.dperson .debt .acts>.linkbtn,.dperson .debt .acts>.del{font-size:12px}
+.dperson .dacc{font-size:12px}
+.dperson>.acts>button{font-size:14px;min-height:40px;padding-block:8px}
 .cmp-note{margin:0;font-size:12px;color:var(--muted)}
 .recon{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--warn);border-radius:12px;padding:12px}
 .recon p{margin:0;font-size:14px}
@@ -751,9 +774,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
 
   <div id="viewMoney" role="tabpanel" aria-labelledby="tabMoney" hidden style="flex-direction:column;gap:16px">
     <h2 class="sr">Деньги на счетах</h2>
-    <section class="total" aria-label="Всего денег">
+    <section class="total mtot" aria-label="Всего денег">
       <span class="lbl">Всего денег</span>
       <span class="big" id="moneyTotal">—</span>
+      <div class="mparts" id="moneyParts" hidden></div>
     </section>
     <div class="wallets" id="wallets"></div>
     <button type="button" class="zline" id="zakatLine" hidden></button>
@@ -1534,21 +1558,6 @@ function renderTrip(trip){
     box.innerHTML=(mIn||mOut?`<span>Потрачено в командировке за месяц</span><b>${moneyR(mOut)}</b>${mIn?`<small>пришло командировочных ${moneyR(mIn)}</small>`:''}`:'<span>В этом месяце записей по командировке нет</span>')+(rb?`<div class="acts tacts">${rb}</div>`:'');
     rOn();return;
   }
-  if(state.editing==='trip'){
-    box.innerHTML=`<span>Сколько сейчас осталось командировочных</span><form class="inline-edit" id="tForm"><input id="tInput" class="num" inputmode="decimal" placeholder="Например, 12000" value="${st&&bal>=0?vIn(bal):''}" aria-label="Остаток командировочных"><button class="primary" type="submit">Сохранить</button><button class="linkbtn" type="button" id="tCancel">Отмена</button></form><small>Дальше к этой сумме прибавятся новые командировочные и вычтутся траты в командировке.</small>`;
-    $('tForm').onsubmit=async e=>{e.preventDefault();const raw=$('tInput').value, v=parseNum(raw);if(!(v>=0)){toast(NUM_ERR);return}state.editing=null;
-      if(await saveSettings({tripStart:{amount:v,at:Date.now()}})) toast('Остаток командировочных: '+money(v));else reopen('trip','#tInput',raw)};
-    $('tCancel').onclick=()=>{state.editing=null;render()};
-    return;
-  }
-  if(state.editing==='allow'){
-    box.innerHTML=`<span>Пришли командировочные на Т-Банк</span><form class="inline-edit" id="aForm"><input id="aInput" class="num" inputmode="decimal" value="${TRIP_ALLOWANCE}" aria-label="Сумма командировочных"><button class="primary" type="submit">Записать</button><button class="linkbtn" type="button" id="aCancel">Отмена</button></form>`;
-    $('aForm').onsubmit=async e=>{e.preventDefault();const raw=$('aInput').value, v=parseNum(raw);if(!(v>0)){toast(isNaN(v)?NUM_ERR:'Введите сумму больше нуля');return}
-      state.editing=null;
-      try{const id=await store.add({type:'in',amount:Math.round(v*100)/100,cat:'t_allow',scope:'trip',acc:TRIP_ACC,date:iso(now),note:'',created:Date.now()});toast('Командировочные: '+money(v),id?()=>store.remove(id):null)}catch(x){reopen('allow','#aInput',raw);toast(saveErr(x))}};
-    $('aCancel').onclick=()=>{state.editing=null;render()};
-    return;
-  }
   const any=st||state.items.some(isTrip);
   /* the same words as the trip line on Учёт: this trip's money and spending, not the month's */
   const {avail,spent,got}=tripNow();
@@ -1589,6 +1598,22 @@ function renderTrip(trip){
   };
   /* the form's «Записать» appears where the link was: a quick second tap doesn't save 28 500 ₽ unseen */
   $('tAllow').onclick=()=>{fresh();state.editing='allow';render();$('aInput')?.focus({preventScroll:true})};
+  /* «Указать остаток» / «+ Пришли командировочные»: a window over the page, high enough that the keyboard doesn't cover it */
+  const win=(id,title,field,btn,note)=>`<div class="wmodal" role="dialog" aria-modal="true" aria-labelledby="${id}T"><div class="sheet-bg" data-tclose></div>
+    <form class="wallet-edit" id="${id}Form" novalidate><b id="${id}T" tabindex="-1">${title}</b>${field}${note?`<p>${note}</p>`:''}
+    <div class="row"><button class="primary" type="submit">${btn}</button><button class="linkbtn" type="button" data-tclose>Отмена</button></div></form></div>`;
+  if(state.editing==='trip'){
+    box.insertAdjacentHTML('beforeend',win('t','Сколько сейчас осталось командировочных',`<input id="tInput" class="num" inputmode="decimal" placeholder="Например, 12000" value="${st&&bal>=0?vIn(bal):''}" aria-label="Остаток командировочных">`,'Сохранить','Дальше к этой сумме прибавятся новые командировочные и вычтутся траты в командировке.'));
+    $('tForm').onsubmit=async e=>{e.preventDefault();const raw=$('tInput').value, v=parseNum(raw);if(!(v>=0)){toast(NUM_ERR);return}state.editing=null;
+      if(await saveSettings({tripStart:{amount:v,at:Date.now()}})) toast('Остаток командировочных: '+money(v));else reopen('trip','#tInput',raw)};
+  }
+  if(state.editing==='allow'){
+    box.insertAdjacentHTML('beforeend',win('a','Пришли командировочные на Т-Банк',`<input id="aInput" class="num" inputmode="decimal" value="${TRIP_ALLOWANCE}" aria-label="Сумма командировочных">`,'Записать'));
+    $('aForm').onsubmit=async e=>{e.preventDefault();const raw=$('aInput').value, v=parseNum(raw);if(!(v>0)){toast(isNaN(v)?NUM_ERR:'Введите сумму больше нуля');return}
+      state.editing=null;
+      try{const id=await store.add({type:'in',amount:Math.round(v*100)/100,cat:'t_allow',scope:'trip',acc:TRIP_ACC,date:iso(now),note:'',created:Date.now()});toast('Командировочные: '+money(v),id?()=>store.remove(id):null)}catch(x){reopen('allow','#aInput',raw);toast(saveErr(x))}};
+  }
+  box.querySelectorAll('[data-tclose]').forEach(x=>x.onclick=()=>{fresh();state.editing=null;render()});
 }
 
 /* How much the user still owes himself on the broker account: an old debt plus pct of every personal income since it was set, minus what was sent, plus what was taken out */
@@ -1850,6 +1875,10 @@ function renderWallets(){
   const box=$('wallets'), ws=state.settings.wallets||{};
   const vals=WALLETS.map(w=>walletValue(w.id)).filter(v=>v!==null), all=r2(vals.reduce((a,b)=>a+b,0));
   $('moneyTotal').textContent=vals.length?moneyR(all):'—';$('moneyTotal').classList.toggle('neg',all<0);
+  /* under the sum: how much of it is on cards, in cash and put aside — a group with no balance typed is left out */
+  const part=ids=>{const v=ids.map(id=>walletValue(id)).filter(x=>x!==null);return v.length?r2(v.reduce((a,b)=>a+b,0)):null};
+  const parts=[['Карты',['sber','tbank','vtb']],['Наличные',['pocket','cash']],['Накопления',['broker','piggy']]].map(([n,ids])=>[n,part(ids)]).filter(([,v])=>v!==null);
+  $('moneyParts').hidden=parts.length<2;$('moneyParts').innerHTML=parts.map(([n,v])=>`<div><span>${n}</span><b>${moneyR(v)}</b></div>`).join('');
   const WEEK=7*864e5;
   const tile=w=>{
     const v=walletValue(w.id), at=Math.max(ws[w.id]?.at||0,ws[w.id]?.checked||0), stale=at&&Date.now()-at>WEEK;
@@ -3122,8 +3151,8 @@ setInterval(refreshToday,60000);
 let dlgStack=[], dlgInert=[], lastTap=null;
 document.addEventListener('click',e=>{const b=e.target.closest?.('button,[role="button"],summary');if(b)lastTap={el:b,t:performance.now()}},true);
 function dlgOpen(){
-  const w=document.querySelector('#wallets .wmodal'), zf=document.querySelector('#zakatForm .wmodal'), dp=document.querySelector('#debtList .wmodal');
-  return [w&&{k:state.recon?'recon':'w',el:w},dp&&dp.getClientRects().length&&{k:'debt:'+state.openDebt,el:dp},!$('zakatSheet').hidden&&{k:'zakat',el:$('zakatSheet')},zf&&{k:'zform',el:zf},!$('sheet').hidden&&{k:'sheet',el:$('sheet')}].filter(Boolean);
+  const w=document.querySelector('#wallets .wmodal'), zf=document.querySelector('#zakatForm .wmodal'), dp=document.querySelector('#debtList .wmodal'), tw=document.querySelector('#tripStat .wmodal');
+  return [w&&{k:state.recon?'recon':'w',el:w},dp&&dp.getClientRects().length&&{k:'debt:'+state.openDebt,el:dp},tw&&tw.getClientRects().length&&{k:'trip:'+state.editing,el:tw},!$('zakatSheet').hidden&&{k:'zakat',el:$('zakatSheet')},zf&&{k:'zform',el:zf},!$('sheet').hidden&&{k:'sheet',el:$('sheet')}].filter(Boolean);
 }
 /* the same button drawn again (the page redraws its lists): found by its id or its data-… */
 const refind=o=>{if(!o||o.isConnected)return o;if(o.id)return $(o.id);const a=[...o.attributes].find(x=>x.name.startsWith('data-'));
