@@ -353,7 +353,8 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .sumtop>:last-child{margin-left:auto}
 .sumcard .big{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,9vw,46px);line-height:1.05;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .sumcard .sub{font-size:14px;color:var(--muted)}
-#limitLine>span{white-space:nowrap}
+#limitLine>.ll{display:block}
+#limitLine .ll>span{white-space:nowrap}
 .alerts{display:flex;flex-direction:column;gap:8px}
 .alerts:empty{display:none}
 .alert{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:0 12px 12px 0;padding:10px 12px;font-size:14px}
@@ -523,6 +524,11 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .dp-sum b{font-family:var(--f-num);font-size:24px;font-weight:500;color:var(--ink)}
 .dinner{display:flex;flex-direction:column;border-top:1px solid var(--line)}
 .dinner>.debt:last-child{border-bottom:0;padding-bottom:0}
+/* a loan's buttons in the person's window: close together, a few to a line */
+.dperson .debt{gap:4px;padding-block:10px}
+.dperson .debt .acts{gap:0 16px}
+.dperson .debt .acts>.linkbtn{min-height:32px;padding:6px 0;margin:0}
+.dperson .debt .acts>.del{min-height:32px;padding:6px 0}
 .cmp-note{margin:0;font-size:12px;color:var(--muted)}
 .recon{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--warn);border-radius:12px;padding:12px}
 .recon p{margin:0;font-size:14px}
@@ -593,9 +599,9 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:500
 .tripline{display:flex;flex-direction:column;gap:8px;padding-top:12px;margin-top:4px;border-top:1px solid var(--line)}
 .meter.trip i{background:var(--trip)}
 .meter.trip.bad i{background:var(--bad)}
-/* an overspend: the sum over in red, what was spent after it in grey — on the same line only while it fits (fitTrip) */
+/* two lines: spent, then left — or the overspend in red, then what was spent in grey */
 #tripLeftLine b{color:var(--bad);font-weight:700}
-#tripLeftLine .tsp{white-space:nowrap}
+#tripLeftLine>b,#tripLeftLine>span{display:block}
 .sheet{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center}
 .sheet-bg{position:absolute;inset:0;background:rgb(0 0 0 / .55)}
 .sheet-panel{position:relative;width:min(720px,100%);max-height:85vh;overflow-y:auto;overscroll-behavior:contain;background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;padding:12px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;animation:up .18s ease-out}
@@ -1377,19 +1383,12 @@ function renderTripLine(){
   m.hidden=!got;
   const tw=!got?0:left<0?100:Math.min(100,spent/avail*100);m.firstElementChild.style.width=tw+'%';m.classList.toggle('bad',got&&left<0);
   m.setAttribute('aria-valuenow',Math.round(tw));m.setAttribute('aria-valuetext',avail>0?`потрачено ${moneyR(spent)} из ${moneyR(avail)}`:`перерасход ${moneyR(-left)}`);
-  if(!got) l.textContent=`потрачено\u00a0${moneyR(spent)}\u00a0· командировочные\u00a0не\u00a0внесены`;
+  /* two lines: what is spent, then what is left (or the overspend first, in red) */
+  if(!got) l.innerHTML=`<span>потрачено ${moneyR(spent)}</span><span>командировочные не внесены</span>`;
   /* «потрачено» after the overspend only with trip money to set it against: a trip opened again with only its overspend would repeat the same sum */
-  else if(left<0) l.innerHTML=`<b>Перерасход командировочных:\u00a0${moneyR(-left)}</b>${avail>0?`<span class="tsp"> · потрачено\u00a0${moneyR(spent)}</span>`:''}`;
-  else l.textContent=`потрачено\u00a0${moneyR(spent)}\u00a0· осталось\u00a0${moneyR(left)}`;
-  fitTrip();
+  else if(left<0) l.innerHTML=`<b>Перерасход командировочных: ${moneyR(-left)}</b>${avail>0?`<span>потрачено ${moneyR(spent)}</span>`:''}`;
+  else l.innerHTML=`<span>потрачено ${moneyR(spent)}</span><span>осталось ${moneyR(left)}</span>`;
 }
-/* «· потрачено» after the overspend only while it fits on that line — checked again whenever the line changes size (a turned phone, Учёт shown again, the font came) */
-function fitTrip(){
-  const b=document.querySelector('#tripLeftLine>b'), s=document.querySelector('#tripLeftLine>.tsp');if(!b||!s) return;
-  s.hidden=false;if(b.offsetParent&&s.offsetTop>b.offsetTop+2) s.hidden=true;
-}
-if(window.ResizeObserver) new ResizeObserver(()=>requestAnimationFrame(fitTrip)).observe($('tripLeftLine'));
-document.fonts?.ready?.then(()=>fitTrip());
 /* ---------- the trip report ----------
    «Командировка закончилась» shows it; Итоги opens the last one again. Kept in settings.tripReports (the last 10), as it was the day the trip
    ended: money given, what was spent by category (his part only), the partner's part he paid, the result. How much the partner has returned
@@ -1637,7 +1636,9 @@ function renderBroker(inc,out){
 }
 
 const DEFAULT_LIMIT=30000;
-const outLim=v=>v>=0.01?` · <span>ещё ${moneyR(v)} вне лимита</span>`:'';
+/* the limit line in two lines: what is left or over on the first, «≈ 800 ₽ в день» and what is outside the limit on the second */
+const limLines=(first,pd,out)=>{const r=[pd?`<span>${pd}</span>`:'',out>=0.01?`<span>ещё ${moneyR(out)} вне лимита</span>`:''].filter(Boolean);
+  return `<span class="ll">${first}</span>`+(r.length?`<span class="ll">${r.join(' · ')}</span>`:'')};
 /* savings, charity and a trip overspend paid from his own money don't count toward the monthly spending limit (Семья does) */
 const NOT_IN_LIMIT=['invest','broker','sadaqa','zakat','trip_extra'];
 /* out: this month's own spending left out of the limit — Учёт says it, so its sum and «Расходы» in Итоги don't seem to disagree */
@@ -1667,13 +1668,13 @@ function renderBudget(spent,out){
   const box=$('budgetBox'), budget=state.settings.budget===undefined?DEFAULT_LIMIT:(+state.settings.budget||0);
   const meter=$('limitMeter'), lo=$('limitOf'), def=state.settings.limitDefault&&budget===DEFAULT_LIMIT;
   if(!budget){
-    lo.textContent='задать лимит';lo.removeAttribute('aria-label');meter.hidden=true;$('limitLine').innerHTML='лимит не задан'+outLim(out);
+    lo.textContent='задать лимит';lo.removeAttribute('aria-label');meter.hidden=true;$('limitLine').innerHTML=limLines('лимит не задан','',out);
   }else{
     /* this month, while something is left: how much a day that is */
     const p=spent/budget, left=r2(budget-spent), pd=left>=0.01&&isCurrentMonth()?perDay(left):'';
     meter.hidden=false;meter.className='meter'+(p>=1?' bad':p>=.85?' warn':'');meter.setAttribute('aria-valuenow',Math.round(Math.min(1,p)*100));meter.setAttribute('aria-valuetext',`потрачено ${moneyR(spent)} из ${moneyR(budget)}`);meter.firstElementChild.style.width=Math.min(100,p*100)+'%';
     lo.textContent='лимит '+moneyR(budget)+(def?' по умолчанию · изменить':'');if(def)lo.removeAttribute('aria-label');else lo.setAttribute('aria-label','Лимит '+moneyR(budget)+' — изменить');
-    $('limitLine').innerHTML=`<span${left<0?' style="color:var(--bad)"':''}>${left>=0?'осталось '+moneyR(left):'превышен на '+moneyR(-left)}</span>`+(pd?` · <span>${pd}</span>`:'')+outLim(out);
+    $('limitLine').innerHTML=limLines(`<span${left<0?' style="color:var(--bad)"':''}>${left>=0?'осталось '+moneyR(left):'превышен на '+moneyR(-left)}</span>`,pd,out);
   }
   /* «лимит 30 000 ₽» on Учёт: the limit window over Учёт (no limit yet — it opens with its field) */
   lo.onclick=()=>limSheet(!budget);
@@ -3069,7 +3070,7 @@ let dlgStack=[], dlgInert=[], lastTap=null;
 document.addEventListener('click',e=>{const b=e.target.closest?.('button,[role="button"],summary');if(b)lastTap={el:b,t:performance.now()}},true);
 function dlgOpen(){
   const w=document.querySelector('#wallets .wmodal'), zf=document.querySelector('#zakatForm .wmodal'), dp=document.querySelector('#debtList .wmodal');
-  return [w&&{k:state.recon?'recon':'w',el:w},dp&&{k:'debt:'+state.openDebt,el:dp},!$('zakatSheet').hidden&&{k:'zakat',el:$('zakatSheet')},zf&&{k:'zform',el:zf},!$('sheet').hidden&&{k:'sheet',el:$('sheet')}].filter(Boolean);
+  return [w&&{k:state.recon?'recon':'w',el:w},dp&&dp.getClientRects().length&&{k:'debt:'+state.openDebt,el:dp},!$('zakatSheet').hidden&&{k:'zakat',el:$('zakatSheet')},zf&&{k:'zform',el:zf},!$('sheet').hidden&&{k:'sheet',el:$('sheet')}].filter(Boolean);
 }
 /* the same button drawn again (the page redraws its lists): found by its id or its data-… */
 const refind=o=>{if(!o||o.isConnected)return o;if(o.id)return $(o.id);const a=[...o.attributes].find(x=>x.name.startsWith('data-'));
