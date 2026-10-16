@@ -376,10 +376,16 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .sumcard .sub{font-size:14px;color:var(--muted)}
 /* Учёт a size smaller: the card, the new record and the last records fit more on the screen
    (the sum field stays at 16px and over — a smaller one makes the iPhone zoom in when it is tapped) */
-#viewLedger .sumcard{padding:12px;gap:6px}
+#viewLedger .sumcard{padding:10px 12px;gap:5px}
 #viewLedger .sumtop,#viewLedger h2,#viewLedger .linkbtn{font-size:12px}
-#viewLedger .sumcard .big{font-size:clamp(22px,8vw,36px)}
-#viewLedger .sumcard .meter{height:6px}
+#viewLedger .sumcard .big{font-size:clamp(20px,7.5vw,30px)}
+#viewLedger .sumcard .meter{height:5px}
+/* the small blocks under the meters: lower, a size smaller */
+#viewLedger .lparts{gap:5px}
+#viewLedger .lparts>div{padding:3px 4px;border-radius:8px}
+#viewLedger .lparts span{font-size:10.5px}
+#viewLedger .lparts b{font-size:min(13px,3.4vw)}
+#viewLedger .tripline{gap:5px;padding-top:6px}
 #viewLedger .sumcard .sub{font-size:13px}
 #viewLedger .seg button{font-size:14px;min-height:40px;padding:6px}
 #viewLedger .amount input{font-size:20px;padding-block:10px}
