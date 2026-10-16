@@ -479,6 +479,27 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .storenote>span{display:block}
 /* «Данные и резервная копия»: the four buttons two to a line; what shows up only now and then takes a whole line */
 .bkgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.wmodal[hidden]{display:none}
+.wmodal:has(.bkpanel){align-items:center;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
+.bkpanel{position:relative;width:min(440px,100%);display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:12px 14px 16px;box-shadow:0 12px 40px rgb(0 0 0 / .45);animation:up .18s ease-out}
+.bkpanel .bkgrid>button{min-height:52px}
+/* under the accounts: «Данные и копия · 9 окт» on the left (the date in yellow when the copy is over a week old), the transfer on the right */
+.total.mtot{padding:8px 12px 9px}
+#moneyTotal{line-height:1}
+#wallets{gap:8px}
+#wallets .wgroup{padding:6px 12px 4px}
+#wallets .whead{padding-bottom:5px}
+#wallets .whead b{padding:1px 8px}
+#wallets .wrow{min-height:32px;padding:4px}
+#wallets .wrow:last-child{padding-bottom:3px}
+#viewMoney .zline{padding:8px 12px;gap:6px}
+#viewMoney .zline .zcols{padding-top:6px}
+.mfoot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:0}
+.mfoot>.moneyacts{margin-left:auto}
+.mfoot>.moneyacts:has(.xfer){flex:1 1 100%}
+#bkOpen,.mfoot #xOpen{font-size:13px;min-height:36px}
+#bkLast{color:var(--muted);font-weight:400}
+#bkLast.old{color:var(--warn)}
 .bkgrid>button{min-width:0}
 #wipeBk,#brokenDlBtn{grid-column:1/-1}
 /* «Очистить всё» asks: the warning and «Сначала скачать копию» are scrolled into view with the card's edge under them */
@@ -903,7 +924,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
 
   </div>
 
-  <div id="viewMoney" role="tabpanel" aria-labelledby="tabMoney" hidden style="flex-direction:column;gap:16px">
+  <div id="viewMoney" role="tabpanel" aria-labelledby="tabMoney" hidden style="flex-direction:column;gap:8px">
     <h2 class="sr">Деньги на счетах</h2>
     <section class="total mtot" aria-label="Всего денег">
       <span class="lbl">Всего денег</span>
@@ -912,11 +933,12 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     </section>
     <div class="wallets" id="wallets"></div>
     <button type="button" class="zline" id="zakatLine" hidden></button>
-    <div class="moneyacts" id="moneyActs"></div>
-    <p class="storenote" id="storeNote">Загрузка…</p>
-    <details class="more">
-      <summary>Данные и резервная копия</summary>
-      <div class="morebody foot">
+    <div class="mfoot"><button type="button" class="linkbtn" id="bkOpen" aria-haspopup="dialog">Данные и копия<span id="bkLast"></span></button><div class="moneyacts" id="moneyActs"></div></div>
+    <!-- «Данные и копия»: a window in the middle of the screen, the note on keeping a copy and the four buttons -->
+    <div class="wmodal" id="bkModal" hidden role="dialog" aria-modal="true" aria-labelledby="bkT"><div class="sheet-bg" data-bkclose></div>
+      <div class="bkpanel">
+        <div class="dp-head"><div class="dp-t"><b id="bkT" tabindex="-1">Данные и резервная копия</b></div><button type="button" class="dp-x" data-bkclose aria-label="Закрыть">×</button></div>
+        <p class="storenote" id="storeNote">Загрузка…</p>
         <div class="bkgrid">
           <button class="ghost" id="exportBtn" aria-label="Скачать CSV за месяц">CSV за месяц</button>
           <button class="ghost" id="backupBtn" aria-label="Скачать резервную копию">Скачать копию</button>
@@ -927,7 +949,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
           <input type="file" id="restoreFile" accept=".json,application/json" hidden>
         </div>
       </div>
-    </details>
+    </div>
   </div>
 
   <div id="viewHistory" role="tabpanel" aria-labelledby="tabHistory" hidden style="flex-direction:column;gap:16px">
@@ -3307,8 +3329,9 @@ setInterval(refreshToday,60000);
 let dlgStack=[], dlgInert=[], lastTap=null;
 document.addEventListener('click',e=>{const b=e.target.closest?.('button,[role="button"],summary');if(b)lastTap={el:b,t:performance.now()}},true);
 function dlgOpen(){
+  const bk=$('bkModal');
   const w=document.querySelector('#wallets .wmodal'), zf=document.querySelector('#zakatForm .wmodal'), dp=document.querySelector('#debtList .wmodal'), tw=document.querySelector('#tripStat .wmodal');
-  return [w&&{k:state.recon?'recon':'w',el:w},dp&&dp.getClientRects().length&&{k:'debt:'+state.openDebt,el:dp},tw&&tw.getClientRects().length&&{k:'trip:'+state.editing,el:tw},!$('zakatSheet').hidden&&{k:'zakat',el:$('zakatSheet')},zf&&{k:'zform',el:zf},!$('sheet').hidden&&{k:'sheet',el:$('sheet')}].filter(Boolean);
+  return [w&&{k:state.recon?'recon':'w',el:w},dp&&dp.getClientRects().length&&{k:'debt:'+state.openDebt,el:dp},tw&&tw.getClientRects().length&&{k:'trip:'+state.editing,el:tw},!$('zakatSheet').hidden&&{k:'zakat',el:$('zakatSheet')},zf&&{k:'zform',el:zf},!$('sheet').hidden&&{k:'sheet',el:$('sheet')},!bk.hidden&&{k:'bk',el:bk}].filter(Boolean);
 }
 /* the same button drawn again (the page redraws its lists): found by its id or its data-… */
 const refind=o=>{if(!o||o.isConnected)return o;if(o.id)return $(o.id);const a=[...o.attributes].find(x=>x.name.startsWith('data-'));
@@ -3332,7 +3355,7 @@ function dlgSync(){
 document.addEventListener('keydown',e=>{
   const top=dlgOpen().pop();if(!top)return;
   if(e.key==='Escape'){e.preventDefault();
-    if(top.k==='sheet')closeSheet();else if(top.k==='zakat'){if(state.zView)zGo(null);else closeZakat()}else{state.editing=null;state.recon=null;if(top.k.startsWith('debt:')){state.openDebt=null;state.openDebtItem=null}render()}
+    if(top.k==='bk')closeBk();else if(top.k==='sheet')closeSheet();else if(top.k==='zakat'){if(state.zView)zGo(null);else closeZakat()}else{state.editing=null;state.recon=null;if(top.k.startsWith('debt:')){state.openDebt=null;state.openDebtItem=null}render()}
     return}
   if(e.key!=='Tab')return;
   const f=[...top.el.querySelectorAll('button,input,select,textarea,summary,a[href],[tabindex="0"]')].filter(x=>!x.disabled&&x.getClientRects().length&&getComputedStyle(x).visibility!=='hidden'), i=f.indexOf(document.activeElement);
@@ -3562,6 +3585,7 @@ function renderDataBox(){
   const lb=+state.settings.lastBackup||0;
   $('brokenDlBtn').hidden=!store.broken().length;
   /* three lines: where the records are, what to do once a week, when the last copy was */
+  $('bkLast').textContent=lb?' · '+dShort.format(new Date(lb)).replace('.',''):' · копии нет';$('bkLast').className=!lb||Date.now()-lb>7*864e5?'old':'';
   $('storeNote').innerHTML=`<span>Записи хранятся только на этом телефоне.</span><span>Раз в неделю скачивайте копию в iCloud Drive.</span><span>${lb?'Последняя копия: '+esc(dayText(iso(new Date(lb)))):'Копию вы ещё не скачивали'}</span>`;
   return state.items.length>=10&&!(Date.now()-lb<7*864e5)?`<div class="alert"><span>${lb?'Резервной копии не было больше недели':'Резервной копии ещё нет'}. Скачайте её и сохраните: ${BK_SAFE} — так копия уцелеет, даже если потерять телефон.</span><button class="primary" id="bkGo">Скачать</button></div>`:'';
 }
@@ -3581,6 +3605,9 @@ const wipeReset=()=>{const b=$('wipeBtn');clearTimeout(wipeT);delete b.dataset.a
 /* it comes up under the finger with the first tap: for 600 ms a tap on it is the second tap of the same double tap — no download */
 $('wipeBk').onclick=()=>{if(Date.now()-$('wipeBtn').dataset.armed<600)return;wipeReset();$('backupBtn').onclick()};
 $('brokenDlBtn').onclick=brokenDl;
+const closeBk=()=>{$('bkModal').hidden=true;wipeReset();dlgSync()};
+$('bkOpen').onclick=()=>{$('bkModal').hidden=false;dlgSync()};
+$('bkModal').querySelectorAll('[data-bkclose]').forEach(b=>b.onclick=closeBk);
 $('wipeBtn').onclick=async()=>{
   const b=$('wipeBtn');
   /* the button grows and «Сначала скачать копию» comes up under the finger: the second tap of a double tap is let go of (fresh) */
@@ -3712,7 +3739,7 @@ if('serviceWorker' in navigator){
   const changed=x=>x.tagName==='SELECT'?x.selectedIndex!==pick0(x)
     :x.type==='date'?(x.defaultValue?x.value!==x.defaultValue:!!x.value&&x.value!==iso(now))
     :!/^(file|checkbox|radio|hidden)$/.test(x.type)&&x.value.trim()&&x.value!==x.defaultValue;
-  const busy=()=>!$('sheet').hidden||!$('zakatSheet').hidden||!!document.querySelector('.wmodal')||!!state.editing||!!state.editItem||!!state.xferOpen
+  const busy=()=>!$('sheet').hidden||!$('zakatSheet').hidden||!!document.querySelector('.wmodal:not([hidden])')||!!state.editing||!!state.editItem||!!state.xferOpen
     ||[...document.querySelectorAll('input,textarea,select')].some(changed);
   navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!hadSW||reloaded)return;
     if(!busy()){reloaded=true;location.reload();return}
