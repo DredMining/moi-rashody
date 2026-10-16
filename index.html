@@ -382,8 +382,14 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 #viewLedger .amount span{font-size:18px}
 #viewLedger .chipbtn{font-size:12px;min-height:40px}
 #viewLedger .submit{font-size:14px;padding:10px}
-#limitLine>.ll{display:block}
-#limitLine .ll>span{white-space:nowrap}
+/* the limit's columns: as «Всего денег» on «Деньги» — split by thin lines, a small grey label over each value */
+.lparts{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);margin-top:2px}
+.lparts>div{display:flex;flex-direction:column;gap:2px;min-width:0;padding:0 8px}
+.lparts>div:first-child{padding-left:0}
+.lparts>div+div{border-left:1px solid var(--line)}
+.lparts span{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lparts b{font-family:var(--f-num);font-weight:500;font-size:min(14px,3.6vw);white-space:nowrap;font-variant-numeric:tabular-nums}
+.lparts b.neg{color:var(--bad)}
 .alerts{display:flex;flex-direction:column;gap:8px}
 .alerts:empty{display:none}
 .alert{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:0 12px 12px 0;padding:10px 12px;font-size:14px}
@@ -567,10 +573,19 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 /* «Всего денег»: a card with a soft accent glow, the sum, then cards / cash / savings in three columns */
 .total.mtot{background:var(--surface);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 70%);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;gap:4px}
 .mparts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:8px;padding-top:10px;border-top:1px solid var(--line)}
-.mparts>div{display:flex;flex-direction:column;gap:2px;min-width:0;padding:0 6px}
-.mparts>div:first-child{padding-left:0}
-.mparts>div+div{border-left:1px solid var(--line)}
-.mparts span{font-size:11px;color:var(--muted)}
+.mparts>div:not(.mbar){display:flex;flex-direction:column;gap:2px;min-width:0;padding:0 6px}
+.mparts>div:first-child,.mparts>.mbar+div{padding-left:0}
+.mparts>div:not(.mbar)+div{border-left:1px solid var(--line)}
+.mparts span{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.mparts span::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--c);flex:none}
+.mparts .kop{display:inline;font-size:.8em}
+.mparts .kop::before{content:none}
+/* the bar over the columns, across the whole card */
+.mparts .mbar{grid-column:1/-1;display:flex;gap:2px;height:4px;margin-bottom:10px;padding:0;border:0}
+.mparts .mbar i{display:block;min-width:3px;border-radius:99px}
+/* the bar itself parts the sum from the columns: no line over it */
+.mparts:has(.mbar){border-top:0;padding-top:6px}
+#moneyTotal .kop{font-size:.6em;color:var(--muted);font-weight:600}
 .mparts b{font-family:var(--f-num);font-weight:500;font-size:min(14px,3.4vw);white-space:nowrap}
 .whint{margin:0;font-size:13px;color:var(--muted)}
 .wrow small{font-size:11px;color:var(--warn)}
@@ -774,7 +789,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     <div class="sumtop"><span id="sumLabel">Траты в лимит за месяц</span><button type="button" class="linkbtn" id="limitOf" aria-haspopup="dialog"></button></div>
     <span class="big" id="total">0 ₽</span>
     <div class="meter" id="limitMeter" role="progressbar" aria-label="Лимит на месяц" aria-valuemin="0" aria-valuemax="100"><i></i></div>
-    <span class="sub" id="limitLine">&nbsp;</span>
+    <div class="lparts" id="limitLine"></div>
     <div class="tripline" id="tripLine" hidden>
       <div class="sumtop"><span>Командировочные</span><span id="tripOf"></span></div>
       <div class="meter trip" id="tripMeter" role="progressbar" aria-label="Командировочные" aria-valuemin="0" aria-valuemax="100"><i></i></div>
@@ -1746,8 +1761,16 @@ function renderBroker(inc,out){
 }
 
 const DEFAULT_LIMIT=30000;
-/* the limit line, each part on its own line: what is left or over, «≈ 800 ₽ в день до …», what is outside the limit */
-const limLines=(first,pd,out)=>[first,pd?`<span>${pd}</span>`:'',out>=0.01?`<span>ещё ${moneyR(out)} вне лимита</span>`:''].filter(Boolean).map(x=>`<span class="ll">${x}</span>`).join('');
+/* under the limit meter, in columns as on «Деньги» and «Итоги» (a small grey label over each value):
+   what is left (or how much over), how much a day that is till the month's end, what was spent outside the limit */
+const dayShort=DF({day:'numeric',month:'short'});
+const limLines=(left,out)=>{const c=[];
+  if(left===null) c.push(['Лимит','не задан']);
+  else c.push(left>=0?['Осталось',moneyR(left)]:['Превышен',moneyR(-left),'neg']);
+  if(left>=0.01&&isCurrentMonth()){const n=daysInMonth(), d=n-now.getDate()+1, v=Math.floor(left/d);
+    if(d<=1) c.push(['В день','последний']);else if(v>=1) c.push([`В день до ${NB(dayShort.format(new Date(state.y,state.m,n)).replace('.',''))}`,'≈\u00a0'+money(v)])}
+  if(out>=0.01) c.push(['Вне лимита',moneyR(out)]);
+  return c.map(([l,v,k])=>`<div><span>${l}</span><b${k?` class="${k}"`:''}>${v}</b></div>`).join('')};
 /* savings, charity and a trip overspend paid from his own money don't count toward the monthly spending limit (Семья does) */
 const NOT_IN_LIMIT=['invest','broker','sadaqa','zakat','trip_extra'];
 /* out: this month's own spending left out of the limit — Учёт says it, so its sum and «Расходы» in Итоги don't seem to disagree */
@@ -1777,13 +1800,13 @@ function renderBudget(spent,out){
   const box=$('budgetBox'), budget=state.settings.budget===undefined?DEFAULT_LIMIT:(+state.settings.budget||0);
   const meter=$('limitMeter'), lo=$('limitOf'), def=state.settings.limitDefault&&budget===DEFAULT_LIMIT;
   if(!budget){
-    lo.textContent='задать лимит';lo.removeAttribute('aria-label');meter.hidden=true;$('limitLine').innerHTML=limLines('лимит не задан','',out);
+    lo.textContent='задать лимит';lo.removeAttribute('aria-label');meter.hidden=true;$('limitLine').innerHTML=limLines(null,out);
   }else{
     /* this month, while something is left: how much a day that is */
     const p=spent/budget, left=r2(budget-spent), pd=left>=0.01&&isCurrentMonth()?perDay(left):'';
     meter.hidden=false;meter.className='meter'+(p>=1?' bad':p>=.85?' warn':'');meter.setAttribute('aria-valuenow',Math.round(Math.min(1,p)*100));meter.setAttribute('aria-valuetext',`потрачено ${moneyR(spent)} из ${moneyR(budget)}`);meter.firstElementChild.style.width=Math.min(100,p*100)+'%';
     lo.textContent='лимит '+moneyR(budget)+(def?' по умолчанию · изменить':'');if(def)lo.removeAttribute('aria-label');else lo.setAttribute('aria-label','Лимит '+moneyR(budget)+' — изменить');
-    $('limitLine').innerHTML=limLines(`<span${left<0?' style="color:var(--bad)"':''}>${left>=0?'осталось '+moneyR(left):'превышен на '+moneyR(-left)}</span>`,pd,out);
+    $('limitLine').innerHTML=limLines(left,out);
   }
   /* «лимит 30 000 ₽» on Учёт: the limit window over Учёт (no limit yet — it opens with its field) */
   lo.onclick=()=>limSheet(!budget);
@@ -1915,11 +1938,17 @@ const toBroker=list=>brokerIn(list)-brokerOutOf(list);
 function renderWallets(){
   const box=$('wallets'), ws=state.settings.wallets||{};
   const vals=WALLETS.map(w=>walletValue(w.id)).filter(v=>v!==null), all=r2(vals.reduce((a,b)=>a+b,0));
-  $('moneyTotal').textContent=vals.length?moneyR(all):'—';$('moneyTotal').classList.toggle('neg',all<0);
+  /* the kopecks smaller and grey: the rubles are what is read first */
+  const kop=t=>esc(t).replace(/,(\d\d)/,'<span class="kop">,$1</span>');
+  $('moneyTotal').innerHTML=vals.length?kop(moneyR(all)):'—';$('moneyTotal').classList.toggle('neg',all<0);
   /* under the sum: how much of it is on cards, in cash and put aside — a group with no balance typed is left out */
   const part=ids=>{const v=ids.map(id=>walletValue(id)).filter(x=>x!==null);return v.length?r2(v.reduce((a,b)=>a+b,0)):null};
   const parts=[['Карты',['sber','tbank','vtb']],['Наличные',['pocket','cash']],['Накопления',['broker','piggy']]].map(([n,ids])=>[n,part(ids)]).filter(([,v])=>v!==null);
-  $('moneyParts').hidden=parts.length<2;$('moneyParts').innerHTML=parts.map(([n,v])=>`<div><span>${n}</span><b>${moneyR(v)}</b></div>`).join('');
+  /* a thin bar split by how much each group holds, its colour on the dot by the group's name */
+  const PC={'Карты':'var(--p1)','Наличные':'var(--p3)','Накопления':'var(--p4)'}, pos=parts.reduce((a,[,v])=>a+Math.max(0,v),0);
+  $('moneyParts').hidden=parts.length<2;
+  $('moneyParts').innerHTML=(pos>0?`<div class="mbar" aria-hidden="true">${parts.map(([n,v])=>v>0?`<i style="flex-grow:${v/pos};background:${PC[n]}"></i>`:'').join('')}</div>`:'')
+    +parts.map(([n,v])=>`<div style="--c:${PC[n]}"><span>${n}</span><b>${kop(moneyR(v))}</b></div>`).join('');
   const WEEK=7*864e5;
   const tile=w=>{
     const v=walletValue(w.id), at=Math.max(ws[w.id]?.at||0,ws[w.id]?.checked||0), stale=at&&Date.now()-at>WEEK;
