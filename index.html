@@ -1130,7 +1130,8 @@ const CAT=Object.fromEntries(CATS.map(c=>[c.id,c]));
 const CAT_RANK=Object.fromEntries(CATS.map((c,n)=>[c.id,['daily','sep','in','trip','tripin'].indexOf(c.g)*1000+(c.custom?999:n)]));
 const byRank=(a,b)=>(CAT_RANK[a]??1e5)-(CAT_RANK[b]??1e5);
 const catOf=id=>CAT[id]||CAT[LEGACY[id]]||CAT.other;
-const typeOf=i=>i.type==='in'?'in':i.type==='transfer'?'tr':i.type==='debt'?'debt':'out';
+/* «tr»: a transfer saved from «Учёт» by a version that spelled it so — read as the transfer it is */
+const typeOf=i=>i.type==='in'?'in':i.type==='transfer'||(i.type==='tr'&&i.from&&i.to)?'tr':i.type==='debt'?'debt':'out';
 const nameOf=i=>i.label||catOf(i.cat).name;
 /* one order of accounts everywhere (the sheet, «Деньги», the filter on «Записи», every list): Сбербанк, Т-Банк, ВТБ, Наличка, Подушка,
    then Брокерский счёт and Копильник (WALLETS) */
@@ -3505,7 +3506,7 @@ async function saveEntry(acc,opt={}){
   /* a personal «Брокер» or «Копильник» typed as an expense is money moved, not spent: it is saved as a transfer
      from the picked account to the broker account / piggy bank (not into expenses or the limit; the broker transfer counts in his % to the broker) */
   const toW=type==='out'&&scope!=='trip'&&!pt?({broker:'broker',invest:'piggy'})[cat]:null, asTr=!!toW&&acc!==toW;
-  const rec=asTr?{type:'tr',amount,from:acc,to:toW,date:p.date,note:note||label,created:Date.now()}:{type,amount,cat,date:p.date,note,created:Date.now(),acc};
+  const rec=asTr?{type:'transfer',amount,from:acc,to:toW,date:p.date,note:note||label,created:Date.now()}:{type,amount,cat,date:p.date,note,created:Date.now(),acc};
   if(scope==='trip') rec.scope='trip';
   if(label&&!asTr) rec.label=label;
   /* forgotten till the trip ended (dated before that day): it goes to that trip, and the trip's result follows — in the same write */
