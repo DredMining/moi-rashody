@@ -160,18 +160,25 @@ button{cursor:pointer}
 .mcard .mcol>b{font-family:var(--f-num);font-weight:500;font-size:min(14px,3.4vw);line-height:1.4;font-variant-numeric:tabular-nums;white-space:nowrap;overflow-wrap:normal}
 /* «Куда ушли деньги» and the incomes: each group (Повседневные, Отдельно, Командировка, Доходы по источникам) is one card under a small
    grey label, 12px from the next group; its categories are rows split by thin lines.
-   A row is a 40px button, its line included: the name and the sum on one line, the bar 2px under them. The rows touch, so the row's
-   own height is all a finger has to hit — 40px, no lower, keeps it easy to tap */
+   A row is a 36px button, its line included: the name and the sum (12.5px) on one line, the bar 2px under them. The rows touch,
+   so the whole card is rows a finger can hit */
 #incomeBreakdown{gap:6px}
 .bdwrap .bd{gap:6px}
 #breakdown .bd h3,#incomeBreakdown>h2{margin:0 0 0 2px;font-family:var(--f-body);font-size:11px;font-weight:600;line-height:13px;letter-spacing:.06em;color:var(--muted)}
 .bdwrap .bars{gap:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.bdwrap .bar{min-height:40px;padding:6px 12px 10px;row-gap:2px;border-bottom:1px solid var(--line)}
+.bdwrap .bar{min-height:36px;padding:5px 12px 8px;row-gap:2px;border-bottom:1px solid var(--line)}
+.bdwrap .bar .name,.bdwrap .bar .val{font-size:12.5px}
+.bdwrap .bar .track{height:3px}
 .bdwrap .bar:last-child{border-bottom:0}
 .bdwrap .bar:active{background:var(--accent-soft)}
 /* the ring sits inside the row: the card's edge would cut one drawn outside it */
 .bars .bar:focus-visible{outline-offset:-2px}
 #tripCard .stat{border:0;background:none;padding:0}
+/* on «Итоги» the trip card is as small as the category cards above it: a small grey label, tight padding, 13px links */
+#tripCard{padding:10px 12px 6px;gap:4px;border-radius:12px}
+#tripCard>h2{margin:0;font-family:var(--f-body);font-size:11px;font-weight:600;line-height:13px;letter-spacing:.06em;color:var(--muted)}
+#tripCard .stat b{font-size:15px}
+#tripStat .tacts .linkbtn{font-size:13px;min-height:36px}
 #tripCard .wmodal b{font-family:var(--f-body);font-weight:600;font-variant-numeric:normal}
 /* its field is one line high (in .wallet-edit a field normally stands in a row) */
 #tripCard .wmodal input{flex:none}
@@ -1739,9 +1746,8 @@ function renderBroker(inc,out){
 }
 
 const DEFAULT_LIMIT=30000;
-/* the limit line in two lines: what is left or over on the first, «≈ 800 ₽ в день» and what is outside the limit on the second */
-const limLines=(first,pd,out)=>{const r=[pd?`<span>${pd}</span>`:'',out>=0.01?`<span>ещё ${moneyR(out)} вне лимита</span>`:''].filter(Boolean);
-  return `<span class="ll">${first}</span>`+(r.length?`<span class="ll">${r.join(' · ')}</span>`:'')};
+/* the limit line, each part on its own line: what is left or over, «≈ 800 ₽ в день до …», what is outside the limit */
+const limLines=(first,pd,out)=>[first,pd?`<span>${pd}</span>`:'',out>=0.01?`<span>ещё ${moneyR(out)} вне лимита</span>`:''].filter(Boolean).map(x=>`<span class="ll">${x}</span>`).join('');
 /* savings, charity and a trip overspend paid from his own money don't count toward the monthly spending limit (Семья does) */
 const NOT_IN_LIMIT=['invest','broker','sadaqa','zakat','trip_extra'];
 /* out: this month's own spending left out of the limit — Учёт says it, so its sum and «Расходы» in Итоги don't seem to disagree */
@@ -2322,7 +2328,7 @@ function renderZakat(){
       ${zRow('Итого облагается',money(cur.base),'','zsum')}${cur.below?zRow('Закят 2,5%','—',`не начисляется (ниже нисаба): ${money(cur.forNisab)} меньше ${money(cur.nisab)}`,'zsum')
         :zRow('Закят 2,5%',money(cur.amount),'','zsum')+(ea>=0.01?zRow('Осталось отдать к сроку',money(rest),`отдано досрочно ${money(ea)}`,'zsum'):'')}</div>
       ${miss.length?`<div class="zhint">Не вписаны на вкладке «Деньги»: ${miss.join(', ')} — они не учтены.${bMiss?' Стоимость брокерского счёта можно указать в настройках закята.':''}</div>`:''}
-      <div class="zhint"><b>Как считается</b>Ставка 2,5% со всей суммы, а не только сверх нисаба. Деньги, пришедшие в этом году, тоже входят — с них закят отдаётся досрочно, это допустимо. Свои долги не вычитаются (шафиитский мазхаб). Жильё, машина и вещи не облагаются.</div>`;
+      <div class="zhint"><b>Как считается</b><span>Ставка 2,5% со всей суммы, а не только сверх нисаба.</span><span>Деньги, пришедшие в этом году, тоже входят — с них закят отдаётся досрочно, это допустимо.</span><span>Свои долги не вычитаются (шафиитский мазхаб).</span><span>Жильё, машина и вещи не облагаются.</span></div>`;
     const why=sub;
     html+=`<button type="button" class="zgo" data-zview="why"><span>Почему столько</span><span aria-hidden="true">›</span></button>`;
     if(z.priceAt&&Date.now()-z.priceAt>30*864e5) html+=`<div class="zhint">Цена ${METAL[metal]} вписана ${gDate(iso(new Date(z.priceAt)))} — обновите её перед сроком.</div>`;
