@@ -595,6 +595,12 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .mparts span{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
 .mparts span::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--c);flex:none}
 .mparts .kop{display:inline;font-size:.8em}
+.mparts em{font-style:normal;font-family:var(--f-num);font-size:10.5px;color:var(--ink);opacity:.7;margin-left:2px}
+/* «Всего денег» in the middle of its card: the label, the sum, and each column's label and value under it */
+.total.mtot{align-items:center;text-align:center}
+.total.mtot .mparts{width:100%}
+.mparts>div:not(.mbar){align-items:center}
+.mparts>div:not(.mbar):first-child,.mparts>.mbar+div{padding-left:6px}
 .mparts .kop::before{content:none}
 /* the bar over the columns, across the whole card */
 .mparts .mbar{grid-column:1/-1;display:flex;gap:2px;height:4px;margin-bottom:10px;padding:0;border:0}
@@ -1387,7 +1393,10 @@ function renderLedger(){
   const own=items.filter(i=>!isTrip(i)), trip=items.filter(isTrip);
   const out=own.filter(i=>typeOf(i)==='out'), inc=own.filter(i=>typeOf(i)==='in');
   const spent=r2(sum(out)), earned=r2(sum(inc)), bal=r2(earned-spent);
-  const inLimit=r2(sum(out.filter(i=>!NOT_IN_LIMIT.includes(catOf(i.cat).id))));
+  const inLimit0=r2(sum(out.filter(i=>!NOT_IN_LIMIT.includes(catOf(i.cat).id))));
+  /* a trip still going on, its money spent and more paid from his own pocket: that overspend is his own spending this month —
+     it counts in the limit now; when the trip ends it becomes the «Докинул на командировку» record, which counts the same way */
+  const tn=isCurrentMonth()?tripNow():null, over=tn&&tn.got&&tn.left<0?r2(-tn.left):0, inLimit=r2(inLimit0+over);
   $('total').textContent=moneyR(inLimit);
   /* _full: the whole sum, kept for fitMonth (it may show it shorter) */
   $('incomeTotal').textContent=$('incomeTotal')._full=moneyR(earned);
@@ -1397,7 +1406,7 @@ function renderLedger(){
   renderTrip(trip);
   renderTripLine();
   const brokerAlert=renderBroker(inc,out)||'';
-  renderBudget(inLimit,r2(spent-inLimit));
+  renderBudget(inLimit,r2(spent-inLimit0));
   const zakatAlert=renderZakat()||'';
   /* things that need an action — between the month card and the form */
   const al=$('alerts');al.innerHTML=zakatAlert+brokerAlert+renderDataBox();
@@ -1663,7 +1672,7 @@ function renderTrip(trip){
       /* the report comes up at once; «Отменить» in the message over it opens the trip again and takes the report away (the window closes).
          Closed, it gives the focus to «Отчёт по прошлой командировке» — «Командировка закончилась» is gone */
       $('tRep')?.focus({preventScroll:true});repSheet(rep);
-      toast(z?'Командировка закрыта: командировочные потрачены ровно':v>0?`Остаток ${money(v)} записан в доходы${pct?` · ${fmt.format(pct)}% на брокер`:''}`:`Перерасход ${money(-v)} записан в расходы из своих денег, в лимит не входит`,
+      toast(z?'Командировка закрыта: командировочные потрачены ровно':v>0?`Остаток ${money(v)} записан в доходы${pct?` · ${fmt.format(pct)}% на брокер`:''}`:`Перерасход ${money(-v)} записан в расходы из своих денег, входит в лимит месяца`,
         /* the report closes (renderTrip) and its link may be gone: the focus goes to «Командировка закончилась», drawn again —
            unless it is somewhere else on the page by now */
         ()=>store.batch(o=>{if(id)o.remove(id);tripReopen(o,prev);o.patchSettings({tripReports:repList().filter(r=>r.at!==at)})})
@@ -1791,9 +1800,9 @@ const limLines=(left,out)=>{const c=[];
   if(out>=0.01) c.push(['Вне лимита',moneyR(out)]);
   return c.map(([l,v,k])=>`<div><span>${l}</span><b${k?` class="${k}"`:''}>${v}</b></div>`).join('')};
 /* savings, charity and a trip overspend paid from his own money don't count toward the monthly spending limit (Семья does) */
-const NOT_IN_LIMIT=['invest','broker','sadaqa','zakat','trip_extra'];
+const NOT_IN_LIMIT=['invest','broker','sadaqa','zakat'];
 /* out: this month's own spending left out of the limit — Учёт says it, so its sum and «Расходы» in Итоги don't seem to disagree */
-const NOT_IN_TXT='Не входят: брокер, копильник, садака, закят, докинул на командировку';
+const NOT_IN_TXT='Не входят: брокер, копильник, садака, закят. Перерасход командировочных входит';
 /* «≈ 800 ₽ в день до 31 октября»: what is left of the limit for each day of the month still to come, today included (whole rubles, down) */
 function perDay(left){
   const n=daysInMonth(), d=n-now.getDate()+1, v=Math.floor(left/d);
@@ -1964,10 +1973,12 @@ function renderWallets(){
   const part=ids=>{const v=ids.map(id=>walletValue(id)).filter(x=>x!==null);return v.length?r2(v.reduce((a,b)=>a+b,0)):null};
   const parts=[['Карты',['sber','tbank','vtb']],['Наличные',['pocket','cash']],['Накопления',['broker','piggy']]].map(([n,ids])=>[n,part(ids)]).filter(([,v])=>v!==null);
   /* a thin bar split by how much each group holds, its colour on the dot by the group's name */
+  /* the share of the whole: whole percent, «<1 %» for a sliver that is still there */
+  const pctOf=f=>f<0.005?'<1%':Math.round(f*100)+'%';
   const PC={'Карты':'var(--p1)','Наличные':'var(--p3)','Накопления':'var(--p4)'}, pos=parts.reduce((a,[,v])=>a+Math.max(0,v),0);
   $('moneyParts').hidden=parts.length<2;
   $('moneyParts').innerHTML=(pos>0?`<div class="mbar" aria-hidden="true">${parts.map(([n,v])=>v>0?`<i style="flex-grow:${v/pos};background:${PC[n]}"></i>`:'').join('')}</div>`:'')
-    +parts.map(([n,v])=>`<div style="--c:${PC[n]}"><span>${n}</span><b>${kop(moneyR(v))}</b></div>`).join('');
+    +parts.map(([n,v])=>`<div style="--c:${PC[n]}"><span>${n}${pos>0&&v>0?`<em>${pctOf(v/pos)}</em>`:''}</span><b>${kop(moneyR(v))}</b></div>`).join('');
   const WEEK=7*864e5;
   const tile=w=>{
     const v=walletValue(w.id), at=Math.max(ws[w.id]?.at||0,ws[w.id]?.checked||0), stale=at&&Date.now()-at>WEEK;
@@ -3194,8 +3205,8 @@ function renderChips(){
   $('sOwn').parentElement.hidden=t==='in';$('sOwn').parentElement.parentElement.classList.toggle('one',t==='in');
   const sb=$('submitBtn');sb.textContent=(t==='in'?'Добавить доход':'Добавить расход')+(s==='trip'?' в командировке':'');sb.classList.toggle('in',t==='in');
   $('amount').placeholder=s==='trip'&&t==='in'?String(TRIP_ALLOWANCE):'0';
-  $('hint').hidden=s!=='trip';
-  $('hint').textContent=t==='in'?`Командировочные считаются отдельно и не входят в личные доходы.`:'Траты из командировочных в личные расходы не попадают.';
+  $('hint').hidden=s!=='trip'||t!=='in';
+  $('hint').textContent=t==='in'?`Командировочные считаются отдельно и не входят в личные доходы.`:'';
 }
 $('tOut').onclick=()=>{state.type='out';renderChips()};
 $('tIn').onclick=()=>{state.type='in';state.scope='own';renderChips()};
