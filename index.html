@@ -199,7 +199,8 @@ button{cursor:pointer}
 #wallets .wgroup{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px}
 .whead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:0 2px}
 .whead h3{margin:0}
-.whead b{font-family:var(--f-num);font-weight:500;font-size:13px;color:var(--muted)}
+/* the group's sum in its own small block on the right */
+.whead b{font-family:var(--f-num);font-weight:500;font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:2px 8px}
 .whead .kop,.wrow .kop{font-size:.8em;color:var(--muted)}
 .wgrid{display:grid;gap:8px}
 .wgrid.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -627,9 +628,11 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .zpay{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);margin-bottom:12px}
 .zpay input{font-size:22px}
 .stat small{font-size:11px;color:var(--muted)}
-.wlist{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:6px}
+/* the accounts side by side, split by thin lines, under a line from the group's name */
+.wlist{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));border-top:1px solid var(--line);padding-top:4px}
 /* «Деньги»: an account's name 14px, its sum 15px; the row stays a 44px button or more */
-.wrow{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:4px;min-width:0;min-height:52px;padding:8px 10px;background:var(--bg);border:1px solid var(--line);border-radius:10px;text-align:left;color:inherit;width:100%}
+.wrow{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:4px;min-width:0;min-height:50px;padding:6px 10px;background:none;border:0;border-radius:8px;text-align:left;color:inherit;width:100%}
+.wrow+.wrow{border-left:1px solid var(--line);border-radius:0}
 .wrow:active{background:var(--accent-soft)}
 
 .wrow .wn{font-size:13px;font-weight:500;min-width:0;overflow-wrap:anywhere}
