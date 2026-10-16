@@ -600,30 +600,20 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .wrow b{font-family:var(--f-num);font-weight:500;font-size:14px}
 .wrow b.none{color:var(--accent);font-family:var(--f-body);font-size:12px;font-weight:500}
 /* «Всего денег»: a bit smaller than the big sums of Учёт and Долги (fitBig makes it smaller still only while it doesn't fit) */
-#moneyTotal{font-size:clamp(22px,8vw,40px)}
-/* «Всего денег»: a card with a soft accent glow, the sum, then cards / cash / savings in three columns */
-.total.mtot{background:var(--surface);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 70%);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;gap:4px}
-.mparts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:8px;padding-top:10px;border-top:1px solid var(--line)}
-.mparts>div:not(.mbar){display:flex;flex-direction:column;gap:2px;min-width:0;padding:0 6px}
-.mparts>div:first-child,.mparts>.mbar+div{padding-left:0}
-.mparts>div:not(.mbar)+div{border-left:1px solid var(--line)}
-.mparts span{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
-.mparts span::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--c);flex:none}
-.mparts .kop{display:inline;font-size:.8em}
-.mparts em{font-style:normal;font-family:var(--f-num);font-size:10.5px;color:var(--ink);opacity:.7;margin-left:2px}
-/* «Всего денег» in the middle of its card: the label, the sum, and each column's label and value under it */
-.total.mtot{align-items:center;text-align:center}
-.total.mtot .mparts{width:100%}
-.mparts>div:not(.mbar){align-items:center}
-.mparts>div:not(.mbar):first-child,.mparts>.mbar+div{padding-left:6px}
-.mparts .kop::before{content:none}
-/* the bar over the columns, across the whole card */
-.mparts .mbar{grid-column:1/-1;display:flex;gap:2px;height:4px;margin-bottom:10px;padding:0;border:0}
-.mparts .mbar i{display:block;min-width:3px;border-radius:99px}
-/* the bar itself parts the sum from the columns: no line over it */
-.mparts:has(.mbar){border-top:0;padding-top:6px}
+#moneyTotal{font-size:clamp(22px,8vw,36px)}
+/* «Всего денег»: a card with a soft accent glow; in its middle the label and the sum (kopecks smaller and grey),
+   a bar split by how much each group holds, then cards / cash / savings each in its own small block, as the limit's on «Учёт» */
+.total.mtot{background:var(--surface);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 70%);border:1px solid var(--line);border-radius:var(--r);padding:12px;gap:2px;align-items:center;text-align:center}
 #moneyTotal .kop{font-size:.6em;color:var(--muted);font-weight:600}
-.mparts b{font-family:var(--f-num);font-weight:500;font-size:min(14px,3.4vw);white-space:nowrap}
+.mparts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:100%;margin-top:6px}
+.mparts .mbar{grid-column:1/-1;display:flex;gap:2px;height:6px;margin-bottom:2px}
+.mparts .mbar i{display:block;min-width:4px;border-radius:99px}
+.mparts>div:not(.mbar){display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;padding:5px 4px;background:var(--bg);border:1px solid var(--line);border-radius:10px}
+.mparts>div>span{display:flex;align-items:center;gap:4px;max-width:100%;font-size:11px;line-height:1.3;color:var(--muted);white-space:nowrap}
+.mparts>div>span::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--c);flex:none}
+.mparts b{font-family:var(--f-num);font-weight:500;font-size:min(14px,3.5vw);line-height:1.3;white-space:nowrap}
+.mparts .kop{font-size:.8em;color:var(--muted)}
+.mparts em{font-style:normal;font-size:10.5px;line-height:1.3;color:var(--muted)}
 .whint{margin:0;font-size:13px;color:var(--muted)}
 .wrow small{font-size:11px;color:var(--warn)}
 /* a person's line: the name, what is left in all, «2 долга · с 5 октября»; a tap opens the person's window */
@@ -1993,7 +1983,7 @@ function renderWallets(){
   const PC={'Карты':'var(--p1)','Наличные':'var(--p3)','Накопления':'var(--p4)'}, pos=parts.reduce((a,[,v])=>a+Math.max(0,v),0);
   $('moneyParts').hidden=parts.length<2;
   $('moneyParts').innerHTML=(pos>0?`<div class="mbar" aria-hidden="true">${parts.map(([n,v])=>v>0?`<i style="flex-grow:${v/pos};background:${PC[n]}"></i>`:'').join('')}</div>`:'')
-    +parts.map(([n,v])=>`<div style="--c:${PC[n]}"><span>${n}${pos>0&&v>0?`<em>${pctOf(v/pos)}</em>`:''}</span><b>${kop(moneyR(v))}</b></div>`).join('');
+    +parts.map(([n,v])=>`<div style="--c:${PC[n]}"><span>${n}</span><b>${kop(moneyR(v))}</b>${pos>0&&v>0?`<em>${pctOf(v/pos)} всех денег</em>`:''}</div>`).join('');
   const WEEK=7*864e5;
   const tile=w=>{
     const v=walletValue(w.id), at=Math.max(ws[w.id]?.at||0,ws[w.id]?.checked||0), stale=at&&Date.now()-at>WEEK;
