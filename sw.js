@@ -1,5 +1,5 @@
 // Opens instantly from the saved copy, then quietly fetches the fresh version for next launch.
-const CACHE = 'moi-rashody-v80';
+const CACHE = 'moi-rashody-v81';
 // the fonts are the app's own files: saved with the page at install, so offline every one of them is at hand
 const FONTS = ['GolosText-cyrillic-q5uCsoe9Lv', 'GolosText-latin-q5uCsoe9Lv', 'IBMPlexMono-cyrillic--F63fjptAg', 'IBMPlexMono-latin--F63fjptAg', 'IBMPlexMono-cyrillic--F6qfjptAg', 'IBMPlexMono-latin--F6qfjptAg', 'Unbounded-cyrillic-Yq6W-LOTXC', 'Unbounded-latin-Yq6W-LOTXC',
   // ₽ for each face (it is in neither the Latin nor the Cyrillic file)

@@ -412,6 +412,15 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .lparts span{max-width:100%;font-size:11px;line-height:1.3;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lparts b{font-family:var(--f-num);font-weight:500;font-size:min(14px,3.6vw);line-height:1.3;white-space:nowrap;font-variant-numeric:tabular-nums}
 .lparts b.neg{color:var(--bad)}
+.lparts b.good{color:var(--good-ink)}
+.lparts b.warn{color:var(--warn)}
+.lparts .kop{font-size:.8em;color:var(--muted)}
+/* the month's sum and, at its right, how much of the limit it is */
+.bigrow{display:flex;align-items:center;gap:8px}
+.bigrow>.big{flex:1 1 auto;min-width:0}
+.lpct{flex:none;font-family:var(--f-num);font-weight:500;font-size:13px;color:var(--muted);padding:2px 7px;border-radius:99px;background:var(--bg);border:1px solid var(--line)}
+.lpct.warn{color:var(--warn)}
+.lpct.bad{color:var(--bad)}
 .alerts{display:flex;flex-direction:column;gap:8px}
 .alerts:empty{display:none}
 .alert{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:0 12px 12px 0;padding:10px 12px;font-size:14px}
@@ -815,7 +824,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   <div id="viewLedger" role="tabpanel" aria-labelledby="tabLedger" style="display:flex;flex-direction:column;gap:16px">
   <section class="sumcard" aria-label="Траты в лимит за месяц">
     <div class="sumtop"><span id="sumLabel">Траты в лимит за месяц</span><button type="button" class="linkbtn" id="limitOf" aria-haspopup="dialog"></button></div>
-    <span class="big" id="total">0 ₽</span>
+    <div class="bigrow"><span class="big" id="total">0 ₽</span><span class="lpct" id="limitPct" hidden></span></div>
     <div class="meter" id="limitMeter" role="progressbar" aria-label="Лимит на месяц" aria-valuemin="0" aria-valuemax="100"><i></i></div>
     <div class="lparts" id="limitLine"></div>
     <div class="tripline" id="tripLine" hidden>
@@ -1540,10 +1549,10 @@ function renderTripLine(){
   m.setAttribute('aria-valuenow',Math.round(tw));m.setAttribute('aria-valuetext',avail>0?`потрачено ${moneyR(spent)} из ${moneyR(avail)}`:`перерасход ${moneyR(-left)}`);
   /* in columns as the limit above: what is spent | what is left (or the overspend first, in red) */
   const col=(t,v,k)=>`<div><span>${t}</span><b${k?` class="${k}"`:''}>${v}</b></div>`;
-  if(!got) l.innerHTML=col('Потрачено',moneyR(spent))+col('Командировочные','не внесены','none');
+  if(!got) l.innerHTML=col('Потрачено',kop(moneyR(spent)))+col('Командировочные','не внесены','none');
   /* «потрачено» after the overspend only with trip money to set it against: a trip opened again with only its overspend would repeat the same sum */
-  else if(left<0) l.innerHTML=col('Перерасход',moneyR(-left),'neg')+(avail>0?col('Потрачено',moneyR(spent)):'');
-  else l.innerHTML=col('Потрачено',moneyR(spent))+col('Осталось',moneyR(left));
+  else if(left<0) l.innerHTML=col('Перерасход',kop(moneyR(-left)),'neg')+(avail>0?col('Потрачено',kop(moneyR(spent))):'');
+  else l.innerHTML=col('Потрачено',kop(moneyR(spent)))+col('Осталось',kop(moneyR(left)),'good');
 }
 /* ---------- the trip report ----------
    «Командировка закончилась» shows it; Итоги opens the last one again. Kept in settings.tripReports (the last 10), as it was the day the trip
@@ -1796,9 +1805,12 @@ const DEFAULT_LIMIT=30000;
 /* under the limit meter, in columns as on «Деньги» and «Итоги» (a small grey label over each value):
    what is left (or how much over), how much a day that is till the month's end, what was spent outside the limit */
 const dayShort=DF({day:'numeric',month:'short'});
-const limLines=(left,out)=>{const c=[];
+/* a sum with its kopecks smaller and grey: the rubles are what is read first */
+const kop=t=>esc(t).replace(/,(\d\d)/,'<span class="kop">,$1</span>');
+const limLines=(left,out,budget)=>{const c=[];
   if(left===null) c.push(['Лимит','не задан']);
-  else c.push(left>=0?['Осталось',moneyR(left)]:['Превышен',moneyR(-left),'neg']);
+  /* what is left: green, yellow when under 15 % of the limit is left, red when over */
+  else c.push(left>=0?['Осталось',moneyR(left),budget&&left<budget*.15?'warn':'good']:['Превышен',moneyR(-left),'neg']);
   if(left>=0.01&&isCurrentMonth()){const n=daysInMonth(), d=n-now.getDate()+1, v=Math.floor(left/d);
     if(d<=1) c.push(['В день','последний']);else if(v>=1) c.push([`В день до ${NB(dayShort.format(new Date(state.y,state.m,n)).replace('.',''))}`,'≈\u00a0'+money(v)])}
   if(out>=0.01) c.push(['Вне лимита',moneyR(out)]);
@@ -1832,13 +1844,14 @@ function renderBudget(spent,out){
   const box=$('budgetBox'), budget=state.settings.budget===undefined?DEFAULT_LIMIT:(+state.settings.budget||0);
   const meter=$('limitMeter'), lo=$('limitOf'), def=state.settings.limitDefault&&budget===DEFAULT_LIMIT;
   if(!budget){
-    lo.textContent='задать лимит';lo.removeAttribute('aria-label');meter.hidden=true;$('limitLine').innerHTML=limLines(null,out);
+    lo.textContent='задать лимит';lo.removeAttribute('aria-label');meter.hidden=true;$('limitLine').innerHTML=limLines(null,out);$('limitPct').hidden=true;
   }else{
     /* this month, while something is left: how much a day that is */
     const p=spent/budget, left=r2(budget-spent), pd=left>=0.01&&isCurrentMonth()?perDay(left):'';
     meter.hidden=false;meter.className='meter'+(p>=1?' bad':p>=.85?' warn':'');meter.setAttribute('aria-valuenow',Math.round(Math.min(1,p)*100));meter.setAttribute('aria-valuetext',`потрачено ${moneyR(spent)} из ${moneyR(budget)}`);meter.firstElementChild.style.width=Math.min(100,p*100)+'%';
     lo.textContent='лимит '+moneyR(budget)+(def?' по умолчанию · изменить':'');if(def)lo.removeAttribute('aria-label');else lo.setAttribute('aria-label','Лимит '+moneyR(budget)+' — изменить');
-    $('limitLine').innerHTML=limLines(left,out);
+    $('limitLine').innerHTML=limLines(left,out,budget);
+    const lp=$('limitPct');lp.hidden=false;lp.textContent=Math.round(p*100)+'%';lp.className='lpct'+(p>=1?' bad':p>=.85?' warn':'');
   }
   /* «лимит 30 000 ₽» on Учёт: the limit window over Учёт (no limit yet — it opens with its field) */
   lo.onclick=()=>limSheet(!budget);
@@ -1970,8 +1983,6 @@ const toBroker=list=>brokerIn(list)-brokerOutOf(list);
 function renderWallets(){
   const box=$('wallets'), ws=state.settings.wallets||{};
   const vals=WALLETS.map(w=>walletValue(w.id)).filter(v=>v!==null), all=r2(vals.reduce((a,b)=>a+b,0));
-  /* the kopecks smaller and grey: the rubles are what is read first */
-  const kop=t=>esc(t).replace(/,(\d\d)/,'<span class="kop">,$1</span>');
   $('moneyTotal').innerHTML=vals.length?kop(moneyR(all)):'—';$('moneyTotal').classList.toggle('neg',all<0);
   /* under the sum: how much of it is on cards, in cash and put aside — a group with no balance typed is left out */
   const part=ids=>{const v=ids.map(id=>walletValue(id)).filter(x=>x!==null);return v.length?r2(v.reduce((a,b)=>a+b,0)):null};
