@@ -380,6 +380,8 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 #viewLedger .sumtop,#viewLedger h2,#viewLedger .linkbtn{font-size:12px}
 #viewLedger .sumcard{border-radius:14px}
 #viewLedger .sumcard .big{font-size:clamp(20px,6.5vw,26px)}
+/* the month's sum in the app's own text face, bold, not the wide display one */
+#viewLedger #total{font-family:var(--f-body);font-weight:700;letter-spacing:-.01em;font-size:clamp(22px,7vw,28px)}
 #viewLedger .sumcard .meter{height:5px}
 /* the small blocks under the meters: lower, a size smaller */
 #viewLedger .lparts{gap:5px}
@@ -387,6 +389,8 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 #viewLedger .lparts span{font-size:10.5px}
 #viewLedger .lparts b{font-size:min(13px,3.4vw)}
 #viewLedger .tripline{gap:5px;padding-top:6px}
+/* the two trip blocks as wide as the limit's three above, side by side in the middle — not stretched across for a short sum */
+#viewLedger #tripLeftLine{grid-auto-flow:row;grid-template-columns:repeat(2,minmax(0,calc((100% - 10px) / 3)));justify-content:center}
 #viewLedger .sumcard .sub{font-size:13px}
 #viewLedger .seg button{font-size:14px;min-height:40px;padding:6px}
 #viewLedger .amount input{font-size:20px;padding-block:10px}
@@ -2571,17 +2575,17 @@ function renderBreakdown(out,inc,tripOut){
   $('breakdown').hidden=!anyOut;
   $('incomeBreakdown').hidden=!anyIn;
 }
-/* the window of a bar: the category, the month, its sum and share, then its records newest first — date, name or comment, account, sum.
-   Only to look at: nothing in it changes a record */
+/* the window of a bar: the category, the month, its sum and share, then its records newest first, as on «Записи»:
+   a tap on a sum opens «Изменить / Удалить» under it; after a change the window is drawn again (a record moved out of it goes) */
 const dShort=DF({day:'numeric',month:'short'});
 function catFill(c,k,list,pm){
   const recs=list.filter(i=>catOf(i.cat).id===c).sort(byNewest), tot=r2(sum(recs)), n=recs.length, inc=k==='In';
   $('sheetTitle').textContent=(CAT[c]?.name||'Другое')+(k==='Trip'?' · командировка':'');
   $('sheetSub').textContent=`${monthLbl()} · ${money(tot)} · ${pctTxt(pm[c],tot)} %`;
-  $('sheetBody').innerHTML=n?`<p class="ccount">${n} ${plural(n,'запись','записи','записей')}</p><div class="clist">${recs.map(i=>{
-      const sub=[accTag(i.acc),i.label&&i.note?esc(i.note):''].filter(Boolean).join(' · ');
-      return `<div class="crow"><span class="cd">${dShort.format(isoToDate(i.date))}</span><span class="cw"><b>${esc(i.label||i.note||nameOf(i))}</b>${sub?`<span>${sub}</span>`:''}</span><b class="ca ${inc?'pos':'spend'}">${inc?'+':'−'}${money(+i.amount||0)}</b></div>`}).join('')}</div>`
+  const sb=$('sheetBody');
+  sb.innerHTML=n?`<p class="ccount">${n} ${plural(n,'запись','записи','записей')} · нажмите на сумму, чтобы изменить</p><div class="clist crecs">${recs.map(i=>itemRow(i,true,null,true)).join('')}</div>`
     :'<div class="empty"><p>Записей в этой категории больше нет.</p></div>';
+  bindEdits(sb);armDeletes(sb,delItem,'Запись удалена',delAsk);
 }
 function catSheet(c,k,list,pm){
   state.pend=null;state.catSheet={c,k};state.limSheet=null;state.repSheet=null;
@@ -2704,14 +2708,15 @@ const relDay=s=>{const y=new Date(now);y.setDate(y.getDate()-1);return s===iso(y
    «Брокер ВТБ» paid from a card is + on «Брокер», a transfer is − or + */
 const rowDelta=(i,af)=>{const a=+i.amount||0, t=typeOf(i);if(af) return walletDelta(i,af);
   return t==='tr'?0:t==='debt'?(i.dir==='back'||i.dir==='in'?a:-a):t==='in'?a:-a};
-function itemRow(i,showDate,af){
+/* own: in a category's window — the category is already its title, so a row is named by its label or comment instead */
+function itemRow(i,showDate,af,own){
   if(state.editItem===i.id) return editRow(i);
   const t=typeOf(i), inc=t==='in', id=esc(i.id), open=state.actItem===i.id, dd=showDate&&typeof i.date==='string'&&i.date!==iso(now)?esc(relDay(i.date)):'', sj=(...a)=>a.filter(Boolean).join(' · '), sp=dd?'<span class="dd">':'<span>';
   let what, amt, cls='', acls='';
   if(t==='debt'){cls='tr';what=`<b>${esc(i.label||'Долг')}</b>${sp}${sj(dd,accTag(i.acc)||'—')}</span>`;amt=(i.dir==='back'||i.dir==='in'?'+':'−')+money(+i.amount||0);acls=i.dir==='back'||i.dir==='in'?'pos':'spend'}
   else if(t==='tr'){cls='tr';what=`<b>Перевод</b>${sp}${sj(dd,`${accTag(i.from)||'?'} → ${accTag(i.to)||'?'}`)}</span>${i.note?`<span>${esc(i.note)}</span>`:''}`;amt=money(+i.amount||0)}
-  else{cls=inc?'in':'';acls=inc?'pos':'spend';const sub=sj(dd,af&&i.acc!==af?`${accTag(i.acc)} → ${accTag(af)}`:accTag(i.acc),i.note?esc(i.note):'');
-    what=`<b>${esc(nameOf(i))}${isTrip(i)?'<span class="tag trip">командировка</span>':''}</b>${sub?`${sp}${sub}</span>`:''}`;amt=(inc?'+':'−')+money(+i.amount||0)}
+  else{cls=inc?'in':'';acls=inc?'pos':'spend';const nt=own&&!i.label&&i.note, sub=sj(dd,af&&i.acc!==af?`${accTag(i.acc)} → ${accTag(af)}`:accTag(i.acc),i.note&&!nt?esc(i.note):'');
+    what=`<b>${esc(own?(i.label||i.note||nameOf(i)):nameOf(i))}${isTrip(i)?'<span class="tag trip">командировка</span>':''}</b>${sub?`${sp}${sub}</span>`:''}`;amt=(inc?'+':'−')+money(+i.amount||0)}
   /* in Записи with an account chosen the sign is that account's: in or out of it */
   const dv=af?r2(walletDelta(i,af)):0;if(dv){amt=(dv>0?'+':'−')+money(Math.abs(dv));acls=dv>0?'pos':'spend'}
   const ic=t==='tr'?'⇄':t==='debt'?'🤝':(ICON[catOf(i.cat).id]||'•');
