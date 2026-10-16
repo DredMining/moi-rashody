@@ -196,11 +196,11 @@ button{cursor:pointer}
 .wallets{display:flex;flex-direction:column;gap:14px}
 .wgroup{display:flex;flex-direction:column;gap:8px}
 /* «Деньги»: each group (Карты, Наличные, Накопления) is a card, its name and sum on top, its accounts as small blocks inside it */
-#wallets .wgroup{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px}
-.whead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:0 2px}
+#wallets .wgroup{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;gap:0}
+.whead{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 2px 8px}
 .whead h3{margin:0}
 /* the group's sum in its own small block on the right */
-.whead b{font-family:var(--f-num);font-weight:500;font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:2px 8px}
+.whead b{font-family:var(--f-num);font-weight:600;font-size:14px;color:var(--ink);background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:8px;padding:3px 9px}
 .whead .kop,.wrow .kop{font-size:.8em;color:var(--muted)}
 .wgrid{display:grid;gap:8px}
 .wgrid.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -611,40 +611,44 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 #zakatBox .linkbtn{font-size:13px}
 /* the zakat card on «Деньги»: «🌙 Закят ›», under it its figures in equal columns — a small grey label over each value;
    with no figures, one short line («настроить ›») */
-.zline{display:flex;flex-direction:column;gap:6px;width:100%;min-height:44px;background:var(--surface);border:1px solid var(--field-line);border-radius:12px;padding:10px 12px;color:var(--ink);font-size:14px;line-height:1.3;text-align:left}
-.zline .zh{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 10px;font-weight:600}
+.zline{display:flex;flex-direction:column;gap:8px;width:100%;min-height:44px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;color:var(--ink);font-size:14px;line-height:1.3;text-align:left}
+.zline:active{background:var(--accent-soft)}
+.zline .zh{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 10px;font-weight:600;font-size:15px}
 .zline .zh>span{white-space:nowrap}
-.zline .zh>span+span{color:var(--muted);font-size:13px;font-weight:400;margin-left:auto}
+.zline .zh>span+span{color:var(--accent);font-size:13px;font-weight:500;margin-left:auto}
 .zline .zgt{color:var(--muted);font-weight:400}
 /* equal columns; a value never breaks — a long one («около 112 345 ₽» at 390px) takes the room it needs from the others */
-.zline .zcols{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(min-content,1fr);gap:10px}
+.zline .zcols{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(min-content,1fr);gap:10px;border-top:1px solid var(--line);padding-top:8px}
 .zline .zcols>span{position:relative;display:flex;flex-direction:column;gap:2px;min-width:0}
 /* a thin line between the columns, in the gap: it takes no room from «Отдано досрочно» */
 .zline .zcols>span+span::before{content:'';position:absolute;left:-5.5px;top:1px;bottom:1px;border-left:1px solid var(--line)}
-.zline .zcols small{font-size:11px;color:var(--muted)}
-.zline .zcols b{font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+.zline .zcols small{font-size:12px;color:var(--muted)}
+.zline .zcols b{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 /* zakat owed: red, as in the zakat window */
 .zline .zcols b.neg{color:var(--bad);font-weight:600}
 .zpay{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);margin-bottom:12px}
 .zpay input{font-size:22px}
 .stat small{font-size:11px;color:var(--muted)}
-/* the accounts side by side, split by thin lines, under a line from the group's name */
-.wlist{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));border-top:1px solid var(--line);padding-top:4px}
+/* the accounts one under another: the name on the left, the sum on the right, thin lines between them */
+.wlist{display:flex;flex-direction:column;border-top:1px solid var(--line)}
 /* «Деньги»: an account's name 14px, its sum 15px; the row stays a 44px button or more */
-.wrow{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:4px;min-width:0;min-height:50px;padding:6px 10px;background:none;border:0;border-radius:8px;text-align:left;color:inherit;width:100%}
-.wrow+.wrow{border-left:1px solid var(--line);border-radius:0}
+.wrow{display:flex;justify-content:space-between;align-items:center;gap:12px;min-width:0;min-height:38px;padding:6px 4px;background:none;border:0;border-bottom:1px solid var(--line);text-align:left;color:inherit;width:100%}
+.wrow:last-child{border-bottom:0;padding-bottom:2px}
 .wrow:active{background:var(--accent-soft)}
 
 .wrow .wn{font-size:13px;font-weight:500;min-width:0;overflow-wrap:anywhere}
-.wrow .wv{display:flex;flex-direction:column;min-width:0;max-width:100%}
+.wrow .wv{display:flex;flex-direction:column;align-items:flex-end;text-align:right;margin-left:auto;min-width:0}
 .wrow b{font-family:var(--f-num);font-weight:500;font-size:min(14px,3.6vw);overflow-wrap:anywhere}
 .wrow b.none{color:var(--accent);font-family:var(--f-body);font-size:12px;font-weight:500}
 /* «Всего денег»: a bit smaller than the big sums of Учёт and Долги (fitBig makes it smaller still only while it doesn't fit) */
 #moneyTotal{font-size:clamp(22px,8vw,36px)}
 /* «Всего денег»: a card with a soft accent glow; in its middle the label and the sum (kopecks smaller and grey),
    a bar split by how much each group holds, then cards / cash / savings each in its own small block, as the limit's on «Учёт» */
-.total.mtot{background:var(--surface);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 70%);border:1px solid var(--line);border-radius:var(--r);padding:12px;gap:2px;align-items:center;text-align:center}
+.total.mtot{background:var(--surface);background:radial-gradient(120% 140% at 50% 0%,color-mix(in srgb,var(--accent) 24%,var(--surface)),var(--surface) 70%);border:1px solid var(--line);border-radius:var(--r);padding:12px;gap:2px;align-items:center;text-align:center}
 #moneyTotal .kop{font-size:.6em;color:var(--muted);font-weight:600}
+.mtot .lbl{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.msub{font-size:12px;color:var(--muted);margin-top:2px}
+.msub:empty{display:none}
 .mparts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:100%;margin-top:6px}
 .mparts .mbar{grid-column:1/-1;display:flex;gap:2px;height:6px;margin-bottom:2px}
 .mparts .mbar i{display:block;min-width:4px;border-radius:99px}
@@ -904,6 +908,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     <section class="total mtot" aria-label="Всего денег">
       <span class="lbl">Всего денег</span>
       <span class="big" id="moneyTotal">—</span>
+      <span class="msub" id="moneyAsOf"></span>
     </section>
     <div class="wallets" id="wallets"></div>
     <button type="button" class="zline" id="zakatLine" hidden></button>
@@ -2013,7 +2018,9 @@ const toBroker=list=>brokerIn(list)-brokerOutOf(list);
 function renderWallets(){
   const box=$('wallets'), ws=state.settings.wallets||{};
   const vals=WALLETS.map(w=>walletValue(w.id)).filter(v=>v!==null), all=r2(vals.reduce((a,b)=>a+b,0));
-  $('moneyTotal').innerHTML=vals.length?kop(moneyR(all)):'—';$('moneyTotal').classList.toggle('neg',all<0);
+  $('moneyTotal').innerHTML=vals.length?kop(moneyR(all)):'—';
+  /* under the sum: on which day, and on how many accounts */
+  $('moneyAsOf').textContent=vals.length?`на ${dayText(iso(now))} · ${vals.length} ${plural(vals.length,'счёт','счёта','счетов')}`:'впишите суммы на счетах';$('moneyTotal').classList.toggle('neg',all<0);
   /* a group's sum, on the right of its name — null while none of its accounts has a balance typed */
   const part=ids=>{const v=ids.map(id=>walletValue(id)).filter(x=>x!==null);return v.length?r2(v.reduce((a,b)=>a+b,0)):null};
   const tile=w=>{
