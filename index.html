@@ -496,7 +496,8 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 #viewMoney .zline .zcols{padding-top:6px}
 .mfoot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:0}
 .mfoot>.moneyacts{margin-left:auto}
-.mfoot>.moneyacts:has(.xfer){flex:1 1 100%}
+.wmodal>.xfer{position:relative;width:min(440px,100%);border-radius:20px;padding:14px;box-shadow:0 12px 40px rgb(0 0 0 / .45);animation:up .18s ease-out}
+.wmodal>.xfer>b{font-size:17px}
 #bkOpen,.mfoot #xOpen{font-size:13px;min-height:36px}
 #bkLast{color:var(--muted);font-weight:400}
 #bkLast.old{color:var(--warn)}
@@ -2081,7 +2082,10 @@ function renderWallets(){
     $('rcCancel').onclick=()=>{fresh();state.recon=null;render()};
   }
   /* the transfer form takes the place of its link, under the zakat card */
-  $('moneyActs').innerHTML=state.xferOpen?xferForm():'<button class="linkbtn" id="xOpen">⇄ Перевод между счетами</button>';
+  /* the transfer opens as a window in the middle of the screen, over «Деньги» */
+  $('moneyActs').innerHTML='<button class="linkbtn" id="xOpen" aria-haspopup="dialog">⇄ Перевод между счетами</button>'
+    +(state.xferOpen?`<div class="wmodal" role="dialog" aria-modal="true" aria-labelledby="xT"><div class="sheet-bg" data-xclose></div>${xferForm()}</div>`:'');
+  $('moneyActs').querySelectorAll('[data-xclose]').forEach(b=>b.onclick=()=>{state.xferOpen=false;render()});
   if($('xOpen')) $('xOpen').onclick=()=>{fresh();state.xfer.amount=0;state.xfer.note='';state.xferOpen=true;render();$('xAmount')?.focus({preventScroll:true});inView($('xForm'))};
   if(state.xferOpen) bindXfer();
   box.querySelectorAll('[data-wclose]').forEach(b=>b.onclick=()=>{fresh();state.editing=null;state.recon=null;render()});
@@ -2106,14 +2110,14 @@ function renderWallets(){
 /* ---------- transfers between own accounts ---------- */
 function xferForm(){
   const opt=sel=>WALLETS.map(w=>`<option value="${w.id}" ${sel===w.id?'selected':''}>${w.name}</option>`).join('');
-  return `<form class="xfer" id="xForm" novalidate><b>Перевод между счетами</b>
+  return `<form class="xfer" id="xForm" novalidate><b id="xT" tabindex="-1">Перевод между счетами</b>
     <label>Откуда<select id="xFrom">${opt(state.xfer.from)}</select></label>
     <label>Куда<select id="xTo">${opt(state.xfer.to)}</select></label>
     <label class="full">Сумма<input id="xAmount" class="num" inputmode="decimal" placeholder="0" autocomplete="off" value="${esc(state.xfer.amount||'')}"></label>
     <label class="full">Комментарий<input id="xNote" maxlength="80" placeholder="Необязательно" autocomplete="off" value="${esc(state.xfer.note||'')}"></label>
     <p class="err full" role="alert" id="xErr" hidden></p>
     <div class="row"><button class="primary" type="submit">Перевести</button><button class="linkbtn" type="button" id="xCancel">Отмена</button></div>
-    <small class="full" style="color:var(--muted);font-size:12px">Перевод не считается ни доходом, ни расходом. Перевод на брокерский счёт засчитывается в ваш процент на брокер, перевод с него — снова прибавляется к долгу себе на брокер.</small></form>`;
+    </form>`;
 }
 function bindXfer(){
   $('xFrom').onchange=e=>state.xfer.from=e.target.value;
@@ -2853,7 +2857,7 @@ function monthStats(k){
   const by=list=>{const m={};list.forEach(i=>{const c=catOf(i.cat).id;m[c]=(m[c]||0)+(+i.amount||0)});return m}, cs=id=>sum(out.filter(i=>catOf(i.cat).id===id));
   /* any: a month with only trip, zakat or broker records is not an empty one */
   return {any:it.length>0,inc:sum(inc),incBy:by(inc),lim:sum(lim),limBy:by(lim),
-    broker:toBroker(own),piggy:cs('invest'),sadaqa:cs('sadaqa'),zakat:cs('zakat'),extra:cs('trip_extra'),
+    broker:toBroker(own),piggy:cs('invest')+sum(own.filter(i=>typeOf(i)==='tr'&&i.to==='piggy'))-sum(own.filter(i=>typeOf(i)==='tr'&&i.from==='piggy')),sadaqa:cs('sadaqa'),zakat:cs('zakat'),extra:cs('trip_extra'),
     trip:sum(it.filter(i=>isTrip(i)&&typeOf(i)==='out'))};
 }
 /* Итоги: Расходы | Доходы | Брокер | Сравнение — only the picked part is shown; a part with nothing this month says so */
@@ -3329,9 +3333,9 @@ setInterval(refreshToday,60000);
 let dlgStack=[], dlgInert=[], lastTap=null;
 document.addEventListener('click',e=>{const b=e.target.closest?.('button,[role="button"],summary');if(b)lastTap={el:b,t:performance.now()}},true);
 function dlgOpen(){
-  const bk=$('bkModal');
+  const bk=$('bkModal'), xm=document.querySelector('#moneyActs .wmodal');
   const w=document.querySelector('#wallets .wmodal'), zf=document.querySelector('#zakatForm .wmodal'), dp=document.querySelector('#debtList .wmodal'), tw=document.querySelector('#tripStat .wmodal');
-  return [w&&{k:state.recon?'recon':'w',el:w},dp&&dp.getClientRects().length&&{k:'debt:'+state.openDebt,el:dp},tw&&tw.getClientRects().length&&{k:'trip:'+state.editing,el:tw},!$('zakatSheet').hidden&&{k:'zakat',el:$('zakatSheet')},zf&&{k:'zform',el:zf},!$('sheet').hidden&&{k:'sheet',el:$('sheet')},!bk.hidden&&{k:'bk',el:bk}].filter(Boolean);
+  return [w&&{k:state.recon?'recon':'w',el:w},dp&&dp.getClientRects().length&&{k:'debt:'+state.openDebt,el:dp},tw&&tw.getClientRects().length&&{k:'trip:'+state.editing,el:tw},!$('zakatSheet').hidden&&{k:'zakat',el:$('zakatSheet')},zf&&{k:'zform',el:zf},!$('sheet').hidden&&{k:'sheet',el:$('sheet')},!bk.hidden&&{k:'bk',el:bk},xm&&{k:'xfer',el:xm}].filter(Boolean);
 }
 /* the same button drawn again (the page redraws its lists): found by its id or its data-… */
 const refind=o=>{if(!o||o.isConnected)return o;if(o.id)return $(o.id);const a=[...o.attributes].find(x=>x.name.startsWith('data-'));
@@ -3355,7 +3359,7 @@ function dlgSync(){
 document.addEventListener('keydown',e=>{
   const top=dlgOpen().pop();if(!top)return;
   if(e.key==='Escape'){e.preventDefault();
-    if(top.k==='bk')closeBk();else if(top.k==='sheet')closeSheet();else if(top.k==='zakat'){if(state.zView)zGo(null);else closeZakat()}else{state.editing=null;state.recon=null;if(top.k.startsWith('debt:')){state.openDebt=null;state.openDebtItem=null}render()}
+    if(top.k==='bk')closeBk();else if(top.k==='xfer'){state.xferOpen=false;render()}else if(top.k==='sheet')closeSheet();else if(top.k==='zakat'){if(state.zView)zGo(null);else closeZakat()}else{state.editing=null;state.recon=null;if(top.k.startsWith('debt:')){state.openDebt=null;state.openDebtItem=null}render()}
     return}
   if(e.key!=='Tab')return;
   const f=[...top.el.querySelectorAll('button,input,select,textarea,summary,a[href],[tabindex="0"]')].filter(x=>!x.disabled&&x.getClientRects().length&&getComputedStyle(x).visibility!=='hidden'), i=f.indexOf(document.activeElement);
@@ -3498,9 +3502,12 @@ async function saveEntry(acc,opt={}){
   /* «за напарника Ислам 6 500 ₽» after the comment, 80 in all: the comment keeps at least 33 of its characters, then a long name is cut («…») — never the sum */
   if(pt){const s=' '+money(pt.part), k=(note?77-Math.min(note.length,33):80)-13-s.length, t='за напарника '+(pt.name.length>k?pt.name.slice(0,k-1).trimEnd()+'…':pt.name)+s;
     note=note?note.slice(0,77-t.length).trimEnd()+' · '+t:t}
-  const rec={type,amount,cat,date:p.date,note,created:Date.now(),acc};
+  /* a personal «Брокер» or «Копильник» typed as an expense is money moved, not spent: it is saved as a transfer
+     from the picked account to the broker account / piggy bank (not into expenses or the limit; the broker transfer counts in his % to the broker) */
+  const toW=type==='out'&&scope!=='trip'&&!pt?({broker:'broker',invest:'piggy'})[cat]:null, asTr=!!toW&&acc!==toW;
+  const rec=asTr?{type:'tr',amount,from:acc,to:toW,date:p.date,note:note||label,created:Date.now()}:{type,amount,cat,date:p.date,note,created:Date.now(),acc};
   if(scope==='trip') rec.scope='trip';
-  if(label) rec.label=label;
+  if(label&&!asTr) rec.label=label;
   /* forgotten till the trip ended (dated before that day): it goes to that trip, and the trip's result follows — in the same write */
   const px=pastTripOf(rec);if(px) rec.pastTrip=px.created||0;
   const tc=px&&tripClosed(rec), tc0=tc&&{...tc}, ed=px?dayText(anchorDay({at:+state.settings.tripEnd})):'', pst=px?.tripPrev?.tripStart;
@@ -3522,10 +3529,10 @@ async function saveEntry(acc,opt={}){
     /* zakat dated before the app started counting it goes to no year */
     const zf=zset().paidFrom, zn=type==='out'&&cat==='zakat'&&zf&&p.date<zf?` · раньше начала учёта закята (${gDate(zf)}) — не засчитана`:'';
     /* trip money is told apart, never sent anywhere: «Командировочные: …», «Расход в командировке: …» */
-    const what=scope==='trip'&&type==='in'?`${label||CAT[cat].name}: ${money(amount)}`:`${pt?'Командировка':`${type==='in'?'Доход':'Расход'}${scope==='trip'?' в командировке':''}`}: ${money(amount)} · ${label||CAT[cat].name}`;
+    const what=asTr?`Перевод: ${money(amount)} · ${WNAME[acc]} → ${WNAME[toW]}`:scope==='trip'&&type==='in'?`${label||CAT[cat].name}: ${money(amount)}`:`${pt?'Командировка':`${type==='in'?'Доход':'Расход'}${scope==='trip'?' в командировке':''}`}: ${money(amount)} · ${label||CAT[cat].name}`;
     const tq=px?` · вошла в прошлую командировку (закончилась ${ed})`+(tc?`, её итог теперь ${tn}`:pst?` — уже в её остатке от ${dayText(anchorDay(pst))}`:''):'';
     /* «Отменить»: the record, the partner's debt and its record — all at once (and the name remembered before) */
-    toast(`${what} · ${WNAME[acc]||''}`+(pt?` · ${pt.name} — долг ${money(pt.part)}`:'')+dn+zn+tq+heldNote(rec),
+    toast(`${what}${asTr?'':' · '+(WNAME[acc]||'')}`+(pt?` · ${pt.name} — долг ${money(pt.part)}`:'')+dn+zn+tq+heldNote(rec),
       id?()=>store.batch(o=>{o.remove(id);if(did){o.removeDebt(did,[rid]);o.patchSettings({partnerName:pn0})}if(tc0){closeBack(o,tc0);o.patchSettings({tripReports:rp0})}}):null,0,away?['Показать',()=>showMonth(p.date)]:null);
   /* not saved: the sheet stays, and says why right above «Записать» */
   }catch(x){$('sheetBody').querySelectorAll('button').forEach(b=>b.disabled=false);const w=$('sheetBody').querySelector('.accwarn');if(w&&!$('sheet').hidden){w.textContent=saveErr(x);w.hidden=false}else toast(saveErr(x))}
