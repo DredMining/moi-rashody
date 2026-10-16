@@ -587,7 +587,7 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .dinner>.debt:last-child{border-bottom:0;padding-bottom:0}
 /* a loan's buttons in the person's window: close together, a few to a line */
 .dperson .debt{gap:4px;padding-block:10px}
-.dperson .debt .acts{gap:0 16px}
+.dperson .debt .acts{gap:0 12px}
 .dperson .debt .acts>.linkbtn{min-height:32px;padding:6px 0;margin:0}
 .dperson .debt .acts>.del{min-height:32px;padding:6px 0}
 .dperson{padding:10px 14px 14px}
@@ -596,7 +596,15 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .dperson .debt .meta{font-size:12px}
 .dperson .debt .acts>.linkbtn,.dperson .debt .acts>.del{font-size:12px}
 .dperson .dacc{font-size:12px}
-.dperson>.acts>button{font-size:14px;min-height:40px;padding-block:8px}
+.dperson>.acts>button{font-size:13px;min-height:36px;padding-block:6px}
+/* a loan row in the person's window is a button: date and sum, the note under them, › turns down when its buttons are open */
+.dtap{display:flex;flex-direction:column;justify-content:center;gap:1px;width:100%;min-height:36px;background:none;border:0;padding:0;margin:0;text-align:left;color:inherit;cursor:pointer;font:inherit}
+.dtap .head,.dtap .meta{display:grid}
+.dtap .left::after{content:'›';content:'›'/'';display:inline-block;margin-left:6px;color:var(--muted);font-family:var(--f-body);transition:transform .15s}
+.dtap[aria-expanded="true"] .left::after{transform:rotate(90deg)}
+.dperson .debt:has(.dtap){padding-block:7px}
+.dperson .debt .acts>.primary,.dperson .debt .acts>.ghost{font-size:13px;min-height:34px;padding:5px 12px}
+.dperson .dacc select{min-height:36px;padding-block:4px}
 .cmp-note{margin:0;font-size:12px;color:var(--muted)}
 .recon{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--warn);border-radius:12px;padding:12px}
 .recon p{margin:0;font-size:14px}
@@ -2842,18 +2850,19 @@ function renderDebts(){
   $('debtTotal').textContent=moneyR(total);
   const people=debtPeople(open);
   $('debtSub').textContent=open.length?`${people} ${plural(people,'человек','человека','человек')} ещё не ${plural(people,'вернул','вернули','вернули')}`:'Никто ничего не должен';
-  /* in a person's window, a loan's own «Вернули всё / часть» show only after «Вернул этот долг» is tapped */
-  const showActs=d=>state.openDebtItem===d.id;
+  /* in a person's window a loan is one short row (date, sum, note); a tap on it opens its buttons under it, a second tap folds them */
+  const showActs=d=>state.openDebtItem===d.id||state.editing==='d-'+d.id||state.editing==='de-'+d.id;
   /* solo: a person's only loan — its «Вернули всё / часть» are the ones at the top of the person's window */
   const one=(d,isOpen,inGroup,solo)=>{
     const left=debtLeft(d), ret=+d.returned||0, when=d.date?dayText(d.date):'';
     const meta=[inGroup?'':when,ret>0&&isOpen?`вернули ${moneyR(ret)} из ${moneyR(+d.amount||0)}`:'',d.note?esc(d.note):''].filter(Boolean).join(' · ');
-    const own=solo?'':inGroup&&!showActs(d)?`<button class="linkbtn" data-di="${esc(d.id)}" aria-expanded="false">Вернул этот долг</button>`
-      :`${accSel('data-racc',d.id,retAccOf(d),'Куда вернули')}<button class="primary" data-full="${esc(d.id)}">Вернули всё</button><button class="ghost" data-partbtn="${esc(d.id)}">Вернули часть</button>`;
+    const fold=inGroup&&!solo, shut=fold&&!showActs(d);
+    const own=solo?'':`${accSel('data-racc',d.id,retAccOf(d),'Куда вернули')}<button class="primary" data-full="${esc(d.id)}">Вернули всё</button><button class="ghost" data-partbtn="${esc(d.id)}">Вернули часть</button>`;
+    const top=`<span class="head"><b>${esc(inGroup?(when||'Без даты'):d.name)}${d.doubtful&&isOpen?'<span class="tag">сомнительный</span>':''}</b><span class="left">${isOpen?moneyR(left):(+d.forgiven>0?'прощён':'возвращён')}</span></span>
+      ${meta?`<span class="meta">${meta}</span>`:''}`;
     return `<div class="debt ${isOpen?'':'closed'}">
-      <div class="head"><b>${esc(inGroup?(when||'Без даты'):d.name)}${d.doubtful&&isOpen?'<span class="tag">сомнительный</span>':''}</b><span class="left">${isOpen?moneyR(left):(+d.forgiven>0?'прощён':'возвращён')}</span></div>
-      ${meta?`<div class="meta">${meta}</div>`:''}
-      ${state.editing==='de-'+d.id?debtEditForm(d):`<div class="acts">${isOpen?(state.editing==='d-'+d.id
+      ${fold?`<button type="button" class="dtap" data-di="${esc(d.id)}" aria-expanded="${!shut}">${top}</button>`:top}
+      ${shut?'':state.editing==='de-'+d.id?debtEditForm(d):`<div class="acts">${isOpen?(state.editing==='d-'+d.id
         ?`<form class="inline-edit" data-part="${esc(d.id)}">${accSel('data-racc',d.id,retAccOf(d),'Куда вернули')}<input class="num" inputmode="decimal" placeholder="Сумма, ₽" aria-label="Сколько вернули"><button class="primary" type="submit">Записать</button><button class="linkbtn" type="button" data-cancel>Отмена</button></form>`
         :`${own}<button class="linkbtn" data-forgive="${esc(d.id)}">Простить → садака</button><button class="linkbtn" data-doubt="${esc(d.id)}">${d.doubtful?'Снять «сомнительный»':'Сомнительный'}</button>`):(+d.forgiven>0?`<span class="meta">Прощено ${money(+d.forgiven)} — записано в садаку</span>`:'')}
         <button class="linkbtn" data-dedit="${esc(d.id)}">Изменить</button><button class="del" data-id="${esc(d.id)}" aria-label="Удалить запись о долге">Удалить</button></div>`}
@@ -2888,7 +2897,8 @@ function renderDebts(){
   list.querySelectorAll('[data-dpclose]').forEach(b=>b.onclick=dpClose);
   list.querySelectorAll('[data-dg]').forEach(b=>b.onclick=()=>{fresh();state.openDebt=b.dataset.dg;state.openDebtItem=null;state.editing=null;render()});
   /* a loan's own return buttons open in place; the keyboard focus goes to its «Вернули всё» */
-  list.querySelectorAll('[data-di]').forEach(h=>h.onclick=()=>{const id=h.dataset.di;fresh();state.openDebtItem=id;render();
+  list.querySelectorAll('[data-di]').forEach(h=>h.onclick=()=>{const id=h.dataset.di, was=h.getAttribute('aria-expanded')==='true';fresh();
+    state.openDebtItem=was?null:id;if(was||(state.editing&&!state.editing.endsWith(id)&&!state.editing.startsWith('g-')))state.editing=null;render();if(was)return;
     const b=list.querySelector(`[data-full="${CSS.escape(id)}"]`);b?.focus({preventScroll:true});inView(b?.closest('.debt'))});
   list.querySelectorAll('[data-racc]').forEach(sel=>sel.onchange=()=>state.retAcc[sel.dataset.racc]=sel.value);
   const backRec=(d,v)=>({type:'debt',dir:'back',amount:Math.round(v*100)/100,acc:retAccOf(d),date:iso(now),label:'Возврат долга: '+d.name,debt:d.id,created:Date.now()});
