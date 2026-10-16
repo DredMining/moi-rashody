@@ -501,6 +501,32 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .zhint{display:flex;flex-direction:column;gap:3px;background:var(--accent-soft);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.45;color:var(--ink)}
 .zhint b{font-weight:600}
 .zwhy[open]{display:flex;flex-direction:column;gap:10px}
+/* the zakat window a size smaller: narrower card, lower rows, smaller type (the trip report on «Учёт» keeps its own sizes) */
+#zakatSheet .zsheet-panel{width:min(440px,100%);border-radius:16px;padding:0 12px 14px}
+#zakatSheet .zsheet-head{padding:8px 0 7px;margin-bottom:2px}
+#zakatSheet .zsheet-head b{font-size:15px}
+#zakatSheet .zback{font-size:13px;min-height:40px}
+#zakatSheet .zk{gap:8px}
+#zakatSheet .zcard{border-radius:12px;padding:0 10px}
+#zakatSheet .zrow{padding:7px 0;gap:10px;font-size:13px}
+#zakatSheet .zrow small{font-size:11px}
+#zakatSheet .zrow.zhd{font-size:13px}
+#zakatSheet .zrow.zp{padding-bottom:1px}
+#zakatSheet .zrow.zp+.zrow{padding-top:1px}
+#zakatSheet .zdates .zd b{font-size:13px}
+#zakatSheet .zgo{border-radius:10px;padding:8px 10px;min-height:40px;font-size:13px}
+#zakatSheet .zgo span:last-child{font-size:17px}
+#zakatSheet .zdue{border-radius:12px;padding:8px 10px}
+#zakatSheet .zdue span{font-size:11.5px}
+#zakatSheet .zdue b{font-size:clamp(16px,5.5vw,20px)}
+#zakatSheet .zhint{border-radius:10px;padding:7px 10px;font-size:12px}
+#zakatSheet .zk .zfine{font-size:10.5px}
+#zakatSheet .zs{font-size:11.5px}
+#zakatSheet .zfoot{padding:5px 0 7px;font-size:11px}
+#zakatSheet .zk .zwarn{font-size:12px}
+#zakatSheet .zsheet-head .iconbtn{width:36px;height:36px;font-size:15px}
+#zakatBox .primary,#zakatBox .ghost{min-height:38px;padding:6px 12px;font-size:13px}
+#zakatBox .linkbtn{font-size:13px}
 /* the zakat card on «Деньги»: «🌙 Закят ›», under it its figures in equal columns — a small grey label over each value;
    with no figures, one short line («настроить ›») */
 .zline{display:flex;flex-direction:column;gap:6px;width:100%;min-height:44px;background:var(--surface);border:1px solid var(--field-line);border-radius:12px;padding:10px 12px;color:var(--ink);font-size:14px;line-height:1.3;text-align:left}
