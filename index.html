@@ -194,7 +194,13 @@ button{cursor:pointer}
 .moneyhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 .moneyhead .num{font-size:15px;font-weight:500}
 .wallets{display:flex;flex-direction:column;gap:14px}
-.wgroup{display:flex;flex-direction:column;gap:6px}
+.wgroup{display:flex;flex-direction:column;gap:8px}
+/* «Деньги»: each group (Карты, Наличные, Накопления) is a card, its name and sum on top, its accounts as small blocks inside it */
+#wallets .wgroup{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px}
+.whead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:0 2px}
+.whead h3{margin:0}
+.whead b{font-family:var(--f-num);font-weight:500;font-size:13px;color:var(--muted)}
+.whead .kop,.wrow .kop{font-size:.8em;color:var(--muted)}
 .wgrid{display:grid;gap:8px}
 .wgrid.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .wgrid.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -621,13 +627,14 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .zpay{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);margin-bottom:12px}
 .zpay input{font-size:22px}
 .stat small{font-size:11px;color:var(--muted)}
-.wlist{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.wlist{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:6px}
 /* «Деньги»: an account's name 14px, its sum 15px; the row stays a 44px button or more */
-.wrow{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 12px;min-height:40px;padding:10px 14px;background:none;border:0;border-bottom:1px solid var(--line);text-align:left;color:inherit;width:100%}
-.wrow:last-child{border-bottom:0}
+.wrow{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:4px;min-width:0;min-height:52px;padding:8px 10px;background:var(--bg);border:1px solid var(--line);border-radius:10px;text-align:left;color:inherit;width:100%}
+.wrow:active{background:var(--accent-soft)}
+
 .wrow .wn{font-size:13px;font-weight:500;min-width:0;overflow-wrap:anywhere}
-.wrow .wv{text-align:right;display:flex;flex-direction:column;align-items:flex-end;margin-left:auto;min-width:0}
-.wrow b{font-family:var(--f-num);font-weight:500;font-size:14px}
+.wrow .wv{display:flex;flex-direction:column;min-width:0;max-width:100%}
+.wrow b{font-family:var(--f-num);font-weight:500;font-size:min(14px,3.6vw);overflow-wrap:anywhere}
 .wrow b.none{color:var(--accent);font-family:var(--f-body);font-size:12px;font-weight:500}
 /* «Всего денег»: a bit smaller than the big sums of Учёт and Долги (fitBig makes it smaller still only while it doesn't fit) */
 #moneyTotal{font-size:clamp(22px,8vw,36px)}
@@ -894,7 +901,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     <section class="total mtot" aria-label="Всего денег">
       <span class="lbl">Всего денег</span>
       <span class="big" id="moneyTotal">—</span>
-      <div class="mparts" id="moneyParts" hidden></div>
     </section>
     <div class="wallets" id="wallets"></div>
     <button type="button" class="zline" id="zakatLine" hidden></button>
@@ -2005,28 +2011,19 @@ function renderWallets(){
   const box=$('wallets'), ws=state.settings.wallets||{};
   const vals=WALLETS.map(w=>walletValue(w.id)).filter(v=>v!==null), all=r2(vals.reduce((a,b)=>a+b,0));
   $('moneyTotal').innerHTML=vals.length?kop(moneyR(all)):'—';$('moneyTotal').classList.toggle('neg',all<0);
-  /* under the sum: how much of it is on cards, in cash and put aside — a group with no balance typed is left out */
+  /* a group's sum, on the right of its name — null while none of its accounts has a balance typed */
   const part=ids=>{const v=ids.map(id=>walletValue(id)).filter(x=>x!==null);return v.length?r2(v.reduce((a,b)=>a+b,0)):null};
-  const parts=[['Карты',['sber','tbank','vtb']],['Наличные',['pocket','cash']],['Накопления',['broker','piggy']]].map(([n,ids])=>[n,part(ids)]).filter(([,v])=>v!==null);
-  /* a thin bar split by how much each group holds, its colour on the dot by the group's name */
-  /* the share of the whole: whole percent, «<1 %» for a sliver that is still there */
-  const pctOf=f=>f<0.005?'<1%':Math.round(f*100)+'%';
-  const PC={'Карты':'var(--p1)','Наличные':'var(--p3)','Накопления':'var(--p4)'}, pos=parts.reduce((a,[,v])=>a+Math.max(0,v),0);
-  $('moneyParts').hidden=parts.length<2;
-  $('moneyParts').innerHTML=(pos>0?`<div class="mbar" aria-hidden="true">${parts.map(([n,v])=>v>0?`<i style="flex-grow:${v/pos};background:${PC[n]}"></i>`:'').join('')}</div>`:'')
-    +parts.map(([n,v])=>`<div style="--c:${PC[n]}"><span>${n}</span><b>${kop(moneyR(v))}</b>${pos>0&&v>0?`<em>${pctOf(v/pos)} всех денег</em>`:''}</div>`).join('');
-  const WEEK=7*864e5;
   const tile=w=>{
-    const v=walletValue(w.id), at=Math.max(ws[w.id]?.at||0,ws[w.id]?.checked||0), stale=at&&Date.now()-at>WEEK;
+    const v=walletValue(w.id);
     const name=`<span class="wn"${w.color?` style="color:${w.color}"`:''}>${w.name}</span>`;
     return v===null
       ?`<button class="wrow" data-w="${w.id}" aria-label="${w.name}: указать сумму">${name}<span class="wv"><b class="none">указать</b></span></button>`
-      :`<button class="wrow" data-w="${w.id}" aria-label="${w.name}: ${moneyR(v)}, изменить">${name}<span class="wv"><b${v<0?' class="neg"':''}>${moneyR(v)}</b>${stale?`<small>сверено ${dayText(iso(new Date(at)))}</small>`:''}</span></button>`;
+      :`<button class="wrow" data-w="${w.id}" aria-label="${w.name}: ${moneyR(v)}, изменить">${name}<span class="wv"><b${v<0?' class="neg"':''}>${kop(moneyR(v))}</b></span></button>`;
   };
   const W=Object.fromEntries(WALLETS.map(w=>[w.id,w]));
   /* nothing typed yet: one line on what to do, right above the accounts */
   let html=(vals.length?'':'<p class="whint">Нажмите на счёт и впишите, сколько там сейчас — дальше сумма будет меняться сама.</p>')+[['Карты',['sber','tbank','vtb']],['Наличные',['pocket','cash']],['Накопления',['broker','piggy']]]
-    .map(([h,ids])=>`<div class="wgroup"><h3>${h}</h3><div class="wlist">${ids.map(id=>tile(W[id])).join('')}</div></div>`).join('');
+    .map(([h,ids])=>{const g=part(ids);return `<div class="wgroup"><div class="whead"><h3>${h}</h3>${g===null?'':`<b>${kop(moneyR(g))}</b>`}</div><div class="wlist" style="--n:${ids.length}">${ids.map(id=>tile(W[id])).join('')}</div></div>`}).join('');
   const ed=WALLETS.find(w=>state.editing==='w-'+w.id);
   if(ed){
     const cur=walletValue(ed.id);
