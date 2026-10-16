@@ -160,12 +160,13 @@ button{cursor:pointer}
 .mcard .mcol>b{font-family:var(--f-num);font-weight:500;font-size:min(14px,3.4vw);line-height:1.4;font-variant-numeric:tabular-nums;white-space:nowrap;overflow-wrap:normal}
 /* «Куда ушли деньги» and the incomes: each group (Повседневные, Отдельно, Командировка, Доходы по источникам) is one card under a small
    grey label, 12px from the next group; its categories are rows split by thin lines.
-   A row is a low 35px button: the name and the sum on one line, the bar 2px under them; the rows touch, so a tap anywhere on the card hits one */
+   A row is a 40px button, its line included: the name and the sum on one line, the bar 2px under them. The rows touch, so the row's
+   own height is all a finger has to hit — 40px, no lower, keeps it easy to tap */
 #incomeBreakdown{gap:6px}
 .bdwrap .bd{gap:6px}
 #breakdown .bd h3,#incomeBreakdown>h2{margin:0 0 0 2px;font-family:var(--f-body);font-size:11px;font-weight:600;line-height:13px;letter-spacing:.06em;color:var(--muted)}
 .bdwrap .bars{gap:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.bdwrap .bar{min-height:35px;padding:4px 12px 7px;row-gap:2px;border-bottom:1px solid var(--line)}
+.bdwrap .bar{min-height:40px;padding:6px 12px 10px;row-gap:2px;border-bottom:1px solid var(--line)}
 .bdwrap .bar:last-child{border-bottom:0}
 .bdwrap .bar:active{background:var(--accent-soft)}
 /* the ring sits inside the row: the card's edge would cut one drawn outside it */
