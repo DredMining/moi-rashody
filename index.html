@@ -697,9 +697,11 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:500
 .tripline{display:flex;flex-direction:column;gap:8px;padding-top:12px;margin-top:4px;border-top:1px solid var(--line)}
 .meter.trip i{background:var(--trip)}
 .meter.trip.bad i{background:var(--bad)}
-/* two lines: spent, then left — or the overspend in red, then what was spent in grey */
-#tripLeftLine b{color:var(--bad);font-weight:700}
-#tripLeftLine>b,#tripLeftLine>span{display:block}
+/* spent | left — or the overspend in red | spent; «не внесены» is a word, not a sum */
+/* when the limit above has three columns, these two stand under its first two: the lines between them meet */
+.sumcard:has(#limitLine>div:nth-child(3)) #tripLeftLine{grid-auto-flow:row;grid-template-columns:repeat(3,minmax(0,1fr))}
+#tripLeftLine b.neg{font-weight:600}
+#tripLeftLine b.none{font-family:var(--f-body);font-size:13px;color:var(--muted)}
 .sheet{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center}
 .sheet-bg{position:absolute;inset:0;background:rgb(0 0 0 / .55)}
 .sheet-panel{position:relative;width:min(720px,100%);max-height:85vh;overflow-y:auto;overscroll-behavior:contain;background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;padding:12px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;animation:up .18s ease-out}
@@ -793,7 +795,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     <div class="tripline" id="tripLine" hidden>
       <div class="sumtop"><span>Командировочные</span><span id="tripOf"></span></div>
       <div class="meter trip" id="tripMeter" role="progressbar" aria-label="Командировочные" aria-valuemin="0" aria-valuemax="100"><i></i></div>
-      <span class="sub" id="tripLeftLine"></span>
+      <div class="lparts" id="tripLeftLine"></div>
     </div>
   </section>
   <div class="alerts" id="alerts"></div>
@@ -1507,11 +1509,12 @@ function renderTripLine(){
   m.hidden=!got;
   const tw=!got?0:left<0?100:Math.min(100,spent/avail*100);m.firstElementChild.style.width=tw+'%';m.classList.toggle('bad',got&&left<0);
   m.setAttribute('aria-valuenow',Math.round(tw));m.setAttribute('aria-valuetext',avail>0?`потрачено ${moneyR(spent)} из ${moneyR(avail)}`:`перерасход ${moneyR(-left)}`);
-  /* two lines: what is spent, then what is left (or the overspend first, in red) */
-  if(!got) l.innerHTML=`<span>потрачено ${moneyR(spent)}</span><span>командировочные не внесены</span>`;
+  /* in columns as the limit above: what is spent | what is left (or the overspend first, in red) */
+  const col=(t,v,k)=>`<div><span>${t}</span><b${k?` class="${k}"`:''}>${v}</b></div>`;
+  if(!got) l.innerHTML=col('Потрачено',moneyR(spent))+col('Командировочные','не внесены','none');
   /* «потрачено» after the overspend only with trip money to set it against: a trip opened again with only its overspend would repeat the same sum */
-  else if(left<0) l.innerHTML=`<b>Перерасход командировочных: ${moneyR(-left)}</b>${avail>0?`<span>потрачено ${moneyR(spent)}</span>`:''}`;
-  else l.innerHTML=`<span>потрачено ${moneyR(spent)}</span><span>осталось ${moneyR(left)}</span>`;
+  else if(left<0) l.innerHTML=col('Перерасход',moneyR(-left),'neg')+(avail>0?col('Потрачено',moneyR(spent)):'');
+  else l.innerHTML=col('Потрачено',moneyR(spent))+col('Осталось',moneyR(left));
 }
 /* ---------- the trip report ----------
    «Командировка закончилась» shows it; Итоги opens the last one again. Kept in settings.tripReports (the last 10), as it was the day the trip
