@@ -378,7 +378,8 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
    (the sum field stays at 16px and over — a smaller one makes the iPhone zoom in when it is tapped) */
 #viewLedger .sumcard{padding:10px 12px;gap:5px}
 #viewLedger .sumtop,#viewLedger h2,#viewLedger .linkbtn{font-size:12px}
-#viewLedger .sumcard .big{font-size:clamp(20px,7.5vw,30px)}
+#viewLedger .sumcard{border-radius:14px}
+#viewLedger .sumcard .big{font-size:clamp(20px,6.5vw,26px)}
 #viewLedger .sumcard .meter{height:5px}
 /* the small blocks under the meters: lower, a size smaller */
 #viewLedger .lparts{gap:5px}
@@ -418,7 +419,7 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 /* the month's sum and, at its right, how much of the limit it is */
 .bigrow{display:flex;align-items:center;gap:8px}
 .bigrow>.big{flex:1 1 auto;min-width:0}
-.lpct{flex:none;font-family:var(--f-num);font-weight:500;font-size:13px;color:var(--muted);padding:2px 7px;border-radius:99px;background:var(--bg);border:1px solid var(--line)}
+.lpct{flex:none;font-family:var(--f-num);font-weight:500;font-size:12px;color:var(--muted);padding:1px 6px;border-radius:99px;background:var(--bg);border:1px solid var(--line)}
 .lpct.warn{color:var(--warn)}
 .lpct.bad{color:var(--bad)}
 .alerts{display:flex;flex-direction:column;gap:8px}
@@ -621,6 +622,7 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .dgroup b{font-size:14px;font-weight:600;overflow-wrap:anywhere}
 .dgroup .sumv{font-family:var(--f-num);font-size:14px}
 .dgroup small{grid-column:1/-1;color:var(--muted);font-size:12px}
+.dgroup.closed b,.dgroup.closed .sumv{color:var(--muted);font-weight:500}
 /* the person's window: «Вернул всё» / «Вернул часть» for all of it, then each loan with its buttons */
 .dg{display:flex;flex-direction:column;gap:10px}
 .dperson{position:relative;width:min(440px,100%);background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:12px 16px 16px;box-shadow:0 12px 40px rgb(0 0 0 / .45);animation:up .18s ease-out}
@@ -2925,10 +2927,11 @@ function renderDebts(){
   /* solo: a person's only loan — its «Вернули всё / часть» are the ones at the top of the person's window */
   const one=(d,isOpen,inGroup,solo)=>{
     const left=debtLeft(d), ret=+d.returned||0, when=d.date?dayText(d.date):'';
-    const meta=[inGroup?'':when,ret>0&&isOpen?`вернули ${moneyR(ret)} из ${moneyR(+d.amount||0)}`:'',d.note?esc(d.note):''].filter(Boolean).join(' · ');
+    const how=!isOpen&&inGroup?(+d.forgiven>0?'прощён':'возвращён'):'';
+    const meta=[inGroup?'':when,how,ret>0&&isOpen?`вернули ${moneyR(ret)} из ${moneyR(+d.amount||0)}`:'',d.note?esc(d.note):''].filter(Boolean).join(' · ');
     const fold=inGroup&&!solo, shut=fold&&!showActs(d);
     const own=solo?'':`${accSel('data-racc',d.id,retAccOf(d),'Куда вернули')}<button class="primary" data-full="${esc(d.id)}">Вернули всё</button><button class="ghost" data-partbtn="${esc(d.id)}">Вернули часть</button>`;
-    const top=`<span class="head"><b>${esc(inGroup?(when||'Без даты'):d.name)}${d.doubtful&&isOpen?'<span class="tag">сомнительный</span>':''}</b><span class="left">${isOpen?moneyR(left):(+d.forgiven>0?'прощён':'возвращён')}</span></span>
+    const top=`<span class="head"><b>${esc(inGroup?(when||'Без даты'):d.name)}${d.doubtful&&isOpen?'<span class="tag">сомнительный</span>':''}</b><span class="left">${isOpen?moneyR(left):inGroup?moneyR(+d.amount||0):(+d.forgiven>0?'прощён':'возвращён')}</span></span>
       ${meta?`<span class="meta">${meta}</span>`:''}`;
     return `<div class="debt ${isOpen?'':'closed'}">
       ${fold?`<button type="button" class="dtap" data-di="${esc(d.id)}" aria-expanded="${!shut}">${top}</button>`:top}
@@ -2959,9 +2962,18 @@ function renderDebts(){
         :`${sel}<button class="primary" data-gfull="${k}" aria-label="${nm} вернул всё: ${moneyR(sumL)}">Вернул всё</button><button class="ghost" data-gpartbtn="${k}" aria-label="${nm} вернул часть">Вернул часть</button>`}</div>
       <div class="dinner">${g.list.map(d=>one(d,true,true,n===1)).join('')}</div></div></div>`};
   /* the window goes by itself when the person has nothing left to return */
-  const og=groups.find(g=>g.k===state.openDebt);if(!og)state.openDebt=null;
+  /* «Закрытые» the same way: one line per person (how many loans, how much came back); tap — a window with each of them */
+  const cgroups=[];closed.forEach(d=>{const k=nk(d.name), c=+d.created||0;let g=cgroups.find(x=>x.k===k);if(!g){g={k,name:d.name.trim(),c,list:[]};cgroups.push(g)}else if(c>=g.c){g.name=d.name.trim();g.c=c}g.list.push(d)});
+  const cBack=g=>r2(g.list.reduce((s,d)=>s+(+d.returned||0),0)), cSub=g=>{const n=g.list.length;return `${n} ${plural(n,'долг','долга','долгов')}`+(g.list.some(d=>+d.forgiven>0)?' · есть прощённые':'')};
+  const cgHtml=g=>`<button type="button" class="dgroup closed" data-dg="x:${esc(g.k)}" aria-haspopup="dialog"><b>${esc(gName(g))}</b><span class="sumv">${moneyR(cBack(g))}</span><small>${cSub(g)} · вернул всё</small></button>`;
+  const cModal=g=>`<div class="wmodal" role="dialog" aria-modal="true" aria-labelledby="dpT"><div class="sheet-bg" data-dpclose></div><div class="dg dperson">
+      <div class="dp-head"><div class="dp-t"><b id="dpT" tabindex="-1">${esc(gName(g))}</b><small>${cSub(g)} · закрыты</small></div><button type="button" class="dp-x" data-dpclose aria-label="Закрыть">×</button></div>
+      <div class="dp-sum"><span>Вернул всего</span><b>${moneyR(cBack(g))}</b></div>
+      <div class="dinner">${g.list.map(d=>one(d,false,true,false)).join('')}</div></div></div>`;
+  const cBox=()=>`<details data-cbox="closedOpen"${state.closedOpen?' open':''}><summary>Закрытые (${cgroups.length} ${plural(cgroups.length,'человек','человека','человек')})</summary>${cgroups.map(cgHtml).join('')}</details>`;
+  const og=groups.find(g=>g.k===state.openDebt), oc=cgroups.find(g=>'x:'+g.k===state.openDebt);if(!og&&!oc)state.openDebt=null;
   list.innerHTML=(open.length?groups.map(groupHtml).join(''):`<div class="empty"><p>Здесь будут люди, которые должны вам деньги. Нажмите «+ Дал в долг».</p></div>`)
-    +(closed.length?closedBox('closedOpen',closed,one):'')+(og?gModal(og):'');
+    +(closed.length?cBox():'')+(og?gModal(og):oc?cModal(oc):'');
   bindClosedBox(list);
   const dpClose=()=>{fresh();state.openDebt=null;state.openDebtItem=null;state.editing=null;render()};
   list.querySelectorAll('[data-dpclose]').forEach(b=>b.onclick=dpClose);
