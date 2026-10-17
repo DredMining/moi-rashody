@@ -28,7 +28,7 @@
   <rect width="512" height="512" fill="url(#bg)"/>
   <rect width="512" height="512" fill="url(#glow)"/>
   <circle cx="423" cy="87" r="116" fill="#fff" opacity=".025"/>
-  <g filter="url(#shadow)">
+  <g filter="url(#shadow)" transform="translate(-14 0)">
     <path d="M108 202v-34c0-24 18-42 42-42h210" fill="none" stroke="url(#gold)" stroke-width="15" stroke-linecap="round"/>
     <path d="M91 207c0-18 14-32 32-32h296c17 0 30 13 30 30v134c0 24-18 42-42 42H133c-25 0-42-17-42-42V207Z" fill="url(#gold)"/>
     <path d="M104 214h331v119c0 17-12 30-30 30H134c-18 0-30-13-30-30V214Z" fill="url(#leather)"/>
