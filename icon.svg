@@ -1,29 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#1B2A4C"/>
-      <stop offset="1" stop-color="#080D18"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#263c68"/>
+      <stop offset="1" stop-color="#080d18"/>
     </linearGradient>
-    <radialGradient id="glow" cx="512" cy="500" r="440" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#5B8CFF" stop-opacity="0.32"/>
-      <stop offset="1" stop-color="#5B8CFF" stop-opacity="0"/>
+    <radialGradient id="glow" cx="210" cy="170" r="400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5b8cff" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#5b8cff" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="ink" x1="0" y1="214" x2="0" y2="810" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#A6C2FF"/>
-      <stop offset="1" stop-color="#5B8CFF"/>
+    <linearGradient id="coin" x1="175" y1="106" x2="344" y2="407" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff0a8"/>
+      <stop offset=".48" stop-color="#ffd166"/>
+      <stop offset="1" stop-color="#d88829"/>
     </linearGradient>
-    <radialGradient id="sheen" cx="512" cy="0" r="760" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.07"/>
-      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
-    </radialGradient>
+    <linearGradient id="symbol" x1="0" y1="174" x2="0" y2="351" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#31466b"/>
+      <stop offset="1" stop-color="#17243c"/>
+    </linearGradient>
   </defs>
-  <rect x="0" y="0" width="1024" height="1024" fill="url(#bg)"/>
-  <rect x="0" y="0" width="1024" height="1024" fill="url(#glow)"/>
-  <rect x="0" y="0" width="1024" height="1024" fill="url(#sheen)"/>
-  <g fill="url(#ink)" stroke="url(#ink)" stroke-width="16" stroke-linejoin="round">
-    <path fill-rule="evenodd" d="M372 222 H602 A170 170 0 0 1 602 562 H372 Z M472 322 H602 A70 70 0 0 1 602 462 H472 Z"/>
-    <rect x="372" y="222" width="100" height="580"/>
-    <rect x="252" y="462" width="120" height="100"/>
-    <rect x="252" y="638" width="350" height="96"/>
-  </g>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#glow)"/>
+  <circle cx="256" cy="256" r="169" fill="#000" opacity=".2"/>
+  <circle cx="256" cy="248" r="164" fill="url(#coin)"/>
+  <circle cx="256" cy="248" r="146" fill="none" stroke="#fff1bd" stroke-opacity=".82" stroke-width="5"/>
+  <circle cx="256" cy="248" r="135" fill="none" stroke="#b97322" stroke-opacity=".46" stroke-width="2"/>
+  <path d="M153 173a126 126 0 0 1 200-28" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="8" stroke-linecap="round"/>
+  <path d="M201 174h91a57 57 0 0 1 0 114h-66v69h-38v-69h-38v-36h38v-42h-38v-36h38zm38 36v42h53a21 21 0 0 0 0-42z" fill="url(#symbol)"/>
+  <path d="M183 288h109v29H183z" fill="url(#symbol)"/>
 </svg>
