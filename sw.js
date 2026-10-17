@@ -1,11 +1,11 @@
 // Opens instantly from the saved copy, then quietly fetches the fresh version for next launch.
-const CACHE = 'moi-rashody-v104';
+const CACHE = 'moi-rashody-v105';
 // the fonts are the app's own files: saved with the page at install, so offline every one of them is at hand
 const FONTS = ['GolosText-cyrillic-q5uCsoe9Lv', 'GolosText-latin-q5uCsoe9Lv', 'IBMPlexMono-cyrillic--F63fjptAg', 'IBMPlexMono-latin--F63fjptAg', 'IBMPlexMono-cyrillic--F6qfjptAg', 'IBMPlexMono-latin--F6qfjptAg', 'Unbounded-cyrillic-Yq6W-LOTXC', 'Unbounded-latin-Yq6W-LOTXC',
   // ₽ for each face (it is in neither the Latin nor the Cyrillic file)
   'GolosText-rub400-2626f3c1', 'GolosText-rub500-1ffbb4e5', 'GolosText-rub600-48126017', 'IBMPlexMono-rub400-928d7d82', 'IBMPlexMono-rub500-4b52133d', 'Unbounded-rub500-fd96e1a7', 'Unbounded-rub700-56dd8e8b'].map(f => `./fonts/${f}.woff2`);
 // the launch screens of the home-screen app (iPhone 17 Pro Max, dark and light) are kept with it too
-const FILES = ['./', './index.html', './manifest.webmanifest', './icon4-192.png', './icon4-512.png', './apple-touch-icon4.png', './splash-1320x2868-dark.png', './splash-1320x2868-light.png', ...FONTS];
+const FILES = ['./', './index.html', './manifest.webmanifest', './icon-wallet-192.png', './icon-wallet-512.png', './apple-touch-icon-wallet.png', './splash-1320x2868-dark.png', './splash-1320x2868-light.png', ...FONTS];
 // the page under both its names: whichever is fetched, both saved copies get it
 const PAGE = [new URL('./', location).href, new URL('./index.html', location).href];
 // a spare copy of the page outside the caches: another app on this address may clear every cache but its own
