@@ -1207,14 +1207,23 @@ function localStore(){
       o.settings={...o.settings,zakat:y}}
     return o};
   try{raw=localStorage.getItem(KEY)}catch(e){status='full'}
+  const keepBrokenRaw=s=>{try{
+    if(!Object.keys(localStorage).some(k=>k.startsWith(BK)&&localStorage.getItem(k)===s))
+      localStorage.setItem(localStorage.getItem(BK)===null?BK:BK+'-'+Date.now(),s);
+  }catch(e){kept=false}};
   if(raw) try{data=parse(raw)}catch(e){status='broken';
     /* unreadable: its text is kept as it is under its own key, and nothing is written over it on the way in */
-    try{if(!Object.keys(localStorage).some(k=>k.startsWith(BK)&&localStorage.getItem(k)===raw))localStorage.setItem(localStorage.getItem(BK)===null?BK:BK+'-'+Date.now(),raw)}catch(x){kept=false}}
+    keepBrokenRaw(raw)}
   /* can this browser keep anything at all (blocked storage, private mode, full memory)? */
   if(!status) try{localStorage.setItem(KEY+'-probe','1');localStorage.removeItem(KEY+'-probe')}catch(e){status='full'}
   let last=raw;
   /* another open copy of the app may have saved since: build every change on what is stored now, not on an old snapshot */
-  const fresh=()=>{let r=null;try{r=localStorage.getItem(KEY)}catch(e){}if(r&&r!==last)try{data=parse(r);last=r}catch(e){}};
+  const fresh=()=>{
+    let r=null;try{r=localStorage.getItem(KEY)}catch(e){return}
+    if(!r||r===last)return;
+    try{data=parse(r);last=r;status='';kept=true}
+    catch(e){status='broken';keepBrokenRaw(r);last=r}
+  };
   const fail=()=>{const x=new Error('quota_exceeded');x.code='quota_exceeded';return x};
   /* outer: another open copy of the app saved — what is being typed here must stay */
   const tell=outer=>{try{cb(data,outer)}catch(e){console.error(e)}};
@@ -2367,13 +2376,13 @@ function zHistory(z){
   return dues;
 }
 /* lunar years a debt was marked doubtful on the zakat date: its zakat for those years is paid when the money comes back */
-const zDoubtYears=id=>(zset().years||[]).filter(y=>(y.ids||[]).includes(id)).length;
+const zDoubtYears=(id,z=zset())=>(z.years||[]).filter(y=>(y.ids||[]).includes(id)).length;
 /* rec: the record that brought the money back (or the садака it was forgiven into) — the zakat follows it when it is fixed in Записи */
-const zDebtX=(d,v,rec)=>{const n=zDoubtYears(d.id);return n>0&&v>0?{date:iso(now),amount:r2(v*ZAKAT_RATE*n),label:`Закят с долга: ${d.name.trim()} — за ${n} ${plural(n,'год','года','лет')}`,debt:d.id,rec,n}:null};
-function zDebtBack(d,v,rec){
-  const x=zDebtX(d,v,rec);if(!x) return null;
-  const z=zset();saveSettings({zakat:{...z,extra:[...(z.extra||[]),x]}});
-  return {n:x.n,amount:x.amount};
+const zDebtX=(d,v,rec,z=zset())=>{const n=zDoubtYears(d.id,z);return n>0&&v>0?{date:iso(now),amount:r2(v*ZAKAT_RATE*n),label:`Закят с долга: ${d.name.trim()} — за ${n} ${plural(n,'год','года','лет')}`,debt:d.id,rec,n}:null};
+function zDebtBack(o,d,v,rec){
+  const z=o.settings().zakat||{}, x=zDebtX(d,v,rec,z);if(!x) return null;
+  o.patchSettings({zakat:{...z,extra:[...(z.extra||[]),x]}});
+  return x;
 }
 /* the «закят с долга» a return brought: linked by the record's id; older ones by debt, day and sum. Its index in z.extra, or −1 */
 const zxN=x=>+x.n||+(/за (\d+) \S+$/.exec(x.label||'')||[])[1]||0;
@@ -3088,7 +3097,7 @@ function renderDebts(){
   /* the list is drawn again and the next loan's buttons come up under the finger: the second tap of a double tap is let go of (fresh) */
   list.querySelectorAll('[data-full]').forEach(b=>b.onclick=async()=>{
     const d=state.debts.find(x=>x.id===b.dataset.full), acc=retAccOf(d);b.disabled=true;fresh();
-    try{const left=debtLeft(d), rid=await store.batch(o=>{const r=o.add(backRec(d,left));o.updateDebt(d.id,{returned:r2((+d.amount||0)-(+d.forgiven||0)),closedAt:Date.now()});return r});const zk=zDebtBack(d,left,rid);toast(`${d.name} — вернули ${money(left)} ${toAcc(acc)}, долг закрыт`+zkNote(zk,true))}catch(e){b.disabled=false;toast(saveErr(e))}
+    try{const left=debtLeft(d), zk=await store.batch(o=>{const r=o.add(backRec(d,left));o.updateDebt(d.id,{returned:r2((+d.amount||0)-(+d.forgiven||0)),closedAt:Date.now()});return zDebtBack(o,d,left,r)});toast(`${d.name} — вернули ${money(left)} ${toAcc(acc)}, долг закрыт`+zkNote(zk,true))}catch(e){b.disabled=false;toast(saveErr(e))}
   });
   /* forgiving a debt: the rest becomes садака. No account is touched — the money already left when it was lent. */
   list.querySelectorAll('[data-forgive]').forEach(b=>b.onclick=async()=>{
@@ -3099,10 +3108,9 @@ function renderDebts(){
     if(Date.now()-b.dataset.armed<600) return;
     b.disabled=true;fresh();
     try{
-      const rid=await store.batch(o=>{const r=o.add({type:'out',amount:Math.round(left*100)/100,cat:'sadaqa',acc:'',date:iso(now),note:'прощён долг: '+d.name,debt:d.id,created:Date.now()});
-        o.updateDebt(d.id,{forgiven:r2((+d.forgiven||0)+left),closedAt:Date.now()});return r});
+      const zk=await store.batch(o=>{const r=o.add({type:'out',amount:Math.round(left*100)/100,cat:'sadaqa',acc:'',date:iso(now),note:'прощён долг: '+d.name,debt:d.id,created:Date.now()});
+        o.updateDebt(d.id,{forgiven:r2((+d.forgiven||0)+left),closedAt:Date.now()});return zDebtBack(o,d,left,r)});
       /* Shafi'i: forgiving doesn't remove the zakat on a debt for the years it was owed — that part belongs to the poor */
-      const zk=zDebtBack(d,left,rid);
       toast(`Долг прощён: ${d.name} — ${money(left)} записано в садаку`+(zk?` · закят с долга ${money(zk.amount)} к оплате`:''));
     }catch(e){b.disabled=false;toast(saveErr(e))}
   });
@@ -3121,22 +3129,22 @@ function renderDebts(){
       const take=r2(Math.min(v,debtLeft(d))), ret=r2((+d.returned||0)+take), patch={returned:ret}, rest=debtLeft({...d,...patch});
       if(rest<=0) patch.closedAt=Date.now();
       state.editing=null;fresh();
-      try{const rid=await store.batch(o=>{const r=o.add(backRec(d,take));o.updateDebt(d.id,patch);return r});const zk=zDebtBack(d,take,rid);toast(`${d.name} — вернули ${money(take)} ${toAcc(acc)}${rest>0?', осталось '+money(rest):', долг закрыт'}`+zkNote(zk))}catch(x){reopen('d-'+d.id,'form[data-part] input',raw);toast(saveErr(x))}
+      try{const zk=await store.batch(o=>{const r=o.add(backRec(d,take));o.updateDebt(d.id,patch);return zDebtBack(o,d,take,r)});toast(`${d.name} — вернули ${money(take)} ${toAcc(acc)}${rest>0?', осталось '+money(rest):', долг закрыт'}`+zkNote(zk))}catch(x){reopen('d-'+d.id,'form[data-part] input',raw);toast(saveErr(x))}
     };
   });
   /* a person's loans at once: v goes to them oldest first (the last one it reaches may stay partly open) — a return record for each,
      linked to its loan, the debts and the zakat they bring, all in one write; one «Отменить» takes all of it back */
   const gOf=k=>groups.find(g=>g.k===k);
   const gBack=async(g,v)=>{
-    const acc=gAcc(g), nm=gName(g), t=Date.now(), z0=zset(), was=g.list.map(d=>[d.id,{returned:+d.returned||0,closedAt:d.closedAt||0}]), done=[];let rest=r2(v);
+    const acc=gAcc(g), nm=gName(g), t=Date.now(), was=g.list.map(d=>[d.id,{returned:+d.returned||0,closedAt:d.closedAt||0}]), done=[];let rest=r2(v);
     const xs=await store.batch(o=>{const xs=[];
       for(const d of g.list){const take=r2(Math.min(rest,debtLeft(d)));if(!(take>=0.01))break;rest=r2(rest-take);
         const rid=o.add({...backRec(d,take),acc,created:t+done.length}), ret=r2((+d.returned||0)+take), shut=debtLeft({...d,returned:ret})<=0;
-        o.updateDebt(d.id,{returned:ret,...(shut?{closedAt:t}:{})});done.push({rid,take,shut});const x=zDebtX(d,take,rid);if(x)xs.push(x)}
-      if(xs.length)o.patchSettings({zakat:{...z0,extra:[...(z0.extra||[]),...xs]}});return xs});
+        o.updateDebt(d.id,{returned:ret,...(shut?{closedAt:t}:{})});done.push({rid,take,shut});const x=zDebtBack(o,d,take,rid);if(x)xs.push(x)}
+      return xs});
     const got=r2(done.reduce((s,x)=>s+x.take,0)), shut=done.filter(x=>x.shut).length, left=r2(g.list.reduce((s,d)=>s+debtLeft(d),0)-got), n=g.list.length, zv=r2(sum(xs)), ids=done.map(x=>x.rid);
     toast(`${nm} — вернул ${money(got)} ${toAcc(acc)}`+(left>=0.01?(shut?`, ${shut===1?'закрыт 1 долг':`закрыто ${shut} ${plural(shut,'долг','долга','долгов')}`}`:'')+`, осталось ${money(left)}`:n===1?', долг закрыт':n===2?', оба долга закрыты':`, все ${n} ${plural(n,'долг','долга','долгов')} закрыты`)+(zv>=0.01?` · закят с долга: ${money(zv)}`:''),
-      ()=>store.batch(o=>{ids.forEach(id=>o.remove(id));was.forEach(([id,p])=>o.updateDebt(id,p));if(xs.length){const z=zset();o.patchSettings({zakat:{...z,extra:(z.extra||[]).filter(x=>!ids.includes(x.rec))}})}}));
+      ()=>store.batch(o=>{ids.forEach(id=>o.remove(id));was.forEach(([id,p])=>o.updateDebt(id,p));if(xs.length){const z=o.settings().zakat||{};o.patchSettings({zakat:{...z,extra:(z.extra||[]).filter(x=>!ids.includes(x.rec))}})}}));
   };
   /* the list is drawn again and the next person comes up under the finger: the second tap of a double tap is let go of (fresh) */
   list.querySelectorAll('[data-gfull]').forEach(b=>b.onclick=async()=>{const g=gOf(b.dataset.gfull);if(!g)return;b.disabled=true;fresh();
