@@ -270,11 +270,11 @@ input[type="date"]::-webkit-date-and-time-value{color:var(--ink);-webkit-text-fi
 .item.tr .amt{color:var(--muted)}
 input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.search-wrap{position:relative;display:flex;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 12px 0 40px;min-height:44px}
-.search-wrap input{width:100%;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;font-size:16px;padding:10px 0;outline:none}
+.search-wrap{position:relative;display:flex;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 12px 0 40px;height:44px;min-height:44px}
+.search-wrap input{width:100%;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;font-size:16px;padding:8px 0;outline:none}
 .search-wrap input::placeholder{color:var(--muted)}
 .search-wrap .icon{position:absolute;left:12px;color:var(--muted);font-size:15px;pointer-events:none}
-.search-wrap .clear{display:flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;margin-right:-8px;border:0;background:none;color:var(--muted);font-size:22px;line-height:1;padding:0;cursor:pointer}
+.search-wrap .clear{display:flex;align-items:center;justify-content:center;flex:none;width:42px;height:42px;margin-right:-8px;border:0;background:none;color:var(--muted);font-size:22px;line-height:1;padding:0;cursor:pointer}
 .search-wrap .clear[hidden]{display:none}
 .chip{border:1px solid var(--field-line);background:transparent;border-radius:99px;padding:6px 12px;min-height:44px;min-width:44px;justify-content:center;font-size:13px;display:inline-flex;align-items:center;gap:6px}
 .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--c)}
@@ -312,6 +312,8 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 /* List */
 /* «Командировка» never gets cut: its button takes the room «Все» doesn't need (min-width:max-content in .seg) */
 .seg3 button{font-size:13px;padding:8px 2px;white-space:nowrap}
+#scopeFilter{height:44px}
+#scopeFilter button{min-height:36px;padding:6px 2px}
 /* «Расходы | Доходы | Брокер | Сравнение» on «Итоги»: a lower switch */
 #statSeg{padding:2px;gap:2px}
 #statSeg button{font-size:12.5px;min-height:34px;padding:4px 2px}
