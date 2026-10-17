@@ -270,6 +270,12 @@ input[type="date"]::-webkit-date-and-time-value{color:var(--ink);-webkit-text-fi
 .item.tr .amt{color:var(--muted)}
 input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
+.search-wrap{position:relative;display:flex;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 12px 0 40px;min-height:44px}
+.search-wrap input{width:100%;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;font-size:16px;padding:10px 0;outline:none}
+.search-wrap input::placeholder{color:var(--muted)}
+.search-wrap .icon{position:absolute;left:12px;color:var(--muted);font-size:15px;pointer-events:none}
+.search-wrap .clear{display:flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;margin-right:-8px;border:0;background:none;color:var(--muted);font-size:22px;line-height:1;padding:0;cursor:pointer}
+.search-wrap .clear[hidden]{display:none}
 .chip{border:1px solid var(--field-line);background:transparent;border-radius:99px;padding:6px 12px;min-height:44px;min-width:44px;justify-content:center;font-size:13px;display:inline-flex;align-items:center;gap:6px}
 .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--c)}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -960,6 +966,11 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
       <button class="iconbtn" id="hNext" aria-label="Следующий месяц">›</button>
     </div>
     <div class="seg seg3" id="scopeFilter" role="group" aria-label="Чьи деньги"></div>
+    <label class="search-wrap" aria-label="Поиск по записям">
+      <span class="icon" aria-hidden="true">⌕</span>
+      <input id="recordSearch" type="search" value="" placeholder="Поиск по комментариям, категориям, сумме" autocomplete="off">
+      <button type="button" class="clear" id="clearSearch" aria-label="Очистить поиск" hidden>×</button>
+    </label>
     <div class="chips" id="accFilter" role="group" aria-label="Фильтр по счёту"></div>
     <section class="recs" aria-label="Записи за месяц">
       <div id="list"></div>
@@ -1165,7 +1176,7 @@ const TRIP_ALLOWANCE=28500;
 
 let now=new Date();
 const state={retAcc:{},editItem:null,recon:null,xfer:{from:'tbank',to:'broker'},items:[],debts:[],settings:{},y:now.getFullYear(),m:now.getMonth(),
-  type:'out',scope:'own',editing:null,tab:'ledger',ready:false};
+  type:'out',scope:'own',editing:null,tab:'ledger',ready:false,searchQuery:''};
 let store=null;
 
 /* ---------- storage: this browser ---------- */
@@ -2833,9 +2844,33 @@ function renderList(items){
   $('accFilter').querySelectorAll('[data-af]').forEach(b=>b.onclick=()=>{state.accFilter=b.dataset.af||null;render()});
   const touches=i=>!af||(typeOf(i)==='tr'?(i.from===af||i.to===af):(i.acc===af||(af==='broker'&&catOf(i.cat).id==='broker'&&typeOf(i)==='out')||(af==='piggy'&&catOf(i.cat).id==='invest'&&typeOf(i)==='out')));
   const inScope=i=>!sf||(sf==='trip'?isTrip(i):!isTrip(i));
-  const shown=items.filter(i=>!zeroEnd(i)&&touches(i)&&inScope(i)).sort(byNewest);
+  const q=(state.searchQuery||'').trim().toLowerCase();
+  const matchesQuery=i=>{
+    if(!q) return true;
+    const hay=[
+      catOf(i.cat).name,
+      i.note||'',
+      ACC_SHORT[i.acc]||'',
+      WNAME[i.acc]||'',
+      WNAME[i.from]||'',
+      WNAME[i.to]||'',
+      String(Math.abs(+i.amount||0)),
+      i.date||''
+    ].join(' ').toLowerCase();
+    return hay.includes(q);
+  };
+  const shown=items.filter(i=>!zeroEnd(i)&&touches(i)&&inScope(i)&&matchesQuery(i)).sort(byNewest);
+  if($('recordSearch')){
+    $('recordSearch').value=state.searchQuery||'';
+    $('recordSearch').oninput=e=>{state.searchQuery=e.target.value;render();};
+    $('clearSearch').hidden=!state.searchQuery;
+    $('clearSearch').onclick=()=>{state.searchQuery='';render();$('recordSearch')?.focus({preventScroll:true});};
+  }
   if(!state.ready){list.innerHTML='<div class="empty"><p>Загружаю записи…</p></div>';return}
-  if(!shown.length){list.innerHTML=`<div class="empty"><p>${af||sf?'Записей с таким фильтром в этом месяце нет.':'В этом месяце записей нет.'}</p></div>`;return}
+  if(!shown.length){
+    const inMsg=q?`По запросу «${esc(state.searchQuery)}» ничего не найдено.`:af||sf?'Записей с таким фильтром в этом месяце нет.':'В этом месяце записей нет.';
+    list.innerHTML=`<div class="empty"><p>${inMsg}</p></div>`;return;
+  }
   const groups={};shown.forEach(i=>(groups[i.date]??=[]).push(i));
   const afW=af&&WALLETS.find(w=>w.id===af), afT=afW?` title="${esc('Движение по счёту «'+afW.name+'»')}"`:'';
   list.innerHTML=Object.entries(groups).map(([d,arr])=>{
