@@ -264,9 +264,15 @@ button{cursor:pointer}
 .segs.one{grid-template-columns:1fr}
 .form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 .form>*{min-width:0}
-#debtAdd{border-radius:16px;background:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 66%)}
-#debtAdd>summary{padding:12px 14px;color:var(--ink)}
-#debtAdd .morebody{padding:0 12px 12px}
+.debt-add-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 66%);color:var(--ink);font:inherit;font-size:14px;font-weight:600;text-align:left;cursor:pointer}
+.debt-add-trigger::after{content:'›';font-size:20px;font-weight:400;line-height:1;color:var(--muted)}
+.wmodal:has(.debt-add-modal){align-items:center;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
+.debt-add-modal{position:relative;width:min(440px,100%);max-height:calc(100vh - 32px);max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px);overflow-y:auto;overscroll-behavior:contain;padding:12px;border:1px solid var(--line);border-radius:20px;background:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 66%);box-shadow:0 12px 40px rgb(0 0 0 / .45);animation:up .18s ease-out}
+.debt-add-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;padding:2px 0 8px;border-bottom:1px solid var(--line)}
+.debt-add-head>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.debt-add-head b{font-size:16px;font-weight:600}
+.debt-add-head span{font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.debt-add-modal{animation:none}}
 #debtForm.form{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
 #debtForm .debt-field{display:flex;flex-direction:column;gap:3px;min-width:0;font-size:12px;color:var(--muted)}
 #debtForm .debt-field>span{line-height:1.2}
@@ -730,7 +736,7 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .dp-section-title,.dinner-head{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .dp-repay .acts{gap:6px 8px;margin:0}
 .dperson .dp-repay .acts>.dacc{flex:1 1 100%}
-.dperson .dp-repay .acts>button{font-size:13px;min-height:36px;padding-block:6px}
+.dperson .dp-repay .acts>button{font-size:12px;min-height:34px;padding:4px 12px}
 .dinner{display:flex;flex-direction:column;gap:8px;padding:0;border-top:0}
 .dinner-head{padding:8px 2px 0;border-top:1px solid var(--line)}
 .dinner>.debt:last-child{border-bottom:1px solid var(--line);padding-bottom:8px}
@@ -1014,20 +1020,22 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
         <span class="sub" id="debtSub">&nbsp;</span>
       </div>
     </section>
-    <details class="more" id="debtAdd">
-      <summary>+ Дал в долг</summary>
-      <div class="morebody">
-      <form class="form" id="debtForm" novalidate>
-        <label class="debt-field"><span>Кто взял</span><input id="dName" placeholder="Имя" maxlength="60" aria-label="Имя" autocomplete="off"></label>
-        <label class="debt-field"><span>Сумма долга</span><input id="dAmount" class="num" inputmode="decimal" placeholder="Сумма, ₽" aria-label="Сумма долга" autocomplete="off"></label>
-        <label class="debt-field"><span>Когда дали</span><input id="dDate" type="date" aria-label="Когда дали"></label>
-        <label class="debt-field debt-account"><span>С какого счёта дали</span><select id="dAcc"></select></label>
-        <label class="debt-field debt-field-wide"><span>Комментарий</span><input id="dNote" placeholder="Необязательно" maxlength="80" aria-label="Комментарий"></label>
-        <p class="err" role="alert" id="debtErr" hidden></p>
-        <button class="submit" type="submit">Записать долг</button>
-      </form>
-      </div>
-    </details>
+    <button class="debt-add-trigger" id="debtAddOpen" type="button" aria-haspopup="dialog" aria-controls="debtAddModal">+ Дал в долг</button>
+    <div class="wmodal" id="debtAddModal" hidden role="dialog" aria-modal="true" aria-labelledby="debtAddTitle">
+      <div class="sheet-bg" data-debtaddclose></div>
+      <section class="debt-add-modal">
+        <div class="debt-add-head"><div><b id="debtAddTitle" tabindex="-1">Добавить долг</b><span>Заполните данные о долге</span></div><button type="button" class="dp-x" data-debtaddclose aria-label="Закрыть">×</button></div>
+        <form class="form" id="debtForm" novalidate>
+          <label class="debt-field"><span>Кто взял</span><input id="dName" placeholder="Имя" maxlength="60" aria-label="Имя" autocomplete="off"></label>
+          <label class="debt-field"><span>Сумма долга</span><input id="dAmount" class="num" inputmode="decimal" placeholder="Сумма, ₽" aria-label="Сумма долга" autocomplete="off"></label>
+          <label class="debt-field"><span>Когда дали</span><input id="dDate" type="date" aria-label="Когда дали"></label>
+          <label class="debt-field debt-account"><span>С какого счёта дали</span><select id="dAcc"></select></label>
+          <label class="debt-field debt-field-wide"><span>Комментарий</span><input id="dNote" placeholder="Необязательно" maxlength="80" aria-label="Комментарий"></label>
+          <p class="err" role="alert" id="debtErr" hidden></p>
+          <button class="submit" type="submit">Записать долг</button>
+        </form>
+      </section>
+    </div>
     <section class="panel" aria-labelledby="debtListH">
       <h2 id="debtListH">Должники</h2>
       <div id="debtList"></div>
@@ -3274,6 +3282,8 @@ $('oweForm').onsubmit=async e=>{
   }catch(x){err.textContent=saveErr(x);err.hidden=false}
 };
 $('dDate').value=iso(now);$('dDate').max=iso(now);
+$('debtAddOpen').onclick=()=>{fresh();$('debtAddModal').hidden=false;dlgSync()};
+$('debtAddModal').querySelectorAll('[data-debtaddclose]').forEach(b=>b.onclick=closeDebtAddModal);
 $('dAcc').innerHTML=[...ACCS.map(([v,n])=>`<option value="${v}" ${v==='cash'?'selected':''}>${n}</option>`),'<option value="">Не списывать — уже учтено</option>'].join('');
 $('debtForm').onsubmit=async e=>{
   e.preventDefault();
@@ -3289,7 +3299,7 @@ $('debtForm').onsubmit=async e=>{
   try{
     await store.batch(o=>{const did=o.addDebt({name,amount:amt,returned:0,date,note:$('dNote').value.trim(),created:rec.created});if(acc)o.add({...rec,debt:did})});
     overOff($('debtForm'),btn);
-    $('dName').value='';$('dAmount').value='';$('dNote').value='';$('dDate').value=iso(now);$('dAcc').value='cash';$('debtAdd').open=false;toast(`Дано в долг: ${name} — ${money(amt)}`+(acc?' '+fromAcc(acc)+heldNote(rec):''));
+    $('dName').value='';$('dAmount').value='';$('dNote').value='';$('dDate').value=iso(now);$('dAcc').value='cash';closeDebtAddModal();toast(`Дано в долг: ${name} — ${money(amt)}`+(acc?' '+fromAcc(acc)+heldNote(rec):''));
   }catch(x){err.textContent=saveErr(x);err.hidden=false}
 };
 overWatch($('debtForm'),$('debtForm').querySelector('.submit'),$('debtErr'));futWatch($('debtForm'),$('dDate'),$('debtErr'));futWatch($('oweForm'),$('oDate'),$('oweErr'));
@@ -3386,9 +3396,9 @@ setInterval(refreshToday,60000);
 let dlgStack=[], dlgInert=[], lastTap=null;
 document.addEventListener('click',e=>{const b=e.target.closest?.('button,[role="button"],summary');if(b)lastTap={el:b,t:performance.now()}},true);
 function dlgOpen(){
-  const bk=$('bkModal'), xm=document.querySelector('#moneyActs .wmodal');
+  const bk=$('bkModal'), da=$('debtAddModal'), xm=document.querySelector('#moneyActs .wmodal');
   const w=document.querySelector('#wallets .wmodal'), zf=document.querySelector('#zakatForm .wmodal'), dp=document.querySelector('#debtList .wmodal'), tw=document.querySelector('#tripStat .wmodal');
-  return [w&&{k:state.recon?'recon':'w',el:w},dp&&dp.getClientRects().length&&{k:'debt:'+state.openDebt,el:dp},tw&&tw.getClientRects().length&&{k:'trip:'+state.editing,el:tw},!$('zakatSheet').hidden&&{k:'zakat',el:$('zakatSheet')},zf&&{k:'zform',el:zf},!$('sheet').hidden&&{k:'sheet',el:$('sheet')},!bk.hidden&&{k:'bk',el:bk},xm&&{k:'xfer',el:xm}].filter(Boolean);
+  return [w&&{k:state.recon?'recon':'w',el:w},dp&&dp.getClientRects().length&&{k:'debt:'+state.openDebt,el:dp},tw&&tw.getClientRects().length&&{k:'trip:'+state.editing,el:tw},!$('zakatSheet').hidden&&{k:'zakat',el:$('zakatSheet')},zf&&{k:'zform',el:zf},!$('sheet').hidden&&{k:'sheet',el:$('sheet')},!da.hidden&&{k:'debtAdd',el:da},!bk.hidden&&{k:'bk',el:bk},xm&&{k:'xfer',el:xm}].filter(Boolean);
 }
 /* the same button drawn again (the page redraws its lists): found by its id or its data-… */
 const refind=o=>{if(!o||o.isConnected)return o;if(o.id)return $(o.id);const a=[...o.attributes].find(x=>x.name.startsWith('data-'));
@@ -3409,10 +3419,11 @@ function dlgSync(){
     if(!top.el.contains(document.activeElement)) (seen(back)&&top.el.contains(back)?back:top.k==='sheet'?$('sheetTitle'):top.k==='zakat'?$('zakatSheetT'):top.el.querySelector('[tabindex="-1"]'))?.focus({preventScroll:true});
   }else if(seen(back)) back.focus({preventScroll:true});
 }
+function closeDebtAddModal(){const m=$('debtAddModal');if(m.hidden)return;m.hidden=true;dlgSync()}
 document.addEventListener('keydown',e=>{
   const top=dlgOpen().pop();if(!top)return;
   if(e.key==='Escape'){e.preventDefault();
-    if(top.k==='bk')closeBk();else if(top.k==='xfer'){state.xferOpen=false;render()}else if(top.k==='sheet')closeSheet();else if(top.k==='zakat'){if(state.zView)zGo(null);else closeZakat()}else{state.editing=null;state.recon=null;if(top.k.startsWith('debt:')){state.openDebt=null;state.openDebtItem=null}render()}
+    if(top.k==='bk')closeBk();else if(top.k==='debtAdd')closeDebtAddModal();else if(top.k==='xfer'){state.xferOpen=false;render()}else if(top.k==='sheet')closeSheet();else if(top.k==='zakat'){if(state.zView)zGo(null);else closeZakat()}else{state.editing=null;state.recon=null;if(top.k.startsWith('debt:')){state.openDebt=null;state.openDebtItem=null}render()}
     return}
   if(e.key!=='Tab')return;
   const f=[...top.el.querySelectorAll('button,input,select,textarea,summary,a[href],[tabindex="0"]')].filter(x=>!x.disabled&&x.getClientRects().length&&getComputedStyle(x).visibility!=='hidden'), i=f.indexOf(document.activeElement);
