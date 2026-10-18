@@ -725,29 +725,37 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .dp-t b{font-size:16px;font-weight:600;overflow-wrap:anywhere}
 .dp-t small{font-size:12px;color:var(--muted)}
 .dp-x{width:44px;height:44px;border:0;border-radius:50%;background:none;color:var(--muted);font-size:26px;line-height:1;cursor:pointer}
-.dp-sum{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:13px;color:var(--muted)}
+.dp-sum{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:13px;color:var(--muted)}
 .dp-sum b{font-family:var(--f-num);font-size:20px;font-weight:500;color:var(--ink)}
-.dinner{display:flex;flex-direction:column;border-top:1px solid var(--line)}
-.dinner>.debt:last-child{border-bottom:0;padding-bottom:0}
+.dp-repay{display:flex;flex-direction:column;gap:6px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.dp-section-title,.dinner-head{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.dp-repay .acts{gap:6px 8px;margin:0}
+.dperson .dp-repay .acts>.dacc{flex:1 1 100%}
+.dperson .dp-repay .acts>button{font-size:13px;min-height:36px;padding-block:6px}
+.dinner{display:flex;flex-direction:column;gap:8px;padding:0;border-top:0}
+.dinner-head{padding:8px 2px 0;border-top:1px solid var(--line)}
+.dinner>.debt:last-child{border-bottom:1px solid var(--line);padding-bottom:8px}
 /* a loan's buttons in the person's window: close together, a few to a line */
-.dperson .debt{gap:4px;padding-block:10px}
-.dperson .debt .acts{gap:0 12px}
-.dperson .debt .acts>.linkbtn{min-height:32px;padding:6px 0;margin:0}
-.dperson .debt .acts>.del{min-height:32px;padding:6px 0}
+.dperson .debt{gap:6px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.dperson .debt .acts{gap:6px 8px;margin-top:6px;padding-top:8px;border-top:1px solid var(--line)}
+.dperson .debt-return,.dperson .debt-manage{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;width:100%}
+.dperson .debt-return{padding:8px;border-radius:10px;background:var(--surface)}
+.dperson .debt-manage{padding-top:6px;border-top:1px dashed var(--line)}
+.dperson .debt-actions-label{flex:1 1 100%;font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.dperson .debt-manage>.linkbtn,.dperson .debt-manage>.del{min-height:32px;padding:6px 0;margin:0;font-size:12px}
 .dperson{padding:10px 14px 14px}
 .dperson.dg{gap:8px}
 .dperson .debt .head b,.dperson .debt .head .left{font-size:14px}
 .dperson .debt .meta{font-size:12px}
 .dperson .debt .acts>.linkbtn,.dperson .debt .acts>.del{font-size:12px}
 .dperson .dacc{font-size:12px}
-.dperson>.acts>button{font-size:13px;min-height:36px;padding-block:6px}
 /* a loan row in the person's window is a button: date and sum, the note under them, › turns down when its buttons are open */
 .dtap{display:flex;flex-direction:column;justify-content:center;gap:1px;width:100%;min-height:36px;background:none;border:0;padding:0;margin:0;text-align:left;color:inherit;cursor:pointer;font:inherit}
 .dtap .head,.dtap .meta{display:grid}
 .dtap .left::after{content:'›';content:'›'/'';display:inline-block;margin-left:6px;color:var(--muted);font-family:var(--f-body);transition:transform .15s}
 .dtap[aria-expanded="true"] .left::after{transform:rotate(90deg)}
-.dperson .debt:has(.dtap){padding-block:7px}
-.dperson .debt .acts>.primary,.dperson .debt .acts>.ghost{font-size:13px;min-height:34px;padding:5px 12px}
+.dperson .debt:has(.dtap){padding:8px 10px}
+.dperson .debt-return>.primary,.dperson .debt-return>.ghost{font-size:13px;min-height:34px;padding:5px 12px}
 .dperson .dacc select{min-height:36px;padding-block:4px}
 .cmp-note{margin:0;font-size:12px;color:var(--muted)}
 .recon{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--warn);border-radius:12px;padding:12px}
@@ -3047,8 +3055,8 @@ function renderDebts(){
       ${fold?`<button type="button" class="dtap" data-di="${esc(d.id)}" aria-expanded="${!shut}">${top}</button>`:top}
       ${shut?'':state.editing==='de-'+d.id?debtEditForm(d):`<div class="acts">${isOpen?(state.editing==='d-'+d.id
         ?`<form class="inline-edit" data-part="${esc(d.id)}">${accSel('data-racc',d.id,retAccOf(d),'Куда вернули')}<input class="num" inputmode="decimal" placeholder="Сумма, ₽" aria-label="Сколько вернули"><button class="primary" type="submit">Записать</button><button class="linkbtn" type="button" data-cancel>Отмена</button></form>`
-        :`${own}<button class="linkbtn" data-forgive="${esc(d.id)}">Простить → садака</button><button class="linkbtn" data-doubt="${esc(d.id)}">${d.doubtful?'Снять «сомнительный»':'Сомнительный'}</button>`):(+d.forgiven>0?`<span class="meta">Прощено ${money(+d.forgiven)} — записано в садаку</span>`:'')}
-        <button class="linkbtn" data-dedit="${esc(d.id)}">Изменить</button><button class="del" data-id="${esc(d.id)}" aria-label="Удалить запись о долге">Удалить</button></div>`}
+        :own?`<div class="debt-return">${own}</div>`:''):(+d.forgiven>0?`<span class="meta">Прощено ${money(+d.forgiven)} — записано в садаку</span>`:'')}
+        <div class="debt-manage"><span class="debt-actions-label">${isOpen?'Другие действия':'Управление записью'}</span>${isOpen&&state.editing!=='d-'?`<button class="linkbtn" data-forgive="${esc(d.id)}">Простить → садака</button><button class="linkbtn" data-doubt="${esc(d.id)}">${d.doubtful?'Снять «сомнительный»':'Сомнительный'}</button>`:''}<button class="linkbtn" data-dedit="${esc(d.id)}">Изменить</button><button class="del" data-id="${esc(d.id)}" aria-label="Удалить запись о долге">Удалить</button></div></div>`}
     </div>`;
   };
   const list=$('debtList');
@@ -3068,9 +3076,9 @@ function renderDebts(){
     return `<div class="wmodal" role="dialog" aria-modal="true" aria-labelledby="dpT"><div class="sheet-bg" data-dpclose></div><div class="dg dperson">
       <div class="dp-head"><div class="dp-t"><b id="dpT" tabindex="-1">${nm}</b><small>${gSub(g)}</small></div><button type="button" class="dp-x" data-dpclose aria-label="Закрыть">×</button></div>
       <div class="dp-sum"><span>Должен</span><b>${moneyR(sumL)}</b></div>
-      <div class="acts">${state.editing==='g-'+g.k?`<form class="inline-edit" data-gpart="${k}">${sel}<input class="num" inputmode="decimal" placeholder="Сумма, ₽" aria-label="Сколько вернул ${nm}"><button class="primary" type="submit">Записать</button><button class="linkbtn" type="button" data-gcancel>Отмена</button></form>`
-        :`${sel}<button class="primary" data-gfull="${k}" aria-label="${nm} вернул всё: ${moneyR(sumL)}">Вернул всё</button><button class="ghost" data-gpartbtn="${k}" aria-label="${nm} вернул часть">Вернул часть</button>`}</div>
-      <div class="dinner">${g.list.map(d=>one(d,true,true,n===1)).join('')}</div></div></div>`};
+      <div class="dp-repay"><div class="dp-section-title">Общий возврат</div><div class="acts">${state.editing==='g-'+g.k?`<form class="inline-edit" data-gpart="${k}">${sel}<input class="num" inputmode="decimal" placeholder="Сумма, ₽" aria-label="Сколько вернул ${nm}"><button class="primary" type="submit">Записать</button><button class="linkbtn" type="button" data-gcancel>Отмена</button></form>`
+        :`${sel}<button class="primary" data-gfull="${k}" aria-label="${nm} вернул всё: ${moneyR(sumL)}">Вернул всё</button><button class="ghost" data-gpartbtn="${k}" aria-label="${nm} вернул часть">Вернул часть</button>`}</div></div>
+      <div class="dinner"><div class="dinner-head">Отдельные долги</div>${g.list.map(d=>one(d,true,true,n===1)).join('')}</div></div></div>`};
   /* the window goes by itself when the person has nothing left to return */
   /* «Закрытые» the same way: one line per person (how many loans, how much came back); tap — a window with each of them */
   const cgroups=[];closed.forEach(d=>{const k=nk(d.name), c=+d.created||0;let g=cgroups.find(x=>x.k===k);if(!g){g={k,name:d.name.trim(),c,list:[]};cgroups.push(g)}else if(c>=g.c){g.name=d.name.trim();g.c=c}g.list.push(d)});
@@ -3079,7 +3087,7 @@ function renderDebts(){
   const cModal=g=>`<div class="wmodal" role="dialog" aria-modal="true" aria-labelledby="dpT"><div class="sheet-bg" data-dpclose></div><div class="dg dperson">
       <div class="dp-head"><div class="dp-t"><b id="dpT" tabindex="-1">${esc(gName(g))}</b><small>${cSub(g)} · закрыты</small></div><button type="button" class="dp-x" data-dpclose aria-label="Закрыть">×</button></div>
       <div class="dp-sum"><span>Вернул всего</span><b>${moneyR(cBack(g))}</b></div>
-      <div class="dinner">${g.list.map(d=>one(d,false,true,false)).join('')}</div></div></div>`;
+      <div class="dinner"><div class="dinner-head">Закрытые долги</div>${g.list.map(d=>one(d,false,true,false)).join('')}</div></div></div>`;
   const cBox=()=>`<details data-cbox="closedOpen"${state.closedOpen?' open':''}><summary>Закрытые (${cgroups.length} ${plural(cgroups.length,'человек','человека','человек')})</summary>${cgroups.map(cgHtml).join('')}</details>`;
   const og=groups.find(g=>g.k===state.openDebt), oc=cgroups.find(g=>'x:'+g.k===state.openDebt);if(!og&&!oc)state.openDebt=null;
   list.innerHTML=(open.length?groups.map(groupHtml).join(''):`<div class="empty"><p>Здесь будут люди, которые должны вам деньги. Нажмите «+ Дал в долг».</p></div>`)
