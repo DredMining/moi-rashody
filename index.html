@@ -161,16 +161,16 @@ button{cursor:pointer}
 .stat b{font-family:var(--f-num);font-weight:500;font-size:17px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .stat small{font-size:12px;color:var(--muted)}
 .stat.wide{grid-column:1/-1}
-.panel.mcard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:5px 4px}
-.mcard .mcol{display:flex;flex-direction:column;gap:2px;min-width:0;padding:0 6px}
+.panel.mcard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:8px 4px;background:radial-gradient(120% 180% at 50% 0%,color-mix(in srgb,var(--accent) 8%,var(--surface)),var(--surface) 74%);border-radius:16px}
+.mcard .mcol{display:flex;flex-direction:column;gap:4px;min-width:0;padding:0 6px}
 .mcard .mcol+.mcol{border-left:1px solid var(--line)}
-.mcard .mdiff{align-items:center;text-align:center}
+.mcard .mdiff{align-items:center;text-align:center;border-radius:10px;background:color-mix(in srgb,var(--accent-soft) 28%,transparent)}
 .mcard .mout{align-items:flex-end;text-align:right}
-.mcard .mcol>span{display:flex;align-items:center;gap:4px;font-size:10.5px;line-height:1.3;color:var(--muted)}
+.mcard .mcol>span{display:flex;align-items:center;gap:4px;font-size:11.5px;line-height:1.2;font-weight:500;color:var(--muted)}
 .mcard .mcol>span::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--good);flex:none}
 .mcard .mdiff>span::before{background:var(--warn)}
 .mcard .mout>span::before{background:var(--bad)}
-.mcard .mcol>b{font-family:var(--f-num);font-weight:500;font-size:min(13px,3.3vw);line-height:1.35;font-variant-numeric:tabular-nums;white-space:nowrap;overflow-wrap:normal}
+.mcard .mcol>b{font-family:var(--f-num);font-weight:500;font-size:min(15px,3.8vw);line-height:1.25;font-variant-numeric:tabular-nums;white-space:nowrap;overflow-wrap:normal}
 /* «Куда ушли деньги» and the incomes: each group (Повседневные, Отдельно, Командировка, Доходы по источникам) is one card under a small
    grey label, 12px from the next group; its categories are rows split by thin lines.
    A row is a 36px button, its line included: the name and the sum (12.5px) on one line, the bar 2px under them. The rows touch,
@@ -265,11 +265,14 @@ button{cursor:pointer}
 .segs.one{grid-template-columns:1fr}
 .form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 .form>*{min-width:0}
+#debtAdd{border-radius:16px;background:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 66%)}
+#debtAdd>summary{padding:12px 14px;color:var(--ink)}
 #debtAdd .morebody{padding:0 12px 12px}
 #debtForm.form{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
 #debtForm .debt-field{display:flex;flex-direction:column;gap:3px;min-width:0;font-size:12px;color:var(--muted)}
 #debtForm .debt-field>span{line-height:1.2}
-#debtForm .debt-field-wide,#debtForm .debt-account,#debtForm .err,#debtForm .submit{grid-column:1/-1}
+#debtForm .debt-field-wide,#debtForm .err,#debtForm .submit{grid-column:1/-1}
+@media (max-width:360px){#debtForm.form{grid-template-columns:minmax(0,1fr)}}
 .form .amount{grid-column:1/-1;position:relative}
 .form .amount input{font-family:var(--f-num);font-size:24px;font-weight:500;padding:12px 44px 12px 14px}
 .form .amount span{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:22px;color:var(--muted)}
@@ -420,9 +423,9 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
    under them «Вне лимита» as a plain row, then the trip money in its own small plate */
 #viewLedger .sumcard{gap:10px;padding:14px}
 .lhead{display:flex;align-items:center;gap:16px}
-.ring{--p:0;--rc:var(--good);flex:none;width:100px;height:100px;border-radius:50%;background:conic-gradient(var(--rc) calc(var(--p) * 1%),var(--line) 0);display:grid;place-items:center}
+.ring{--p:0;--rc:var(--good);flex:none;width:103px;height:103px;border-radius:50%;background:conic-gradient(var(--rc) calc(var(--p) * 1%),var(--line) 0);display:grid;place-items:center}
 .ring.warn{--rc:var(--warn)}.ring.bad{--rc:var(--bad)}
-.ring>div{width:80px;height:80px;border-radius:50%;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+.ring>div{width:83px;height:83px;border-radius:50%;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
 .ring b{font-size:25px;font-weight:700;font-variant-numeric:tabular-nums}
 .ring.warn b{color:var(--warn)}.ring.bad b{color:var(--bad)}
 .lr{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
@@ -435,10 +438,11 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .lrows:empty{display:none}
 .lrows>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-top:10px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
 .lrows b{font-family:var(--f-num);font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}
-#viewLedger .tripline{margin:0;padding:10px 12px;gap:7px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
-.thead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;color:var(--muted)}
-.thead b{color:var(--ink);font-weight:600;font-size:14px}
-.tfoot{display:flex;justify-content:space-between;gap:4px 12px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+#viewLedger .tripline{margin:0;padding:7px 10px;gap:4px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+#viewLedger .tripline .meter{height:4px}
+.thead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;line-height:1.2;color:var(--muted)}
+.thead b{color:var(--ink);font-weight:600;font-size:13px;line-height:1.2}
+.tfoot{display:flex;justify-content:space-between;gap:2px 10px;flex-wrap:wrap;font-size:12px;line-height:1.2;color:var(--muted)}
 .tfoot b{font-family:var(--f-num);font-weight:500;color:var(--ink)}
 .tfoot b.good{color:var(--good-ink)}.tfoot b.neg{color:var(--bad);font-weight:600}
 .tfoot .kop{font-size:.8em;color:var(--muted)}
@@ -1005,8 +1009,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
         <label class="debt-field"><span>Кто взял</span><input id="dName" placeholder="Имя" maxlength="60" aria-label="Имя" autocomplete="off"></label>
         <label class="debt-field"><span>Сумма долга</span><input id="dAmount" class="num" inputmode="decimal" placeholder="Сумма, ₽" aria-label="Сумма долга" autocomplete="off"></label>
         <label class="debt-field"><span>Когда дали</span><input id="dDate" type="date" aria-label="Когда дали"></label>
-        <label class="debt-field debt-field-wide"><span>Комментарий</span><input id="dNote" placeholder="Необязательно" maxlength="80" aria-label="Комментарий"></label>
         <label class="debt-field debt-account"><span>С какого счёта дали</span><select id="dAcc"></select></label>
+        <label class="debt-field debt-field-wide"><span>Комментарий</span><input id="dNote" placeholder="Необязательно" maxlength="80" aria-label="Комментарий"></label>
         <p class="err" role="alert" id="debtErr" hidden></p>
         <button class="submit" type="submit">Записать долг</button>
       </form>
