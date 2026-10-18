@@ -142,6 +142,20 @@ button{cursor:pointer}
 .total .lbl{font-size:13px;color:var(--muted)}
 .total .big{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,9vw,52px);line-height:1.05;letter-spacing:-.01em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .total .sub{font-size:13px;color:var(--muted)}
+/* the outstanding debt is a single glanceable card: total first, then how many people still owe */
+.debt-overview{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;padding:16px;background:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--accent) 18%,var(--surface)),var(--surface) 66%);border:1px solid var(--line);border-radius:18px}
+.debt-overview::after{content:'';position:absolute;z-index:0;right:-48px;top:40px;width:148px;height:148px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 12%,transparent),transparent 72%);pointer-events:none}
+.debt-overview>*{position:relative;z-index:1}
+.debt-overview-head{display:flex;align-items:center;gap:10px;min-width:0}
+.debt-overview-icon{width:42px;height:42px;flex:none;display:grid;place-items:center;border-radius:13px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));color:var(--accent)}
+.debt-overview-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.debt-overview-head .lbl{font-size:14px;font-weight:600;color:var(--ink)}
+.debt-overview-tag{margin-left:auto;flex:none;padding:5px 9px;border:1px solid var(--line);border-radius:99px;background:var(--bg);color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.debt-overview .big{font-size:clamp(28px,8.5vw,40px);line-height:1.08;letter-spacing:-.035em}
+.debt-overview-meta{display:flex;align-items:center;gap:9px;min-width:0;padding-top:12px;border-top:1px solid var(--line)}
+.debt-overview-people{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:10px;background:var(--bg);color:var(--accent)}
+.debt-overview-people svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.debt-overview .sub{min-width:0;font-size:13px;font-weight:500;line-height:1.35;overflow-wrap:anywhere}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
 .stat>span{font-size:12px;color:var(--muted)}
@@ -969,10 +983,17 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   </div>
 
   <div id="viewDebts" role="tabpanel" aria-labelledby="tabDebts" hidden style="flex-direction:column;gap:16px">
-    <section class="total" aria-label="Итого долгов">
-      <span class="lbl">Мне должны</span>
+    <section class="total debt-overview" aria-label="Итого долгов">
+      <div class="debt-overview-head">
+        <span class="debt-overview-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 7.5h3.8a2.1 2.1 0 1 1 0 4.2H9m2.2-4.2 2.7 8.8M9 10h6"/></svg></span>
+        <span class="lbl">Мне должны</span>
+        <span class="debt-overview-tag">Остаток</span>
+      </div>
       <span class="big" id="debtTotal">0 ₽</span>
-      <span class="sub" id="debtSub">&nbsp;</span>
+      <div class="debt-overview-meta">
+        <span class="debt-overview-people" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19v-1.5A4.5 4.5 0 0 1 8 13h2a4.5 4.5 0 0 1 4.5 4.5V19M16 5.5a3 3 0 0 1 0 5.8M17 13h.5a3.5 3.5 0 0 1 3.5 3.5V19"/></svg></span>
+        <span class="sub" id="debtSub">&nbsp;</span>
+      </div>
     </section>
     <details class="more" id="debtAdd">
       <summary>+ Дал в долг</summary>
