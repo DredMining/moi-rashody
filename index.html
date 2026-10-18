@@ -436,9 +436,9 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 #limitLeft{display:block;min-width:0;font-weight:500;text-align:right}
 .lof .good{color:var(--good-ink)}.lof .warn{color:var(--warn)}.lof .bad{color:var(--bad)}
 .lrows:empty{display:none}
-.lrows>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:7px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:12px;line-height:1.2;color:var(--muted)}
+.lrows>div{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:3px 0 0;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent;font-size:11px;line-height:1.2;color:var(--muted)}
 .lrows b{font-family:var(--f-num);font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}
-#viewLedger .lrows b{font-size:13px}
+#viewLedger .lrows b{font-size:12px}
 #viewLedger .tripline{margin:0;padding:7px 10px;gap:4px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
 #viewLedger .tripline .meter{height:4px}
 .thead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;line-height:1.2;color:var(--muted)}
@@ -907,9 +907,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     <div class="lhead">
       <div class="ring" id="limitMeter" role="progressbar" aria-label="Лимит на месяц" aria-valuemin="0" aria-valuemax="100"><div><b id="limitPct">—</b></div></div>
       <div class="lr"><span id="sumLabel">Траты в лимит за месяц</span><span class="big" id="total">0 ₽</span>
-        <span class="lof"><button type="button" class="linkbtn" id="limitOf" aria-haspopup="dialog"></button><span id="limitLeft"></span></span></div>
+        <span class="lof"><button type="button" class="linkbtn" id="limitOf" aria-haspopup="dialog"></button><span id="limitLeft"></span></span>
+        <div class="lrows" id="limitLine"></div></div>
     </div>
-    <div class="lrows" id="limitLine"></div>
     <div class="tripline" id="tripLine" hidden>
       <div class="thead"><b>🧳 Командировочные</b><span id="tripOf"></span></div>
       <div class="meter trip" id="tripMeter" role="progressbar" aria-label="Командировочные" aria-valuemin="0" aria-valuemax="100"><i></i></div>
