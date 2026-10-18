@@ -101,7 +101,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* the iPhone status bar (black-translucent) writes in white: in the light theme the strip under it stays dark */
 .app{height:100vh;height:100dvh;height:var(--app-h,100dvh);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);background:linear-gradient(var(--sbar),var(--sbar)) top/100% env(safe-area-inset-top,0px) no-repeat var(--bg)}
 /* nothing ever scrolls sideways: a long word or sum wraps or shrinks (this only hides what slips through) */
-.scroller{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
+.scroller{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:none;-ms-overflow-style:none}
+.scroller::-webkit-scrollbar{display:none}
 /* read by a screen reader, not shown */
 .sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 [tabindex="-1"]:focus{outline:none}
@@ -736,7 +737,7 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .dp-section-title,.dinner-head{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .dp-repay .acts{gap:6px 8px;margin:0}
 .dperson .dp-repay .acts>.dacc{flex:1 1 100%}
-.dperson .dp-repay .acts>button{font-size:12px;min-height:34px;padding:4px 12px}
+.dperson .dp-repay .acts>button{font-size:11px;min-height:30px;padding:3px 10px}
 .dinner{display:flex;flex-direction:column;gap:8px;padding:0;border-top:0}
 .dinner-head{padding:8px 2px 0;border-top:1px solid var(--line)}
 .dinner>.debt:last-child{border-bottom:1px solid var(--line);padding-bottom:8px}
@@ -3060,10 +3061,10 @@ function renderDebts(){
       ${meta?`<span class="meta">${meta}</span>`:''}`;
     return `<div class="debt ${isOpen?'':'closed'}">
       ${fold?`<button type="button" class="dtap" data-di="${esc(d.id)}" aria-expanded="${!shut}">${top}</button>`:top}
-      ${shut?'':state.editing==='de-'+d.id?debtEditForm(d):`<div class="acts">${isOpen?(state.editing==='d-'+d.id
+      ${shut?'':state.editing==='de-'+d.id?'':`<div class="acts">${isOpen?(state.editing==='d-'+d.id
         ?`<form class="inline-edit" data-part="${esc(d.id)}">${accSel('data-racc',d.id,retAccOf(d),'Куда вернули')}<input class="num" inputmode="decimal" placeholder="Сумма, ₽" aria-label="Сколько вернули"><button class="primary" type="submit">Записать</button><button class="linkbtn" type="button" data-cancel>Отмена</button></form>`
         :own?`<div class="debt-return">${own}</div>`:''):(+d.forgiven>0?`<span class="meta">Прощено ${money(+d.forgiven)} — записано в садаку</span>`:'')}
-        <div class="debt-manage"><span class="debt-actions-label">${isOpen?'Другие действия':'Управление записью'}</span>${isOpen&&state.editing!=='d-'?`<button class="linkbtn" data-forgive="${esc(d.id)}">Простить → садака</button><button class="linkbtn" data-doubt="${esc(d.id)}">${d.doubtful?'Снять «сомнительный»':'Сомнительный'}</button>`:''}<button class="linkbtn" data-dedit="${esc(d.id)}">Изменить</button><button class="del" data-id="${esc(d.id)}" aria-label="Удалить запись о долге">Удалить</button></div></div>`}
+        <div class="debt-manage"><span class="debt-actions-label">${isOpen?'Другие действия':'Управление записью'}</span>${isOpen&&state.editing!=='d-'?`<button class="linkbtn" data-forgive="${esc(d.id)}">Простить → садака</button><button class="linkbtn" data-doubt="${esc(d.id)}">${d.doubtful?'Снять «сомнительный»':'Сомнительный'}</button>`:''}<button class="linkbtn" data-dedit="${esc(d.id)}" aria-haspopup="dialog">Изменить</button><button class="del" data-id="${esc(d.id)}" aria-label="Удалить запись о долге">Удалить</button></div></div>`}
     </div>`;
   };
   const list=$('debtList');
@@ -3097,8 +3098,9 @@ function renderDebts(){
       <div class="dinner"><div class="dinner-head">Закрытые долги</div>${g.list.map(d=>one(d,false,true,false)).join('')}</div></div></div>`;
   const cBox=()=>`<details data-cbox="closedOpen"${state.closedOpen?' open':''}><summary>Закрытые (${cgroups.length} ${plural(cgroups.length,'человек','человека','человек')})</summary>${cgroups.map(cgHtml).join('')}</details>`;
   const og=groups.find(g=>g.k===state.openDebt), oc=cgroups.find(g=>'x:'+g.k===state.openDebt);if(!og&&!oc)state.openDebt=null;
+  const editD=state.editing?.startsWith('de-')?state.debts.find(d=>'de-'+d.id===state.editing):null;
   list.innerHTML=(open.length?groups.map(groupHtml).join(''):`<div class="empty"><p>Здесь будут люди, которые должны вам деньги. Нажмите «+ Дал в долг».</p></div>`)
-    +(closed.length?cBox():'')+(og?gModal(og):oc?cModal(oc):'');
+    +(closed.length?cBox():'')+(editD&&!editD.mine?debtEditModal(editD):og?gModal(og):oc?cModal(oc):'');
   bindClosedBox(list);
   const dpClose=()=>{fresh();state.openDebt=null;state.openDebtItem=null;state.editing=null;render()};
   list.querySelectorAll('[data-dpclose]').forEach(b=>b.onclick=dpClose);
@@ -3191,11 +3193,12 @@ function renderOwe(){
     const meta=[when,ret>0&&isOpen?`отдано ${moneyR(ret)} из ${moneyR(+d.amount||0)}`:'',d.note?esc(d.note):''].filter(Boolean).join(' · ');
     return `<div class="debt ${isOpen?'':'closed'}"><div class="head"><b>${esc(d.name)}</b><span class="left">${isOpen?moneyR(left):(+d.forgiven>0?'прощён':'отдан')}</span></div>
       ${meta?`<div class="meta">${meta}</div>`:''}
-      ${state.editing==='de-'+d.id?debtEditForm(d):`<div class="acts">${isOpen?(state.editing==='o-'+d.id
+      ${state.editing==='de-'+d.id?'':`<div class="acts">${isOpen?(state.editing==='o-'+d.id
         ?`<form class="inline-edit" data-opart="${esc(d.id)}">${accSel('data-oacc',d.id,payAccOf(d),'С какого счёта')}<input class="num" inputmode="decimal" placeholder="Сумма, ₽" aria-label="Сколько отдано"><button class="primary" type="submit">Записать</button><button class="linkbtn" type="button" data-ocancel>Отмена</button></form>`
         :`${accSel('data-oacc',d.id,payAccOf(d),'С какого счёта')}<button class="primary" data-ofull="${esc(d.id)}">Отдал всё</button><button class="ghost" data-opartbtn="${esc(d.id)}">Отдал часть</button><button class="linkbtn" data-oforgive="${esc(d.id)}">Мне простили</button>`):''}
-        <button class="linkbtn" data-dedit="${esc(d.id)}">Изменить</button><button class="del" data-id="${esc(d.id)}" aria-label="Удалить запись о долге">Удалить</button></div>`}</div>`};
-  list.innerHTML=open.map(d=>one(d,true)).join('')+(closed.length?closedBox('oweClosedOpen',closed,one):'');
+        <button class="linkbtn" data-dedit="${esc(d.id)}" aria-haspopup="dialog">Изменить</button><button class="del" data-id="${esc(d.id)}" aria-label="Удалить запись о долге">Удалить</button></div>`}</div>`};
+  const editD=mine.find(d=>state.editing==='de-'+d.id);
+  list.innerHTML=open.map(d=>one(d,true)).join('')+(closed.length?closedBox('oweClosedOpen',closed,one):'')+(editD?debtEditModal(editD):'');
   bindClosedBox(list);
   const payRec=(d,v)=>({type:'debt',dir:'pay',amount:Math.round(v*100)/100,acc:payAccOf(d),date:iso(now),label:'Отдал долг: '+d.name,debt:d.id,created:Date.now()});
   list.querySelectorAll('[data-oacc]').forEach(sel=>sel.onchange=()=>state.payAcc[sel.dataset.oacc]=sel.value);
@@ -3231,8 +3234,18 @@ function debtEditForm(d){
     <p class="err full" role="alert" hidden></p>
     <div class="row full"><button class="primary" type="submit">Сохранить</button><button class="linkbtn" type="button" data-decancel>Отмена</button></div></form>`;
 }
+function debtEditModal(d){
+  return `<div class="wmodal" data-debt-editor role="dialog" aria-modal="true" aria-labelledby="debtEditTitle">
+    <div class="sheet-bg" data-debteditclose></div>
+    <section class="debt-add-modal">
+      <div class="debt-add-head"><div><b id="debtEditTitle" tabindex="-1">Изменить долг</b><span>${esc(d.name)}</span></div><button type="button" class="dp-x" data-debteditclose aria-label="Закрыть">×</button></div>
+      ${debtEditForm(d)}
+    </section>
+  </div>`;
+}
 function bindDebtEdit(list){
-  list.querySelectorAll('[data-dedit]').forEach(b=>b.onclick=()=>{fresh();state.editing='de-'+b.dataset.dedit;render();const x=list.querySelector('form[data-deform] input[name=amount]');x?.focus({preventScroll:true});inView(x?.closest('.debt'))});
+  list.querySelectorAll('[data-debteditclose]').forEach(b=>b.onclick=()=>{fresh();state.editing=null;render()});
+  list.querySelectorAll('[data-dedit]').forEach(b=>b.onclick=()=>{fresh();state.editing='de-'+b.dataset.dedit;render();const f=list.querySelector('form[data-deform]'),x=f?.elements.amount;x?.focus({preventScroll:true});inView(f?.closest('.debt-add-modal'))});
   list.querySelectorAll('form[data-deform]').forEach(f=>{
     /* the form goes and the debt's «Вернули всё» / «Отдал всё» comes up under the finger (fresh) */
     f.querySelector('[data-decancel]').onclick=()=>{fresh();state.editing=null;render()};
@@ -3396,9 +3409,9 @@ setInterval(refreshToday,60000);
 let dlgStack=[], dlgInert=[], lastTap=null;
 document.addEventListener('click',e=>{const b=e.target.closest?.('button,[role="button"],summary');if(b)lastTap={el:b,t:performance.now()}},true);
 function dlgOpen(){
-  const bk=$('bkModal'), da=$('debtAddModal'), xm=document.querySelector('#moneyActs .wmodal');
-  const w=document.querySelector('#wallets .wmodal'), zf=document.querySelector('#zakatForm .wmodal'), dp=document.querySelector('#debtList .wmodal'), tw=document.querySelector('#tripStat .wmodal');
-  return [w&&{k:state.recon?'recon':'w',el:w},dp&&dp.getClientRects().length&&{k:'debt:'+state.openDebt,el:dp},tw&&tw.getClientRects().length&&{k:'trip:'+state.editing,el:tw},!$('zakatSheet').hidden&&{k:'zakat',el:$('zakatSheet')},zf&&{k:'zform',el:zf},!$('sheet').hidden&&{k:'sheet',el:$('sheet')},!da.hidden&&{k:'debtAdd',el:da},!bk.hidden&&{k:'bk',el:bk},xm&&{k:'xfer',el:xm}].filter(Boolean);
+  const bk=$('bkModal'), da=$('debtAddModal'), de=document.querySelector('.wmodal[data-debt-editor]'), xm=document.querySelector('#moneyActs .wmodal');
+  const w=document.querySelector('#wallets .wmodal'), zf=document.querySelector('#zakatForm .wmodal'), dp=document.querySelector('#debtList .wmodal:not([data-debt-editor])'), tw=document.querySelector('#tripStat .wmodal');
+  return [w&&{k:state.recon?'recon':'w',el:w},dp&&dp.getClientRects().length&&{k:'debt:'+state.openDebt,el:dp},de&&{k:'debtEdit',el:de},tw&&tw.getClientRects().length&&{k:'trip:'+state.editing,el:tw},!$('zakatSheet').hidden&&{k:'zakat',el:$('zakatSheet')},zf&&{k:'zform',el:zf},!$('sheet').hidden&&{k:'sheet',el:$('sheet')},!da.hidden&&{k:'debtAdd',el:da},!bk.hidden&&{k:'bk',el:bk},xm&&{k:'xfer',el:xm}].filter(Boolean);
 }
 /* the same button drawn again (the page redraws its lists): found by its id or its data-… */
 const refind=o=>{if(!o||o.isConnected)return o;if(o.id)return $(o.id);const a=[...o.attributes].find(x=>x.name.startsWith('data-'));
