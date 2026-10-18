@@ -150,7 +150,6 @@ button{cursor:pointer}
 .debt-overview-icon{width:36px;height:36px;flex:none;display:grid;place-items:center;border-radius:11px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));color:var(--accent)}
 .debt-overview-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .debt-overview-head .lbl{font-size:14px;font-weight:600;color:var(--ink)}
-.debt-overview-tag{margin-left:auto;flex:none;padding:4px 8px;border:1px solid var(--line);border-radius:99px;background:var(--bg);color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
 .debt-overview .big{font-size:clamp(26px,7.6vw,36px);line-height:1.04;letter-spacing:-.035em}
 .debt-overview-meta{display:flex;align-items:center;gap:8px;min-width:0;padding-top:8px;border-top:1px solid var(--line)}
 .debt-overview-people{width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:9px;background:var(--bg);color:var(--accent)}
@@ -266,6 +265,11 @@ button{cursor:pointer}
 .segs.one{grid-template-columns:1fr}
 .form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 .form>*{min-width:0}
+#debtAdd .morebody{padding:0 12px 12px}
+#debtForm.form{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+#debtForm .debt-field{display:flex;flex-direction:column;gap:3px;min-width:0;font-size:12px;color:var(--muted)}
+#debtForm .debt-field>span{line-height:1.2}
+#debtForm .debt-field-wide,#debtForm .debt-account,#debtForm .err,#debtForm .submit{grid-column:1/-1}
 .form .amount{grid-column:1/-1;position:relative}
 .form .amount input{font-family:var(--f-num);font-size:24px;font-weight:500;padding:12px 44px 12px 14px}
 .form .amount span{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:22px;color:var(--muted)}
@@ -985,9 +989,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   <div id="viewDebts" role="tabpanel" aria-labelledby="tabDebts" hidden style="flex-direction:column;gap:16px">
     <section class="total debt-overview" aria-label="Итого долгов">
       <div class="debt-overview-head">
-        <span class="debt-overview-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 7.5h3.8a2.1 2.1 0 1 1 0 4.2H9m2.2-4.2 2.7 8.8M9 10h6"/></svg></span>
+        <span class="debt-overview-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 8.5V6a2.5 2.5 0 0 1 2.5-2.5H17"/><path d="M3 8.5h17.5A1.5 1.5 0 0 1 22 10v7a2 2 0 0 1-2 2H5a3 3 0 0 1-3-3V9.5a1 1 0 0 1 1-1Z"/><path d="M15 13.5h3M12 3.5v5m0 0-1.8-1.8M12 8.5l1.8-1.8"/></svg></span>
         <span class="lbl">Мне должны</span>
-        <span class="debt-overview-tag">Остаток</span>
       </div>
       <span class="big" id="debtTotal">0 ₽</span>
       <div class="debt-overview-meta">
@@ -999,11 +1002,11 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
       <summary>+ Дал в долг</summary>
       <div class="morebody">
       <form class="form" id="debtForm" novalidate>
-        <input id="dName" placeholder="Имя" maxlength="60" aria-label="Имя" autocomplete="off">
-        <input id="dAmount" class="num" inputmode="decimal" placeholder="Сумма, ₽" aria-label="Сумма долга" autocomplete="off">
-        <input id="dDate" type="date" aria-label="Когда дали">
-        <input id="dNote" placeholder="Комментарий (необязательно)" maxlength="80" aria-label="Комментарий">
-        <label class="full" style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);grid-column:1/-1">С какого счёта дали<select id="dAcc"></select></label>
+        <label class="debt-field"><span>Кто взял</span><input id="dName" placeholder="Имя" maxlength="60" aria-label="Имя" autocomplete="off"></label>
+        <label class="debt-field"><span>Сумма долга</span><input id="dAmount" class="num" inputmode="decimal" placeholder="Сумма, ₽" aria-label="Сумма долга" autocomplete="off"></label>
+        <label class="debt-field"><span>Когда дали</span><input id="dDate" type="date" aria-label="Когда дали"></label>
+        <label class="debt-field debt-field-wide"><span>Комментарий</span><input id="dNote" placeholder="Необязательно" maxlength="80" aria-label="Комментарий"></label>
+        <label class="debt-field debt-account"><span>С какого счёта дали</span><select id="dAcc"></select></label>
         <p class="err" role="alert" id="debtErr" hidden></p>
         <button class="submit" type="submit">Записать долг</button>
       </form>
