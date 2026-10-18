@@ -143,19 +143,19 @@ button{cursor:pointer}
 .total .big{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,9vw,52px);line-height:1.05;letter-spacing:-.01em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .total .sub{font-size:13px;color:var(--muted)}
 /* the outstanding debt is a single glanceable card: total first, then how many people still owe */
-.debt-overview{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;padding:16px;background:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--accent) 18%,var(--surface)),var(--surface) 66%);border:1px solid var(--line);border-radius:18px}
-.debt-overview::after{content:'';position:absolute;z-index:0;right:-48px;top:40px;width:148px;height:148px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 12%,transparent),transparent 72%);pointer-events:none}
+.debt-overview{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:8px;padding:12px;background:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--accent) 18%,var(--surface)),var(--surface) 66%);border:1px solid var(--line);border-radius:16px}
+.debt-overview::after{content:'';position:absolute;z-index:0;right:-38px;top:22px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 12%,transparent),transparent 72%);pointer-events:none}
 .debt-overview>*{position:relative;z-index:1}
-.debt-overview-head{display:flex;align-items:center;gap:10px;min-width:0}
-.debt-overview-icon{width:42px;height:42px;flex:none;display:grid;place-items:center;border-radius:13px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));color:var(--accent)}
+.debt-overview-head{display:flex;align-items:center;gap:8px;min-width:0}
+.debt-overview-icon{width:36px;height:36px;flex:none;display:grid;place-items:center;border-radius:11px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));color:var(--accent)}
 .debt-overview-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .debt-overview-head .lbl{font-size:14px;font-weight:600;color:var(--ink)}
-.debt-overview-tag{margin-left:auto;flex:none;padding:5px 9px;border:1px solid var(--line);border-radius:99px;background:var(--bg);color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
-.debt-overview .big{font-size:clamp(28px,8.5vw,40px);line-height:1.08;letter-spacing:-.035em}
-.debt-overview-meta{display:flex;align-items:center;gap:9px;min-width:0;padding-top:12px;border-top:1px solid var(--line)}
-.debt-overview-people{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:10px;background:var(--bg);color:var(--accent)}
-.debt-overview-people svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.debt-overview .sub{min-width:0;font-size:13px;font-weight:500;line-height:1.35;overflow-wrap:anywhere}
+.debt-overview-tag{margin-left:auto;flex:none;padding:4px 8px;border:1px solid var(--line);border-radius:99px;background:var(--bg);color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.debt-overview .big{font-size:clamp(26px,7.6vw,36px);line-height:1.04;letter-spacing:-.035em}
+.debt-overview-meta{display:flex;align-items:center;gap:8px;min-width:0;padding-top:8px;border-top:1px solid var(--line)}
+.debt-overview-people{width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:9px;background:var(--bg);color:var(--accent)}
+.debt-overview-people svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.debt-overview .sub{min-width:0;font-size:12px;font-weight:500;line-height:1.3;overflow-wrap:anywhere}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
 .stat>span{font-size:12px;color:var(--muted)}
