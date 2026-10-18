@@ -422,22 +422,23 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 /* the month card: a ring of how much of the limit is spent, beside it the sum, «из 35 000 · осталось …»;
    under them «Вне лимита» as a plain row, then the trip money in its own small plate */
 #viewLedger .sumcard{gap:10px;padding:14px}
-.lhead{display:flex;align-items:center;gap:16px}
+.lhead{display:flex;align-items:center;gap:14px}
 .ring{--p:0;--rc:var(--good);flex:none;width:103px;height:103px;border-radius:50%;background:conic-gradient(var(--rc) calc(var(--p) * 1%),var(--line) 0);display:grid;place-items:center}
 .ring.warn{--rc:var(--warn)}.ring.bad{--rc:var(--bad)}
 .ring>div{width:83px;height:83px;border-radius:50%;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
 .ring b{font-size:25px;font-weight:700;font-variant-numeric:tabular-nums}
 .ring.warn b{color:var(--warn)}.ring.bad b{color:var(--bad)}
-.lr{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
-.lr #sumLabel{font-size:13px;color:var(--muted)}
+.lr{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.lr #sumLabel{font-size:12px;font-weight:500;line-height:1.2;color:var(--muted)}
 #viewLedger .lr #total{font-family:var(--f-body);font-weight:700;letter-spacing:-.01em;font-size:clamp(24px,8vw,32px);line-height:1.1}
-.lof{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
-#viewLedger .lof .linkbtn{font-size:14px;padding:0;margin:0;min-height:0;color:var(--muted);text-decoration:underline dotted;text-underline-offset:3px}
-#limitLeft{display:block;font-weight:500}
+.lof{display:flex;align-items:center;justify-content:space-between;gap:4px 8px;flex-wrap:wrap;font-size:12px;line-height:1.25;color:var(--muted);overflow-wrap:anywhere}
+#viewLedger .lof .linkbtn{font-size:12px;padding:0;margin:0;min-height:0;color:var(--muted);text-decoration:underline dotted;text-underline-offset:3px;white-space:nowrap}
+#limitLeft{display:block;min-width:0;font-weight:500;text-align:right}
 .lof .good{color:var(--good-ink)}.lof .warn{color:var(--warn)}.lof .bad{color:var(--bad)}
 .lrows:empty{display:none}
-.lrows>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-top:10px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+.lrows>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:7px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:12px;line-height:1.2;color:var(--muted)}
 .lrows b{font-family:var(--f-num);font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}
+#viewLedger .lrows b{font-size:13px}
 #viewLedger .tripline{margin:0;padding:7px 10px;gap:4px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
 #viewLedger .tripline .meter{height:4px}
 .thead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;line-height:1.2;color:var(--muted)}
