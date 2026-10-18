@@ -343,6 +343,10 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .recs .item>.ic{width:24px;height:24px;font-size:12px}
 .recs .item .what>span{font-size:11px}
 .recs .item .amt{min-height:36px;margin-block:-4px}
+#recent .item{font-size:13px;gap:8px;padding-block:3px}
+#recent .item>.ic{width:24px;height:24px;font-size:12px}
+#recent .item .what>span{font-size:11px}
+#recent .item .amt{min-height:36px;margin-block:-4px}
 .recs .day{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:2px 14px 0}
 .recs .dayhead{align-items:center;font-size:13px;font-weight:600;color:var(--ink);padding-block:6px 4px}
 /* the day is a heading (h3) for a screen reader; it looks like the rest of its line */
@@ -2849,9 +2853,9 @@ const delAsk=id=>{const it=state.items.find(i=>i.id===id), d=it&&recDebt(it);if(
   return tc?`${on}Командировка уже закончилась — её итог станет ${closeTxt(closeAfter(tc,-tripVal(it)))}. Удалить?`
     :tp?on+(catOf(it.cat).id==='trip_left'?`Командировка снова пойдёт: ${money(+it.amount||0)} вернутся в командировочные. Удалить?`:`Командировка снова пойдёт, с перерасходом ${money(+it.amount||0)}. Удалить?`):on||dq?on+dq+'Удалить?':''};
 const byNewest=(a,b)=>b.date.localeCompare(a.date)||(b.created||0)-(a.created||0);
-/* last three records under the entry form, to check and undo right away */
+/* last five records under the entry form, to check and undo right away */
 function renderRecent(){
-  const box=$('recent'), last=state.items.filter(i=>!zeroEnd(i)).sort((a,b)=>(b.created||0)-(a.created||0)).slice(0,3);
+  const box=$('recent'), last=state.items.filter(i=>!zeroEnd(i)).sort((a,b)=>(b.created||0)-(a.created||0)).slice(0,5);
   if(!state.ready){box.innerHTML='<div class="empty"><p>Загружаю записи…</p></div>';return}
   if(!last.length){
     box.innerHTML=`<div class="empty"><p>Здесь появятся ваши последние записи. Введите сумму, нажмите «Добавить расход», выберите категорию и счёт.</p></div>`;
