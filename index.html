@@ -443,7 +443,7 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 #viewLedger .tripline{gap:5px;padding-top:6px}
 /* the month card: a ring of how much of the limit is spent, beside it the sum, «из 35 000 · осталось …»;
    under them «Вне лимита» as a plain row, then the trip money in its own small plate */
-#viewLedger .sumcard{gap:10px;padding:14px}
+#viewLedger .sumcard{gap:10px;padding:14px;background:radial-gradient(120% 140% at 50% 0%,color-mix(in srgb,var(--accent) 24%,var(--surface)),var(--surface) 70%)}
 .lhead{display:flex;align-items:center;gap:14px}
 .ring{--p:0;--rc:var(--good);flex:none;width:103px;height:103px;border-radius:50%;background:conic-gradient(var(--rc) calc(var(--p) * 1%),var(--line) 0);display:grid;place-items:center}
 .ring.warn{--rc:var(--warn)}.ring.bad{--rc:var(--bad)}
