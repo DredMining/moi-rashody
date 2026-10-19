@@ -784,8 +784,19 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .dperson .debt-manage{padding-top:6px;border-top:1px dashed var(--line)}
 .dperson .debt-actions-label{flex:1 1 100%;font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .dperson .debt-manage>.linkbtn,.dperson .debt-manage>.del{min-height:32px;padding:6px 0;margin:0;font-size:12px}
-.dperson{padding:10px 14px 14px}
-.dperson.dg{gap:8px}
+.dperson{padding:8px 10px 10px}
+.dperson.dg{gap:6px}
+.dperson .dp-head{grid-template-columns:minmax(0,1fr) 40px;gap:6px}
+.dperson .dp-x{width:40px;height:40px}
+.dperson .dp-sum{padding:5px 8px}
+.dperson .dp-sum b{font-size:16px}
+.dperson .dp-repay{gap:3px;padding:6px}
+.dperson .dp-repay .acts>.dacc{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px}
+.dperson .dp-repay .acts>button{font-size:10px;min-height:26px;padding:1px 6px}
+.dperson .dp-repay .acts>.dacc select{min-height:32px;padding:2px 8px;font-size:16px}
+.dperson .dinner{gap:5px}
+.dperson .dinner-head{padding-top:5px}
+.dperson .dinner>.debt:last-child{padding-bottom:6px}
 .dperson .debt .head b,.dperson .debt .head .left{font-size:14px}
 .dperson .debt .meta{font-size:12px}
 .dperson .debt .acts>.linkbtn,.dperson .debt .acts>.del{font-size:12px}
@@ -795,7 +806,7 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .dtap .head,.dtap .meta{display:grid}
 .dtap .left::after{content:'›';content:'›'/'';display:inline-block;margin-left:6px;color:var(--muted);font-family:var(--f-body);transition:transform .15s}
 .dtap[aria-expanded="true"] .left::after{transform:rotate(90deg)}
-.dperson .debt:has(.dtap){padding:8px 10px}
+.dperson .debt:has(.dtap){gap:3px;padding:5px 8px}
 .dperson .debt-return>.primary,.dperson .debt-return>.ghost{font-size:13px;min-height:34px;padding:5px 12px}
 .dperson .dacc select{min-height:36px;padding-block:4px}
 .cmp-note{margin:0;font-size:12px;color:var(--muted)}
@@ -877,6 +888,8 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:500
 #tripLeftLine b.neg{font-weight:600}
 #tripLeftLine b.none{font-family:var(--f-body);font-size:13px;color:var(--muted)}
 .sheet{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet.centered{align-items:center;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
+.sheet.centered .sheet-panel{width:min(520px,100%);max-height:calc(100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px);max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px);border-bottom:1px solid var(--line);border-radius:20px}
 .sheet-bg{position:absolute;inset:0;background:rgb(0 0 0 / .55)}
 .sheet-panel{position:relative;width:min(720px,100%);max-height:85vh;overflow-y:auto;overscroll-behavior:contain;background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;padding:12px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;animation:up .18s ease-out}
 @keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
@@ -974,6 +987,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
       <div class="tfoot" id="tripLeftLine"></div>
     </div>
   </section>
+  <div class="alerts" id="alerts"></div>
+
   <section class="panel" id="addBox" aria-labelledby="addH">
     <h2 id="addH">Новая запись</h2>
     <div class="segs">
@@ -996,7 +1011,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
       <button class="submit" id="submitBtn" type="submit">Добавить расход</button>
     </form>
   </section>
-  <div class="alerts" id="alerts"></div>
 
   <section class="panel" aria-labelledby="recentH" id="recentBox">
     <div class="listhead"><h2 id="recentH">Последние записи</h2><button class="linkbtn" id="toHistory">Все записи →</button></div>
@@ -1800,6 +1814,7 @@ async function repShare(r){
 /* the report window over the page: the same as the limit window — ✕, the backdrop and Esc close it, the focus goes back */
 function repSheet(r){
   state.pend=null;state.catSheet=null;state.limSheet=null;state.repSheet={at:r.at};
+  $('sheet').classList.remove('centered');
   $('sheet').classList.remove('cats');$('sheetBack').style.visibility='hidden';$('sheetBack').onclick=null;
   repFill(r);$('sheet').hidden=false;
   fresh();dlgSync();$('sheetTitle').focus({preventScroll:true});
@@ -2024,6 +2039,7 @@ function renderBudget(spent,out){
 /* the limit window: the month's limit (changed right here), what is spent in it, what is left or how much it is over, the meter */
 function limFill(spent,budget,def){
   const ed=state.limSheet.edit, left=r2(budget-spent), p=budget?spent/budget:0, pd=left>=0.01&&isCurrentMonth()?perDay(left):'';
+  $('sheet').classList.toggle('centered',ed);
   $('sheetTitle').textContent='Лимит';
   $('sheetSub').textContent=monthLbl();
   $('sheetBody').innerHTML=`<div class="zcard">${ed?`<div class="zrow zedit"><div><span>Лимит на месяц</span>${limForm('lim',budget)}</div></div>`
@@ -2749,7 +2765,7 @@ function catFill(c,k,list,pm){
 }
 function catSheet(c,k,list,pm){
   state.pend=null;state.catSheet={c,k};state.limSheet=null;state.repSheet=null;
-  $('sheet').classList.add('cats');catFill(c,k,list,pm);
+  $('sheet').classList.remove('centered');$('sheet').classList.add('cats');catFill(c,k,list,pm);
   $('sheetBack').style.visibility='hidden';$('sheetBack').onclick=null;
   $('sheet').hidden=false;
   fresh();dlgSync();$('sheetTitle').focus({preventScroll:true});
@@ -3502,10 +3518,10 @@ document.addEventListener('keydown',e=>{
   if(e.shiftKey&&i<=0){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&(i<0||i===f.length-1)){e.preventDefault();f[0].focus()}
 });
 /* ---------- step sheets ---------- */
-function closeSheet(){$('sheet').hidden=true;state.pend=null;state.catSheet=null;state.limSheet=null;state.repSheet=null;$('sheet').classList.remove('cats');dlgSync()}
+function closeSheet(){$('sheet').hidden=true;state.pend=null;state.catSheet=null;state.limSheet=null;state.repSheet=null;$('sheet').classList.remove('cats','centered');dlgSync()}
 $('sheet').querySelectorAll('[data-close]').forEach(b=>b.onclick=closeSheet);
 function sheetFrame(title,back){
-  const p=state.pend;state.catSheet=null;state.limSheet=null;state.repSheet=null;$('sheet').classList.remove('cats');
+  const p=state.pend;state.catSheet=null;state.limSheet=null;state.repSheet=null;$('sheet').classList.remove('cats','centered');
   $('sheetTitle').textContent=title;
   $('sheetSub').textContent=`${p.type==='in'?'+':'−'}${money(p.amount)}${p.scope==='trip'?' · командировка':''}`;
   $('sheetBack').style.visibility=back?'visible':'hidden';$('sheetBack').onclick=back||null;
