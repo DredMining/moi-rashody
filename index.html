@@ -117,18 +117,18 @@ button{cursor:pointer}
 .pos{color:var(--good)} .neg{color:var(--bad)}
 
 /* Tabs */
-/* the labels sit above the whole home-indicator zone, upright and on its side; on a very narrow screen they get smaller, never overlap */
-.tabs{flex:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--surface);border-top:1px solid var(--line);padding:4px max(2px,min(8px,2%),calc((100% - 720px)/2)) max(6px,env(safe-area-inset-bottom,0px));z-index:20;container-type:inline-size}
+/* The tab row stays compact while its bottom padding leaves room for the iPhone home indicator. */
+.tabs{flex:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--surface);border-top:1px solid var(--line);padding:5px max(2px,min(8px,2%),calc((100% - 720px)/2)) max(6px,env(safe-area-inset-bottom,0px));z-index:20;container-type:inline-size}
 /* Keep a clear gap above the home indicator while lowering the tab bar. */
 .app .tabs{padding-bottom:max(6px,calc(env(safe-area-inset-bottom,0px) - 17px),calc(var(--simulator-safe-bottom,0px) - 17px))!important}
-.tabs button{border:0;background:transparent;padding:4px 0 2px;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:12px;font-size:clamp(9px,5cqi,12px);font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent}
-.tabs .ico{position:relative;width:min(56px,100%);height:36px;border-radius:18px;display:grid;place-items:center;transition:background-color .2s ease,color .2s ease}
+.tabs button{border:0;background:transparent;padding:2px 0 1px;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--muted);font-size:12px;font-size:clamp(9px,5cqi,12px);font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent}
+.tabs .ico{position:relative;width:min(56px,100%);height:32px;border-radius:16px;display:grid;place-items:center;transition:background-color .2s ease,color .2s ease}
 .tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .tabs button[aria-selected="true"]{color:var(--ink);font-weight:600}
 .tabs button[aria-selected="true"] .ico{background:var(--accent-soft);color:var(--accent)}
 .tabs button:active .ico{background:var(--accent-soft)}
 /* Учёт in the middle: a round blue «+», inside the bar, below its top line */
-.tabs .tab-main .ico{width:42px;height:42px;border-radius:50%;margin-top:-2px;background:var(--accent);color:var(--accent-ink);box-shadow:0 4px 14px rgb(0 0 0 / .28);border:3px solid var(--surface)}
+.tabs .tab-main .ico{width:40px;height:40px;border-radius:50%;margin-top:-3px;background:var(--accent);color:var(--accent-ink);box-shadow:0 4px 14px rgb(0 0 0 / .28);border:3px solid var(--surface)}
 .tabs .tab-main .ico svg{width:24px;height:24px;stroke-width:2.4}
 .tabs .tab-main[aria-selected="true"] .ico,.tabs .tab-main:active .ico{background:var(--accent);color:var(--accent-ink)}
 .tabs .tab-main:active .ico{transform:scale(.94)}
