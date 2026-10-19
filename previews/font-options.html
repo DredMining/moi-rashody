@@ -1,0 +1,374 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap');
+
+#font-options {
+  width: 100%;
+  color-scheme: light dark;
+}
+
+#font-options * {
+  box-sizing: border-box;
+}
+
+#font-options [data-variant] {
+  min-height: 500px;
+  padding: 12px 16px 22px;
+}
+
+#font-options .font-option-stage {
+  min-height: 452px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+#font-options .font-option-wrap {
+  width: min(100%, 440px);
+}
+
+#font-options .font-option-name {
+  margin: 0 0 4px;
+  color: var(--muted-foreground);
+  font: 500 13px/1.35 system-ui, sans-serif;
+}
+
+#font-options .font-option-roles {
+  margin: 0 0 12px;
+  color: var(--muted-foreground);
+  font: 400 12px/1.35 system-ui, sans-serif;
+}
+
+#font-options .app-screen {
+  --ui-font: 'Golos Text';
+  --display-font: 'Golos Text';
+  --amount-font: 'Golos Text';
+  width: 100%;
+  padding: 18px;
+  border: 1px solid light-dark(#d9e2ef, #293751);
+  border-radius: 18px;
+  background: light-dark(#f9fbff, #0d1422);
+  color: light-dark(#19263d, #eef2ff);
+  font: 400 15px/1.45 var(--ui-font), system-ui, sans-serif;
+}
+
+#font-options .app-header,
+#font-options .budget-row,
+#font-options .budget-meta,
+#font-options .section-heading,
+#font-options .entry-row,
+#font-options .bottom-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#font-options .app-header {
+  margin-bottom: 16px;
+}
+
+#font-options .app-header h1 {
+  margin: 0;
+  font: 700 21px/1.2 var(--display-font), var(--ui-font), sans-serif;
+  letter-spacing: -0.025em;
+}
+
+#font-options .period {
+  color: light-dark(#607491, #91a4c6);
+  font-size: 13px;
+}
+
+#font-options .budget-card,
+#font-options .entries-card {
+  padding: 15px;
+  border: 1px solid light-dark(#d9e2ef, #293751);
+  border-radius: 14px;
+  background: light-dark(#fff, #151f31);
+}
+
+#font-options .budget-row {
+  gap: 12px;
+}
+
+#font-options .eyebrow,
+#font-options .budget-meta,
+#font-options .entry-detail small {
+  color: light-dark(#647997, #91a4c6);
+}
+
+#font-options .eyebrow {
+  font-size: 13px;
+}
+
+#font-options .hero-amount {
+  font: 700 27px/1.18 var(--amount-font), var(--ui-font), sans-serif;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+}
+
+#font-options .percent {
+  color: light-dark(#647df7, #91a3ff);
+  font: 500 13px/1 var(--ui-font), sans-serif;
+}
+
+#font-options .progress-track {
+  height: 7px;
+  margin: 12px 0 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: light-dark(#e8edf5, #293750);
+}
+
+#font-options .progress-fill {
+  width: 63%;
+  height: 100%;
+  border-radius: inherit;
+  background: #647df7;
+}
+
+#font-options .budget-meta {
+  gap: 8px;
+  font-size: 12px;
+}
+
+#font-options .entries-card {
+  margin-top: 12px;
+}
+
+#font-options .section-heading {
+  margin-bottom: 9px;
+  gap: 10px;
+}
+
+#font-options .section-heading h2 {
+  margin: 0;
+  font: 600 15px/1.3 var(--display-font), var(--ui-font), sans-serif;
+}
+
+#font-options .all-link {
+  color: light-dark(#4b68e6, #8ea1ff);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+#font-options .entry-row {
+  min-height: 42px;
+  gap: 10px;
+  border-top: 1px solid light-dark(#edf0f5, #263249);
+}
+
+#font-options .entry-detail {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 1px;
+}
+
+#font-options .entry-detail strong {
+  font-weight: 500;
+}
+
+#font-options .entry-detail small {
+  font-size: 11px;
+}
+
+#font-options .category-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: #7388ff;
+}
+
+#font-options .category-dot.orange {
+  background: #e4a15e;
+}
+
+#font-options .transaction-amount {
+  font: 400 12px/1.2 'IBM Plex Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+#font-options .bottom-nav {
+  justify-content: space-around;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid light-dark(#d9e2ef, #293751);
+  color: light-dark(#6d7f9c, #94a5c3);
+  font-size: 11px;
+}
+
+#font-options .bottom-nav span.active {
+  color: light-dark(#4b68e6, #92a4ff);
+  font-weight: 600;
+}
+
+@media (max-width: 420px) {
+  #font-options [data-variant] {
+    padding-inline: 8px;
+  }
+
+  #font-options .app-screen {
+    padding: 14px;
+  }
+
+  #font-options .budget-card,
+  #font-options .entries-card {
+    padding: 13px;
+  }
+
+  #font-options .hero-amount {
+    font-size: 25px;
+  }
+
+  #font-options .budget-meta {
+    font-size: 11px;
+  }
+}
+</style>
+
+<div id="font-options" class="viz-carousel" aria-label="Варианты шрифта для приложения «Мои расходы»" data-previous-label="Предыдущий шрифт" data-next-label="Следующий шрифт">
+  <section data-variant="Текущий" aria-label="Текущая пара шрифтов">
+    <div class="font-option-stage">
+      <div class="font-option-wrap">
+        <p class="font-option-name">Текущий: выразительные заголовки</p>
+        <p class="font-option-roles">Unbounded · Golos Text · IBM Plex Mono</p>
+        <div class="app-screen" style="--ui-font:'Golos Text';--display-font:'Unbounded';--amount-font:'Unbounded'">
+          <header class="app-header"><h1>Мои расходы</h1><span class="period">Октябрь</span></header>
+          <section class="budget-card" aria-label="Месячный лимит">
+            <div class="budget-row"><span class="eyebrow">Лимит на месяц</span><span class="percent">63%</span></div>
+            <div class="hero-amount">30 000 ₽</div>
+            <div class="progress-track" role="progressbar" aria-label="Использовано 63 процента лимита" aria-valuenow="63" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill"></div></div>
+            <div class="budget-meta"><span>Потрачено 18 900 ₽</span><span>Осталось 11 100 ₽</span></div>
+          </section>
+          <section class="entries-card" aria-label="Последние записи">
+            <div class="section-heading"><h2>Последние записи</h2><span class="all-link">Все записи →</span></div>
+            <div class="entry-row"><span class="category-dot" aria-hidden="true"></span><span class="entry-detail"><strong>Продукты</strong><small>Сегодня · Карта</small></span><span class="transaction-amount">−2 450 ₽</span></div>
+            <div class="entry-row"><span class="category-dot orange" aria-hidden="true"></span><span class="entry-detail"><strong>Такси</strong><small>Вчера · Карта</small></span><span class="transaction-amount">−780 ₽</span></div>
+          </section>
+          <nav class="bottom-nav" aria-label="Разделы"><span>Итоги</span><span>Деньги</span><span class="active">Учёт</span><span>Записи</span><span>Долги</span></nav>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-variant="Golos Text" aria-label="Golos Text в интерфейсе и суммах" hidden>
+    <div class="font-option-stage">
+      <div class="font-option-wrap">
+        <p class="font-option-name">Спокойный и компактный</p>
+        <p class="font-option-roles">Golos Text · IBM Plex Mono для записей</p>
+        <div class="app-screen" style="--ui-font:'Golos Text';--display-font:'Golos Text';--amount-font:'Golos Text'">
+          <header class="app-header"><h1>Мои расходы</h1><span class="period">Октябрь</span></header>
+          <section class="budget-card" aria-label="Месячный лимит">
+            <div class="budget-row"><span class="eyebrow">Лимит на месяц</span><span class="percent">63%</span></div>
+            <div class="hero-amount">30 000 ₽</div>
+            <div class="progress-track" role="progressbar" aria-label="Использовано 63 процента лимита" aria-valuenow="63" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill"></div></div>
+            <div class="budget-meta"><span>Потрачено 18 900 ₽</span><span>Осталось 11 100 ₽</span></div>
+          </section>
+          <section class="entries-card" aria-label="Последние записи">
+            <div class="section-heading"><h2>Последние записи</h2><span class="all-link">Все записи →</span></div>
+            <div class="entry-row"><span class="category-dot" aria-hidden="true"></span><span class="entry-detail"><strong>Продукты</strong><small>Сегодня · Карта</small></span><span class="transaction-amount">−2 450 ₽</span></div>
+            <div class="entry-row"><span class="category-dot orange" aria-hidden="true"></span><span class="entry-detail"><strong>Такси</strong><small>Вчера · Карта</small></span><span class="transaction-amount">−780 ₽</span></div>
+          </section>
+          <nav class="bottom-nav" aria-label="Разделы"><span>Итоги</span><span>Деньги</span><span class="active">Учёт</span><span>Записи</span><span>Долги</span></nav>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-variant="Manrope" aria-label="Manrope в интерфейсе и суммах" hidden>
+    <div class="font-option-stage">
+      <div class="font-option-wrap">
+        <p class="font-option-name">Мягкий и дружелюбный</p>
+        <p class="font-option-roles">Manrope · IBM Plex Mono для записей</p>
+        <div class="app-screen" style="--ui-font:'Manrope';--display-font:'Manrope';--amount-font:'Manrope'">
+          <header class="app-header"><h1>Мои расходы</h1><span class="period">Октябрь</span></header>
+          <section class="budget-card" aria-label="Месячный лимит">
+            <div class="budget-row"><span class="eyebrow">Лимит на месяц</span><span class="percent">63%</span></div>
+            <div class="hero-amount">30 000 ₽</div>
+            <div class="progress-track" role="progressbar" aria-label="Использовано 63 процента лимита" aria-valuenow="63" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill"></div></div>
+            <div class="budget-meta"><span>Потрачено 18 900 ₽</span><span>Осталось 11 100 ₽</span></div>
+          </section>
+          <section class="entries-card" aria-label="Последние записи">
+            <div class="section-heading"><h2>Последние записи</h2><span class="all-link">Все записи →</span></div>
+            <div class="entry-row"><span class="category-dot" aria-hidden="true"></span><span class="entry-detail"><strong>Продукты</strong><small>Сегодня · Карта</small></span><span class="transaction-amount">−2 450 ₽</span></div>
+            <div class="entry-row"><span class="category-dot orange" aria-hidden="true"></span><span class="entry-detail"><strong>Такси</strong><small>Вчера · Карта</small></span><span class="transaction-amount">−780 ₽</span></div>
+          </section>
+          <nav class="bottom-nav" aria-label="Разделы"><span>Итоги</span><span>Деньги</span><span class="active">Учёт</span><span>Записи</span><span>Долги</span></nav>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-variant="Inter" aria-label="Inter в интерфейсе и суммах" hidden>
+    <div class="font-option-stage">
+      <div class="font-option-wrap">
+        <p class="font-option-name">Нейтральный и привычный</p>
+        <p class="font-option-roles">Inter · IBM Plex Mono для записей</p>
+        <div class="app-screen" style="--ui-font:'Inter';--display-font:'Inter';--amount-font:'Inter'">
+          <header class="app-header"><h1>Мои расходы</h1><span class="period">Октябрь</span></header>
+          <section class="budget-card" aria-label="Месячный лимит">
+            <div class="budget-row"><span class="eyebrow">Лимит на месяц</span><span class="percent">63%</span></div>
+            <div class="hero-amount">30 000 ₽</div>
+            <div class="progress-track" role="progressbar" aria-label="Использовано 63 процента лимита" aria-valuenow="63" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill"></div></div>
+            <div class="budget-meta"><span>Потрачено 18 900 ₽</span><span>Осталось 11 100 ₽</span></div>
+          </section>
+          <section class="entries-card" aria-label="Последние записи">
+            <div class="section-heading"><h2>Последние записи</h2><span class="all-link">Все записи →</span></div>
+            <div class="entry-row"><span class="category-dot" aria-hidden="true"></span><span class="entry-detail"><strong>Продукты</strong><small>Сегодня · Карта</small></span><span class="transaction-amount">−2 450 ₽</span></div>
+            <div class="entry-row"><span class="category-dot orange" aria-hidden="true"></span><span class="entry-detail"><strong>Такси</strong><small>Вчера · Карта</small></span><span class="transaction-amount">−780 ₽</span></div>
+          </section>
+          <nav class="bottom-nav" aria-label="Разделы"><span>Итоги</span><span>Деньги</span><span class="active">Учёт</span><span>Записи</span><span>Долги</span></nav>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-variant="Onest" aria-label="Onest в интерфейсе и суммах" hidden>
+    <div class="font-option-stage">
+      <div class="font-option-wrap">
+        <p class="font-option-name">Современный, с характером</p>
+        <p class="font-option-roles">Onest · IBM Plex Mono для записей</p>
+        <div class="app-screen" style="--ui-font:'Onest';--display-font:'Onest';--amount-font:'Onest'">
+          <header class="app-header"><h1>Мои расходы</h1><span class="period">Октябрь</span></header>
+          <section class="budget-card" aria-label="Месячный лимит">
+            <div class="budget-row"><span class="eyebrow">Лимит на месяц</span><span class="percent">63%</span></div>
+            <div class="hero-amount">30 000 ₽</div>
+            <div class="progress-track" role="progressbar" aria-label="Использовано 63 процента лимита" aria-valuenow="63" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill"></div></div>
+            <div class="budget-meta"><span>Потрачено 18 900 ₽</span><span>Осталось 11 100 ₽</span></div>
+          </section>
+          <section class="entries-card" aria-label="Последние записи">
+            <div class="section-heading"><h2>Последние записи</h2><span class="all-link">Все записи →</span></div>
+            <div class="entry-row"><span class="category-dot" aria-hidden="true"></span><span class="entry-detail"><strong>Продукты</strong><small>Сегодня · Карта</small></span><span class="transaction-amount">−2 450 ₽</span></div>
+            <div class="entry-row"><span class="category-dot orange" aria-hidden="true"></span><span class="entry-detail"><strong>Такси</strong><small>Вчера · Карта</small></span><span class="transaction-amount">−780 ₽</span></div>
+          </section>
+          <nav class="bottom-nav" aria-label="Разделы"><span>Итоги</span><span>Деньги</span><span class="active">Учёт</span><span>Записи</span><span>Долги</span></nav>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-variant="IBM Plex Sans" aria-label="IBM Plex Sans в интерфейсе и суммах" hidden>
+    <div class="font-option-stage">
+      <div class="font-option-wrap">
+        <p class="font-option-name">Строгий и технический</p>
+        <p class="font-option-roles">IBM Plex Sans · IBM Plex Mono для записей</p>
+        <div class="app-screen" style="--ui-font:'IBM Plex Sans';--display-font:'IBM Plex Sans';--amount-font:'IBM Plex Sans'">
+          <header class="app-header"><h1>Мои расходы</h1><span class="period">Октябрь</span></header>
+          <section class="budget-card" aria-label="Месячный лимит">
+            <div class="budget-row"><span class="eyebrow">Лимит на месяц</span><span class="percent">63%</span></div>
+            <div class="hero-amount">30 000 ₽</div>
+            <div class="progress-track" role="progressbar" aria-label="Использовано 63 процента лимита" aria-valuenow="63" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill"></div></div>
+            <div class="budget-meta"><span>Потрачено 18 900 ₽</span><span>Осталось 11 100 ₽</span></div>
+          </section>
+          <section class="entries-card" aria-label="Последние записи">
+            <div class="section-heading"><h2>Последние записи</h2><span class="all-link">Все записи →</span></div>
+            <div class="entry-row"><span class="category-dot" aria-hidden="true"></span><span class="entry-detail"><strong>Продукты</strong><small>Сегодня · Карта</small></span><span class="transaction-amount">−2 450 ₽</span></div>
+            <div class="entry-row"><span class="category-dot orange" aria-hidden="true"></span><span class="entry-detail"><strong>Такси</strong><small>Вчера · Карта</small></span><span class="transaction-amount">−780 ₽</span></div>
+          </section>
+          <nav class="bottom-nav" aria-label="Разделы"><span>Итоги</span><span>Деньги</span><span class="active">Учёт</span><span>Записи</span><span>Долги</span></nav>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
