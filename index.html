@@ -2038,15 +2038,14 @@ function renderBudget(spent,out){
 }
 /* the limit window: the month's limit (changed right here), what is spent in it, what is left or how much it is over, the meter */
 function limFill(spent,budget,def){
-  const ed=state.limSheet.edit, left=r2(budget-spent), p=budget?spent/budget:0, pd=left>=0.01&&isCurrentMonth()?perDay(left):'';
+  const ed=state.limSheet.edit, left=r2(budget-spent), pd=left>=0.01&&isCurrentMonth()?perDay(left):'';
   $('sheet').classList.toggle('centered',ed);
   $('sheetTitle').textContent='Лимит';
   $('sheetSub').textContent=monthLbl();
   $('sheetBody').innerHTML=`<div class="zcard">${ed?`<div class="zrow zedit"><div><span>Лимит на месяц</span>${limForm('lim',budget)}</div></div>`
       :zRow('Лимит на месяц',budget?money(budget):'<span class="zv">не задан</span>',def?'стоит по умолчанию':'','',`<button type="button" class="linkbtn zre" id="limSet">${budget?'Изменить':'Задать'}</button>`)}
     ${zRow('Потрачено в лимит',money(spent))}${!budget?'':left>=0?zRow('Осталось',money(left),pd,'zsum'):zRow('Превышен на',money(-left),'','zsum zbad')}</div>
-    ${budget?`<div class="meter${p>=1?' bad':p>=.85?' warn':''}" role="progressbar" aria-label="Лимит на месяц" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(Math.min(1,p)*100)}" aria-valuetext="потрачено ${money(spent)} из ${money(budget)}"><i style="width:${Math.min(100,p*100)}%"></i></div>`:''}
-    <p class="zs lnote">${NOT_IN_TXT}</p>`;
+    `;
   if(ed) limFormOn('lim',budget,()=>{state.limSheet.edit=false},()=>$('limSet')?.focus({preventScroll:true}));
   else $('limSet').onclick=()=>{fresh();state.limSheet.edit=true;render();$('limInput')?.focus({preventScroll:true})};
   /* the window grew or shrank (its field, «Лимит убран»): a message on screen stays above it */
