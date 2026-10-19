@@ -392,8 +392,16 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .item-edit label.echk{flex-direction:row;align-items:center;gap:8px;font-size:13px;color:var(--ink);min-height:44px}
 .item-edit .echk input{width:auto;flex:none;min-height:0}
 .wmodal.item-editor-modal{z-index:80;align-items:center;padding:calc(max(env(safe-area-inset-top,0px),var(--simulator-safe-top,0px)) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
-.item-editor-panel{position:relative;width:min(440px,100%);max-height:calc(100vh - max(env(safe-area-inset-top,0px),var(--simulator-safe-top,0px)) - env(safe-area-inset-bottom,0px) - 32px);max-height:calc(100dvh - max(env(safe-area-inset-top,0px),var(--simulator-safe-top,0px)) - env(safe-area-inset-bottom,0px) - 32px);overflow-y:auto;overscroll-behavior:contain;padding:12px;border:1px solid var(--line);border-radius:20px;background:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 66%);box-shadow:0 12px 40px rgb(0 0 0 / .45);animation:up .18s ease-out}
-.item-editor-panel .item-edit{margin:0;padding:0;border:0;background:transparent}
+.item-editor-panel{position:relative;width:min(440px,100%);max-height:calc(100vh - max(env(safe-area-inset-top,0px),var(--simulator-safe-top,0px)) - env(safe-area-inset-bottom,0px) - 32px);max-height:calc(100dvh - max(env(safe-area-inset-top,0px),var(--simulator-safe-top,0px)) - env(safe-area-inset-bottom,0px) - 32px);overflow-y:auto;overscroll-behavior:contain;padding:10px;border:1px solid var(--line);border-radius:20px;background:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--accent) 16%,var(--surface)),var(--surface) 66%);box-shadow:0 12px 40px rgb(0 0 0 / .45);animation:up .18s ease-out}
+.item-editor-panel .debt-add-head{margin-bottom:6px;padding-bottom:6px}
+.item-editor-panel .item-edit{gap:6px;margin:0;padding:0;border:0;background:transparent}
+.item-editor-panel .item-edit label{gap:2px}
+.item-editor-panel .item-edit input,.item-editor-panel .item-edit select{min-height:40px;padding-block:7px;line-height:1.25}
+.item-editor-panel .item-edit .seg{gap:2px;padding:2px}
+.item-editor-panel .item-edit .seg button{min-height:40px;padding:6px 4px}
+.item-editor-panel .item-edit .eseg{gap:6px}
+.item-editor-panel .item-edit .row{gap:8px}
+.item-editor-panel .item-edit .row button{min-height:40px;padding-block:6px}
 @media (prefers-reduced-motion:reduce){.item-editor-panel{animation:none}}
 .cmp-sel{display:flex;gap:8px;align-items:center}
 .cmp-sel select{flex:1 1 0;min-width:0;padding-inline:10px}
@@ -830,6 +838,11 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:500
 .item .amt.pos{color:var(--good)}
 .item .what .acct{display:inline;font-weight:600}
 .itemacts{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:0 16px;align-items:center;justify-content:flex-end;padding-top:4px}
+#recent .item:has(.itemacts){row-gap:2px;padding-block:2px}
+#recent .item:has(.itemacts) .what{line-height:1.35}
+#recent .itemacts{padding-top:0}
+#recent .itemacts .linkbtn,#recent .itemacts .del{min-height:36px}
+#recent .itemacts .del{padding-block:6px}
 /* a long delete question goes onto its own line; «Изменить» stays one word */
 .itemacts .linkbtn{flex:none;white-space:nowrap}
 .itemacts .del{min-width:0;text-align:right}
