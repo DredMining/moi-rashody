@@ -361,6 +361,11 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .recs .item>.ic{width:24px;height:24px;font-size:12px}
 .recs .item .what>span{font-size:11px}
 .recs .item .amt{min-height:36px;margin-block:-4px}
+.recs .item:has(.itemacts){row-gap:0;padding-block:0}
+.recs .item:has(.itemacts) .what{line-height:1.35}
+.recs .itemacts{padding-top:0;gap:0 12px}
+.recs .itemacts .linkbtn,.recs .itemacts .del{min-height:36px}
+.recs .itemacts .del{padding-block:6px}
 #recent .item{font-size:13px;gap:8px;padding-block:3px}
 #recent .item>.ic{width:24px;height:24px;font-size:12px}
 #recent .item .what>span{font-size:11px}
@@ -745,6 +750,10 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .dgroup b{font-size:14px;font-weight:600;overflow-wrap:anywhere}
 .dgroup .sumv{font-family:var(--f-num);font-size:14px}
 .dgroup small{grid-column:1/-1;color:var(--muted);font-size:12px}
+#viewDebts section.panel[aria-labelledby="debtListH"]{padding:12px;gap:8px}
+#debtList .dgroup{padding-block:5px;line-height:1.2}
+#debtList .dgroup small{font-size:11px}
+#debtList details summary{padding-block:8px}
 .dgroup.closed b,.dgroup.closed .sumv{color:var(--muted);font-weight:500}
 /* the person's window: «Вернул всё» / «Вернул часть» for all of it, then each loan with its buttons */
 .dg{display:flex;flex-direction:column;gap:10px}
