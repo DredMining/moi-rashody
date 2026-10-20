@@ -209,6 +209,7 @@ button{cursor:pointer}
 /* its field is one line high (in .wallet-edit a field normally stands in a row) */
 #tripCard .wmodal input{flex:none}
 /* Итоги shows one part at a time, picked under the month card */
+#viewStats{touch-action:pan-y pinch-zoom}
 #viewStats[data-view="out"] [data-sv]:not([data-sv="out"]),#viewStats[data-view="in"] [data-sv]:not([data-sv="in"]),
 #viewStats[data-view="broker"] [data-sv]:not([data-sv="broker"]),#viewStats[data-view="cmp"] [data-sv]:not([data-sv="cmp"]){display:none}
 #cmpBox>summary{display:none}
@@ -2999,14 +3000,43 @@ function monthStats(k){
 }
 /* Итоги: Расходы | Доходы | Брокер | Сравнение — only the picked part is shown; a part with nothing this month says so */
 const SV=[['out','Расходы'],['in','Доходы'],['broker','Брокер'],['cmp','Сравнение']];
+function setStatView(v){
+  const box=$('viewStats');
+  if(!SV.some(([k])=>k===v)||box.dataset.view===v)return;
+  state.statView=v;fresh();render();
+}
 function renderStatSeg(){
   const v=SV.some(([k])=>k===state.statView)?state.statView:'out', box=$('viewStats');
   box.dataset.view=v;$('cmpBox').open=true;
   $('statSeg').innerHTML=SV.map(([k,n])=>`<button type="button" data-svb="${k}" aria-pressed="${k===v}">${n}</button>`).join('');
-  $('statSeg').querySelectorAll('[data-svb]').forEach(b=>b.onclick=()=>{state.statView=b.dataset.svb;fresh();render()});
+  $('statSeg').querySelectorAll('[data-svb]').forEach(b=>b.onclick=()=>setStatView(b.dataset.svb));
   const shown=[...box.querySelectorAll(`[data-sv="${v}"]`)].some(x=>!x.hidden);
   $('svEmpty').hidden=shown;$('svEmpty').textContent=v==='in'?'Доходов за этот месяц нет.':'Расходов за этот месяц нет.';
 }
+function bindStatsSwipe(){
+  const box=$('viewStats');let down=null,blockClickUntil=0;
+  box.addEventListener('pointerdown',e=>{
+    blockClickUntil=0;
+    if(!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0)||e.target.closest?.('input,textarea,select,[contenteditable="true"],.wmodal,.sheet,.zsheet')){down=null;return}
+    down={id:e.pointerId,x:e.clientX,y:e.clientY};
+  },{passive:true});
+  box.addEventListener('pointerup',e=>{
+    if(!down||down.id!==e.pointerId){down=null;return}
+    const dx=e.clientX-down.x,dy=e.clientY-down.y;down=null;
+    if(Math.abs(dx)<52||Math.abs(dx)<=Math.abs(dy)*1.2)return;
+    blockClickUntil=performance.now()+350;
+    const current=SV.findIndex(([k])=>k===box.dataset.view);
+    if(current<0)return;
+    const next=Math.max(0,Math.min(SV.length-1,current+(dx<0?1:-1)));
+    if(next!==current)setStatView(SV[next][0]);
+  },{passive:true});
+  box.addEventListener('pointercancel',()=>{down=null},{passive:true});
+  box.addEventListener('click',e=>{
+    if(performance.now()>blockClickUntil)return;
+    blockClickUntil=0;e.preventDefault();e.stopImmediatePropagation();
+  },true);
+}
+bindStatsSwipe();
 function renderCompare(){
   const cur=`${now.getFullYear()}-${pad(now.getMonth()+1)}`;
   const keys=[...new Set([monthKey(),cur,...state.items.filter(i=>typeof i.date==='string').map(i=>i.date.slice(0,7)).filter(k=>/^\d{4}-(0[1-9]|1[0-2])$/.test(k))])].sort().reverse();
