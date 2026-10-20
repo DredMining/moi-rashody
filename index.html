@@ -427,20 +427,20 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .item-editor-panel .item-edit .row button{min-height:40px;padding-block:6px}
 @media (prefers-reduced-motion:reduce){.item-editor-panel{animation:none}}
 .cmp-title{margin:0;font-size:13px;font-weight:600;color:var(--ink)}
-.cmp-explain{margin:0;font-size:10px;line-height:1.35;color:var(--muted)}
+.cmp-explain{margin:0;font-size:9px;line-height:1.3;color:var(--muted)}
 .cmp-sel{display:flex;gap:8px;align-items:center}
 .cmp-sel select{flex:1 1 0;min-width:0;padding-inline:10px}
 .cmp-sel span{color:var(--muted);font-size:13px}
-.cmp{display:flex;flex-direction:column;gap:4px}
-.cmp-row{display:flex;flex-direction:column;gap:3px;min-width:0;padding:5px 7px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
-.cmp-row.t{border-color:color-mix(in srgb,var(--accent) 28%,var(--line));background:color-mix(in srgb,var(--accent) 5%,var(--bg))}
-.cmp-row.sub{padding:4px 7px;background:color-mix(in srgb,var(--surface) 64%,var(--bg))}
-.cmp-name{min-width:0;overflow-wrap:anywhere;font-size:11px;line-height:1.2;font-weight:600}
-.cmp-row.sub .cmp-name{padding-left:6px;color:var(--muted);font-size:10.5px;font-weight:500}
-.cmp-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;min-width:0}
-.cmp-value{display:flex;flex-direction:column;gap:2px;min-width:0}
-.cmp-value>span:first-child{overflow:hidden;color:var(--muted);font-size:9px;line-height:1.1;text-overflow:ellipsis;white-space:nowrap}
-.cmp-value>b,.cmp-delta{font-family:var(--f-num);font-size:clamp(9px,2.8vw,11px);font-variant-numeric:tabular-nums;font-weight:500;white-space:nowrap}
+.cmp{display:flex;flex-direction:column;gap:0}
+.cmp-head,.cmp-row{display:grid;grid-template-columns:minmax(0,1.25fr) repeat(3,minmax(0,1fr));gap:4px;align-items:center;min-width:0}
+.cmp-head{padding:3px 5px;color:var(--muted);font-size:8px;line-height:1.15}
+.cmp-head>span:not(:first-child){text-align:right}
+.cmp-row{padding:4px 5px;border-bottom:1px solid var(--line)}
+.cmp-row.t{margin-block:2px;padding:5px;border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));border-radius:8px;background:color-mix(in srgb,var(--accent) 5%,var(--bg))}
+.cmp-row.sub{padding-block:3px}
+.cmp-name{min-width:0;overflow-wrap:anywhere;font-size:10px;line-height:1.15;font-weight:600}
+.cmp-row.sub .cmp-name{padding-left:5px;color:var(--muted);font-size:9px;font-weight:500}
+.cmp-amount,.cmp-delta{min-width:0;overflow:hidden;font-family:var(--f-num);font-size:clamp(8px,2.7vw,10px);font-variant-numeric:tabular-nums;font-weight:500;text-align:right;text-overflow:clip;white-space:nowrap}
 .sumcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:8px}
 .sumtop{display:flex;flex-wrap:wrap;justify-content:space-between;gap:0 8px;font-size:13px;color:var(--muted)}
 .sumtop>:last-child{margin-left:auto}
@@ -771,7 +771,7 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .dp-sum b{font-family:var(--f-num);font-size:20px;font-weight:500;color:var(--ink)}
 .dp-repay{display:flex;flex-direction:column;gap:4px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
 .dp-section-title,.dinner-head{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
-.dp-repay .acts{gap:4px 6px;margin:0}
+.dp-repay .acts{gap:2px 4px;margin:0}
 .dperson .dp-repay .acts>.dacc{flex:1 1 100%}
 .dperson .dp-repay .acts>button{font-size:11px;min-height:28px;padding:2px 8px;border-radius:8px}
 .dperson .dp-repay .acts>.primary{border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));background:color-mix(in srgb,var(--accent) 14%,var(--surface));color:var(--accent)}
@@ -793,9 +793,9 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .dperson .dp-x{width:40px;height:40px}
 .dperson .dp-sum{padding:5px 8px}
 .dperson .dp-sum b{font-size:16px}
-.dperson .dp-repay{gap:3px;padding:6px}
+.dperson .dp-repay{gap:4px;padding:6px;border-radius:10px}
 .dperson .dp-repay .acts>.dacc{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px}
-.dperson .dp-repay .acts>button{font-size:10px;min-height:24px;padding:0 4px;border-radius:6px}
+.dperson .dp-repay .acts>button{font-size:11px;min-height:28px;padding:2px 8px;border-radius:8px}
 .dperson .dp-repay .acts>.dacc select{min-height:32px;padding:2px 8px;font-size:16px}
 .dperson .dinner{gap:5px}
 .dperson .dinner-head{padding-top:5px}
@@ -1162,7 +1162,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
             <summary>Сравнение месяцев</summary>
             <div class="morebody">
               <h2 class="cmp-title">Сравнение месяцев</h2>
-              <p class="cmp-explain">В каждой строке показаны оба месяца и разница. Разница = первый месяц минус второй.</p>
+              <p class="cmp-explain">Все суммы в ₽. Разница = первый месяц минус второй.</p>
               <div class="cmp-sel"><select id="cmpA" aria-label="Первый месяц"></select><span>и</span><select id="cmpB" aria-label="Второй месяц"></select></div>
               <div id="cmp"></div>
             </div>
@@ -3126,15 +3126,13 @@ function renderCompare(){
   const m0=n=>{const v=Math.round(n*100)/100;return (v<0?'−':'')+(Number.isInteger(v)?fmt0:fmt2).format(Math.abs(v))};
   const hd=k=>mShort.format(keyDate(k))+(A.slice(0,4)!==B.slice(0,4)?' '+k.slice(0,4):'');
   /* good = green: income up, spending down; savings and trip money shown neutral */
-  const delta=(x,y,kind)=>{const d=Math.round((x-y)*100)/100;if(d===0)return '<span class="cmp-delta" style="color:var(--muted)">0 ₽</span>';
-    const good=kind==='out'?d<0:kind==='in'?d>0:null;return `<span class="cmp-delta" style="color:${good===null?'var(--muted)':good?'var(--good)':'var(--bad)'}">${d>0?'+':'−'}${m0(Math.abs(d))} ₽</span>`};
-  const row=(name,x,y,kind,cls='')=>`<div class="cmp-row ${cls}"><span class="cmp-name">${name}</span><div class="cmp-values">
-    <div class="cmp-value"><span>${esc(cap(hd(A)))}</span><b>${m0(x)} ₽</b></div><div class="cmp-value"><span>${esc(cap(hd(B)))}</span><b>${m0(y)} ₽</b></div><div class="cmp-value"><span>Разница</span>${delta(x,y,kind)}</div>
-    </div></div>`;
+  const delta=(x,y,kind)=>{const d=Math.round((x-y)*100)/100;if(d===0)return '<span class="cmp-delta" style="color:var(--muted)">0</span>';
+    const good=kind==='out'?d<0:kind==='in'?d>0:null;return `<span class="cmp-delta" style="color:${good===null?'var(--muted)':good?'var(--good)':'var(--bad)'}">${d>0?'+':'−'}${m0(Math.abs(d))}</span>`};
+  const row=(name,x,y,kind,cls='')=>`<div class="cmp-row ${cls}"><span class="cmp-name">${name}</span><span class="cmp-amount">${m0(x)}</span><span class="cmp-amount">${m0(y)}</span>${delta(x,y,kind)}</div>`;
   /* the categories in the one fixed order, as on the tiles — a row stays in its place from month to month */
   const cats=(ma,mb,kind)=>Object.keys({...ma,...mb}).filter(c=>Math.round(ma[c]||0)||Math.round(mb[c]||0)).sort(byRank).map(c=>row(esc(CAT[c]?.name||'Другое'),ma[c]||0,mb[c]||0,kind,'sub')).join('');
   if(!a.any&&!b.any){$('cmp').innerHTML='<div class="empty"><p>Записей за эти месяцы пока нет.</p></div>';return}
-  $('cmp').innerHTML=(A===cur||B===cur?`<p class="cmp-note">${cap(mLabel.format(keyDate(cur)).split(' ')[0])} ещё идёт, поэтому сравнение неполное.</p>`:'')+`<div class="cmp">
+  $('cmp').innerHTML=(A===cur||B===cur?`<p class="cmp-note">${cap(mLabel.format(keyDate(cur)).split(' ')[0])} ещё идёт, поэтому сравнение неполное.</p>`:'')+`<div class="cmp"><div class="cmp-head"><span>Категория</span><span>${esc(cap(hd(A)))}</span><span>${esc(cap(hd(B)))}</span><span>Разница</span></div>
     ${row('Траты в&nbsp;лимит',a.lim,b.lim,'out','t')}${cats(a.limBy,b.limBy,'out')}
     ${row('Доходы',a.inc,b.inc,'in','t')}${cats(a.incBy,b.incBy,'in')}
     ${row('На брокер',a.broker,b.broker,'save','t')}${a.piggy||b.piggy?row('В копильник',a.piggy,b.piggy,'save'):''}${a.sadaqa||b.sadaqa?row('Садака',a.sadaqa,b.sadaqa,'save'):''}${a.zakat||b.zakat?row('Закят',a.zakat,b.zakat,'save'):''}
