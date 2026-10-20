@@ -169,14 +169,14 @@ button{cursor:pointer}
 .mcard .mcol{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;padding:8px 4px;border:1px solid var(--line);border-radius:12px;background:var(--bg);text-align:center}
 .mcard .mdiff>span,.mcard .mdiff>b{color:var(--warn)}
 .mcard .mdiff{transition:background-color .22s ease,box-shadow .22s ease}
-.mcard .mdiff[data-tone="positive"]{background:color-mix(in srgb,var(--good) 9%,var(--bg));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--good) 38%,transparent),0 0 16px color-mix(in srgb,var(--good) 24%,transparent)}
-.mcard .mdiff[data-tone="negative"]{background:color-mix(in srgb,var(--bad) 9%,var(--bg));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--bad) 38%,transparent),0 0 16px color-mix(in srgb,var(--bad) 24%,transparent)}
+.mcard .mdiff[data-tone="positive"]{background:color-mix(in srgb,var(--good) 9%,var(--bg));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--good) 30%,transparent),0 0 12px color-mix(in srgb,var(--good) 14%,transparent)}
+.mcard .mdiff[data-tone="negative"]{background:color-mix(in srgb,var(--bad) 9%,var(--bg));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--bad) 30%,transparent),0 0 12px color-mix(in srgb,var(--bad) 14%,transparent)}
 .mcard .mdiff[data-tone="positive"]>span,.mcard .mdiff[data-tone="positive"]>b{color:var(--good)}
 .mcard .mdiff[data-tone="negative"]>span,.mcard .mdiff[data-tone="negative"]>b{color:var(--bad)}
-.mcard .mdiff[data-tone="positive"]>span::before{background:var(--good);box-shadow:0 0 8px color-mix(in srgb,var(--good) 78%,transparent)}
-.mcard .mdiff[data-tone="negative"]>span::before{background:var(--bad);box-shadow:0 0 8px color-mix(in srgb,var(--bad) 78%,transparent)}
-.mcard .mdiff[data-tone="positive"]>b{text-shadow:0 0 10px color-mix(in srgb,var(--good) 38%,transparent),0 0 18px color-mix(in srgb,var(--good) 22%,transparent)}
-.mcard .mdiff[data-tone="negative"]>b{text-shadow:0 0 10px color-mix(in srgb,var(--bad) 38%,transparent),0 0 18px color-mix(in srgb,var(--bad) 22%,transparent)}
+.mcard .mdiff[data-tone="positive"]>span::before{background:var(--good);box-shadow:0 0 5px color-mix(in srgb,var(--good) 55%,transparent)}
+.mcard .mdiff[data-tone="negative"]>span::before{background:var(--bad);box-shadow:0 0 5px color-mix(in srgb,var(--bad) 55%,transparent)}
+.mcard .mdiff[data-tone="positive"]>b{text-shadow:0 0 7px color-mix(in srgb,var(--good) 25%,transparent),0 0 12px color-mix(in srgb,var(--good) 14%,transparent)}
+.mcard .mdiff[data-tone="negative"]>b{text-shadow:0 0 7px color-mix(in srgb,var(--bad) 25%,transparent),0 0 12px color-mix(in srgb,var(--bad) 14%,transparent)}
 @media (prefers-reduced-motion:reduce){.mcard .mdiff{transition:none}}
 .mcard .mout{align-items:center;text-align:center}
 .mcard .mcol>span{display:flex;align-items:center;justify-content:center;gap:4px;font-size:12px;line-height:1.2;font-weight:600;color:var(--muted)}
@@ -213,7 +213,7 @@ button{cursor:pointer}
 #statsViewport{width:100%;min-width:0;overflow:hidden;transition:height .28s cubic-bezier(.22,.61,.36,1)}
 #statsTrack{display:flex;align-items:flex-start;gap:0;width:400%;will-change:transform;transition:transform .3s cubic-bezier(.22,.61,.36,1)}
 #statsTrack.is-dragging{transition:none;user-select:none;-webkit-user-select:none}
-.stats-page{flex:0 0 25%;width:25%;min-width:0;display:flex;flex-direction:column;gap:16px}
+.stats-page{flex:0 0 25%;width:25%;min-width:0;margin-inline-end:12px;display:flex;flex-direction:column;gap:16px}
 .stats-page>[data-sv]{width:100%;max-width:100%}
 @media(prefers-reduced-motion:reduce){#statsViewport,#statsTrack{transition-duration:.01ms}}
 #cmpBox>summary{display:none}
@@ -3017,6 +3017,7 @@ function monthStats(k){
 }
 /* Итоги: Расходы | Доходы | Брокер | Сравнение — only the picked part is shown; a part with nothing this month says so */
 const SV=[['out','Расходы'],['in','Доходы'],['broker','Брокер'],['cmp','Сравнение']];
+const STAT_GAP=12;
 function setStatView(v){
   const index=SV.findIndex(([k])=>k===v),box=$('viewStats');if(index<0||box.dataset.view===v)return;
   state.statView=v;fresh();renderStatSeg();
@@ -3040,13 +3041,13 @@ function renderStatSeg(){
   $('statSeg').innerHTML=SV.map(([k,n])=>`<button type="button" data-svb="${k}" aria-pressed="${k===v}">${n}</button>`).join('');
   $('statSeg').querySelectorAll('[data-svb]').forEach(b=>b.onclick=()=>setStatView(b.dataset.svb));
   const index=SV.findIndex(([k])=>k===v),track=$('statsTrack');
-  applyStatView(index);track.style.transform=`translate3d(-${index*25}%,0,0)`;
+  applyStatView(index);track.style.transform=`translate3d(calc(-${index*25}% - ${index*STAT_GAP}px),0,0)`;
   requestAnimationFrame(()=>syncStatsViewport(index));
 }
 function bindStatsSwipe(){
   const surface=$('scroller'),track=$('statsTrack'),useTouchEvents='ontouchstart' in window;let down=null,touchDown=null,blockClickUntil=0;
   const indexNow=()=>Math.max(0,SV.findIndex(([k])=>k===$('viewStats').dataset.view));
-  const snapBack=()=>{track.classList.remove('is-dragging');track.style.transform=`translate3d(-${indexNow()*25}%,0,0)`};
+  const snapBack=()=>{const i=indexNow();track.classList.remove('is-dragging');track.style.transform=`translate3d(calc(-${i*25}% - ${i*STAT_GAP}px),0,0)`};
   const resetPointer=()=>{down=null;if(track.classList.contains('is-dragging'))snapBack()};
   const resetTouch=()=>{touchDown=null;if(track.classList.contains('is-dragging'))snapBack()};
   const ignored=target=>target.closest?.('input,textarea,select,[contenteditable="true"],.wmodal,.sheet,.zsheet');
@@ -3055,7 +3056,7 @@ function bindStatsSwipe(){
     if(!g.dragging){if(Math.abs(dx)<4||Math.abs(dx)<Math.abs(dy)*.35)return;g.dragging=true;track.classList.add('is-dragging');if(g.pointerId!=null)try{surface.setPointerCapture(g.pointerId)}catch{}}
     if(e?.cancelable)e.preventDefault();
     const index=indexNow(),width=$('viewStats').clientWidth||surface.clientWidth,edge=(index===0&&dx>0)||(index===SV.length-1&&dx<0),offset=edge?dx*.2:dx;
-    track.style.transform=`translate3d(calc(-${index*25}% + ${offset}px),0,0)`;
+    track.style.transform=`translate3d(calc(-${index*25}% - ${index*STAT_GAP}px + ${offset}px),0,0)`;
     const at=performance.now();g.velocity=(x-g.lastX)/Math.max(1,at-g.lastAt);g.lastX=x;g.lastAt=at;
   };
   const complete=(g,x,y)=>{
