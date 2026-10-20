@@ -426,24 +426,21 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .item-editor-panel .item-edit .row{gap:8px}
 .item-editor-panel .item-edit .row button{min-height:40px;padding-block:6px}
 @media (prefers-reduced-motion:reduce){.item-editor-panel{animation:none}}
+.cmp-title{margin:0;font-size:14px;font-weight:600;color:var(--ink)}
+.cmp-explain{margin:0;font-size:11px;line-height:1.4;color:var(--muted)}
 .cmp-sel{display:flex;gap:8px;align-items:center}
 .cmp-sel select{flex:1 1 0;min-width:0;padding-inline:10px}
 .cmp-sel span{color:var(--muted);font-size:13px}
-.cmp{display:grid;grid-template-columns:minmax(64px,1fr) auto auto auto;gap:6px 10px;align-items:baseline;font-size:14px}
-.cmp .v,.cmp .d{font-size:13px}
-.cmp .h{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;text-align:right}
-.cmp .h:first-child{text-align:left}
-/* a long name wraps inside its own column (with a hyphen where the phone can), never under the numbers */
-.cmp .n{min-width:0;overflow-wrap:anywhere;word-break:normal;-webkit-hyphens:auto;hyphens:auto}
-.cmp .v{font-family:var(--f-num);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
-.cmp .d{font-family:var(--f-num);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;font-size:12px}
-.cmp .t{font-weight:600;padding-top:10px;border-top:1px solid var(--line)}
-/* a category under its total: the name is set in, its numbers end at the same edge as all the others */
-.cmp .sub{color:var(--muted)}
-.cmp .n.sub{padding-left:10px}
-@media (max-width:420px){.cmp{font-size:13px;gap:6px 8px}.cmp .v,.cmp .d{font-size:12px}}
-/* a phone up to 400px wide: each name on a line of its own above its three numbers, so names and sums never overlap */
-@media (max-width:400px){.cmp{grid-template-columns:repeat(3,minmax(0,1fr));gap:2px 8px}.cmp .v,.cmp .d{font-size:11px}.cmp .h:first-child{display:none}.cmp .n{grid-column:1/-1;padding-top:8px}.cmp .v.t,.cmp .d.t{border-top:0;padding-top:0}}
+.cmp{display:flex;flex-direction:column;gap:6px}
+.cmp-row{display:flex;flex-direction:column;gap:5px;min-width:0;padding:7px 8px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.cmp-row.t{border-color:color-mix(in srgb,var(--accent) 28%,var(--line));background:color-mix(in srgb,var(--accent) 5%,var(--bg))}
+.cmp-row.sub{padding:6px 8px;background:color-mix(in srgb,var(--surface) 64%,var(--bg))}
+.cmp-name{min-width:0;overflow-wrap:anywhere;font-size:12px;line-height:1.25;font-weight:600}
+.cmp-row.sub .cmp-name{padding-left:8px;color:var(--muted);font-weight:500}
+.cmp-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;min-width:0}
+.cmp-value{display:flex;flex-direction:column;gap:3px;min-width:0}
+.cmp-value>span:first-child{overflow:hidden;color:var(--muted);font-size:10px;line-height:1.2;text-overflow:ellipsis;white-space:nowrap}
+.cmp-value>b,.cmp-delta{font-family:var(--f-num);font-size:clamp(9px,3vw,12px);font-variant-numeric:tabular-nums;font-weight:500;white-space:nowrap}
 .sumcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:8px}
 .sumtop{display:flex;flex-wrap:wrap;justify-content:space-between;gap:0 8px;font-size:13px;color:var(--muted)}
 .sumtop>:last-child{margin-left:auto}
@@ -815,6 +812,7 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .dperson .debt:has(.dtap){gap:3px;padding:5px 8px}
 .dperson .debt-return>.primary,.dperson .debt-return>.ghost{font-size:13px;min-height:34px;padding:5px 12px}
 .dperson .dacc select{min-height:36px;padding-block:4px}
+#cmp{display:flex;flex-direction:column;gap:8px}
 .cmp-note{margin:0;font-size:12px;color:var(--muted)}
 .recon{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--warn);border-radius:12px;padding:12px}
 .recon p{margin:0;font-size:14px}
@@ -1163,6 +1161,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
           <details class="more panel-ish" id="cmpBox" data-sv="cmp">
             <summary>Сравнение месяцев</summary>
             <div class="morebody">
+              <h2 class="cmp-title">Сравнение месяцев</h2>
+              <p class="cmp-explain">В каждой строке показаны оба месяца и разница. Разница = первый месяц минус второй.</p>
               <div class="cmp-sel"><select id="cmpA" aria-label="Первый месяц"></select><span>и</span><select id="cmpB" aria-label="Второй месяц"></select></div>
               <div id="cmp"></div>
             </div>
@@ -3124,16 +3124,17 @@ function renderCompare(){
   $('cmpA').onchange=e=>{state.cmpA=e.target.value;render()};$('cmpB').onchange=e=>{state.cmpB=e.target.value;render()};
   const a=monthStats(A), b=monthStats(B);
   const m0=n=>{const v=Math.round(n*100)/100;return (v<0?'−':'')+(Number.isInteger(v)?fmt0:fmt2).format(Math.abs(v))};
+  const hd=k=>mShort.format(keyDate(k))+(A.slice(0,4)!==B.slice(0,4)?' '+k.slice(0,4):'');
   /* good = green: income up, spending down; savings and trip money shown neutral */
-  const delta=(x,y,kind)=>{const d=Math.round((x-y)*100)/100;if(Math.abs(d)<1)return '<span class="d" style="color:var(--muted)">—</span>';
-    const good=kind==='out'?d<0:kind==='in'?d>0:null;return `<span class="d" style="color:${good===null?'var(--muted)':good?'var(--good)':'var(--bad)'}">${d>0?'+':'−'}${m0(Math.abs(d))}</span>`};
-  const row=(name,x,y,kind,cls='')=>`<span class="n ${cls}">${name}</span><span class="v ${cls}">${m0(x)}</span><span class="v ${cls}">${m0(y)}</span>${delta(x,y,kind).replace('class="d"',`class="d ${cls}"`)}`;
+  const delta=(x,y,kind)=>{const d=Math.round((x-y)*100)/100;if(d===0)return '<span class="cmp-delta" style="color:var(--muted)">0 ₽</span>';
+    const good=kind==='out'?d<0:kind==='in'?d>0:null;return `<span class="cmp-delta" style="color:${good===null?'var(--muted)':good?'var(--good)':'var(--bad)'}">${d>0?'+':'−'}${m0(Math.abs(d))} ₽</span>`};
+  const row=(name,x,y,kind,cls='')=>`<div class="cmp-row ${cls}"><span class="cmp-name">${name}</span><div class="cmp-values">
+    <div class="cmp-value"><span>${esc(cap(hd(A)))}</span><b>${m0(x)} ₽</b></div><div class="cmp-value"><span>${esc(cap(hd(B)))}</span><b>${m0(y)} ₽</b></div><div class="cmp-value"><span>Разница</span>${delta(x,y,kind)}</div>
+    </div></div>`;
   /* the categories in the one fixed order, as on the tiles — a row stays in its place from month to month */
   const cats=(ma,mb,kind)=>Object.keys({...ma,...mb}).filter(c=>Math.round(ma[c]||0)||Math.round(mb[c]||0)).sort(byRank).map(c=>row(esc(CAT[c]?.name||'Другое'),ma[c]||0,mb[c]||0,kind,'sub')).join('');
   if(!a.any&&!b.any){$('cmp').innerHTML='<div class="empty"><p>Записей за эти месяцы пока нет.</p></div>';return}
-  /* two years in the table: each column says its year */
-  const hd=k=>mShort.format(keyDate(k))+(A.slice(0,4)!==B.slice(0,4)?' '+k.slice(0,4):'');
-  $('cmp').innerHTML=(A===cur||B===cur?`<p class="cmp-note">${cap(mLabel.format(keyDate(cur)).split(' ')[0])} ещё идёт, поэтому сравнение неполное.</p>`:'')+`<div class="cmp"><span class="h">&nbsp;</span><span class="h">${hd(A)}</span><span class="h">${hd(B)}</span><span class="h">разница, ₽</span>
+  $('cmp').innerHTML=(A===cur||B===cur?`<p class="cmp-note">${cap(mLabel.format(keyDate(cur)).split(' ')[0])} ещё идёт, поэтому сравнение неполное.</p>`:'')+`<div class="cmp">
     ${row('Траты в&nbsp;лимит',a.lim,b.lim,'out','t')}${cats(a.limBy,b.limBy,'out')}
     ${row('Доходы',a.inc,b.inc,'in','t')}${cats(a.incBy,b.incBy,'in')}
     ${row('На брокер',a.broker,b.broker,'save','t')}${a.piggy||b.piggy?row('В копильник',a.piggy,b.piggy,'save'):''}${a.sadaqa||b.sadaqa?row('Садака',a.sadaqa,b.sadaqa,'save'):''}${a.zakat||b.zakat?row('Закят',a.zakat,b.zakat,'save'):''}
