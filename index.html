@@ -427,7 +427,6 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .item-editor-panel .item-edit .row button{min-height:40px;padding-block:6px}
 @media (prefers-reduced-motion:reduce){.item-editor-panel{animation:none}}
 .cmp-title{margin:0;font-size:13px;font-weight:600;color:var(--ink)}
-.cmp-explain{margin:0;font-size:9px;line-height:1.3;color:var(--muted)}
 .cmp-sel{display:flex;gap:8px;align-items:center}
 .cmp-sel select{flex:1 1 0;min-width:0;padding-inline:10px}
 .cmp-sel span{color:var(--muted);font-size:13px}
@@ -813,7 +812,6 @@ details.more[open]>summary::after{transform:rotate(-90deg)}
 .dperson .debt-return>.primary,.dperson .debt-return>.ghost{font-size:13px;min-height:34px;padding:5px 12px}
 .dperson .dacc select{min-height:36px;padding-block:4px}
 #cmp{display:flex;flex-direction:column;gap:8px}
-.cmp-note{margin:0;font-size:12px;color:var(--muted)}
 .recon{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--warn);border-radius:12px;padding:12px}
 .recon p{margin:0;font-size:14px}
 .recon .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -1162,7 +1160,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
             <summary>Сравнение месяцев</summary>
             <div class="morebody">
               <h2 class="cmp-title">Сравнение месяцев</h2>
-              <p class="cmp-explain">Все суммы в ₽. Разница = первый месяц минус второй.</p>
               <div class="cmp-sel"><select id="cmpA" aria-label="Первый месяц"></select><span>и</span><select id="cmpB" aria-label="Второй месяц"></select></div>
               <div id="cmp"></div>
             </div>
@@ -3132,7 +3129,7 @@ function renderCompare(){
   /* the categories in the one fixed order, as on the tiles — a row stays in its place from month to month */
   const cats=(ma,mb,kind)=>Object.keys({...ma,...mb}).filter(c=>Math.round(ma[c]||0)||Math.round(mb[c]||0)).sort(byRank).map(c=>row(esc(CAT[c]?.name||'Другое'),ma[c]||0,mb[c]||0,kind,'sub')).join('');
   if(!a.any&&!b.any){$('cmp').innerHTML='<div class="empty"><p>Записей за эти месяцы пока нет.</p></div>';return}
-  $('cmp').innerHTML=(A===cur||B===cur?`<p class="cmp-note">${cap(mLabel.format(keyDate(cur)).split(' ')[0])} ещё идёт, поэтому сравнение неполное.</p>`:'')+`<div class="cmp"><div class="cmp-head"><span>Категория</span><span>${esc(cap(hd(A)))}</span><span>${esc(cap(hd(B)))}</span><span>Разница</span></div>
+  $('cmp').innerHTML=`<div class="cmp"><div class="cmp-head"><span>Категория</span><span>${esc(cap(hd(A)))}</span><span>${esc(cap(hd(B)))}</span><span>Разница</span></div>
     ${row('Траты в&nbsp;лимит',a.lim,b.lim,'out','t')}${cats(a.limBy,b.limBy,'out')}
     ${row('Доходы',a.inc,b.inc,'in','t')}${cats(a.incBy,b.incBy,'in')}
     ${row('На брокер',a.broker,b.broker,'save','t')}${a.piggy||b.piggy?row('В копильник',a.piggy,b.piggy,'save'):''}${a.sadaqa||b.sadaqa?row('Садака',a.sadaqa,b.sadaqa,'save'):''}${a.zakat||b.zakat?row('Закят',a.zakat,b.zakat,'save'):''}
