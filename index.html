@@ -196,6 +196,8 @@ button{cursor:pointer}
 .bdwrap .bar .name,.bdwrap .bar .val{font-size:12.5px}
 .bdwrap .bar .track{height:3px}
 .bdwrap .bar:last-child{border-bottom:0}
+#viewStats .bdwrap .bar{min-height:30px;padding:2px 9px 4px;row-gap:1px}
+#viewStats .bdwrap .bar .name,#viewStats .bdwrap .bar .val{font-size:12px}
 .bdwrap .bar:active{background:var(--accent-soft)}
 /* the ring sits inside the row: the card's edge would cut one drawn outside it */
 .bars .bar:focus-visible{outline-offset:-2px}
@@ -426,7 +428,7 @@ input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .item-editor-panel .item-edit .row{gap:8px}
 .item-editor-panel .item-edit .row button{min-height:40px;padding-block:6px}
 @media (prefers-reduced-motion:reduce){.item-editor-panel{animation:none}}
-.cmp-title{margin:0;font-size:13px;font-weight:600;color:var(--ink)}
+.cmp-title{margin:0;text-align:center;font-size:13px;font-weight:600;color:var(--ink)}
 .cmp-sel{display:flex;justify-content:center;gap:6px;align-items:center}
 .cmp-sel select{flex:0 1 132px;max-width:calc((100% - 6px)/2);min-width:0;min-height:36px;padding:4px 8px;border-radius:8px;font-size:14px;line-height:1.2}
 .cmp-sel span{color:var(--muted);font-size:13px}
