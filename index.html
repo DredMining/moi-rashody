@@ -209,13 +209,13 @@ button{cursor:pointer}
 /* its field is one line high (in .wallet-edit a field normally stands in a row) */
 #tripCard .wmodal input{flex:none}
 /* The stats panels move like a horizontal gallery; vertical page scrolling stays native. */
-#viewStats{touch-action:manipulation}
-#statsViewport{width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;scroll-snap-type:x mandatory;scroll-snap-stop:always;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:manipulation;transition:height .28s cubic-bezier(.22,.61,.36,1)}
-#statsViewport::-webkit-scrollbar{display:none}
-#statsTrack{display:flex;align-items:flex-start;gap:0;width:100%;will-change:scroll-position}
-.stats-page{flex:0 0 100%;width:100%;min-width:0;display:flex;flex-direction:column;gap:16px;scroll-snap-align:start}
+#viewStats,#statsViewport,#scroller.stats-swipe{touch-action:pan-y pinch-zoom}
+#statsViewport{width:100%;min-width:0;overflow:hidden;transition:height .28s cubic-bezier(.22,.61,.36,1)}
+#statsTrack{display:flex;align-items:flex-start;gap:0;width:400%;will-change:transform;transition:transform .3s cubic-bezier(.22,.61,.36,1)}
+#statsTrack.is-dragging{transition:none;user-select:none;-webkit-user-select:none}
+.stats-page{flex:0 0 25%;width:25%;min-width:0;display:flex;flex-direction:column;gap:16px}
 .stats-page>[data-sv]{width:100%;max-width:100%}
-@media(prefers-reduced-motion:reduce){#statsViewport{scroll-behavior:auto;transition-duration:.01ms}}
+@media(prefers-reduced-motion:reduce){#statsViewport,#statsTrack{transition-duration:.01ms}}
 #cmpBox>summary{display:none}
 .sv-empty{margin:0;padding:16px;text-align:center;font-size:14px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
 /* the trip links: each a 44px button of its own, «Отчёт по прошлой командировке» and «Командировка закончилась» each on a line apart */
@@ -1585,6 +1585,7 @@ const TABS=[['ledger','tabLedger','viewLedger'],['money','tabMoney','viewMoney']
 function renderTabs(){
   /* Tab reaches the chosen tab only; the arrows move between them */
   for(const [t,tab,view] of TABS){const on=state.tab===t;$(tab).setAttribute('aria-selected',on);$(tab).tabIndex=on?0:-1;$(view).hidden=!on;$(view).style.display=on?'flex':'none'}
+  $('scroller').classList.toggle('stats-swipe',state.tab==='stats');
   /* the window / tab title says what is on screen (a screen reader, the app switcher): «Записи, октябрь 2026 — Мои расходы» */
   const tn={ledger:'Учёт',money:'Деньги',history:'Записи',debts:'Долги',stats:'Итоги'}[state.tab];
   document.title=(tn?tn+(['history','stats'].includes(state.tab)?', '+monthLbl():'')+' — ':'')+'Мои расходы';
@@ -3017,11 +3018,8 @@ function monthStats(k){
 /* Итоги: Расходы | Доходы | Брокер | Сравнение — only the picked part is shown; a part with nothing this month says so */
 const SV=[['out','Расходы'],['in','Доходы'],['broker','Брокер'],['cmp','Сравнение']];
 function setStatView(v){
-  const index=SV.findIndex(([k])=>k===v);if(index<0)return;
-  fresh();
-  const viewport=$('statsViewport'),left=index*viewport.clientWidth;
-  if(!viewport.clientWidth){applyStatView(index);return}
-  viewport.scrollTo({left,behavior:'smooth'});
+  const index=SV.findIndex(([k])=>k===v),box=$('viewStats');if(index<0||box.dataset.view===v)return;
+  state.statView=v;fresh();renderStatSeg();
 }
 function syncStatsViewport(index=Math.max(0,SV.findIndex(([k])=>k===state.statView))){
   const viewport=$('statsViewport'),pages=[...$('statsTrack').children],active=pages[index];
@@ -3041,25 +3039,53 @@ function renderStatSeg(){
   const v=SV.some(([k])=>k===state.statView)?state.statView:'out';
   $('statSeg').innerHTML=SV.map(([k,n])=>`<button type="button" data-svb="${k}" aria-pressed="${k===v}">${n}</button>`).join('');
   $('statSeg').querySelectorAll('[data-svb]').forEach(b=>b.onclick=()=>setStatView(b.dataset.svb));
-  const index=SV.findIndex(([k])=>k===v),viewport=$('statsViewport');
-  applyStatView(index);viewport.scrollLeft=index*viewport.clientWidth;
+  const index=SV.findIndex(([k])=>k===v),track=$('statsTrack');
+  applyStatView(index);track.style.transform=`translate3d(-${index*25}%,0,0)`;
   requestAnimationFrame(()=>syncStatsViewport(index));
 }
-function bindStatsScroll(){
-  const viewport=$('statsViewport');let frame=0,settle=0;
-  const update=()=>{
-    frame=0;if(!viewport.clientWidth)return;
-    const index=Math.max(0,Math.min(SV.length-1,Math.round(viewport.scrollLeft/viewport.clientWidth)));
-    if($('viewStats').dataset.view!==SV[index][0])applyStatView(index);
-    clearTimeout(settle);settle=setTimeout(()=>syncStatsViewport(index),120);
-  };
-  viewport.addEventListener('scroll',()=>{if(!frame)frame=requestAnimationFrame(update)},{passive:true});
-  window.addEventListener('resize',()=>{
-    const index=Math.max(0,SV.findIndex(([k])=>k===$('viewStats').dataset.view));
-    viewport.scrollLeft=index*viewport.clientWidth;syncStatsViewport(index);
+function bindStatsSwipe(){
+  const surface=$('scroller'),track=$('statsTrack');let down=null,blockClickUntil=0;
+  const indexNow=()=>Math.max(0,SV.findIndex(([k])=>k===$('viewStats').dataset.view));
+  const snapBack=()=>{track.classList.remove('is-dragging');track.style.transform=`translate3d(-${indexNow()*25}%,0,0)`};
+  surface.addEventListener('pointerdown',e=>{
+    blockClickUntil=0;
+    if(state.tab!=='stats'||!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0)||e.target.closest?.('input,textarea,select,[contenteditable="true"],.wmodal,.sheet,.zsheet')){down=null;return}
+    down={id:e.pointerId,x:e.clientX,y:e.clientY,lastX:e.clientX,lastAt:performance.now(),startAt:performance.now(),velocity:0,dragging:false};
   },{passive:true});
+  surface.addEventListener('pointermove',e=>{
+    if(!down||down.id!==e.pointerId)return;
+    const dx=e.clientX-down.x,dy=e.clientY-down.y;
+    if(!down.dragging){
+      if(Math.max(Math.abs(dx),Math.abs(dy))<7)return;
+      if(Math.abs(dy)>Math.abs(dx)*1.35&&Math.abs(dy)>18){down=null;return}
+      if(Math.abs(dx)<=Math.abs(dy)*1.05)return;
+      down.dragging=true;track.classList.add('is-dragging');
+      try{surface.setPointerCapture(e.pointerId)}catch{}
+    }
+    if(e.cancelable)e.preventDefault();
+    const index=indexNow(),width=$('viewStats').clientWidth||surface.clientWidth,edge=(index===0&&dx>0)||(index===SV.length-1&&dx<0),offset=edge?dx*.2:dx;
+    track.style.transform=`translate3d(calc(-${index*25}% + ${offset}px),0,0)`;
+    const at=performance.now();down.velocity=(e.clientX-down.lastX)/Math.max(1,at-down.lastAt);down.lastX=e.clientX;down.lastAt=at;
+  },{passive:false});
+  surface.addEventListener('pointerup',e=>{
+    if(!down||down.id!==e.pointerId){down=null;return}
+    const g=down;down=null;if(!g.dragging)return;
+    const dx=e.clientX-g.x,dy=e.clientY-g.y,elapsed=Math.max(1,performance.now()-g.startAt),speed=Math.max(Math.abs(dx)/elapsed,Math.abs(g.velocity));
+    blockClickUntil=performance.now()+500;
+    const current=indexNow(),width=$('viewStats').clientWidth||surface.clientWidth,threshold=Math.max(20,Math.min(34,width*.07));
+    const qualifies=Math.abs(dx)>=threshold||(Math.abs(dx)>=12&&speed>=.35);
+    const next=qualifies?Math.max(0,Math.min(SV.length-1,current+(dx<0?1:-1))):current;
+    track.classList.remove('is-dragging');
+    if(next!==current)setStatView(SV[next][0]);else snapBack();
+  },{passive:true});
+  surface.addEventListener('pointercancel',()=>{if(!down)return;down=null;snapBack()},{passive:true});
+  surface.addEventListener('click',e=>{
+    if(performance.now()>blockClickUntil)return;
+    blockClickUntil=0;e.preventDefault();e.stopImmediatePropagation();
+  },true);
+  window.addEventListener('resize',()=>syncStatsViewport(),{passive:true});
 }
-bindStatsScroll();
+bindStatsSwipe();
 function renderCompare(){
   const cur=`${now.getFullYear()}-${pad(now.getMonth()+1)}`;
   const keys=[...new Set([monthKey(),cur,...state.items.filter(i=>typeof i.date==='string').map(i=>i.date.slice(0,7)).filter(k=>/^\d{4}-(0[1-9]|1[0-2])$/.test(k))])].sort().reverse();
