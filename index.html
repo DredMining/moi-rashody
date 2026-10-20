@@ -3044,46 +3044,63 @@ function renderStatSeg(){
   requestAnimationFrame(()=>syncStatsViewport(index));
 }
 function bindStatsSwipe(){
-  const surface=$('scroller'),track=$('statsTrack');let down=null,blockClickUntil=0;
+  const surface=$('scroller'),track=$('statsTrack'),useTouchEvents='ontouchstart' in window;let down=null,touchDown=null,blockClickUntil=0;
   const indexNow=()=>Math.max(0,SV.findIndex(([k])=>k===$('viewStats').dataset.view));
   const snapBack=()=>{track.classList.remove('is-dragging');track.style.transform=`translate3d(-${indexNow()*25}%,0,0)`};
-  const reset=()=>{down=null;if(track.classList.contains('is-dragging'))snapBack()};
-  surface.addEventListener('pointerdown',e=>{
-    blockClickUntil=0;
-    if(state.tab!=='stats'||!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0)||e.target.closest?.('input,textarea,select,[contenteditable="true"],.wmodal,.sheet,.zsheet')){reset();return}
-    down={id:e.pointerId,x:e.clientX,y:e.clientY,lastX:e.clientX,lastAt:performance.now(),startAt:performance.now(),velocity:0,dragging:false};
-  },{passive:true});
-  surface.addEventListener('pointermove',e=>{
-    if(!down||down.id!==e.pointerId)return;
-    const dx=e.clientX-down.x,dy=e.clientY-down.y;
-    if(!down.dragging){
-      if(Math.abs(dx)<8)return;
-      if(Math.abs(dx)<Math.abs(dy)*.5)return;
-      /* Keep the horizontal axis once it is chosen; later vertical drift must not cancel the slide. */
-      down.dragging=true;track.classList.add('is-dragging');
-      try{surface.setPointerCapture(e.pointerId)}catch{}
-    }
-    if(e.cancelable)e.preventDefault();
+  const resetPointer=()=>{down=null;if(track.classList.contains('is-dragging'))snapBack()};
+  const resetTouch=()=>{touchDown=null;if(track.classList.contains('is-dragging'))snapBack()};
+  const ignored=target=>target.closest?.('input,textarea,select,[contenteditable="true"],.wmodal,.sheet,.zsheet');
+  const move=(g,x,y,e)=>{
+    const dx=x-g.x,dy=y-g.y;
+    if(!g.dragging){if(Math.abs(dx)<4||Math.abs(dx)<Math.abs(dy)*.35)return;g.dragging=true;track.classList.add('is-dragging');if(g.pointerId!=null)try{surface.setPointerCapture(g.pointerId)}catch{}}
+    if(e?.cancelable)e.preventDefault();
     const index=indexNow(),width=$('viewStats').clientWidth||surface.clientWidth,edge=(index===0&&dx>0)||(index===SV.length-1&&dx<0),offset=edge?dx*.2:dx;
     track.style.transform=`translate3d(calc(-${index*25}% + ${offset}px),0,0)`;
-    const at=performance.now();down.velocity=(e.clientX-down.lastX)/Math.max(1,at-down.lastAt);down.lastX=e.clientX;down.lastAt=at;
-  },{passive:false});
-  const finish=e=>{
-    if(!down){reset();return}if(down.id!==e.pointerId)return;
-    const g=down;down=null;if(!g.dragging)return;
-    const dx=e.clientX-g.x,dy=e.clientY-g.y,elapsed=Math.max(1,performance.now()-g.startAt),speed=Math.max(Math.abs(dx)/elapsed,Math.abs(g.velocity));
+    const at=performance.now();g.velocity=(x-g.lastX)/Math.max(1,at-g.lastAt);g.lastX=x;g.lastAt=at;
+  };
+  const complete=(g,x,y)=>{
+    if(!g.dragging)return;
+    const dx=x-g.x,elapsed=Math.max(1,performance.now()-g.startAt),speed=Math.max(Math.abs(dx)/elapsed,Math.abs(g.velocity));
     blockClickUntil=performance.now()+500;
     const current=indexNow(),width=$('viewStats').clientWidth||surface.clientWidth,threshold=Math.max(20,Math.min(34,width*.07));
     const qualifies=Math.abs(dx)>=threshold||(Math.abs(dx)>=12&&speed>=.35);
     const next=qualifies?Math.max(0,Math.min(SV.length-1,current+(dx<0?1:-1))):current;
-    track.classList.remove('is-dragging');
-    if(next!==current)setStatView(SV[next][0]);else snapBack();
+    track.classList.remove('is-dragging');if(next!==current)setStatView(SV[next][0]);else snapBack();
   };
-  const cancel=e=>{if(down&&e?.pointerId!=null&&down.id!==e.pointerId)return;reset()};
-  window.addEventListener('pointerup',finish,{capture:true,passive:true});
-  window.addEventListener('pointercancel',cancel,{capture:true,passive:true});
-  surface.addEventListener('lostpointercapture',cancel,{passive:true});
-  window.addEventListener('blur',cancel,{passive:true});
+  surface.addEventListener('pointerdown',e=>{
+    if(e.pointerType==='touch'&&useTouchEvents)return;
+    blockClickUntil=0;
+    if(state.tab!=='stats'||!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0)||ignored(e.target)){resetPointer();return}
+    down={id:e.pointerId,pointerId:e.pointerId,x:e.clientX,y:e.clientY,lastX:e.clientX,lastAt:performance.now(),startAt:performance.now(),velocity:0,dragging:false};
+  },{passive:true});
+  surface.addEventListener('pointermove',e=>{
+    if(!down||down.id!==e.pointerId)return;
+    move(down,e.clientX,e.clientY,e);
+  },{passive:false});
+  const finishPointer=e=>{
+    if(!down||down.id!==e.pointerId)return;
+    const g=down;down=null;complete(g,e.clientX,e.clientY);
+  };
+  const cancelPointer=e=>{if(e.pointerType==='touch'&&useTouchEvents)return;if(down&&e?.pointerId!=null&&down.id!==e.pointerId)return;resetPointer()};
+  window.addEventListener('pointerup',finishPointer,{capture:true,passive:true});
+  window.addEventListener('pointercancel',cancelPointer,{capture:true,passive:true});
+  surface.addEventListener('lostpointercapture',cancelPointer,{passive:true});
+  surface.addEventListener('touchstart',e=>{
+    blockClickUntil=0;
+    if(state.tab!=='stats'||e.touches.length!==1||ignored(e.target)){resetTouch();return}
+    const t=e.touches[0];touchDown={id:t.identifier,x:t.clientX,y:t.clientY,lastX:t.clientX,lastAt:performance.now(),startAt:performance.now(),velocity:0,dragging:false};
+  },{passive:true});
+  surface.addEventListener('touchmove',e=>{
+    if(!touchDown||e.touches.length!==1)return;
+    const t=[...e.touches].find(t=>t.identifier===touchDown.id);if(t)move(touchDown,t.clientX,t.clientY,e);
+  },{passive:false});
+  surface.addEventListener('touchend',e=>{
+    if(!touchDown)return;
+    const t=[...e.changedTouches].find(t=>t.identifier===touchDown.id);if(!t)return;
+    const g=touchDown;touchDown=null;complete(g,t.clientX,t.clientY);
+  },{passive:true});
+  surface.addEventListener('touchcancel',resetTouch,{passive:true});
+  window.addEventListener('blur',()=>{resetPointer();resetTouch()},{passive:true});
   surface.addEventListener('click',e=>{
     if(performance.now()>blockClickUntil)return;
     blockClickUntil=0;e.preventDefault();e.stopImmediatePropagation();
