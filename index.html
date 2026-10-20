@@ -6,6 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Мои расходы</title>
+<meta name="description" content="Ведите учёт доходов и расходов, счетов, долгов, командировочных и закята. Записи хранятся только на вашем устройстве.">
 <meta name="theme-color" content="#0D1320">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -2947,7 +2948,7 @@ function renderRecent(){
   const box=$('recent'), last=state.items.filter(i=>!zeroEnd(i)).sort((a,b)=>(b.created||0)-(a.created||0)).slice(0,5);
   if(!state.ready){box.innerHTML='<div class="empty"><p>Загружаю записи…</p></div>';return}
   if(!last.length){
-    box.innerHTML=`<div class="empty"><p>Здесь появятся ваши последние записи. Введите сумму, нажмите «Добавить расход», выберите категорию и счёт.</p></div>`;
+    box.innerHTML=`<div class="empty"><p>Записей пока нет. Укажите сумму, выберите категорию и счёт, чтобы добавить первую запись.</p></div>`;
     return;
   }
   box.innerHTML=last.map(i=>itemRow(i,true)).join('');
