@@ -208,10 +208,14 @@ button{cursor:pointer}
 #tripCard .wmodal b{font-family:var(--f-body);font-weight:600;font-variant-numeric:normal}
 /* its field is one line high (in .wallet-edit a field normally stands in a row) */
 #tripCard .wmodal input{flex:none}
-/* Итоги shows one part at a time, picked under the month card */
+/* The stats panels move like a horizontal gallery; vertical page scrolling stays native. */
 #viewStats{touch-action:pan-y pinch-zoom}
-#viewStats[data-view="out"] [data-sv]:not([data-sv="out"]),#viewStats[data-view="in"] [data-sv]:not([data-sv="in"]),
-#viewStats[data-view="broker"] [data-sv]:not([data-sv="broker"]),#viewStats[data-view="cmp"] [data-sv]:not([data-sv="cmp"]){display:none}
+#statsViewport{width:100%;min-width:0;overflow:hidden;touch-action:pan-y pinch-zoom;transition:height .28s cubic-bezier(.22,.61,.36,1)}
+#statsTrack{display:flex;align-items:flex-start;gap:0;width:400%;will-change:transform;transition:transform .32s cubic-bezier(.22,.61,.36,1)}
+#statsTrack.is-dragging{transition:none;user-select:none;-webkit-user-select:none}
+.stats-page{flex:0 0 25%;width:25%;min-width:0;display:flex;flex-direction:column;gap:16px}
+.stats-page>[data-sv]{width:100%;max-width:100%}
+@media(prefers-reduced-motion:reduce){#statsViewport,#statsTrack{transition-duration:.01ms}}
 #cmpBox>summary{display:none}
 .sv-empty{margin:0;padding:16px;text-align:center;font-size:14px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
 /* the trip links: each a 44px button of its own, «Отчёт по прошлой командировке» and «Командировка закончилась» each on a line apart */
@@ -1129,31 +1133,43 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     </section>
     <div class="seg seg3" id="statSeg" role="group" aria-label="Что показать"></div>
     <p class="sv-empty" id="svEmpty" hidden></p>
-    <section id="breakdown" data-sv="out" aria-label="Куда ушли деньги" class="bdwrap">
-      <div class="bd" id="bdDaily"><h3>Повседневные</h3><div class="bars" id="barsDaily"></div></div>
-      <div class="bd" id="bdSep"><h3>Отдельно</h3><div class="bars" id="barsSep"></div></div>
-      <div class="bd" id="bdTrip"><h3>Командировка</h3><div class="bars" id="barsTrip"></div></div>
-    </section>
-    <section id="incomeBreakdown" data-sv="in" aria-labelledby="incH" class="bdwrap">
-      <h2 id="incH">Доходы по источникам</h2>
-      <div class="bd" id="bdIn"><div class="bars" id="barsIn"></div></div>
-    </section>
-    <section class="panel" id="tripCard" data-sv="out" aria-labelledby="tripH">
-      <h2 id="tripH">Командировка</h2>
-      <div class="stat wide" id="tripStat"></div>
-    </section>
-    <section class="panel" data-sv="broker" aria-labelledby="ruleH">
-      <h2 id="ruleH">Брокер и лимит</h2>
-      <div class="rule" id="brokerBox"></div>
-      <div class="rule" id="budgetBox"></div>
-    </section>
-    <details class="more panel-ish" id="cmpBox" data-sv="cmp">
-      <summary>Сравнение месяцев</summary>
-      <div class="morebody">
-      <div class="cmp-sel"><select id="cmpA" aria-label="Первый месяц"></select><span>и</span><select id="cmpB" aria-label="Второй месяц"></select></div>
-      <div id="cmp"></div>
+    <div id="statsViewport" class="stats-viewport">
+      <div id="statsTrack" class="stats-track" style="transform:translate3d(0,0,0)">
+        <div class="stats-page" data-stat-page="out">
+          <section id="breakdown" data-sv="out" aria-label="Куда ушли деньги" class="bdwrap">
+            <div class="bd" id="bdDaily"><h3>Повседневные</h3><div class="bars" id="barsDaily"></div></div>
+            <div class="bd" id="bdSep"><h3>Отдельно</h3><div class="bars" id="barsSep"></div></div>
+            <div class="bd" id="bdTrip"><h3>Командировка</h3><div class="bars" id="barsTrip"></div></div>
+          </section>
+          <section class="panel" id="tripCard" data-sv="out" aria-labelledby="tripH">
+            <h2 id="tripH">Командировка</h2>
+            <div class="stat wide" id="tripStat"></div>
+          </section>
+        </div>
+        <div class="stats-page" data-stat-page="in">
+          <section id="incomeBreakdown" data-sv="in" aria-labelledby="incH" class="bdwrap">
+            <h2 id="incH">Доходы по источникам</h2>
+            <div class="bd" id="bdIn"><div class="bars" id="barsIn"></div></div>
+          </section>
+        </div>
+        <div class="stats-page" data-stat-page="broker">
+          <section class="panel" data-sv="broker" aria-labelledby="ruleH">
+            <h2 id="ruleH">Брокер и лимит</h2>
+            <div class="rule" id="brokerBox"></div>
+            <div class="rule" id="budgetBox"></div>
+          </section>
+        </div>
+        <div class="stats-page" data-stat-page="cmp">
+          <details class="more panel-ish" id="cmpBox" data-sv="cmp">
+            <summary>Сравнение месяцев</summary>
+            <div class="morebody">
+              <div class="cmp-sel"><select id="cmpA" aria-label="Первый месяц"></select><span>и</span><select id="cmpB" aria-label="Второй месяц"></select></div>
+              <div id="cmp"></div>
+            </div>
+          </details>
+        </div>
       </div>
-    </details>
+    </div>
   </div>
 
 </main>
@@ -3003,38 +3019,66 @@ const SV=[['out','Расходы'],['in','Доходы'],['broker','Брокер
 function setStatView(v){
   const box=$('viewStats');
   if(!SV.some(([k])=>k===v)||box.dataset.view===v)return;
-  state.statView=v;fresh();render();
+  state.statView=v;fresh();renderStatSeg();
+}
+function syncStatsViewport(){
+  const viewport=$('statsViewport'),pages=[...$('statsTrack').children],index=Math.max(0,SV.findIndex(([k])=>k===state.statView)),active=pages[index];
+  if(active&&active.getClientRects().length){const h=Math.ceil(active.getBoundingClientRect().height);if(h)viewport.style.height=h+'px'}
 }
 function renderStatSeg(){
   const v=SV.some(([k])=>k===state.statView)?state.statView:'out', box=$('viewStats');
   box.dataset.view=v;$('cmpBox').open=true;
   $('statSeg').innerHTML=SV.map(([k,n])=>`<button type="button" data-svb="${k}" aria-pressed="${k===v}">${n}</button>`).join('');
   $('statSeg').querySelectorAll('[data-svb]').forEach(b=>b.onclick=()=>setStatView(b.dataset.svb));
+  const index=SV.findIndex(([k])=>k===v),track=$('statsTrack'),pages=[...track.children];
+  track.style.transform=`translate3d(-${index*25}%,0,0)`;
+  pages.forEach((page,i)=>{page.inert=i!==index;page.setAttribute('aria-hidden',i===index?'false':'true')});
+  syncStatsViewport();requestAnimationFrame(syncStatsViewport);
   const shown=[...box.querySelectorAll(`[data-sv="${v}"]`)].some(x=>!x.hidden);
   $('svEmpty').hidden=shown;$('svEmpty').textContent=v==='in'?'Доходов за этот месяц нет.':'Расходов за этот месяц нет.';
 }
 function bindStatsSwipe(){
-  const box=$('viewStats');let down=null,blockClickUntil=0;
+  const box=$('statsViewport'),track=$('statsTrack');let down=null,blockClickUntil=0;
+  const indexNow=()=>Math.max(0,SV.findIndex(([k])=>k===$('viewStats').dataset.view));
+  const snapBack=()=>{track.classList.remove('is-dragging');track.style.transform=`translate3d(-${indexNow()*25}%,0,0)`};
   box.addEventListener('pointerdown',e=>{
     blockClickUntil=0;
     if(!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0)||e.target.closest?.('input,textarea,select,[contenteditable="true"],.wmodal,.sheet,.zsheet')){down=null;return}
-    down={id:e.pointerId,x:e.clientX,y:e.clientY};
+    down={id:e.pointerId,x:e.clientX,y:e.clientY,lastX:e.clientX,startAt:performance.now(),lastAt:performance.now(),velocity:0,dragging:false};
   },{passive:true});
+  box.addEventListener('pointermove',e=>{
+    if(!down||down.id!==e.pointerId)return;
+    const dx=e.clientX-down.x,dy=e.clientY-down.y;
+    if(!down.dragging){
+      if(Math.max(Math.abs(dx),Math.abs(dy))<8)return;
+      if(Math.abs(dy)>Math.abs(dx)*1.15){down=null;return}
+      if(Math.abs(dx)<=Math.abs(dy)*1.2)return;
+      down.dragging=true;track.classList.add('is-dragging');
+      try{box.setPointerCapture(e.pointerId)}catch{}
+    }
+    if(!down.dragging)return;
+    if(e.cancelable)e.preventDefault();
+    const index=indexNow(),width=box.clientWidth||1,atEdge=(index===0&&dx>0)||(index===SV.length-1&&dx<0),offset=atEdge?dx*.28:dx;
+    track.style.transform=`translate3d(${-index*width+offset}px,0,0)`;
+    const at=performance.now();down.velocity=(e.clientX-down.lastX)/Math.max(1,at-down.lastAt);down.lastX=e.clientX;down.lastAt=at;
+  },{passive:false});
   box.addEventListener('pointerup',e=>{
     if(!down||down.id!==e.pointerId){down=null;return}
-    const dx=e.clientX-down.x,dy=e.clientY-down.y;down=null;
-    if(Math.abs(dx)<52||Math.abs(dx)<=Math.abs(dy)*1.2)return;
-    blockClickUntil=performance.now()+350;
-    const current=SV.findIndex(([k])=>k===box.dataset.view);
-    if(current<0)return;
-    const next=Math.max(0,Math.min(SV.length-1,current+(dx<0?1:-1)));
-    if(next!==current)setStatView(SV[next][0]);
+    const g=down;down=null;if(!g.dragging)return;
+    const dx=e.clientX-g.x,dy=e.clientY-g.y,elapsed=Math.max(1,performance.now()-g.startAt),speed=Math.max(Math.abs(dx)/elapsed,Math.abs(g.velocity));
+    blockClickUntil=performance.now()+500;
+    const current=indexNow(),threshold=Math.max(28,Math.min(44,box.clientWidth*.1));
+    let next=current;
+    if(Math.abs(dy)<Math.abs(dx)*1.35&&(Math.abs(dx)>=threshold||(Math.abs(dx)>=16&&speed>=.42)))next=Math.max(0,Math.min(SV.length-1,current+(dx<0?1:-1)));
+    track.classList.remove('is-dragging');
+    if(next!==current)setStatView(SV[next][0]);else snapBack();
   },{passive:true});
-  box.addEventListener('pointercancel',()=>{down=null},{passive:true});
+  box.addEventListener('pointercancel',()=>{down=null;snapBack()},{passive:true});
   box.addEventListener('click',e=>{
     if(performance.now()>blockClickUntil)return;
     blockClickUntil=0;e.preventDefault();e.stopImmediatePropagation();
   },true);
+  window.addEventListener('resize',syncStatsViewport,{passive:true});
 }
 bindStatsSwipe();
 function renderCompare(){
