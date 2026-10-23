@@ -197,13 +197,13 @@ button{cursor:pointer}
 .mcard .mcol>b{font-family:var(--f-num);font-weight:500;font-size:min(16px,4.1vw);line-height:1.2;font-variant-numeric:tabular-nums;white-space:nowrap;overflow-wrap:normal}
 /* «Куда ушли деньги» and the incomes: each group (Повседневные, Отдельно, Командировка, Доходы по источникам) is one card under a small
    grey label (h3), 12px from the next group; its categories are rows split by thin lines.
-   A row is a 44px button, its line included: the name and the sum (12px) on one line, the bar under them. The rows touch,
+   A row is a 36px button (--h-m), its line included: the name and the sum (12px) on one line, the bar under them. The rows touch,
    so the whole card is rows a finger can hit */
 #incomeBreakdown{gap:6px}
 .bdwrap .bd{gap:6px}
-#breakdown .bd h3,#incomeBreakdown>h2{margin:0 0 0 2px;font-size:var(--fs-xs);line-height:1.2}
+#breakdown .bd h3,#incomeBreakdown>h2,[data-sv="broker"] .bd h3{margin:0 0 0 2px;font-size:var(--fs-xs);line-height:1.2}
 .bdwrap .bars{gap:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
-.bdwrap .bar{min-height:var(--h-l);padding:6px var(--pad-card) 8px;row-gap:4px;border-bottom:1px solid var(--line)}
+.bdwrap .bar{min-height:var(--h-m);padding:5px var(--pad-card) 6px;row-gap:4px;border-bottom:1px solid var(--line)}
 .bdwrap .bar .name,.bdwrap .bar .val{font-size:12px}
 .bdwrap .bar .track{height:3px}
 .bdwrap .bar:last-child{border-bottom:0}
@@ -211,7 +211,7 @@ button{cursor:pointer}
 /* the ring sits inside the row: the card's edge would cut one drawn outside it */
 .bars .bar:focus-visible{outline-offset:-2px}
 #tripCard .stat{border:0;background:none;padding:0}
-/* on «Итоги» the trip card is as small as the category cards above it: tight padding, the links 44px tall reach past its bottom edge */
+/* on «Итоги» the trip card is as small as the category cards above it: tight padding, its links are S buttons (32px, --h-s) */
 #tripCard{padding:10px var(--pad-card) 6px;gap:4px}
 #tripCard .stat b{font-size:15px}
 #tripStat .tacts .linkbtn{font-size:var(--fs-xs);min-height:var(--h-s)}
@@ -227,9 +227,15 @@ button{cursor:pointer}
 #cmpBox>summary{display:none}
 #cmpBox>.morebody{padding-top:var(--pad-card)}
 .sv-empty{margin:0;padding:16px;text-align:center;font-size:var(--fs-md);color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
-/* the trip links: each a 44px button of its own, «Отчёт по прошлой командировке» and «Командировка закончилась» each on a line apart */
-#tripStat .tacts{display:flex;flex-wrap:wrap;gap:2px 6px;align-items:center}
+/* the trip links: 32px buttons (--h-s), the rows touch; «Отчёт по прошлой командировке» and «Командировка закончилась» each on a line apart.
+   The words of «Сверить» / «+ Пришли командировочные» sit at the bottom of their 32px, those of the lines under them at the top:
+   the lines of text stand close, each tap area stays a whole 32px and none lies over another.
+   «Отчёт…» between them keeps its words in the middle of its 32px: the two gaps around it come out equal */
+#tripStat .tacts{display:flex;flex-wrap:wrap;gap:0 6px;align-items:center}
+#tripStat .tacts .linkbtn{padding-block:0 8px}
+#tripStat .tacts #tEdit,#tripStat .tacts #tAllow{padding-block:8px 0}
 #tripStat .tacts #tEnd,#tripStat .tacts #tRep{flex-basis:100%;margin:0 0 0 -6px}
+#tripStat .tacts #tRep:has(+#tEnd){padding-block:0}
 .wallets{display:flex;flex-direction:column;gap:var(--gap-stack)}
 .wgroup{display:flex;flex-direction:column;gap:8px}
 /* «Деньги»: each group (Карты, Наличные, Накопления) is a card, its name and sum on top, its accounts as small blocks inside it */
@@ -307,9 +313,13 @@ button{cursor:pointer}
 input,select{width:100%;border:1px solid var(--field-line);background:var(--bg);border-radius:10px;padding:10px 12px;min-width:0;font-size:16px;color:var(--ink)}
 select,input[type="date"]{-webkit-text-fill-color:var(--ink)}
 input[type="date"]::-webkit-date-and-time-value{color:var(--ink);-webkit-text-fill-color:var(--ink)}
-.xfer{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:12px}
+.xfer{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px 4px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:12px}
 .xfer>.dp-head,.xfer .full{grid-column:1/-1}
 .xfer label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);min-width:0}
+/* «Откуда» and «Куда»: M fields (36px; the type stays 16px — under it the iPhone zooms in), «⇄» between them swaps the two.
+   «⇄» 32px wide, the columns 4px apart and the arrow's side 4px: «Брокерский счёт» still fits whole in a 440px window */
+.xfer select{min-height:var(--h-m);padding:4px 4px 4px 8px;line-height:1.2}
+.xfer .xswap{align-self:end;width:var(--h-s);min-height:var(--h-m);padding:0;font-size:18px;line-height:1}
 .xfer .row{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .moneyacts{display:flex;justify-content:flex-end}
 .item.tr .amt{color:var(--muted)}
@@ -356,12 +366,12 @@ input.num::placeholder{font-family:var(--f-body)}
 .seg3 button{font-size:13px;padding:8px 2px;white-space:nowrap}
 #scopeFilter{height:40px}
 #scopeFilter button{min-height:32px;padding:4px 2px}
-/* Five compact sections in «Итоги», including the trip ledger. */
-#statSeg{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:2px;gap:2px}
-/* a word is never cut: «Команди-ровка» breaks at its soft hyphen (SV), the others fit whole */
-#statSeg button{flex:none;width:100%;min-width:0;min-height:var(--h-m);padding:4px 1px;font-size:clamp(var(--fs-2xs),2.9vw,12px);line-height:1.1;white-space:normal;overflow-wrap:normal;-webkit-hyphens:manual;hyphens:manual}
-/* the one place under 11px: on a 320px phone five labels share a line only at 10px («Сравнение» whole) */
-@media (max-width:359px){#statSeg button{font-size:10px}}
+/* Five sections in «Итоги»: each button as wide as its word or more (no word is broken — «Командировка» whole),
+   the rest of the line shared out evenly (.seg: flex 1 1 0, min-width:max-content) */
+#statSeg{padding:2px;gap:2px}
+#statSeg button{min-height:var(--h-m);padding:4px 3px;font-size:clamp(var(--fs-2xs),2.9vw,12px);line-height:1.1;white-space:nowrap}
+/* the one place under 11px: on a 320px phone the five words share a line only at 10px; narrower than that a button goes onto a second line */
+@media (max-width:359px){#statSeg button{font-size:10px;padding-inline:1px}}
 .listhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .day{display:flex;flex-direction:column}
 .dayhead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted);padding-block:10px 6px;border-bottom:1px solid var(--line)}
@@ -432,26 +442,37 @@ input.num::placeholder{font-family:var(--f-body)}
 .item-editor-panel .item-edit .eseg{gap:6px}
 .item-editor-panel .item-edit .row{gap:8px}
 .item-editor-panel .item-edit .row button{min-height:var(--h-m);padding-block:4px}
-/* the comparison: a name and three sums a row (on a phone the sums at 11px, «109 343,27» fits whole from 375px);
-   narrower than that the name takes a line of its own and the sums share the next one, at 12px */
-.cmp-title{margin:0;text-align:center}
+/* the comparison: a name and three sums a row (on a phone the sums at 11px). One grid for the whole table, each row a subgrid of it:
+   a sum's column is never narrower than its longest figure (no figure is cut), the name takes the rest at 1.6 : 1 — on a 440px phone
+   «Питание вне дома» stays one line. Narrower than 375px the name takes a line of its own and the sums share the next one, at 12px.
+   The rows are low: 2px over and under the text */
 .cmp-sel{display:flex;gap:6px;align-items:center}
-/* 16px: a smaller list makes the iPhone zoom in when it is tapped */
-.cmp-sel select{flex:1 1 0;min-width:0;min-height:var(--h-m);padding:4px 8px;border-radius:var(--r-sm);font-size:16px;line-height:1.2}
-.cmp-sel span{color:var(--muted);font-size:var(--fs-sm)}
+/* a month: its whole name a size smaller (13px) in a box; the list itself lies over the box, see-through and at 16px (a smaller one
+   makes the iPhone zoom in when it is tapped) — a tap or the keyboard opens the phone's own list, the focus ring is drawn on the box */
+.cmp-pick{position:relative;flex:1 1 0;min-width:0;display:flex;align-items:center;min-height:var(--h-m);padding:0 24px 0 10px;border:1px solid var(--field-line);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);font-size:var(--fs-sm);font-weight:500;line-height:1.2}
+.cmp-pick::after{content:'';position:absolute;right:10px;top:50%;width:6px;height:6px;margin-top:-5px;border:solid var(--muted);border-width:0 1.5px 1.5px 0;transform:rotate(45deg);pointer-events:none}
+.cmp-pv{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cmp-pick select{position:absolute;inset:0;width:100%;height:100%;min-height:0;margin:0;padding:0;border:0;opacity:0;font-size:16px;cursor:pointer}
+.cmp-pick:has(select:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.cmp-and{color:var(--muted);font-size:var(--fs-sm)}
+@media (max-width:359px){.cmp-pick{padding:0 20px 0 8px;font-size:var(--fs-xs)}.cmp-pick::after{right:8px}}
 .cmp{display:flex;flex-direction:column;gap:0}
 .cmp-head,.cmp-row{display:grid;grid-template-columns:minmax(0,1.25fr) repeat(3,minmax(0,1fr));gap:4px;align-items:center;min-width:0}
-.cmp-head{padding:3px 5px;color:var(--muted);font-size:var(--fs-2xs);line-height:1.15}
+@supports (grid-template-columns:subgrid){
+  .cmp{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(3,minmax(max-content,1fr));column-gap:8px}
+  .cmp-head,.cmp-row{grid-column:1/-1;grid-template-columns:subgrid;column-gap:normal}
+}
+.cmp-head{padding:2px 5px;color:var(--muted);font-size:var(--fs-2xs);line-height:1.15}
 .cmp-head>span:not(:first-child){text-align:right}
-.cmp-row{padding:4px 5px;border-bottom:1px solid var(--line)}
-.cmp-row.t{margin-block:2px;padding:5px;border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));border-radius:var(--r-sm);background:color-mix(in srgb,var(--accent) 5%,var(--bg))}
-.cmp-row.sub{padding-block:3px}
+.cmp-row{padding:2px 5px;border-bottom:1px solid var(--line)}
+.cmp-row.t{margin-block:2px;padding:3px 5px;border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));border-radius:var(--r-sm);background:color-mix(in srgb,var(--accent) 5%,var(--bg))}
 .cmp-name{min-width:0;overflow-wrap:anywhere;font-size:var(--fs-xs);line-height:1.2;font-weight:600}
 .cmp-row.sub .cmp-name{padding-left:5px;color:var(--muted);font-weight:500}
 .cmp-amount,.cmp-delta{min-width:0;overflow:hidden;font-family:var(--f-num);font-size:var(--fs-xs);font-variant-numeric:tabular-nums;font-weight:500;text-align:right;text-overflow:clip;white-space:nowrap}
 @media (max-width:480px){.cmp-amount,.cmp-delta{font-size:var(--fs-2xs)}}
 @media (max-width:374px){
-  .cmp-head,.cmp-row{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:2px}
+  .cmp{display:flex}
+  .cmp-head,.cmp-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:2px 4px}
   .cmp-name{grid-column:1/-1}
   .cmp-head>span:first-child{display:none}
   .cmp-amount,.cmp-delta{font-size:var(--fs-xs)}
@@ -634,15 +655,18 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 .sheet-body .zs.lnote{margin-top:0}
 /* the one small note at the bottom of a card */
 .zfoot{margin:0;padding:8px 0 10px;font-size:12px;color:var(--muted);line-height:1.4}
-/* «Брокер и лимит»: the blocks inside the card are told apart by their fill alone, no frame */
-#viewStats .zcard{padding:1px 10px;border:0}
-#viewStats .zrow{gap:8px;padding:6px 0;font-size:var(--fs-sm);line-height:1.2}
+/* «Брокер» and «Лимит» on «Итоги», as «Расходы»: a small grey label (h3) over each, under it one card of rows split by thin lines
+   (a row 36px or more: the name on the left, the sum on the right); a form («Изменить %», «Сверить», «Изменить») opens in the same card */
+#viewStats [data-sv="broker"] .rule{gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:0 var(--pad-card)}
+#viewStats [data-sv="broker"] .rule:has(>form){padding-block:var(--pad-card)}
+#viewStats .zcard{padding:0;border:0;border-radius:0;background:none}
+#viewStats .zrow{min-height:var(--h-m);gap:8px;padding:5px 0;font-size:var(--fs-sm);line-height:1.2}
 #viewStats .zrow.zhd{font-size:var(--fs-xs)}
 #viewStats .zrow small{font-size:var(--fs-2xs);line-height:1.2}
 #viewStats .zrow.zhd .linkbtn,#viewStats .zrow .zre{min-height:var(--h-s);margin:0 -4px;padding:0 4px;font-size:var(--fs-xs);line-height:1}
 #viewStats .zrow .zre{align-self:flex-start}
-#viewStats .zrow.zp{padding-bottom:2px}
-#viewStats .zrow.zp+.zrow{padding-top:2px}
+/* every row a line of its own, as in «Расходы» (elsewhere «Положено» and «Отложено» stand together) */
+#viewStats .zrow.zp{border-bottom:1px solid var(--line)}
 #viewStats .zfoot{padding:5px 0 7px;font-size:var(--fs-2xs);line-height:1.3}
 /* the trip report: what was spent by category, set in under «Потрачено»; «Поделиться» and «Закрыть» side by side under the card */
 .zcats{display:flex;flex-direction:column;padding:0 0 8px 12px;border-bottom:1px solid var(--line)}
@@ -765,10 +789,13 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 .dp-x::after,.sheet-head .iconbtn::after,.zsheet-head .iconbtn::after{content:'';position:absolute;inset:-2px}
 .dp-sum{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:5px 8px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg);font-size:13px;color:var(--muted)}
 .dp-sum b{font-family:var(--f-num);font-size:var(--fs-xl);font-weight:500;color:var(--ink)}
-.dp-repay{display:flex;flex-direction:column;gap:4px;padding:6px 8px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg)}
+.dp-repay{display:flex;flex-direction:column;gap:4px;padding:4px 8px 6px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg)}
 .dp-section-title,.dinner-head{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.dp-repay .acts{gap:6px 8px;margin:0}
-.dperson .dp-repay .acts>.dacc{flex:1 1 100%;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px}
+/* the account on its own line, 6px under it «Вернул всё» on the left half and «Вернул часть» on the right (the same for «Отдал всё / часть»);
+   a form («Записать») takes the whole width */
+.dp-repay .acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 8px;margin:0}
+.dp-repay .acts>.inline-edit{grid-column:1/-1}
+.dperson .dp-repay .acts>.dacc{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px}
 /* «Вернул всё» / «Вернул часть»: the app's own primary and outline buttons, M size — as the same buttons of each loan below */
 .dperson .dp-repay .acts>button{font-size:var(--fs-sm);min-height:var(--h-m);padding:4px 12px}
 .dinner{display:flex;flex-direction:column;gap:5px;padding:0;border-top:0}
@@ -778,7 +805,7 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 .dperson .debt{gap:6px;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg)}
 .dperson .debt .acts{gap:6px 8px;margin-top:6px;padding-top:8px;border-top:1px solid var(--line)}
 .dperson .debt-return,.dperson .debt-manage{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;width:100%}
-.dperson .debt-return{padding:8px;border-radius:10px;background:var(--surface)}
+.dperson .debt-return{row-gap:6px;padding:6px;border-radius:10px;background:var(--surface)}
 .dperson .debt-manage{padding-top:6px;border-top:1px dashed var(--line)}
 /* in a debt's own window («Я должен») its «Другие действия» stand right in the window, in line with the blocks above */
 .dperson>.debt-manage{padding:6px 8px 0}
@@ -796,7 +823,7 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 .dtap .left::after{content:'›';content:'›'/'';display:inline-block;margin-left:6px;color:var(--muted);font-family:var(--f-body);transition:transform .15s}
 .dtap[aria-expanded="true"] .left::after{transform:rotate(90deg)}
 .dperson .debt:has(.dtap){gap:3px;padding:5px 8px}
-.dperson .debt-return>.primary,.dperson .debt-return>.ghost{font-size:var(--fs-sm);min-height:var(--h-m);padding:5px 12px}
+.dperson .debt-return>.primary,.dperson .debt-return>.ghost{flex:1 1 0;min-width:0;font-size:var(--fs-sm);min-height:var(--h-m);padding:5px 8px}
 .dperson .dacc select{min-height:36px;padding-block:4px}
 #cmp{display:flex;flex-direction:column;gap:8px}
 .recon{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--warn);border-radius:12px;padding:12px}
@@ -1135,10 +1162,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
           </section>
         </div>
         <div class="stats-page" data-stat-page="broker">
-          <section class="panel" data-sv="broker" aria-labelledby="ruleH">
-            <h2 id="ruleH">Брокер и лимит</h2>
-            <div class="rule" id="brokerBox"></div>
-            <div class="rule" id="budgetBox"></div>
+          <section class="bdwrap" data-sv="broker" aria-label="Брокер и лимит">
+            <div class="bd"><h3>Брокер</h3><div class="rule" id="brokerBox"></div></div>
+            <div class="bd"><h3>Лимит</h3><div class="rule" id="budgetBox"></div></div>
           </section>
         </div>
         <div class="stats-page" data-stat-page="trip">
@@ -1148,11 +1174,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
           </section>
         </div>
         <div class="stats-page" data-stat-page="cmp">
-          <details class="more panel-ish" id="cmpBox" data-sv="cmp">
+          <details class="more panel-ish" id="cmpBox" data-sv="cmp" aria-label="Сравнение месяцев">
             <summary>Сравнение месяцев</summary>
             <div class="morebody">
-              <h2 class="cmp-title">Сравнение месяцев</h2>
-              <div class="cmp-sel"><select id="cmpA" aria-label="Первый месяц"></select><span>и</span><select id="cmpB" aria-label="Второй месяц"></select></div>
+              <div class="cmp-sel"><span class="cmp-pick"><span class="cmp-pv" id="cmpAv" aria-hidden="true"></span><select id="cmpA" aria-label="Первый месяц"></select></span><span class="cmp-and">и</span><span class="cmp-pick"><span class="cmp-pv" id="cmpBv" aria-hidden="true"></span><select id="cmpB" aria-label="Второй месяц"></select></span></div>
               <div id="cmp"></div>
             </div>
           </details>
@@ -1205,6 +1230,7 @@ const CATS=[
   {id:'bus',name:'Маршрутка',g:'daily',c:'p1',kw:['маршрутка','автобус','проезд']},
   {id:'snack',name:'Сушняк',g:'daily',c:'p7',kw:['сушняк','сок','соки','кофе','тоник','вода','энергетик']},
   {id:'lunch',name:'Питание вне дома',g:'daily',c:'p2',kw:['обед','ужин','завтрак','столовая','кафе','питание']},
+  {id:'clothing',name:'Одежда',g:'daily',c:'p5',kw:['одежда','одежду','кофта','футболка','джинсы','куртка','обувь','кроссовки']},
   {id:'subs',name:'Связь и подписки',g:'daily',c:'p8',kw:['впн','vpn','премиум','мегафон','связь','wifi','интернет','телефон','подписка','ии','claude','клод','chatgpt','gpt','чатгпт','нейросеть','нейросети']},
   {id:'grocery',name:'Продукты',g:'daily',c:'p3',kw:['продукты','магазин','хлеб']},
   {id:'taxi',name:'Такси',g:'daily',c:'p6',kw:['такси']},
@@ -1237,7 +1263,7 @@ const CATS=[
   {id:'other',name:'Другое',g:'daily',c:'p8',kw:[],custom:true}
 ];
 const LEGACY={ai:'subs',food:'grocery',cafe:'lunch',transport:'taxi',fun:'other',shop:'other',study:'other',gifts:'other',home:'other',clothes:'other'};
-const ICON={bus:'🚌',taxi:'🚕',fuel:'⛽',lunch:'🍽️',fastfood:'🍔',snack:'🥤',wb:'🛍️',grocery:'🛒',health:'💊',subs:'📱',family:'👨‍👩‍👦',broker:'📈',invest:'🪙',sadaqa:'🤲',zakat:'🌙',
+const ICON={bus:'🚌',taxi:'🚕',fuel:'⛽',lunch:'🍽️',clothing:'👕',fastfood:'🍔',snack:'🥤',wb:'🛍️',grocery:'🛒',health:'💊',subs:'📱',family:'👨‍👩‍👦',broker:'📈',invest:'🪙',sadaqa:'🤲',zakat:'🌙',
   salary:'💼',stipend:'🎓',side:'🛠️',bonus:'🎁',dividends:'📊',interest:'💰',gift:'💝',trip_left:'🧳',trip_extra:'🧳',in_other:'➕',t_taxi:'🚕',t_grocery:'🛒',t_flat:'🏠',t_fuel:'⛽',t_other:'➕',t_allow:'✈️',other:'➕'};
 const CAT=Object.fromEntries(CATS.map(c=>[c.id,c]));
 /* a category's place in that order: by group (personal spending, «Отдельно», income, trip), as CATS lists them, «Другое» last */
@@ -1316,8 +1342,9 @@ function localStore(){
   if(raw) try{data=parse(raw)}catch(e){status='broken';
     /* unreadable: its text is kept as it is under its own key, and nothing is written over it on the way in */
     keepBrokenRaw(raw)}
-  /* can this browser keep anything at all (blocked storage, private mode, full memory)? */
-  if(!status) try{localStorage.setItem(KEY+'-probe','1');localStorage.removeItem(KEY+'-probe')}catch(e){status='full'}
+  /* can this browser keep anything at all (blocked storage, private mode, full memory)? Full: the step-back copy (see prev) makes room first */
+  const probe=()=>{localStorage.setItem(KEY+'-probe','1');localStorage.removeItem(KEY+'-probe')};
+  if(!status) try{probe()}catch(e){try{if(localStorage.getItem(KEY+'-prev')===null)throw e;localStorage.removeItem(KEY+'-prev');probe()}catch(x){status='full'}}
   let last=raw;
   /* another open copy of the app may have saved since: build every change on what is stored now, not on an old snapshot */
   const fresh=()=>{
@@ -1334,10 +1361,11 @@ function localStore(){
   const mut=(f,all)=>{fresh();const d={...data,items:[...data.items],debts:[...data.debts]}, r=f(d);
     if(status==='broken'&&!kept&&!all){tell();throw fail()}
     const s=JSON.stringify(d);
-    try{localStorage.setItem(KEY,s)}catch(e){status='full';tell();throw fail()}
+    /* no room: the step-back copy (see prev) gives up its place first — nothing reads it, and what is saved now matters more */
+    try{localStorage.setItem(KEY,s)}catch(e){try{if(localStorage.getItem(KEY+'-prev')===null)throw e;localStorage.removeItem(KEY+'-prev');localStorage.setItem(KEY,s)}catch(x){status='full';tell();throw fail()}}
     data=d;last=s;status='';tell();return r};
-  /* the data being replaced stays one step back under its own key */
-  const prev=f=>{let k=false;try{const r=localStorage.getItem(KEY);if(r){localStorage.setItem(KEY+'-prev',r);k=true}}catch(e){}
+  /* the data being replaced stays one step back under its own key; no room for it — an older step-back copy goes, it would pass for this one */
+  const prev=f=>{let k=false;try{const r=localStorage.getItem(KEY);if(r){localStorage.setItem(KEY+'-prev',r);k=true}}catch(e){try{localStorage.removeItem(KEY+'-prev')}catch(x){}}
     try{return f()}catch(e){if(k)try{localStorage.removeItem(KEY+'-prev')}catch(x){}throw e}};
   addEventListener('storage',e=>{if(e.key===KEY){fresh();tell(true)}});
   const nid=()=>'l'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -1370,7 +1398,9 @@ function localStore(){
     add:one('add'),update:one('update'),remove:one('remove'),restore:one('restore'),patchSettings:one('patchSettings'),
     addDebt:one('addDebt'),updateDebt:one('updateDebt'),removeDebt:one('removeDebt'),restoreDebt:one('restoreDebt'),
     async batch(f){return mut(d=>f(ops(d)))},
-    async replaceAll(n){prev(()=>mut(d=>{d.items=n.items||[];d.debts=n.debts||[];d.settings=n.settings||{}}))},
+    /* a copy too big for this browser: what is stored stays and still takes new records — no «память заполнена» banner; big: applyRestore says why */
+    async replaceAll(n){const was=status;try{prev(()=>mut(d=>{d.items=n.items||[];d.debts=n.debts||[];d.settings=n.settings||{}}))}
+      catch(e){if(status==='full'&&was!=='full'){status=was;tell();e.big=true}throw e}},
     /* a fresh start: the step-back copy, the damaged text and its «Скрыть» go too — nothing of the old data stays in this browser */
     async clearAll(settings){mut(d=>{d.items=[];d.debts=[];d.settings=settings},true);kept=true;
       try{[KEY+'-prev',KEY+'-hide-broken',...broken()].forEach(k=>localStorage.removeItem(k))}catch(e){}tell()}
@@ -2191,12 +2221,15 @@ function renderWallets(){
     const cur=walletValue(ed.id);
     html+=`<div class="wmodal" role="dialog" aria-modal="true" aria-labelledby="wT"><div class="sheet-bg" data-wclose></div><form class="wallet-edit" id="wForm"><div class="dp-head"><div class="dp-t"><b id="wT" tabindex="-1">${ed.name}</b></div><button type="button" class="dp-x" data-wclose aria-label="Закрыть">✕</button></div><p>${WHELP}</p><div class="row"><input id="wInput" class="num" inputmode="decimal" placeholder="Сумма, ₽" value="${cur===null||cur<0?'':vIn(cur)}" aria-label="${ed.name}" aria-describedby="wErr"><button class="primary" type="submit">Сохранить</button><button class="linkbtn" type="button" id="wCancel">Отмена</button></div><p class="err" role="alert" id="wErr" hidden></p></form></div>`;
   }
+  /* the account is gone (cleared or replaced in another open copy of the app): nothing to check it against — the question goes */
+  if(state.recon&&walletValue(state.recon.id)===null) state.recon=null;
   const rc=state.recon;
   /* broker account and piggy bank: the difference is a change in value — only the new amount, no income or spending record */
-  if(rc){const d=r2(rc.to-rc.from), sv=SAVE_ACCS.includes(rc.id);
+  /* another open copy of the app may have changed this account since the question came up: the difference is from what it holds now */
+  if(rc){rc.from=walletValue(rc.id);const d=r2(rc.to-rc.from), sv=SAVE_ACCS.includes(rc.id), ok=Math.abs(d)<1;
     html=`<div class="wmodal" role="dialog" aria-modal="true" aria-labelledby="rcT"><div class="sheet-bg" data-wclose></div><div class="recon"><div class="dp-head"><div class="dp-t"><b>Сверка счёта</b></div><button type="button" class="dp-x" data-wclose aria-label="Закрыть">✕</button></div><p id="rcT" tabindex="-1"><b>${esc(WNAME[rc.id])}</b>: в приложении ${money(rc.from)}, ${sv?'сейчас':'на самом деле'} ${money(rc.to)}.</p>
-      <p>${sv?'Изменение':'Расхождение'} <b class="${d<0?'neg':'pos'}">${d>0?'+':''}${money(d)}</b> — ${sv?'изменилась стоимость. Это не доход и не трата: в лимит и в процент на брокер не попадёт':d<0?'похоже, какую-то трату не записали':'похоже, какой-то доход не записали'}.</p>
-      <div class="row">${sv?'<button class="primary" id="rcFix">Обновить сумму (изменилась стоимость)</button>':`<button class="primary" id="rcAdd">${d<0?'Записать как неучтённую трату':'Записать как неучтённый доход'}</button><button class="ghost" id="rcFix">Просто исправить сумму</button>`}<button class="linkbtn" id="rcCancel">Отмена</button></div></div></div>`+html}
+      <p>${ok?'Расхождения больше нет: сумма уже сходится с записями.':`${sv?'Изменение':'Расхождение'} <b class="${d<0?'neg':'pos'}">${d>0?'+':''}${money(d)}</b> — ${sv?'изменилась стоимость. Это не доход и не трата: в лимит и в процент на брокер не попадёт':d<0?'похоже, какую-то трату не записали':'похоже, какой-то доход не записали'}.`}</p>
+      <div class="row">${sv||ok?`<button class="primary" id="rcFix">${ok?'Сохранить сумму':'Обновить сумму (изменилась стоимость)'}</button>`:`<button class="primary" id="rcAdd">${d<0?'Записать как неучтённую трату':'Записать как неучтённый доход'}</button><button class="ghost" id="rcFix">Просто исправить сумму</button>`}<button class="linkbtn" id="rcCancel">Отмена</button></div></div></div>`+html}
   box.innerHTML=html;
   if(rc){
     const d=r2(rc.to-rc.from);
@@ -2205,7 +2238,7 @@ function renderWallets(){
       const w=state.settings.wallets||{};
       try{await store.batch(o=>{o.add(d<0?{type:'out',amount:-d,cat:'other',label:'Неучтённое',acc:rc.id,date:iso(now),note:'расхождение при сверке',created:t+1}
         :{type:'in',amount:d,cat:'in_other',label:'Неучтённое',acc:rc.id,date:iso(now),note:'расхождение при сверке',created:t+1});o.patchSettings({wallets:{...w,[rc.id]:{...w[rc.id],checked:Date.now()}}})});
-        toast(`${WNAME[rc.id]}: ${money(rc.to)}`)}catch(x){state.recon=rc;render();toast(saveErr(x))}};
+        toast(`${WNAME[rc.id]}: ${money(walletValue(rc.id)??rc.to)}`)}catch(x){state.recon=rc;render();toast(saveErr(x))}};
     /* a failed save: the same question stays open */
     $('rcFix').onclick=async()=>{fresh();state.recon=null;if(await saveSettings({wallets:{...ws,[rc.id]:reAnchor(ws[rc.id],rc.to,rc.id)}}))toast(`${WNAME[rc.id]}: ${money(rc.to)}`);else{state.recon=rc;render()}};
     $('rcCancel').onclick=()=>{fresh();state.recon=null;render()};
@@ -2241,6 +2274,7 @@ function xferForm(){
   const opt=sel=>WALLETS.map(w=>`<option value="${w.id}" ${sel===w.id?'selected':''}>${w.name}</option>`).join('');
   return `<form class="xfer" id="xForm" novalidate><div class="dp-head"><div class="dp-t"><b id="xT" tabindex="-1">Перевод между счетами</b></div><button type="button" class="dp-x" data-xclose aria-label="Закрыть">✕</button></div>
     <label>Откуда<select id="xFrom">${opt(state.xfer.from)}</select></label>
+    <button type="button" class="ghost xswap" id="xSwap" aria-label="Поменять местами">⇄</button>
     <label>Куда<select id="xTo">${opt(state.xfer.to)}</select></label>
     <label class="full">Сумма<input id="xAmount" class="num" inputmode="decimal" placeholder="0" autocomplete="off" value="${esc(state.xfer.amount||'')}"></label>
     <label class="full">Комментарий<input id="xNote" maxlength="80" placeholder="Необязательно" autocomplete="off" value="${esc(state.xfer.note||'')}"></label>
@@ -2251,6 +2285,8 @@ function xferForm(){
 function bindXfer(){
   $('xFrom').onchange=e=>state.xfer.from=e.target.value;
   $('xTo').onchange=e=>state.xfer.to=e.target.value;
+  /* «⇄»: the two accounts change places — as if both were picked by hand (the same change handlers; the overspend warning goes) */
+  $('xSwap').onclick=()=>{const f=$('xFrom'),t=$('xTo'),a=f.value;f.value=t.value;t.value=a;[f,t].forEach(s=>s.dispatchEvent(new Event('change',{bubbles:true})))};
   $('xCancel').onclick=()=>{state.xferOpen=false;render()};
   $('xAmount').oninput=e=>state.xfer.amount=e.target.value;
   $('xNote').oninput=e=>state.xfer.note=e.target.value;
@@ -2644,6 +2680,8 @@ function zForm(z){
 }
 function zPaySheet(amount){
   state.pend={type:'out',scope:'own',amount:r2(amount),word:'',guessed:'zakat',cat:'zakat',note:'',date:iso(now)};
+  /* a new record starts here too (as in the form): the last message goes, nothing undone — its «Отменить» would lie over «Сколько отдаёте сейчас» */
+  toastOff();
   sheetFrame('Оплата закята',null);
   $('sheetSub').textContent='к оплате '+money(amount);
   $('sheetBody').innerHTML=`<label class="zpay">Сколько отдаёте сейчас<input id="zAmt" class="num" inputmode="decimal" value="${String(r2(amount)).replace('.',',')}" aria-describedby="zAmtErr"></label>
@@ -3009,8 +3047,8 @@ function monthStats(k){
     trip:sum(it.filter(i=>isTrip(i)&&typeOf(i)==='out'))};
 }
 /* Итоги: Расходы | Доходы | Брокер | Командировка | Сравнение */
-/* «Командировка» has a soft hyphen: on a phone its button is too narrow for the whole word, and it breaks there, not anywhere */
-const SV=[['out','Расходы'],['in','Доходы'],['broker','Брокер'],['trip','Команди\u00ADровка'],['cmp','Сравнение']];
+/* each label whole on one line (#statSeg: a button as wide as its word) */
+const SV=[['out','Расходы'],['in','Доходы'],['broker','Брокер'],['trip','Командировка'],['cmp','Сравнение']];
 const STAT_GAP=12;
 function setStatView(v){
   const index=SV.findIndex(([k])=>k===v),box=$('viewStats');if(index<0||box.dataset.view===v)return;
@@ -3111,10 +3149,12 @@ function renderCompare(){
   const others=keys.filter(k=>k!==A);
   const B=state.cmpB&&others.includes(state.cmpB)?state.cmpB:others.includes(prevKey(A))?prevKey(A):others.find(k=>k<A)||others.filter(k=>k>A).pop();
   const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
-  const opt=(ks,sel)=>ks.map(k=>`<option value="${esc(k)}" ${k===sel?'selected':''}>${cap(mShort.format(keyDate(k)))} ${esc(k.slice(0,4))}</option>`).join('');
-  $('cmpA').parentElement.hidden=!B;
+  /* «Октябрь 2026»: the whole month's name, in the list and in its box */
+  const mFull=k=>cap(mLabel.format(keyDate(k)).replace(/\s*г\.$/,''));
+  const opt=(ks,sel)=>ks.map(k=>`<option value="${esc(k)}" ${k===sel?'selected':''}>${esc(mFull(k))}</option>`).join('');
+  $('cmpA').closest('.cmp-sel').hidden=!B;
   if(!B){$('cmp').innerHTML=`<div class="empty"><p>${state.items.some(i=>typeof i.date==='string')?'Нужен ещё один месяц с записями для сравнения.':'Записей пока нет.'}</p></div>`;return}
-  $('cmpA').innerHTML=opt(keys,A);$('cmpB').innerHTML=opt(others,B);
+  $('cmpA').innerHTML=opt(keys,A);$('cmpB').innerHTML=opt(others,B);$('cmpAv').textContent=mFull(A);$('cmpBv').textContent=mFull(B);
   $('cmpA').onchange=e=>{state.cmpA=e.target.value;render()};$('cmpB').onchange=e=>{state.cmpB=e.target.value;render()};
   const a=monthStats(A), b=monthStats(B);
   const m0=n=>{const v=Math.round(n*100)/100;return (v<0?'−':'')+(Number.isInteger(v)?fmt0:fmt2).format(Math.abs(v))};
@@ -3581,7 +3621,13 @@ function refreshToday(){
   dateLabel();
   if($('debtAddModal').hidden)$('dDate').value=iso(now);
   if(wasCurrent){state.y=now.getFullYear();state.m=now.getMonth()}
-  render();
+  /* only «today» moved: what is typed in an open window stays, as when another copy of the app saves (keepTyped);
+     the zakat settings: a start date kept that way gets its nisab, hint and question about past years again (upd — nothing is saved),
+     the outer keepTyped puts back the answer picked in #zPastBox, which upd builds anew */
+  const q0=$('zPastBox')?.dataset.h;
+  keepTyped(()=>{keepTyped(render);$('zStart')?.dispatchEvent(new Event('input'))});
+  /* the new day changed the question about past years (one more lunar year ended): the answer to the old one is not carried over */
+  const pb=$('zPastBox');if(pb&&pb.dataset.h!==q0)pb.querySelectorAll('input:checked').forEach(x=>x.checked=false);
 }
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshToday()});
 setInterval(refreshToday,60000);
@@ -3629,6 +3675,10 @@ document.addEventListener('keydown',e=>{
 /* ---------- step sheets ---------- */
 function closeSheet(){$('sheet').hidden=true;state.pend=null;state.catSheet=null;state.limSheet=null;state.repSheet=null;$('sheet').classList.remove('cats','centered');dlgSync()}
 $('sheet').querySelectorAll('[data-close]').forEach(b=>b.onclick=closeSheet);
+/* a message on screen («Отменить» of the record just saved) doesn't lie over the next record's tiles: when the sheet opens or closes,
+   a step makes it taller or shorter, or it has risen into place (animation up), the message is placed again above it (toastPlace) */
+{const sp=$('sheet').querySelector('.sheet-panel'), tp=()=>{if(!$('toast').hidden)toastPlace($('toast'))};
+  if(window.ResizeObserver) new ResizeObserver(tp).observe(sp);sp.addEventListener('animationend',tp)}
 function sheetFrame(title,back){
   const p=state.pend;state.catSheet=null;state.limSheet=null;state.repSheet=null;$('sheet').classList.remove('cats','centered');
   $('sheetTitle').textContent=title;
@@ -3810,6 +3860,9 @@ $('form').onsubmit=e=>{
   const type=state.type, scope=state.scope, hit=guessHit(word,type,scope);
   state.pend={type,scope,amount,word,hit,guessed:hit?.id||null,note:$('note').value.trim(),date};
   $('amount').blur();
+  /* a new record starts: the message of the last one goes (only hidden, nothing undone) — its «Отменить» would lie over this sheet's tiles;
+     that record can still be deleted from «Последние записи» */
+  toastOff();
   if(hit){state.pend.cat=hit.id;afterCat()} else stepCat();
 };
 /* ‹ › on Записи and Итоги: one month back or on (never past this month) */
@@ -3962,7 +4015,7 @@ async function applyRestore(d){
   state.editing=null;state.recon=null;state.xferOpen=false;
   /* the last backup is the newest one known: this phone's, the file's own, or the file itself (it is a backup made that day) */
   const lb=Math.min(Date.now(),Math.max(+state.settings.lastBackup||0,+d.settings.lastBackup||0,d.exAt||0));
-  try{await store.replaceAll(lb?{...d,settings:{...d.settings,lastBackup:lb}}:d)}catch(x){toast(saveErr(x));return}
+  try{await store.replaceAll(lb?{...d,settings:{...d.settings,lastBackup:lb}}:d)}catch(x){toast(x?.big?'Копия не поместилась в память браузера: она слишком большая. Текущие данные не изменились.':saveErr(x));return}
   /* a copy is loaded: the warning about damaged data has done its job (the damaged text itself stays, see «Данные и резервная копия») */
   hideBroken();
   toast('Загружено: '+nRec(d));
