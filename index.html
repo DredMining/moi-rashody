@@ -227,19 +227,15 @@ button{cursor:pointer}
 #cmpBox>summary{display:none}
 #cmpBox>.morebody{padding-top:var(--pad-card)}
 .sv-empty{margin:0;padding:16px;text-align:center;font-size:var(--fs-md);color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
-/* the trip links: 32px buttons (--h-s), the rows touch; «Отчёт по прошлой командировке», «Командировка началась» and «Командировка закончилась» each on a line apart.
-   The words of «Сверить» / «+ Пришли командировочные» sit at the bottom of their 32px, those of the lines under them at the top:
-   the lines of text stand close, each tap area stays a whole 32px and none lies over another.
-   «Отчёт…» between them keeps its words in the middle of its 32px: the two gaps around it come out equal */
+/* the trip links: 32px buttons (--h-s), the rows touch: «Сверить» / «+ Пришли командировочные» on the first line, «Командировка началась»
+   (once begun — «Командировка закончилась» in its place) on the second, «Отчёт по прошлой командировке» on the third (owner's order, 24.10.2026).
+   The words of the first line sit at the bottom of their 32px, those of the last at the top: the lines of text stand close,
+   each tap area stays a whole 32px and none lies over another. The line between them keeps its words in the middle: the two gaps around it come out equal */
 #tripStat .tacts{display:flex;flex-wrap:wrap;gap:0 6px;align-items:center}
 #tripStat .tacts .linkbtn{padding-block:0 8px}
 #tripStat .tacts #tEdit,#tripStat .tacts #tAllow{padding-block:8px 0}
 #tripStat .tacts #tEnd,#tripStat .tacts #tRep,#tripStat .tacts #tBegin{flex-basis:100%;margin:0 0 0 -6px}
-#tripStat .tacts #tRep:has(+#tEnd),#tripStat .tacts #tRep:has(+#tBegin),#tripStat .tacts #tBegin:has(+#tEnd){padding-block:0}
-/* all three lines (the report, «началась», «закончилась»): each line's words 4px higher in its 32px than those above — the gaps stay those of two lines
-   (the last one's words as high as its 32px allows) */
-#tripStat .tacts #tRep+#tBegin:has(+#tEnd){padding-block:0 8px}
-#tripStat .tacts #tRep+#tBegin+#tEnd{padding-block:0 14px}
+#tripStat .tacts #tBegin:has(+#tRep),#tripStat .tacts #tEnd:has(+#tRep){padding-block:0}
 .wallets{display:flex;flex-direction:column;gap:var(--gap-stack)}
 .wgroup{display:flex;flex-direction:column;gap:8px}
 /* «Деньги»: each group (Карты, Наличные, Накопления) is a card, its name and sum on top, its accounts as small blocks inside it */
@@ -1870,8 +1866,8 @@ function tripNow(){
    Which account the money went from is not its business: the accounts show that */
 function renderTripLine(){
   const box=$('tripLine'), {avail,spent,left,got}=tripNow(), m=$('tripMeter'), l=$('tripLeftLine');
-  /* no trip going on: no trip money and no trip spending since the last trip ended — the line is hidden */
-  if(!(avail>0)&&!(spent>0)){box.hidden=true;return}
+  /* only while a trip is marked as begun (owner's choice, 24.10.2026): trip money that came early waits on Итоги; ended — gone */
+  if(!tripOn()){box.hidden=true;return}
   box.hidden=false;
   /* a label stays with its sum (no-break spaces): the line may wrap only after a «·» */
   $('tripOf').textContent=avail>0?'выдано\u00a0'+moneyR(avail):'';
@@ -1999,7 +1995,7 @@ function renderTrip(trip){
   box.innerHTML=`${!got&&spent>0?`<span>Потрачено в командировке</span><b>${moneyR(spent)}</b><small>командировочные не внесены</small>`
     :bal<0?`<span>Перерасход командировочных</span><b class="neg">${moneyR(-bal)}</b>`:`<span>Осталось командировочных</span><b>${any?moneyR(bal):'—'}</b>`}
     ${avail>0&&spent>0?`<small>выдано\u00a0${moneyR(avail)}\u00a0· потрачено\u00a0${moneyR(spent)}</small>`:''}${on?`<small>идёт с ${dayText(anchorDay({at:on}))}</small>`:''}
-    <div class="acts tacts"><button class="linkbtn" id="tEdit" aria-haspopup="dialog">${st?'Сверить':'Указать остаток'}</button><button class="linkbtn" id="tAllow" aria-haspopup="dialog">+ Пришли командировочные</button>${rb}${on?'':'<button class="linkbtn" id="tBegin">Командировка началась</button>'}${avail>0||spent>0||on?`<button class="linkbtn" id="tEnd">Командировка закончилась</button>`:''}</div>`;
+    <div class="acts tacts"><button class="linkbtn" id="tEdit" aria-haspopup="dialog">${st?'Сверить':'Указать остаток'}</button><button class="linkbtn" id="tAllow" aria-haspopup="dialog">+ Пришли командировочные</button>${on?'<button class="linkbtn" id="tEnd">Командировка закончилась</button>':'<button class="linkbtn" id="tBegin">Командировка началась</button>'}${rb}</div>`;
   rOn();
   /* a field gets the cursor only when he opens its form with a tap (never on a redraw), and the page doesn't move for it */
   $('tEdit').onclick=()=>{fresh();state.editing='trip';render();$('tInput')?.focus({preventScroll:true})};
@@ -3832,10 +3828,12 @@ function guessHit(word,type,scope){
 }
 /* the form's switches: Расход/Доход and Личное/Командировка pressed, the button, the sum's placeholder and the hint follow them */
 function renderChips(){
+  /* «Личное / Командировка» only while a trip is marked as begun (owner's choice, 24.10.2026): else every record is his own */
+  const on=!!tripOn();if(!on)state.scope='own';
   const t=state.type,s=state.scope;
   $('tOut').setAttribute('aria-pressed',t==='out');$('tIn').setAttribute('aria-pressed',t==='in');
   $('sOwn').setAttribute('aria-pressed',s==='own');$('sTrip').setAttribute('aria-pressed',s==='trip');
-  $('sOwn').parentElement.hidden=t==='in';$('sOwn').parentElement.parentElement.classList.toggle('one',t==='in');
+  $('sOwn').parentElement.hidden=t==='in'||!on;$('sOwn').parentElement.parentElement.classList.toggle('one',t==='in'||!on);
   const sb=$('submitBtn');sb.textContent=(t==='in'?'Добавить доход':'Добавить расход')+(s==='trip'?' в командировке':'');sb.classList.toggle('in',t==='in');
   $('amount').placeholder=s==='trip'&&t==='in'?String(TRIP_ALLOWANCE):'0';
   $('hint').hidden=s!=='trip'||t!=='in';
