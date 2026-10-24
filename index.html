@@ -3225,9 +3225,9 @@ const delAsk=id=>{const it=state.items.find(i=>i.id===id), d=it&&recDebt(it);if(
   const pd=it&&ptDebt(it), sh=pd?recsShift([it,...debtRecs(pd)]):'', pw=pd?[+pd.returned>0?`возвратами (${money(+pd.returned)})`:'',+pd.forgiven>0?`садакой (${money(+pd.forgiven)})`:''].filter(Boolean).join(' и '):'';
   return pd?[`Удалится и долг: ${pd.name} — ${money(+pd.amount||0)}${pw?', вместе с '+pw:''}.${sh?' '+sh+'.':''}${debtZxAsk(pd)} ${q||'Точно?'}`,['Только трату',x=>delItem(x,true),'долг напарника останется']]:q};
 const byNewest=(a,b)=>b.date.localeCompare(a.date)||(b.created||0)-(a.created||0);
-/* last five records under the entry form, to check and undo right away */
+/* last seven records under the entry form, to check and undo right away */
 function renderRecent(){
-  const box=$('recent'), last=state.items.filter(i=>!zeroEnd(i)).sort((a,b)=>(b.created||0)-(a.created||0)).slice(0,5);
+  const box=$('recent'), last=state.items.filter(i=>!zeroEnd(i)).sort((a,b)=>(b.created||0)-(a.created||0)).slice(0,7);
   if(!state.ready){box.innerHTML='<div class="empty"><p>Загружаю записи…</p></div>';return}
   if(!last.length){
     box.innerHTML=`<div class="empty"><p>Записей пока нет. Укажите сумму, выберите категорию и счёт, чтобы добавить первую запись.</p></div>`;
