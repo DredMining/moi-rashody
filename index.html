@@ -258,6 +258,9 @@ button{cursor:pointer}
 .wallet-edit input{flex:1 1 140px}
 .wallet-edit p{margin:0;font-size:12px;color:var(--muted)}
 .wallet-edit p.err{color:var(--bad);font-size:13px}
+/* «Это за прошлую командировку» in the trip money window: a box and its text on one row */
+.wallet-edit label.echk{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);min-height:44px}
+.wallet-edit .echk input{width:auto;flex:none;margin:0}
 .rule{display:flex;flex-direction:column;gap:6px}
 .rule .row{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted);flex-wrap:wrap}
 .meter{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
@@ -1287,9 +1290,11 @@ const fmt=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2});
 /* kopecks are shown everywhere when there are any: 12 000,50 ₽; whole sums stay 12 000 ₽ */
 const fmt0=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0});
 const fmt2=new Intl.NumberFormat('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
-/* every stored sum is in whole kopecks; a negative one gets the real minus «−», and −0 is plain 0 */
-const r2=n=>Math.round(n*100)/100;
-const money=n=>{const a=Math.round(Math.abs(n)*100)/100||0;return (n<0&&a?'−':'')+(Number.isInteger(a)?fmt0:fmt2).format(a)+'\u00a0₽'};
+/* every stored sum is in whole kopecks; a negative one gets the real minus «−», and −0 is plain 0.
+   Half a kopeck always goes up (1,005 → 1,01; −0,995 → −0,99, so «положено − отложено» still adds up): toFixed(6) first takes off
+   the float error (1.005*100 = 100.49999999999999) that made a half go down or up at random */
+const r2=n=>Math.round(+(n*100).toFixed(6))/100;
+const money=n=>{const a=Math.abs(r2(n))||0;return (n<0&&a?'−':'')+(Number.isInteger(a)?fmt0:fmt2).format(a)+'\u00a0₽'};
 const moneyR=money;
 /* a date that doesn't read (damaged saved data) is shown as nothing instead of stopping the whole screen */
 const DF=o=>{const f=new Intl.DateTimeFormat('ru-RU',o);return {format:d=>isNaN(d)?'':f.format(d)}};
@@ -1330,7 +1335,8 @@ function localStore(){
       for(const k of ['start','wait','paidFrom']) if(y[k]==='')delete y[k];else if(y[k]!=null&&!okDay(y[k])){delete y[k];bad()}
       if(y.dipOk!=null&&!(typeof y.dipOk==='string'?okDay(y.dipOk):obj(y.dipOk)&&okDay(y.dipOk.start)&&okDay(y.dipOk.upTo))){delete y.dipOk;bad()}
       if(y.price!=null){const p=num(y.price);if(p===null){delete y.price;bad()}else y.price=p}
-      if(Array.isArray(y.years)) y.years=y.years.filter(x=>obj(x)&&okDay(x.due)||bad()).map(x=>{const r={...x}, a=num(r.amount);if(a===null)bad();r.amount=a??0;if(r.start!=null&&!okDay(r.start)){delete r.start;bad()}return r});
+      if(Array.isArray(y.years)) y.years=y.years.filter(x=>obj(x)&&okDay(x.due)||bad()).map(x=>{const r={...x}, a=num(r.amount);if(a===null)bad();r.amount=a??0;if(r.start!=null&&!okDay(r.start)){delete r.start;bad()}
+        if(r.dipOk!=null&&!(typeof r.dipOk==='string'?okDay(r.dipOk):obj(r.dipOk)&&okDay(r.dipOk.start)&&okDay(r.dipOk.upTo))){delete r.dipOk;bad()}return r});
       if(Array.isArray(y.extra)) y.extra=y.extra.filter(obj).map(x=>{const r={...x}, a=num(r.amount);if(a===null)bad();r.amount=a??0;if(!okDay(r.date)){r.date=iso(new Date());bad()}return r});
       o.settings={...o.settings,zakat:y}}
     return o};
@@ -1482,8 +1488,9 @@ const monthLbl=()=>monthName.format(new Date(state.y,state.m,1)).replace(' г.',
 const inMonth=()=>state.items.filter(i=>typeof i.date==='string'&&i.date.startsWith(monthKey()));
 const daysInMonth=()=>new Date(state.y,state.m+1,0).getDate();
 const isCurrentMonth=()=>state.y===now.getFullYear()&&state.m===now.getMonth();
-/* a typed balance (an account, trip money, the broker debt) already holds every record saved before it and every record
-   dated before the day it was typed — a record added later «задним числом» doesn't move it. «Очистить всё» zeros were never typed: saved-before only */
+/* a typed balance (an account, trip money) already holds every record saved before it and every record
+   dated before the day it was typed — a record added later «задним числом» doesn't move it. «Очистить всё» zeros were never typed: saved-before only.
+   The broker debt goes by the moment of saving only (brokerOwed) */
 const anchorDay=w=>iso(new Date(w.at||0));
 const inAnchor=(i,w)=>!!w&&((i.created||0)<=(w.at||0)||(!w.reset&&typeof i.date==='string'&&i.date<anchorDay(w)));
 function plural(n,a,b,c){const m=n%10,h=n%100;return m===1&&h!==11?a:m>=2&&m<=4&&(h<10||h>=20)?b:c}
@@ -1716,12 +1723,25 @@ function tripClosed(i){
   const x=state.items.filter(x=>TRIP_END.includes(catOf(x.cat).id)&&(x.created||0)>=c).sort((a,b)=>(a.created||0)-(b.created||0))[0], p=x?.tripPrev;
   return x&&!(p&&(c<=(+p.tripEnd||0)||(p.tripStart&&inAnchor(i,tripAnc(p.tripStart,p.tripEnd)))))?x:null;
 }
+/* the «Докинул на командировку» «Указать остаток» writes for an overspend while a trip goes on: its tripPrev holds the balance typed with it,
+   at its own moment (no «Командировка закончилась» record has that) — not a trip's result, even saved seconds before one */
+const tripSync=x=>+x.created>0&&+x.tripPrev?.tripStart?.at===+x.created;
 /* a trip record saved after the last trip ended but dated before the day it ended (forgotten till then): it belongs to that trip —
    the record that holds its result, or null (no trip ended, or a trip balance typed since already holds it) */
 function pastTripOf(i){
   const end=+state.settings.tripEnd||0, st=tripAnc(state.settings.tripStart,end);
   if(!isTrip(i)||!end||(i.created||0)<=end||(st&&inAnchor(i,st))||!(typeof i.date==='string'&&i.date<anchorDay({at:end}))) return null;
-  return state.items.find(x=>TRIP_END.includes(catOf(x.cat).id)&&Math.abs((x.created||0)-end)<=5000)||null;
+  return state.items.find(x=>TRIP_END.includes(catOf(x.cat).id)&&!tripSync(x)&&Math.abs((x.created||0)-end)<=5000)||null;
+}
+/* trip money coming now may be for the last trip, ended with his own money put in («Докинул на командировку») — often closed before its money came.
+   px: that result record, or null; p0: surely for it — that trip had no trip money at all (closed with nothing come), and nothing goes on since.
+   The report and tripNow see only what came after a typed balance: none may be typed since it ended (the zero it left, tripAnc) nor in it
+   (its start was the zero the trip before left, or none) — else money may have come before that balance */
+function lateTrip(){
+  const end=+state.settings.tripEnd||0, px=end&&state.items.find(x=>catOf(x.cat).id==='trip_extra'&&+x.amount>=0.005&&!tripSync(x)&&Math.abs((x.created||0)-end)<=5000)||null,
+    r=px&&repList().find(y=>Math.abs((+y.at||0)-(px.created||0))<=5000), t=tripNow(), ps=px?.tripPrev?.tripStart;
+  return {px,p0:!!r&&!(+r.allow>0)&&!(+r.start>0)&&!(+r.over>0)&&!(t.avail>0)&&!(t.spent>0)
+    &&!!tripAnc(state.settings.tripStart,end)?.reset&&(!ps||!!tripAnc(ps,px.tripPrev.tripEnd)?.reset)};
 }
 /* the trip result after its money changed by d: a leftover is «Остаток командировочных», a minus — «Докинул на командировку» */
 const closeAfter=(x,d)=>r2((catOf(x.cat).id==='trip_left'?1:-1)*(+x.amount||0)+d);
@@ -1730,16 +1750,24 @@ const closeTxt=L=>Math.abs(L)<0.005?'0 ₽':L>0?`«${CAT.trip_left.name}» ${mon
    again — still finds it, and the result comes back as it was, the same record with the same sum */
 function tripCloseFix(o,x,d){
   const L=closeAfter(x,d), z=Math.abs(L)<0.005, c=z?catOf(x.cat).id:L>0?'trip_left':'trip_extra';
-  o.update(x.id,{type:c==='trip_left'?'in':'out',cat:c,amount:z?0:Math.abs(L),...(c!==catOf(x.cat).id?{note:L>0?'командировка закончилась — остаток стал личным':'командировочных не хватило — добавлено из своих'}:{})});
+  const p={type:c==='trip_left'?'in':'out',cat:c,amount:z?0:Math.abs(L),...(c!==catOf(x.cat).id?{note:L>0?'командировка закончилась — остаток стал личным':'командировочных не хватило — добавлено из своих'}:{})};
+  o.update(x.id,p);brokerFix(o,x,{...x,...p});
   return closeTxt(L);
 }
-/* «Отменить»: the result record back as it was (put back if it went) */
-const closeBack=(o,x)=>{o.update(x.id,x);o.restore(x)};
+/* the result record a → b, moved by a record saved now: brokerOwed counts records saved after «Сверить», and this one keeps the moment
+   the trip ended — when the debt was typed since then, its % moves that typed debt (both ways, each side rounded: «Отменить» brings it back to the kopeck) */
+const brokerFix=(o,a,b)=>{const s=o.settings().brokerOwed, d=r2(brokerDue([b]))-r2(brokerDue([a]));
+  if(s&&(+s.at||0)>=(a.created||0)&&Math.abs(d)>=0.005) o.patchSettings({brokerOwed:{...s,amount:r2((+s.amount||0)+d)}})};
+/* «Отменить»: the result record back as it was (put back if it went), and the debt to the broker with it */
+const closeBack=(o,x)=>{brokerFix(o,state.items.find(i=>i.id===x.id)||x,x);o.update(x.id,x);o.restore(x)};
+/* a result record deleted (back: put back by «Отменить»): its % leaves the typed debt as a result of 0 would —
+   else a trip opened again and ended once more owes the % of the same leftover twice (an overspend owes none: nothing moves) */
+const endDel=(o,x,back)=>{if(x&&TRIP_END.includes(catOf(x.cat).id)){const z={...x,amount:0};brokerFix(o,back?z:x,back?x:z)}};
 /* the latest «Командировка закончилась» record: deleting it opens that trip again — as it was (tripPrev), or for an older record from its result.
    Not once a trip balance was typed after it («Сверить»): that typed balance stays */
 function tripEndPrev(it){
   const end=+state.settings.tripEnd||0, c=it.created||0, p=it.tripPrev, st=state.settings.tripStart;
-  if(!TRIP_END.includes(catOf(it.cat).id)||!end||Math.abs(end-c)>5000||(st&&(+st.amount||Math.abs((st.at||0)-end)>5000))) return null;
+  if(!TRIP_END.includes(catOf(it.cat).id)||tripSync(it)||!end||Math.abs(end-c)>5000||(st&&(+st.amount||Math.abs((st.at||0)-end)>5000))) return null;
   if(p&&typeof p==='object'&&(p.tripStart==null||typeof p.tripStart.amount==='number')) return {tripStart:p.tripStart||null,tripEnd:+p.tripEnd||0};
   return {tripStart:{amount:closeAfter(it,0),at:c},tripEnd:state.items.filter(x=>x!==it&&TRIP_END.includes(catOf(x.cat).id)&&(x.created||0)<c).reduce((m,x)=>Math.max(m,x.created||0),0)};
 }
@@ -1801,8 +1829,8 @@ function tripReport(at,left){
     ...(pd.length?{partner:{ids:pd.map(d=>d.id),names:[...new Set(pd.map(d=>d.name.trim()))],amount:r2(sum(pd)),ret:r2(pd.reduce((s,d)=>s+(+d.returned||0),0)),left:r2(pd.reduce((s,d)=>s+debtLeft(d),0))}}:{})};
 }
 /* a record of an ended trip saved, changed or deleted after it ended (its result x moves): that trip's report follows in the same write —
-   a taken out of it, b put in; what was spent by category, the money that came, the result, and the partner's loan dl saved with b */
-function repFix(o,x,a,b,dl){
+   a taken out of it, b put in; what was spent by category, the money that came, the result, the partner's loan dl saved with b, dd deleted with a */
+function repFix(o,x,a,b,dl,dd){
   const rs=o.settings().tripReports, k=Array.isArray(rs)?rs.findIndex(r=>repClean(r)&&Math.abs((+r.at||0)-(x.created||0))<=5000):-1;if(k<0) return;
   const r=repClean(rs[k]), tv=i=>i?tripVal(i):0;
   const mv=(i,s)=>{if(!i||!isTrip(i))return;const v=s*(+i.amount||0);
@@ -1811,6 +1839,9 @@ function repFix(o,x,a,b,dl){
   if(typeof b?.date==='string'&&b.date<r.from) r.from=b.date;
   if(dl){const p=r.partner||{ids:[],names:[],amount:0,ret:0,left:0};
     r.partner={...p,ids:[...(p.ids||[]),dl.id],names:[...new Set([...(p.names||[]),dl.name.trim()])],amount:r2((+p.amount||0)+dl.amount),left:r2((+p.left||0)+dl.amount)}}
+  /* dd: the partner's loan deleted with a — it leaves the report (his name too, when no loan left there is his) */
+  const q=r.partner;if(dd&&q&&(q.ids||[]).includes(dd.id)){const ids=q.ids.filter(i=>i!==dd.id), nm=ids.map(i=>state.debts.find(d=>d.id===i)?.name.trim());
+    if(!ids.length) delete r.partner;else r.partner={...q,ids,names:nm.every(Boolean)?[...new Set(nm)]:q.names,amount:r2(Math.max(0,(+q.amount||0)-(+dd.amount||0))),ret:r2(Math.max(0,(+q.ret||0)-(+dd.returned||0))),left:r2(Math.max(0,(+q.left||0)-debtLeft(dd)))}}
   o.patchSettings({tripReports:rs.map((y,j)=>j===k?r:y)});
 }
 /* «Командировка: 3 окт. — 15 окт. 2026» (the year after the first day too when the trip went over the New Year); the dates stay on one line */
@@ -1891,7 +1922,7 @@ function renderTrip(trip){
      Spent to the kopeck: no record, the trip just ends (only «Отменить» opens it again) — the line on Учёт goes, the next trip starts from zero */
   if($('tEnd')) $('tEnd').onclick=async e=>{
     const b=e.currentTarget, v=r2(bal), z=Math.abs(v)<0.005;
-    if(!b.dataset.armed){b.dataset.armed=Date.now();b.textContent=z?'Командировочные потрачены ровно. Закрыть — нажмите ещё раз':v>0?`Остаток ${money(v)} станет вашим доходом. Нажмите ещё раз`:`Перерасход ${money(-v)} — записать как ваш расход. Нажмите ещё раз`;b.style.color='var(--bad)';
+    if(!b.dataset.armed){b.dataset.armed=Date.now();b.textContent=z?'Командировочные потрачены ровно. Закрыть — нажмите ещё раз':v>0?`Остаток ${money(v)} станет вашим доходом. Нажмите ещё раз`:!got?`Командировочные ещё не внесены — закрыть, и ${money(-v)} станут вашим расходом? Нажмите ещё раз`:`Перерасход ${money(-v)} — записать как ваш расход. Нажмите ещё раз`;b.style.color='var(--bad)';
       setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent='Командировка закончилась';b.style.color=''}},5000);return}
     /* a quick double tap is not a confirmation */
     if(Date.now()-b.dataset.armed<600) return;
@@ -1904,10 +1935,10 @@ function renderTrip(trip){
       /* the report comes up at once; «Отменить» in the message over it opens the trip again and takes the report away (the window closes).
          Closed, it gives the focus to «Отчёт по прошлой командировке» — «Командировка закончилась» is gone */
       $('tRep')?.focus({preventScroll:true});repSheet(rep);
-      toast(z?'Командировка закрыта: командировочные потрачены ровно':v>0?`Остаток ${money(v)} записан в доходы${pct?` · ${fmt.format(pct)}% на брокер`:''}`:`Перерасход ${money(-v)} записан в расходы из своих денег, входит в лимит месяца`,
+      toast(z?'Командировка закрыта: командировочные потрачены ровно':v>0?`Остаток ${money(v)} записан в доходы${pct?` · ${fmt.format(pct)}% на брокер`:''}`:!got?`Командировочные не внесены — ${money(-v)} записаны в расходы из своих денег, входят в лимит месяца · когда придут, запишите их в «+ Пришли командировочные» с отметкой «Это за прошлую командировку»`:`Перерасход ${money(-v)} записан в расходы из своих денег, входит в лимит месяца`,
         /* the report closes (renderTrip) and its link may be gone: the focus goes to «Командировка закончилась», drawn again —
            unless it is somewhere else on the page by now */
-        ()=>store.batch(o=>{if(id)o.remove(id);tripReopen(o,prev);o.patchSettings({tripReports:repList().filter(r=>r.at!==at)})})
+        ()=>store.batch(o=>{if(id){endDel(o,state.items.find(i=>i.id===id));o.remove(id)}tripReopen(o,prev);o.patchSettings({tripReports:repList().filter(r=>r.at!==at)})})
           .then(()=>{const a=document.activeElement, t=$('tEnd');if((!a||a===document.body||$('tripStat').contains(a))&&t?.getClientRects().length)t.focus({preventScroll:true})}));
       /* the window has risen into place: the message stays right above it */
       setTimeout(()=>{if(!$('toast').hidden)toastPlace($('toast'))},250);
@@ -1920,15 +1951,33 @@ function renderTrip(trip){
     <form class="wallet-edit" id="${id}Form" novalidate><div class="dp-head"><div class="dp-t"><b id="${id}T" tabindex="-1">${title}</b></div><button type="button" class="dp-x" data-tclose aria-label="Закрыть">✕</button></div>${field}${note?`<p>${note}</p>`:''}
     <div class="row"><button class="primary" type="submit">${btn}</button><button class="linkbtn" type="button" data-tclose>Отмена</button></div></form></div>`;
   if(state.editing==='trip'){
-    host.insertAdjacentHTML('beforeend',win('t','Сколько сейчас осталось командировочных',`<input id="tInput" class="num" inputmode="decimal" placeholder="Например, 12000" value="${st&&bal>=0?vIn(bal):''}" aria-label="Остаток командировочных">`,'Сохранить','Дальше к этой сумме прибавятся новые командировочные и вычтутся траты в командировке.'));
+    /* an overspend (his own money, counted in the limit) doesn't vanish with a typed balance: said here, and kept as «Докинул на командировку» */
+    const ov=got&&bal<0?r2(-bal):0;
+    host.insertAdjacentHTML('beforeend',win('t','Сколько сейчас осталось командировочных',`<input id="tInput" class="num" inputmode="decimal" placeholder="Например, 12000" value="${st&&bal>=0?vIn(bal):''}" aria-label="Остаток командировочных">`,'Сохранить',(ov?`Сейчас перерасход ${money(ov)} — он запишется вашим расходом «${CAT.trip_extra.name}» и останется в лимите месяца. `:'')+'Дальше к этой сумме прибавятся новые командировочные и вычтутся траты в командировке.'));
     $('tForm').onsubmit=async e=>{e.preventDefault();const raw=$('tInput').value, v=parseNum(raw);if(!(v>=0)){toast(NUM_ERR);return}state.editing=null;
-      if(await saveSettings({tripStart:{amount:v,at:Date.now()}})) toast('Остаток командировочных: '+money(v));else reopen('trip','#tInput',raw)};
+      const t=tripNow(), over=t.got&&t.left<0?r2(-t.left):0, at=Date.now(), st0=state.settings.tripStart||null;
+      if(!over){if(await saveSettings({tripStart:{amount:v,at}})) toast('Остаток командировочных: '+money(v));else reopen('trip','#tInput',raw);return}
+      /* the record as «Командировка закончилась» writes it, and the balance — one write. Its tripPrev is the balance typed now, at its own moment
+         (tripSync): it holds every trip record saved before it, so tripClosed never takes this record for an ended trip's result */
+      try{const id=await store.batch(o=>{o.patchSettings({tripStart:{amount:v,at}});
+          return o.add({type:'out',cat:'trip_extra',amount:over,acc:'',date:iso(now),note:'командировочных не хватило — добавлено из своих',created:at,tripPrev:{tripStart:{amount:v,at},tripEnd:+state.settings.tripEnd||0}})});
+        toast(`Перерасход ${money(over)} записан в расходы из своих денег · остаток командировочных: ${money(v)}`,()=>store.batch(o=>{o.remove(id);o.patchSettings({tripStart:st0})}))}
+      catch(x){reopen('trip','#tInput',raw);toast(saveErr(x))}};
   }
   if(state.editing==='allow'){
-    host.insertAdjacentHTML('beforeend',win('a','Пришли командировочные на Т-Банк',`<input id="aInput" class="num" inputmode="decimal" value="${TRIP_ALLOWANCE}" aria-label="Сумма командировочных">`,'Записать'));
+    /* the last trip ended with his own money put in: money coming now may be for it — ticked at once only when surely so (lateTrip) */
+    const {px,p0}=lateTrip();
+    host.insertAdjacentHTML('beforeend',win('a','Пришли командировочные на Т-Банк',`<input id="aInput" class="num" inputmode="decimal" value="${TRIP_ALLOWANCE}" aria-label="Сумма командировочных">`
+      +(px?`<label class="echk"><input type="checkbox" id="aPast"${p0?' checked':''}>Это за прошлую командировку: закончилась ${dayText(anchorDay({at:+state.settings.tripEnd}))}, докинули из своих ${money(+px.amount)}</label>`:''),'Записать'));
     $('aForm').onsubmit=async e=>{e.preventDefault();const raw=$('aInput').value, v=parseNum(raw);if(!(v>0)){toast(isNaN(v)?NUM_ERR:'Введите сумму больше нуля');return}
+      const r0={type:'in',amount:Math.round(v*100)/100,cat:'t_allow',scope:'trip',acc:TRIP_ACC,date:iso(now),note:'',created:Date.now()};
+      /* that trip takes it as a record dated back into it does (pastTrip): its result and report follow in the same write —
+         only when its result is found, else the money would belong to no trip */
+      const tc=px&&$('aPast')?.checked?tripClosed({...r0,pastTrip:px.created||0}):null, tc0=tc&&{...tc}, rec=tc?{...r0,pastTrip:px.created||0}:r0, rp0=state.settings.tripReports;
       state.editing=null;
-      try{const id=await store.add({type:'in',amount:Math.round(v*100)/100,cat:'t_allow',scope:'trip',acc:TRIP_ACC,date:iso(now),note:'',created:Date.now()});toast('Командировочные: '+money(v),id?()=>store.remove(id):null)}catch(x){reopen('allow','#aInput',raw);toast(saveErr(x))}};
+      try{const [id,tn]=await store.batch(o=>{const r=[o.add(rec),tc?tripCloseFix(o,tc,tripVal(rec)):''];if(tc)repFix(o,tc,null,rec);return r});
+        toast('Командировочные: '+money(v)+(tc?` · за прошлую командировку, её итог теперь ${tn}`:''),id?()=>store.batch(o=>{o.remove(id);if(tc0){closeBack(o,tc0);o.patchSettings({tripReports:rp0})}}):null)}
+      catch(x){reopen('allow','#aInput',raw);toast(saveErr(x))}};
   }
   host.querySelectorAll('[data-tclose]').forEach(x=>x.onclick=()=>{fresh();state.editing=null;render()});
 }
@@ -1955,12 +2004,16 @@ function brokerRates(inc){
 /* due to the broker from these records: each personal income at the % of the time it was saved;
    income that came straight to the broker account (dividends) is already there — no % from it */
 const brokerDue=list=>list.reduce((s,i)=>typeOf(i)==='in'&&!isTrip(i)&&i.acc!=='broker'?s+(+i.amount||0)*brokerPctAt(i.created||0)/100:s,0);
-function brokerOwed(){
-  /* % of every income (except командировочные) adds up until it's sent to the broker; below zero — sent more than was due */
+function brokerOwed(raw){
+  /* % of every income (except командировочные) adds up until it's sent to the broker; below zero — sent more than was due.
+     raw: not yet rounded to kopecks — for a sum worked out from it, so half a kopeck is rounded only once */
   const s=state.settings, o=s.brokerOwed||{amount:0,at:0};
   if(!s.brokerOwed&&!brokerPctOf()&&!(s.brokerPctHist||[]).some(x=>+x.pct>0)) return null;
-  const after=state.items.filter(i=>!inAnchor(i,o)&&!isTrip(i));
-  return Math.round(((+o.amount||0)+brokerDue(after)-toBroker(after))*100)/100;
+  /* by when a record was saved, not its date: one saved after «Сверить» counts even when dated earlier — an income remembered
+     later still owes its % (owner's choice, 22.10.2026); account balances keep the day rule (inAnchor). A trip result moved by
+     a record saved after it, or deleted: brokerFix (endDel) moves the typed debt */
+  const after=state.items.filter(i=>(i.created||0)>(o.at||0)&&!isTrip(i)), v=(+o.amount||0)+brokerDue(after)-toBroker(after);
+  return raw?v:r2(v);
 }
 function renderBroker(inc,out){
   const box=$('brokerBox'), pct=brokerPctOf();
@@ -1971,7 +2024,8 @@ function renderBroker(inc,out){
       state.editing=null;
       if(v===pct){render();return}
       const h0=state.settings.brokerPctHist, h=[...(Array.isArray(h0)&&h0.length?h0:[{pct,from:0}]),{pct:v,from:Date.now()}];
-      saveSettings({brokerPct:v,brokerPctHist:h.length>50?[h[0],...h.slice(-49)]:h});
+      /* the whole history is kept: dropping an old change would recount the incomes saved under it (past months). One entry per change made by hand */
+      saveSettings({brokerPct:v,brokerPctHist:h});
       toast(v?`На брокер ${fmt.format(v)}% — с новых доходов`:'Процент на брокер — 0: с новых доходов ничего не откладывается')};
     $('pCancel').onclick=()=>{state.editing=null;render()};
     return '';
@@ -1981,7 +2035,7 @@ function renderBroker(inc,out){
     /* an overpayment isn't put into the field: empty — it stays as it is */
     box.innerHTML=`<form class="inline-edit" id="oForm" novalidate><input id="oInput" class="num" inputmode="decimal" placeholder="${over?'0':'Например, 8000'}" value="${cur===null||over?'':vIn(Math.max(0,cur))}" aria-label="Долг себе на брокер сейчас"><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="oCancel">Отмена</button><p class="err" role="alert" id="oErr" hidden></p></form><div class="row"><span>${over?`Сейчас переплата ${moneyR(-cur)}: она уменьшит то, что положено с новых доходов. Оставьте поле пустым, чтобы её сохранить. `:''}Сколько вы сейчас должны себе на брокер. Дальше приложение само прибавит % с новых доходов, вычтет переводы на брокер и прибавит снова то, что выведено с брокерского счёта.</span></div>`;
     $('oForm').onsubmit=e=>{e.preventDefault();const s=$('oInput').value.trim(), v=parseNum(s), er=$('oErr');
-      /* nothing typed (an overpayment stays as it is): nothing changes; the same sum is still saved — it dates the check, so older records count as included */
+      /* nothing typed (an overpayment stays as it is): nothing changes; the same sum is still saved — it dates the check, so records saved before it count as included */
       if(!s){state.editing=null;render();return}
       if(!(v>=0)){er.textContent=NUM_ERR+'.';er.hidden=false;$('oInput').focus({preventScroll:true});return}
       state.editing=null;saveSettings({brokerOwed:{amount:v,at:Date.now()}});toast('Долг себе на брокер: '+money(v))};
@@ -2003,9 +2057,10 @@ function renderBroker(inc,out){
     const R=brokerRates(inc), rest=r2(due-done+wd);
     /* the debt to himself the month began with: the debt now without what this month's records and later ones added (a debt typed
        in this month already held the records before it — they are taken back out too). What is put aside over the month's due
-       pays it first — that is not an overpayment */
+       pays it first — that is not an overpayment. From the debt not yet rounded: o and this month's due may hold the same
+       half a kopeck, and rounded twice it turned into a kopeck of «долг себе» */
     const ms=monthKey()+'-01', aft=state.items.filter(i=>!isTrip(i)&&typeof i.date==='string'&&i.date>=ms);
-    const old=o===null?0:r2(o-brokerDue(aft)+toBroker(aft)), toOld=v=>old>=0.01&&v>=0.01?r2(Math.min(old,v)):0;
+    const old=o===null?0:r2(brokerOwed(1)-brokerDue(aft)+toBroker(aft)), toOld=v=>old>=0.01&&v>=0.01?r2(Math.min(old,v)):0;
     const last=()=>{if(rest>=0.01) return zRow('Ещё перевести на брокер',moneyR(rest),'','zsum');
       const x=-rest, d=toOld(x), ov=r2(x-d), dn=!d?'':ov>=0.01?`ещё ${moneyR(d)} ушло в счёт долга себе`:`и ещё ${moneyR(d)} — в счёт долга себе`;
       return ov>=0.01?zRow('Переплата',moneyR(ov),dn,'zsum zgood'):`<div class="zrow zsum zgood"><div><span>Отложено всё ✓</span>${dn?`<small>${dn}</small>`:''}</div></div>`};
@@ -2130,13 +2185,24 @@ function walletDelta(i,id){
   if(t==='out'&&((id==='broker'&&c==='broker')||(id==='piggy'&&c==='invest'))) v+=a;
   return v;
 }
+/* the typed balances kept for zakat: the first and the newest, 40 in all — but from the earliest year zakat may still count again
+   (the one running now or waited for, the last saved one) none goes, nor the last one before it: a drop below nisab in those years
+   stays, and what changed before them never moves into them. Never more than 400: that start can stand for years (waiting for nisab).
+   z: the zakat settings */
+function histTrim(h,z){
+  const ly=(z.years||[]).reduce((a,y)=>!a||y.due>a.due?y:a,null), c=[z.start,z.wait,ly?.start].filter(isoOk).sort()[0];
+  let n=h.length-40;
+  if(n>0&&c){const k=h.findIndex(x=>anchorDay(x)>=c);n=Math.max(Math.min(n,(k<0?h.length:k)-2),h.length-400)}
+  return n>0?[h[0],...h.slice(1+n)]:h;
+}
 /* a newly typed balance; the earlier ones are kept so zakat can tell what each past day really had.
    id: the account — the sum it shows now typed again is the same balance checked once more: its sum, its day and its history stay
-   as they were (a record dated before today and added later still counts), only «checked» («сверено») moves. Only a different sum re-anchors */
-const reAnchor=(o,amount,id)=>{const live=o&&typeof o.amount==='number'&&!o.reset;
+   as they were (a record dated before today and added later still counts), only «checked» («сверено») moves. Only a different sum re-anchors.
+   zs: the zakat settings saved with it (else the saved ones) */
+const reAnchor=(o,amount,id,zs)=>{const live=o&&typeof o.amount==='number'&&!o.reset;
   if(live&&id&&walletValue(id,null,o)===r2(amount)) return {...o,checked:Date.now()};
   const h=[...(o?.hist||[]),...(live?[{amount:o.amount,at:o.at||0,...(o.since?{since:o.since}:{})}]:[])];
-  return {amount,at:Date.now(),hist:h.length>40?[h[0],...h.slice(-39)]:h}};
+  return {amount,at:Date.now(),hist:histTrim(h,zs||zset())}};
 /* older versions kept a second broker value in the zakat settings: it joins the account on «Деньги» once — the newer of the two
    is today's value, the older ones stay in its history (zakat reads past days from it). Returns the settings patch, or null */
 function brokerOne(st){
@@ -2147,7 +2213,7 @@ function brokerOne(st){
   const old=[...(wb?[...(wb.hist||[]),...(wb.reset?[]:[{amount:wb.amount,at:wb.at||0,...(wb.since?{since:wb.since}:{})}])]:[]),...(zb.hist||[]),{amount:zb.amount,at:zb.at||0}];
   const top=wb&&(wb.at||0)>(zb.at||0)?wb:{amount:zb.amount,at:zb.at||0};
   const h=old.filter(x=>x&&typeof x.amount==='number'&&!(x.amount===top.amount&&(x.at||0)===(top.at||0))).sort((a,b)=>(a.at||0)-(b.at||0));
-  return {zakat:z,wallets:{...ws,broker:{...top,hist:h.length>40?[h[0],...h.slice(-39)]:h}}};
+  return {zakat:z,wallets:{...ws,broker:{...top,hist:histTrim(h,z)}}};
 }
 /* upTo: balance at the end of that day (records dated later are left out); base: a start amount other than the typed one */
 function walletValue(id,upTo,base){
@@ -2260,7 +2326,8 @@ function renderWallets(){
       state.editing=null;
       /* zeros left by «Очистить всё» in older versions were never typed: the first real amount just becomes the balance */
       const first=cur===null||(w0?.reset&&!state.items.some(i=>!inAnchor(i,w0)&&walletDelta(i,ed.id)));
-      if(!first&&Math.abs(v-cur)>=1){state.recon={id:ed.id,from:cur,to:v};render();return}
+      /* a whole ruble off or more, in kopecks: 1.15−0.15 is 0.9999999999999999 in float */
+      if(!first&&Math.abs(r2(v-cur))>=1){state.recon={id:ed.id,from:cur,to:v};render();return}
       /* kopecks off: a new typed balance, it holds every record saved up to now; the same sum: only checked (reAnchor) */
       const same=!first&&r2(v)===cur;
       if(await saveSettings({wallets:{...ws,[ed.id]:reAnchor(ws[ed.id],v,ed.id)}})) toast(`${ed.name}: ${money(v)}${same?' — сумма та же, сверено':''}`);
@@ -2500,7 +2567,8 @@ function zRoll(M){
     if(z.start){
       const E=hawlEnd(z.start);if(E>T)break;
       let y=z.years.find(x=>x.due===E);
-      if(!y){if(zDip(z,M))break;y={...zCalc(E,z,M),start:z.start,at:Date.now()};z.years.push(y)}
+      /* «Ошибка в записях» pressed in this year stays with it: «Пересчитать» later doesn't ask about that drop again */
+      if(!y){if(zDip(z,M))break;const ok=z.dipOk;y={...zCalc(E,z,M),start:z.start,...(ok&&(ok.start===z.start||ok===z.start)?{dipOk:ok}:{}),at:Date.now()};z.years.push(y)}
       if(y.below){z.wait=E;delete z.start}else z.start=E;
       delete z.dipOk;changed=true;continue;
     }
@@ -2527,10 +2595,12 @@ function zDebtBack(o,d,v,rec){
   o.patchSettings({zakat:{...z,extra:[...(z.extra||[]),x]}});
   return x;
 }
-/* the «закят с долга» a return brought: linked by the record's id; older ones by debt, day and sum. Its index in z.extra, or −1 */
+/* the «закят с долга» a return brought: linked by the record's id; older ones by debt, day and sum — the sum against the zakat not yet
+   rounded, so one an older version rounded half a kopeck down still matches (0.0051: any rounding of it, not the kopeck next to it).
+   Its index in z.extra, or −1 */
 const zxN=x=>+x.n||+(/за (\d+) \S+$/.exec(x.label||'')||[])[1]||0;
 const zxOf=(i,z=zset())=>{const e=z.extra||[], k=e.findIndex(x=>x.rec&&x.rec===i.id), did=i.debt||recDebt(i)?.id;
-  return k>=0?k:e.findIndex(x=>!x.rec&&did&&x.debt===did&&x.date===i.date&&Math.abs((+x.amount||0)-r2((+i.amount||0)*ZAKAT_RATE*zxN(x)))<0.01)};
+  return k>=0?k:e.findIndex(x=>!x.rec&&did&&x.debt===did&&x.date===i.date&&Math.abs((+x.amount||0)-(+i.amount||0)*ZAKAT_RATE*zxN(x))<0.0051)};
 /* a return fixed in Записи to sum v (0 — deleted): the zakat it brought goes or follows the new sum — never counted twice
    when the money comes back again. The new zakat settings, or null */
 const zxFix=(i,v,date)=>{const z=zset(), k=zxOf(i,z);if(k<0) return null;const e=[...z.extra], x=e[k];
@@ -2608,11 +2678,13 @@ function renderZakat(){
     const bMiss=M.missing.includes('broker'), miss=M.missing.map(id=>WNAME[id]);
     /* only the accounts typed in on «Деньги»; Копильник on its own line, as it is there */
     const cards=['sber','tbank','vtb','pocket','cash'].filter(id=>!M.missing.includes(id)), pg=M.missing.includes('piggy')?null:r2(M.piggy(T));
+    /* trip money left now (as «Осталось командировочных» on Итоги): counted with the cards while the trip goes on (his choice) — only said apart */
+    const tl=cards.includes(TRIP_ACC)?r2(tripBalance()):0;
     /* an account in minus counts as 0 (his own debt is not subtracted): said under its line, so the sum differs from «Деньги» for a reason */
     const ng=Object.fromEntries(M.neg(T).map(x=>[x.id,x.v])), negSub=ids=>{const l=ids.filter(id=>id in ng);
       return l.length?`${l.map(id=>`${WNAME[id]} ${money(ng[id])}`).join(', ')} в минусе — ${l.length>1?'считаются':'считается'} как 0: свои долги не вычитаются`:''};
     let sub='';
-    sub+=`<div class="zcard">${cards.length||Math.abs(cur.cash-(pg||0))>=0.01?zRow('Карты и наличные',money(r2(cur.cash-(pg||0))),[cards.map(id=>WNAME[id]).join(', '),negSub(cards)].filter(Boolean).join(' · ')):''}${pg===null?'':zRow('Копильник',money(pg),negSub(['piggy']))}
+    sub+=`<div class="zcard">${cards.length||Math.abs(cur.cash-(pg||0))>=0.01?zRow('Карты и наличные',money(r2(cur.cash-(pg||0))),[cards.map(id=>WNAME[id]).join(', '),negSub(cards)].filter(Boolean).join(' · '),tl>=0.01?'zp':'')+(tl>=0.01?zRow('из них командировочные',money(tl)):''):''}${pg===null?'':zRow('Копильник',money(pg),negSub(['piggy']))}
       ${bMiss?'':zRow('Брокерский счёт',money(cur.broker),negSub(['broker'])||'сумма с вкладки «Деньги»')}
       ${cur.rel?zRow('Вам должны',money(cur.rel),'надёжные долги'):''}
       ${cur.doubt?zRow('Сомнительные долги',money(cur.doubt),'только для нисаба, закят — когда вернут'):''}
@@ -2715,17 +2787,26 @@ function bindZakat(z,M){
     const nz={...z,years:[...(z.years||[]).filter(x=>x.due!==d),y],start:d,dipOk:{start:d,upTo:d}};delete nz.wait;
     saveSettings({zakat:nz});toast(`Срок ${gDate(d)}: закят ${money(y.amount)}`,()=>saveSettings({zakat:z}))};
   /* recount a finished year with its own price and metal; two taps, it changes what is owed.
-     The last year turning below ↔ above nisab moves what follows: above — the next year starts on its due date; below — it waits for nisab */
-  $('zakatBox').querySelectorAll('[data-zre]').forEach(b=>b.onclick=()=>{const d=b.dataset.zre, ys=(z.years||[]).filter(y=>y.due!==d), y0=(z.years||[]).find(y=>y.due===d);
-    const zz={...z,years:ys,...(y0&&y0.price>0?{price:y0.price,metal:y0.metal}:{})}, y={...zCalc(d,zz,M),start:y0?.start,at:Date.now()};
-    const sv=x=>x.below?'— (ниже нисаба)':money(+x.amount||0)+(x.approx?' (примерно)':'');
-    if(!b.dataset.armed){if(!b.dataset.t)b.dataset.t=b.textContent;b.dataset.armed=Date.now();b.textContent=`Было ${y0?sv(y0):money(0)} → станет ${sv(y)}. Нажмите ещё раз`;
+     The last year turning below ↔ above nisab moves what follows: above — the next year starts on its due date; below — it waits for nisab.
+     Shafi'i, as for the year running now: a drop below nisab inside the year (records fixed after it) — no zakat for it, said before the
+     second tap with where the next year goes; after the last year it starts the first day the money is at nisab again, by today's
+     price (as zRoll will check it). What he settled stays: a year charged by hand, a drop he called an error in the records
+     (kept with the year; the year after a charged one — as zForce left it) */
+  $('zakatBox').querySelectorAll('[data-zre]').forEach(b=>b.onclick=()=>{const d=b.dataset.zre, ys=(z.years||[]).filter(y=>y.due!==d), y0=(z.years||[]).find(y=>y.due===d), T=iso(now), last=!ys.some(x=>x.due>d);
+    const zz={...z,years:ys,...(y0&&y0.price>0?{price:y0.price,metal:y0.metal}:{})}, c=zCalc(d,zz,M);
+    const ok=y0?.dipOk||((z.years||[]).some(x=>x.forced&&x.due===y0?.start)?{start:y0.start,upTo:y0.start}:null), dip=y0?.start&&!y0.forced?zDip({...zz,start:y0.start,dipOk:ok},M):null;
+    const y={...c,...(y0?.forced?{amount:r2(c.base*ZAKAT_RATE),below:false,forced:1,ids:M.debtsAt(d).ids}:dip?{amount:0,below:true,ids:[]}:{}),...(y0?.dipOk?{dipOk:y0.dipOk}:{}),start:y0?.start,at:Date.now()};
+    const nz={...z,years:[...ys,y]};
+    let nb;if(dip&&last){nb=null;for(let D=dip.d;D<=T;D=addDays(D,1)) if(atNisab(zPool(nz,M,D),zNisab(z))){nb=D;break}}
+    const nx=nb?(nb!==z.start?`, новый год закята с ${gDate(nb)}${hawlEnd(nb)<=T?` (его срок ${gDate(hawlEnd(nb))} уже прошёл)`:''}`:''):nb===null?', новый год начнётся, когда сумма дойдёт до нисаба':dip?', следующие сроки не пересчитаны':'';
+    const sv=x=>x.below?'— (ниже нисаба)':money(+x.amount||0)+(x.approx?' (примерно)':'')+(x.forced?' (начислен вручную)':'');
+    if(!b.dataset.armed){if(!b.dataset.t)b.dataset.t=b.textContent;b.dataset.armed=Date.now();b.textContent=`Было ${y0?sv(y0):money(0)} → станет ${sv(y)}${dip?`: ${gDate(dip.d)} сумма была ${money(dip.v)}, год прерван`:''}${nx}. Нажмите ещё раз`;
       setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent=b.dataset.t}},5000);return}
     /* a quick double tap is not a confirmation */
     if(Date.now()-b.dataset.armed<600) return;
-    const nz={...z,years:[...ys,y]};
-    if(!ys.some(x=>x.due>d)&&!!y0?.below!==y.below){delete nz.dipOk;if(y.below){nz.wait=d;delete nz.start}else{nz.start=d;delete nz.wait}}
-    saveSettings({zakat:nz});toast(`Срок ${gDate(d)}: ${y.below?'ниже нисаба, закята нет':'закят '+money(y.amount)}`,()=>saveSettings({zakat:z}))});
+    if(nb){if(nb!==z.start){nz.start=nb;delete nz.wait;delete nz.dipOk}}
+    else if(nb===null||last&&!!y0?.below!==y.below){delete nz.dipOk;if(y.below){nz.wait=dip?dip.d:d;delete nz.start}else{nz.start=d;delete nz.wait}}
+    saveSettings({zakat:nz});toast(`Срок ${gDate(d)}: ${dip?`год прерван ${gDate(dip.d)}, закята нет`:y.below?'ниже нисаба, закята нет':'закят '+money(y.amount)}${nx}`,()=>saveSettings({zakat:z}))});
   document.querySelectorAll('#zakatForm [data-zclose]').forEach(b=>b.onclick=()=>{state.editing=null;render()});
   const f=$('zForm');if(!f) return;
   /* the preview is the nisab that will be saved: the price is kept in kopecks, so a longer one is rounded here too and said */
@@ -2763,7 +2844,7 @@ function bindZakat(z,M){
       else if(z.paidFrom&&nz.start<z.paidFrom){nz.paidFrom=nz.start;if(ch==='charge')delete nz.paidCut}
     }
     /* one broker value in the whole app: it is the account on «Деньги» (a change in value, as «Обновить сумму» there) */
-    delete nz.broker;const bm=brokerOne(state.settings)||{}, ws=bm.wallets||state.settings.wallets||{}, wp=bv?{wallets:{...ws,broker:reAnchor(ws.broker,r2(b),'broker')}}:bm.wallets?{wallets:ws}:{};
+    delete nz.broker;const bm=brokerOne(state.settings)||{}, ws=bm.wallets||state.settings.wallets||{}, wp=bv?{wallets:{...ws,broker:reAnchor(ws.broker,r2(b),'broker',nz)}}:bm.wallets?{wallets:ws}:{};
     state.editing=null;saveSettings({zakat:nz,...wp});toast('Закят: настройки сохранены'+(bv?` · брокерский счёт: ${money(r2(b))}`:''));
   };
 }
@@ -2907,8 +2988,13 @@ function bindEdits(root){
       if(E.cat&&!E.cat.disabled){if(!E.cat.value) return fail('Выберите категорию.');p.cat=E.cat.value;const c=CAT[p.cat];
         if(c.custom){const l=E.label.value.trim();if(!l) return fail(f.dataset.et==='in'?'Впишите, что за доход.':'Впишите, на что потратили.');p.label=l} else p.label=''}
       if(f.dataset.et){p.type=f.dataset.et;p.scope=f.dataset.es==='trip'?'trip':undefined}
-      /* «Брокер» / «Копильник» is money put there from another account — from the same account nothing moves */
-      if((p.type||typeOf(i))==='out'&&((p.cat==='broker'&&p.acc==='broker')||(p.cat==='invest'&&p.acc==='piggy'))) return fail(`«${CAT[p.cat].name}» — это деньги, отложенные на ${p.cat==='broker'?'брокерский счёт':'копильник'}: выберите счёт, откуда они ушли.`);
+      /* «Брокер» / «Копильник» is money put there from another account — from the same account nothing moves.
+         Picked here for a personal record, it is saved as a transfer from that account, as saveEntry does: money moved is not spending,
+         so it stays out of «Расходы» and «Баланс». A record that already is one (older versions saved it as an expense) stays as it was;
+         so does one paid for the partner too: a transfer would lose his loan (ptDebt finds it by an expense) */
+      const toW=(p.type||typeOf(i))==='out'&&!p.scope?({broker:'broker',invest:'piggy'})[p.cat]:null, asTr=!!toW&&!(typeOf(i)==='out'&&!isTrip(i)&&catOf(i.cat).id===p.cat)&&!ptDebt(i);
+      if((p.type||typeOf(i))==='out'&&((p.cat==='broker'&&p.acc==='broker')||(p.cat==='invest'&&p.acc==='piggy')||(asTr&&!p.acc))) return fail(`«${CAT[p.cat].name}» — это деньги, отложенные на ${p.cat==='broker'?'брокерский счёт':'копильник'}: выберите счёт, откуда они ушли.`);
+      if(asTr) Object.assign(p,{type:'transfer',from:p.acc,to:toW,cat:undefined,acc:undefined,label:undefined,scope:undefined});
       if(E.note) p.note=E.note.value.trim();
       /* a debt record: its debt follows — the loan's sum and date, or how much came back */
       const d=recDebt(i), dp=d?debtPatch(d,i,p.amount,p.date):null;
@@ -2936,7 +3022,7 @@ function bindEdits(root){
         return tfx.filter(([,td])=>Math.abs(td)>=0.005).map(([x,td])=>' · итог командировки теперь '+tripCloseFix(o,x,td)).join('')});
         /* a zakat payment changed: what is owed now */
         const zn=(zx&&Math.abs(zx.amount-(+zx.x.amount||0))>=0.005?` · закят ${zxWhat(i)}: ${money(zx.amount)}`:'')+zkMoved(zk0);
-        state.actItem=null;render();onScreen(`[data-act="${CSS.escape(i.id)}"]`)?.focus({preventScroll:true});toast((moved?`Запись перенесена на ${dayText(p.date)}`:'Запись исправлена')+(dp?debtNote({...d,...dp}):'')+tn+zn+heldNote({...i,...p},i),null,0,moved?['Показать',()=>showMonth(p.date)]:null)}catch(x){state.editItem=i.id;render();toast(saveErr(x))}
+        state.actItem=null;render();onScreen(`[data-act="${CSS.escape(i.id)}"]`)?.focus({preventScroll:true});toast((moved?`Запись перенесена на ${dayText(p.date)}`:'Запись исправлена')+(asTr?` · теперь это перевод ${WNAME[p.from]} → ${WNAME[p.to]}`:'')+(dp?debtNote({...d,...dp}):'')+tn+zn+heldNote({...i,...p},i),null,0,moved?['Показать',()=>showMonth(p.date)]:null)}catch(x){state.editItem=i.id;render();toast(saveErr(x))}
     };
   });
 }
@@ -2966,21 +3052,28 @@ function itemRow(i,showDate,af,own){
     <button type="button" class="amt ${acls}" data-act="${id}" aria-expanded="${open}" aria-label="Действия с записью ${esc(amt)}">${amt}</button>
     ${open?`<div class="itemacts"><button type="button" class="linkbtn" data-open="${id}">Изменить</button><button type="button" class="del" data-id="${id}">Удалить</button></div>`:''}</div>`;
 }
+/* «Заплатил и за напарника»: the partner's loan saved in the same write as this expense (saveEntry gives both the same created,
+   tripReport finds it so too) — or null */
+const ptDebt=i=>typeOf(i)==='out'&&!i.debt&&+i.created>0?state.debts.find(d=>d.trip&&!d.mine&&+d.created===+i.created)||null:null;
 /* a debt record takes its debt along: a deleted return is no longer returned; the loan record itself — the whole debt goes (delDebt) */
-const delItem=async id=>{const it=state.items.find(i=>i.id===id), d=it&&recDebt(it);state.editItem=null;state.actItem=null;
+const delItem=async(id,keep)=>{const it=state.items.find(i=>i.id===id), d=it&&recDebt(it);state.editItem=null;state.actItem=null;
   if(d&&isLoan(it)) return delDebt(d.id);
   const dp=d?debtPatch(d,it,0):null, d0=d&&{returned:+d.returned||0,forgiven:+d.forgiven||0,closedAt:d.closedAt||0};
   /* a deleted return: the «закят с долга» it brought goes too — the debt is open again, its zakat comes with the next return */
   const zx=d&&dp&&typeof dp==='object'?zxFix(it,0):null, zk0=zLedger(zset()).owed;
   /* a record of an ended trip: the trip result follows; the latest «Командировка закончилась» record: that trip goes on again */
   const tc=it&&tripClosed(it), tc0=tc&&{...tc}, tp=it&&tripEndPrev(it), s0={tripStart:state.settings.tripStart||null,tripEnd:+state.settings.tripEnd||0}, rp0=state.settings.tripReports;
+  /* paid for the partner too: his loan and all its records (the loan, returns, садака) go with it, as delDebt takes them; keep — «Только трату» */
+  const pd=!keep&&it?ptDebt(it):null, pr=pd?debtRecs(pd):[], pz=pd?debtZx(pd):[], js=x=>JSON.stringify(x);
   /* the record, its debt and its trip — one write; the trip going on again has no report any more */
-  const tn=await store.batch(o=>{o.remove(id);if(dp&&typeof dp==='object')o.updateDebt(d.id,dp);if(zx)o.patchSettings({zakat:zx.z});
-    if(tp){tripReopen(o,tp);o.patchSettings({tripReports:repList().filter(r=>Math.abs((+r.at||0)-(it.created||0))>5000)})}if(tc)repFix(o,tc,it,null);return tc?' · итог командировки теперь '+tripCloseFix(o,tc,r2(-tripVal(it))):''});
-  const zn=(zx?` · закят ${zxWhat(it)} (${money(+zx.x.amount||0)}) снят`:'')+zkMoved(zk0);
-  return it?[()=>store.batch(o=>{o.restore(it);if(d0)o.updateDebt(d.id,d0);if(tc0)closeBack(o,tc0);if(tp)tripReopen(o,s0);if(tp||tc0)o.patchSettings({tripReports:rp0});
-      if(zx){const z=zset();if(zxOf(it,z)<0)o.patchSettings({zakat:{...z,extra:[...(z.extra||[]),zx.x]}})}}),
-    'Запись удалена'+(dp&&typeof dp==='object'?debtNote({...d,...dp}):'')+zn+tn+(tp?' · командировка снова идёт':'')]:null};
+  const tn=await store.batch(o=>{o.remove(id);endDel(o,it);if(dp&&typeof dp==='object')o.updateDebt(d.id,dp);if(zx)o.patchSettings({zakat:zx.z});
+    if(pd){o.removeDebt(pd.id,pr.map(i=>i.id));if(pz.length){const z=o.settings().zakat||{};o.patchSettings({zakat:{...z,extra:(z.extra||[]).filter(x=>x.debt!==pd.id)}})}}
+    if(tp){tripReopen(o,tp);o.patchSettings({tripReports:repList().filter(r=>Math.abs((+r.at||0)-(it.created||0))>5000)})}if(tc)repFix(o,tc,it,null,null,pd);return tc?' · итог командировки теперь '+tripCloseFix(o,tc,r2(-tripVal(it))):''});
+  const zn=(zx?` · закят ${zxWhat(it)} (${money(+zx.x.amount||0)}) снят`:'')+(pz.length?` · закят с долга (${money(r2(sum(pz)))}) снят`:'')+zkMoved(zk0);
+  return it?[()=>store.batch(o=>{o.restore(it);endDel(o,it,1);if(d0)o.updateDebt(d.id,d0);if(tc0)closeBack(o,tc0);if(tp)tripReopen(o,s0);if(tp||tc0)o.patchSettings({tripReports:rp0});
+      if(zx){const z=zset();if(zxOf(it,z)<0)o.patchSettings({zakat:{...z,extra:[...(z.extra||[]),zx.x]}})}
+      if(pd){o.restoreDebt(pd,pr);if(pz.length){const z=o.settings().zakat||{}, e=z.extra||[];o.patchSettings({zakat:{...z,extra:[...e,...pz.filter(x=>!e.some(y=>js(y)===js(x)))]}})}}}),
+    'Запись удалена'+(dp&&typeof dp==='object'?debtNote({...d,...dp}):'')+(pd?` · долг удалён вместе с записями: ${pd.name} — ${money(+pd.amount||0)}`:'')+zn+tn+(tp?' · командировка снова идёт':'')]:null};
 /* the first tap on «Удалить» of a record: a loan record asks about its debt, a trip record says what happens to the trip */
 const delAsk=id=>{const it=state.items.find(i=>i.id===id), d=it&&recDebt(it);if(d&&isLoan(it)){const sh=recsShift(debtRecs(d));return `Удалится и долг: ${d.name}.${sh?' '+sh+'.':''}${debtZxAsk(d)} Точно?`}
   const tc=it&&tripClosed(it), tp=it&&!tc&&tripEndPrev(it);
@@ -2989,8 +3082,11 @@ const delAsk=id=>{const it=state.items.find(i=>i.id===id), d=it&&recDebt(it);if(
   /* a return, or the садака a debt was forgiven into: its debt is named — it grows back (and the zakat it brought goes) */
   const dp=d?debtPatch(d,it,0):null, dl=dp&&typeof dp==='object'?debtLeft({...d,...dp}):0, zi=dp&&typeof dp==='object'?zxOf(it):-1;
   const dq=dp&&typeof dp==='object'?(debtLeft(d)>0?`Долг: ${d.name} — станет ${money(dl)}. `:`Долг снова откроется: ${d.name} — ${money(dl)}. `)+(zi>=0?`Закят ${zxWhat(it)} (${money(+zset().extra[zi].amount||0)}) снимется. `:''):'';
-  return tc?`${on}Командировка уже закончилась — её итог станет ${closeTxt(closeAfter(tc,-tripVal(it)))}. Удалить?`
-    :tp?on+(catOf(it.cat).id==='trip_left'?`Командировка снова пойдёт: ${money(+it.amount||0)} вернутся в командировочные. Удалить?`:`Командировка снова пойдёт, с перерасходом ${money(+it.amount||0)}. Удалить?`):on||dq?on+dq+'Удалить?':''};
+  const q=tc?`${on}Командировка уже закончилась — её итог станет ${closeTxt(closeAfter(tc,-tripVal(it)))}. Удалить?`
+    :tp?on+(catOf(it.cat).id==='trip_left'?`Командировка снова пойдёт: ${money(+it.amount||0)} вернутся в командировочные. Удалить?`:`Командировка снова пойдёт, с перерасходом ${money(+it.amount||0)}. Удалить?`):on||dq?on+dq+'Удалить?':'';
+  /* paid for the partner too: his loan goes with it, its returns and садака named (no balance may show them) — or «Только трату» */
+  const pd=it&&ptDebt(it), sh=pd?recsShift([it,...debtRecs(pd)]):'', pw=pd?[+pd.returned>0?`возвратами (${money(+pd.returned)})`:'',+pd.forgiven>0?`садакой (${money(+pd.forgiven)})`:''].filter(Boolean).join(' и '):'';
+  return pd?[`Удалится и долг: ${pd.name} — ${money(+pd.amount||0)}${pw?', вместе с '+pw:''}.${sh?' '+sh+'.':''}${debtZxAsk(pd)} ${q||'Точно?'}`,['Только трату',x=>delItem(x,true),'долг напарника останется']]:q};
 const byNewest=(a,b)=>b.date.localeCompare(a.date)||(b.created||0)-(a.created||0);
 /* last five records under the entry form, to check and undo right away */
 function renderRecent(){
@@ -3041,9 +3137,10 @@ function monthStats(k){
   const it=state.items.filter(i=>typeof i.date==='string'&&i.date.startsWith(k));
   const own=it.filter(i=>!isTrip(i)), out=own.filter(i=>typeOf(i)==='out'), inc=own.filter(i=>typeOf(i)==='in'), lim=out.filter(i=>!NOT_IN_LIMIT.includes(catOf(i.cat).id));
   const by=list=>{const m={};list.forEach(i=>{const c=catOf(i.cat).id;m[c]=(m[c]||0)+(+i.amount||0)});return m}, cs=id=>sum(out.filter(i=>catOf(i.cat).id===id));
-  /* any: a month with only trip, zakat or broker records is not an empty one */
+  /* any: a month with only trip, zakat or broker records is not an empty one.
+     broker / piggy: what went in minus what came out — in kopecks, so 0,1 + 0,2 − 0,3 is 0 and «В копильник» stays hidden */
   return {any:it.length>0,inc:sum(inc),incBy:by(inc),lim:sum(lim),limBy:by(lim),
-    broker:toBroker(own),piggy:cs('invest')+sum(own.filter(i=>typeOf(i)==='tr'&&i.to==='piggy'))-sum(own.filter(i=>typeOf(i)==='tr'&&i.from==='piggy')),sadaqa:cs('sadaqa'),zakat:cs('zakat'),extra:cs('trip_extra'),
+    broker:r2(toBroker(own)),piggy:r2(cs('invest')+sum(own.filter(i=>typeOf(i)==='tr'&&i.to==='piggy'))-sum(own.filter(i=>typeOf(i)==='tr'&&i.from==='piggy'))),sadaqa:cs('sadaqa'),zakat:cs('zakat'),extra:cs('trip_extra'),
     trip:sum(it.filter(i=>isTrip(i)&&typeOf(i)==='out'))};
 }
 /* Итоги: Расходы | Доходы | Брокер | Командировка | Сравнение */
@@ -3716,6 +3813,9 @@ function afterCat(labelDone){
   const p=state.pend;
   if(CAT[p.cat].custom&&!labelDone){stepLabel();return}
   if(p.type==='in'&&p.cat==='dividends'){saveEntry('broker');return}
+  /* командировочные come to Т-Банк, as «+ Пришли командировочные» on Итоги records them; the last trip closed before any of its money came
+     and nothing goes on since: they are for it (lateTrip) — as that window ticks it */
+  if(p.cat==='t_allow'){const l=lateTrip();saveEntry(TRIP_ACC,l.p0?{past:l.px}:{});return}
   stepAcc();
 }
 /* account marks drawn here (no internet needed): Сбер green with a tick, Т-Банк yellow shield «Т», ВТБ blue, cash, a pillow */
@@ -3818,8 +3918,9 @@ async function saveEntry(acc,opt={}){
   const rec=asTr?{type:'transfer',amount,from:acc,to:toW,date:p.date,note:note||label,created:Date.now()}:{type,amount,cat,date:p.date,note,created:Date.now(),acc};
   if(scope==='trip') rec.scope='trip';
   if(label&&!asTr) rec.label=label;
-  /* forgotten till the trip ended (dated before that day): it goes to that trip, and the trip's result follows — in the same write */
-  const px=pastTripOf(rec);if(px) rec.pastTrip=px.created||0;
+  /* forgotten till the trip ended (dated before that day): it goes to that trip, and the trip's result follows — in the same write.
+     opt.past: trip money that came for the last trip (afterCat, lateTrip) — taken only when that trip's result is found, else it would belong to no trip */
+  const px=pastTripOf(rec)||(opt.past&&tripClosed({...rec,pastTrip:opt.past.created||0})?opt.past:null);if(px) rec.pastTrip=px.created||0;
   const tc=px&&tripClosed(rec), tc0=tc&&{...tc}, ed=px?dayText(anchorDay({at:+state.settings.tripEnd})):'', pst=px?.tripPrev?.tripStart;
   $('sheetBody').querySelectorAll('button').forEach(b=>b.disabled=true);
   try{
@@ -3857,7 +3958,8 @@ $('form').onsubmit=e=>{
   const date=$('date').value||iso(now);
   if(date>iso(now)){bad(FUTURE_ERR);$('date').hidden=false;return}
   err.hidden=true;
-  const type=state.type, scope=state.scope, hit=guessHit(word,type,scope);
+  /* «28500 командировочные» on «Доход»: trip money, not his income (no % to the broker) — a trip record, saved as «+ Пришли командировочные» saves it (afterCat) */
+  const type=state.type, ta=type==='in'?guessHit(word,'in','trip'):null, scope=ta?'trip':state.scope, hit=ta||guessHit(word,type,scope);
   state.pend={type,scope,amount,word,hit,guessed:hit?.id||null,note:$('note').value.trim(),date};
   $('amount').blur();
   /* a new record starts: the message of the last one goes (only hidden, nothing undone) — its «Отменить» would lie over this sheet's tiles;
@@ -3988,6 +4090,7 @@ function normBackup(d){
     set(z,'dipOk',o=>typeof o==='string'?day(o,w):{...obj(o,w),start:day(o.start,w),upTo:day(o.upTo,w)});
     set(z,'broker',b=>anc(b,w));
     set(z,'years',ys=>list(ys,w).map((x,n)=>{const wy=`срока закята № ${n+1}`, y={...obj(x,wy)};y.due=day(y.due,wy);y.amount=amt(y.amount,wy);set(y,'start',s=>day(s,wy));
+      set(y,'dipOk',o=>typeof o==='string'?day(o,wy):{...obj(o,wy),start:day(o.start,wy),upTo:day(o.upTo,wy)});
       for(const k of ['base','price','nisab','cash','broker','rel','doubt','owedPrev','adv','forNisab']) set(y,k,q=>N(q,wy,'неверное число',-Infinity));
       set(y,'ids',a=>list(a,wy).map(t=>typeof t==='string'||typeof t==='number'?String(t):no(wy,'неверный долг',t)));tm(y,['at'],wy);return y}));
     set(z,'extra',xs=>list(xs,w).map((x,n)=>{const wx=`закята с долга № ${n+1}`, e={...obj(x,wx)};e.date=day(e.date,wx);e.amount=amt(e.amount,wx);T(e,['label','debt','rec'],wx);set(e,'n',q=>N(q,wx,'неверное число'));return e}));
