@@ -227,15 +227,19 @@ button{cursor:pointer}
 #cmpBox>summary{display:none}
 #cmpBox>.morebody{padding-top:var(--pad-card)}
 .sv-empty{margin:0;padding:16px;text-align:center;font-size:var(--fs-md);color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
-/* the trip links: 32px buttons (--h-s), the rows touch; «Отчёт по прошлой командировке» and «Командировка закончилась» each on a line apart.
+/* the trip links: 32px buttons (--h-s), the rows touch; «Отчёт по прошлой командировке», «Командировка началась» and «Командировка закончилась» each on a line apart.
    The words of «Сверить» / «+ Пришли командировочные» sit at the bottom of their 32px, those of the lines under them at the top:
    the lines of text stand close, each tap area stays a whole 32px and none lies over another.
    «Отчёт…» between them keeps its words in the middle of its 32px: the two gaps around it come out equal */
 #tripStat .tacts{display:flex;flex-wrap:wrap;gap:0 6px;align-items:center}
 #tripStat .tacts .linkbtn{padding-block:0 8px}
 #tripStat .tacts #tEdit,#tripStat .tacts #tAllow{padding-block:8px 0}
-#tripStat .tacts #tEnd,#tripStat .tacts #tRep{flex-basis:100%;margin:0 0 0 -6px}
-#tripStat .tacts #tRep:has(+#tEnd){padding-block:0}
+#tripStat .tacts #tEnd,#tripStat .tacts #tRep,#tripStat .tacts #tBegin{flex-basis:100%;margin:0 0 0 -6px}
+#tripStat .tacts #tRep:has(+#tEnd),#tripStat .tacts #tRep:has(+#tBegin),#tripStat .tacts #tBegin:has(+#tEnd){padding-block:0}
+/* all three lines (the report, «началась», «закончилась»): each line's words 4px higher in its 32px than those above — the gaps stay those of two lines
+   (the last one's words as high as its 32px allows) */
+#tripStat .tacts #tRep+#tBegin:has(+#tEnd){padding-block:0 8px}
+#tripStat .tacts #tRep+#tBegin+#tEnd{padding-block:0 14px}
 .wallets{display:flex;flex-direction:column;gap:var(--gap-stack)}
 .wgroup{display:flex;flex-direction:column;gap:8px}
 /* «Деньги»: each group (Карты, Наличные, Накопления) is a card, its name and sum on top, its accounts as small blocks inside it */
@@ -324,6 +328,8 @@ input[type="date"]::-webkit-date-and-time-value{color:var(--ink);-webkit-text-fi
 .xfer select{min-height:var(--h-m);padding:4px 4px 4px 8px;line-height:1.2}
 .xfer .xswap{align-self:end;width:var(--h-s);min-height:var(--h-m);padding:0;font-size:18px;line-height:1}
 .xfer .row{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+/* narrower than 440px two names side by side are cut («Брокерский сч»): «Откуда» over «Куда», «⇄» on the right between them; the type stays 16px */
+@media (max-width:439px){.xfer{grid-template-columns:minmax(0,1fr) auto}.xfer .xswap{grid-row:span 2;align-self:center}}
 .moneyacts{display:flex;justify-content:flex-end}
 .item.tr .amt{color:var(--muted)}
 input::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
@@ -469,7 +475,7 @@ input.num::placeholder{font-family:var(--f-body)}
 .cmp-head>span:not(:first-child){text-align:right}
 .cmp-row{padding:2px 5px;border-bottom:1px solid var(--line)}
 .cmp-row.t{margin-block:2px;padding:3px 5px;border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));border-radius:var(--r-sm);background:color-mix(in srgb,var(--accent) 5%,var(--bg))}
-.cmp-name{min-width:0;overflow-wrap:anywhere;font-size:var(--fs-xs);line-height:1.2;font-weight:600}
+.cmp-name{min-width:0;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto;font-size:var(--fs-xs);line-height:1.2;font-weight:600}
 .cmp-row.sub .cmp-name{padding-left:5px;color:var(--muted);font-weight:500}
 .cmp-amount,.cmp-delta{min-width:0;overflow:hidden;font-family:var(--f-num);font-size:var(--fs-xs);font-variant-numeric:tabular-nums;font-weight:500;text-align:right;text-overflow:clip;white-space:nowrap}
 @media (max-width:480px){.cmp-amount,.cmp-delta{font-size:var(--fs-2xs)}}
@@ -478,7 +484,8 @@ input.num::placeholder{font-family:var(--f-body)}
   .cmp-head,.cmp-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:2px 4px}
   .cmp-name{grid-column:1/-1}
   .cmp-head>span:first-child{display:none}
-  .cmp-amount,.cmp-delta{font-size:var(--fs-xs)}
+  /* a sum too long for its third goes on between digit groups (<wbr> in renderCompare) — never cut */
+  .cmp-amount,.cmp-delta{font-size:var(--fs-xs);white-space:normal}
 }
 .sumcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:10px}
 /* Учёт a size smaller: the card, the new record and the last records fit more on the screen
@@ -496,6 +503,8 @@ input.num::placeholder{font-family:var(--f-body)}
 .ring>div{width:83px;height:83px;border-radius:50%;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
 .ring b{font-size:25px;font-weight:700;font-variant-numeric:tabular-nums}
 .ring.warn b{color:var(--warn-ink)}.ring.bad b{color:var(--bad)}
+/* «>999%» fits inside the ring only smaller (renderBudget) */
+.ring.over b{font-size:20px}
 .lr{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
 /* the hero's label, as «Всего денег» and «Мне должны» */
 .lr #sumLabel{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;line-height:1.2;color:var(--muted)}
@@ -565,7 +574,9 @@ input.num::placeholder{font-family:var(--f-body)}
 .storenote>span{display:block}
 /* «Данные и резервная копия»: the four buttons two to a line; what shows up only now and then takes a whole line */
 .bkgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
-.wmodal:has(.bkpanel){align-items:center;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
+/* taller than the screen (320 px, landscape, «Очистить всё» asking): it starts at the top and scrolls whole, as .zform does; shorter — in the middle */
+.wmodal>.bkpanel{margin:auto 0}
+.wmodal:has(.bkpanel){padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
 .bkpanel{position:relative;width:min(440px,100%);display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);padding:var(--pad-card);box-shadow:var(--shadow-modal);animation:up .18s ease-out}
 .bkpanel .bkgrid>button{min-height:var(--h-l)}
 /* under the accounts: «Данные и копия · 9 окт» on the left (the date in yellow when the copy is over a week old), the transfer on the right */
@@ -584,7 +595,8 @@ input.num::placeholder{font-family:var(--f-body)}
 /* a dangerous button («Очистить всё»): the outline one in red */
 .ghost.danger{color:var(--bad);border-color:var(--bad)}
 .bkgrid>button{min-width:0}
-#wipeBk,#brokenDlBtn{grid-column:1/-1}
+/* «Очистить всё» asking: its long question takes a whole line of its own (in half of one it made the window taller than a small screen); «Загрузить копию» stays where it was — a second quick tap on the old place finds nothing */
+#wipeBk,#brokenDlBtn,#wipeBtn[data-armed]{grid-column:1/-1}
 /* «Очистить всё» asks: the warning and «Сначала скачать копию» are scrolled into view with the card's edge under them */
 #wipeBk{scroll-margin-bottom:16px}
 .extras{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
@@ -736,6 +748,8 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 .zline .zcols b{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 /* zakat owed: red, as in the zakat window */
 .zline .zcols b.neg{color:var(--bad);font-weight:600}
+/* 320px: three columns don't fit — a value breaks at its plain space («около» / «331 043 ₽», «21 дек.» / «2026»); a sum itself (no-break spaces) never */
+@media (max-width:374px){.zline .zcols b{white-space:normal}}
 .zpay{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);margin-bottom:12px}
 .zpay input{font-size:22px}
 /* the accounts one under another: the name on the left, the sum on the right, thin lines between them */
@@ -979,6 +993,9 @@ input[type="date"]{-webkit-appearance:none;appearance:none;display:block;max-wid
 input[type="date"]::-webkit-date-and-time-value{text-align:left;margin:0}
 input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
 .panel,.debt,.item{min-width:0;max-width:100%}
+/* narrower than 320px (a page zoomed to 200%, a tiny window): the ring goes over the month's sums, the month card and a category row go
+   one under another, a row of buttons grows with its wrapped buttons — no sum split inside a number, no word cut or run over another */
+@media (max-width:319px){.lhead{flex-wrap:wrap;justify-content:center}.lr{flex-basis:100%}#viewLedger .lof .linkbtn{white-space:normal}.panel.mcard,.bar{grid-template-columns:minmax(0,1fr)}#scopeFilter{height:auto}.whead{flex-wrap:wrap}}
 @media (max-width:480px){.form{grid-template-columns:minmax(0,1fr)}.segs{grid-template-columns:1fr}}
 /* «reduce motion» on the phone: nothing slides or fades, the windows included */
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
@@ -1071,7 +1088,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     <h2 class="sr">Записи за месяц</h2>
     <div class="monthbar">
       <button class="iconbtn" id="hPrev" aria-label="Предыдущий месяц">‹</button>
-      <div class="title" id="hTitle">—</div>
+      <div class="title" id="hTitle" tabindex="-1">—</div>
       <button class="iconbtn" id="hNext" aria-label="Следующий месяц">›</button>
     </div>
     <div class="seg seg3" id="scopeFilter" role="group" aria-label="Чьи деньги"></div>
@@ -1137,6 +1154,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   </div>
 
   <div id="viewStats" role="tabpanel" aria-labelledby="tabStats" hidden>
+    <h2 class="sr">Итоги за месяц</h2>
     <div class="monthbar">
       <button class="iconbtn" id="sPrev" aria-label="Предыдущий месяц">‹</button>
       <div class="title" id="sTitle">—</div>
@@ -1272,7 +1290,10 @@ const CAT=Object.fromEntries(CATS.map(c=>[c.id,c]));
 /* a category's place in that order: by group (personal spending, «Отдельно», income, trip), as CATS lists them, «Другое» last */
 const CAT_RANK=Object.fromEntries(CATS.map((c,n)=>[c.id,['daily','sep','in','trip','tripin'].indexOf(c.g)*1000+(c.custom?999:n)]));
 const byRank=(a,b)=>(CAT_RANK[a]??1e5)-(CAT_RANK[b]??1e5);
-const catOf=id=>CAT[id]||CAT[LEGACY[id]]||CAT.other;
+/* Object.hasOwn only since iOS 15.4 */
+const hasOwn=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
+/* only the app's own names: «toString», «constructor», «__proto__» (a hand-made file) are «Другое», not a part of every object */
+const catOf=id=>(hasOwn(CAT,id)&&CAT[id])||(hasOwn(LEGACY,id)&&CAT[LEGACY[id]])||CAT.other;
 /* «tr»: a transfer saved from «Учёт» by a version that spelled it so — read as the transfer it is */
 const typeOf=i=>i.type==='in'?'in':i.type==='transfer'||(i.type==='tr'&&i.from&&i.to)?'tr':i.type==='debt'?'debt':'out';
 const nameOf=i=>i.label||catOf(i.cat).name;
@@ -1318,15 +1339,15 @@ let store=null;
 /* status: '' — fine; 'full' — the browser refused to keep the last change (memory full or blocked); 'broken' — the saved text didn't read */
 function localStore(){
   const KEY='expenses-v1', BK=KEY+'-broken';
-  let data={items:[],budget:0,debts:[],settings:{}}, raw=null, status='', kept=true, healed=0, healedSum=0, healedZ=0, cb=()=>{};
+  let data={items:[],budget:0,debts:[],settings:{}}, raw=null, status='', kept=true, healed=0, healedSum=0, healedZ=0, healedT=0, cb=()=>{};
   const okDay=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&iso(isoToDate(s))===s, obj=x=>x&&typeof x==='object'&&!Array.isArray(x);
   const parse=s=>{const d=JSON.parse(s);if(!d||typeof d!=='object'||Array.isArray(d)||(d.items&&!Array.isArray(d.items))||(d.debts&&!Array.isArray(d.debts))||(d.settings&&typeof d.settings!=='object'))throw 0;
     const o={...data,...d,items:d.items||[],debts:d.debts||[],settings:d.settings||{}};if(o.budget&&!o.settings.budget) o.settings={...o.settings,budget:o.budget};
     /* saved by an older version with a date that doesn't read: the record gets the day it was made (else today), so it shows
        in «Записи» and can be fixed; a debt's such date goes, a debt with no name gets one. Kept with the next change (see initStore) */
-    /* a sum written as text («5000») is a number; one that doesn't read or is below zero becomes 0, to be fixed in «Записи» */
-    const num=v=>{const n=typeof v==='number'?v:typeof v==='string'&&/^\d+(?:[.,]\d+)?$/.test(v.trim())?+v.trim().replace(',','.'):NaN;return Number.isFinite(n)&&n>=0?n:null};
-    healed=0;healedSum=0;o.items=o.items.filter(obj).map(i=>{const a=num(i.amount);if(a===null)healedSum++;if(a!==i.amount)i={...i,amount:a??0};
+    /* a sum written as text («5000», «1 350,50») is a number, read as the forms read it; one that doesn't read or is below zero becomes 0, to be fixed in «Записи» — what it was is added to the record's comment, to be typed back */
+    const num=v=>{const n=typeof v==='number'?v:typeof v==='string'?parseNum(v,9):NaN;return Number.isFinite(n)&&n>=0?n:null};
+    healed=0;healedSum=0;o.items=o.items.filter(obj).map(i=>{const a=num(i.amount);if(a===null){healedSum++;const v=typeof i.amount==='string'||typeof i.amount==='number'?String(i.amount).trim().slice(0,24):'';if(v&&(i.note==null||typeof i.note==='string'))i={...i,note:(i.note?i.note+' · ':'')+`сумма была «${v}»`}}if(a!==i.amount)i={...i,amount:a??0};
       if(okDay(i.date))return i;healed++;const c=+i.created;return {...i,date:iso(c>0?new Date(c):new Date())}});
     o.debts=o.debts.filter(obj).map(x=>{const y=x.date==null||okDay(x.date)?{...x}:(({date,...r})=>r)(x);if(typeof y.name!=='string'||!y.name.trim())y.name='Без имени';return y});
     /* the zakat: a date or price that doesn't read goes; a year without its date goes whole (it can't be placed); a debt's zakat gets today */
@@ -1335,10 +1356,14 @@ function localStore(){
       for(const k of ['start','wait','paidFrom']) if(y[k]==='')delete y[k];else if(y[k]!=null&&!okDay(y[k])){delete y[k];bad()}
       if(y.dipOk!=null&&!(typeof y.dipOk==='string'?okDay(y.dipOk):obj(y.dipOk)&&okDay(y.dipOk.start)&&okDay(y.dipOk.upTo))){delete y.dipOk;bad()}
       if(y.price!=null){const p=num(y.price);if(p===null){delete y.price;bad()}else y.price=p}
+      /* the broker value older versions kept here, written as text («200000»): a number, as the price — brokerOne moves it to the account on «Деньги»; one that doesn't read is said, not dropped silently */
+      if(obj(y.broker)&&typeof y.broker.amount!=='number'){const b=num(y.broker.amount);if(b===null)bad();else y.broker={...y.broker,amount:b}}
       if(Array.isArray(y.years)) y.years=y.years.filter(x=>obj(x)&&okDay(x.due)||bad()).map(x=>{const r={...x}, a=num(r.amount);if(a===null)bad();r.amount=a??0;if(r.start!=null&&!okDay(r.start)){delete r.start;bad()}
         if(r.dipOk!=null&&!(typeof r.dipOk==='string'?okDay(r.dipOk):obj(r.dipOk)&&okDay(r.dipOk.start)&&okDay(r.dipOk.upTo))){delete r.dipOk;bad()}return r});
       if(Array.isArray(y.extra)) y.extra=y.extra.filter(obj).map(x=>{const r={...x}, a=num(r.amount);if(a===null)bad();r.amount=a??0;if(!okDay(r.date)){r.date=iso(new Date());bad()}return r});
       o.settings={...o.settings,zakat:y}}
+    /* «Командировка началась» (tripBegun): a moment the app saved, or nothing — anything else goes (only a mark: no money moves with it), and he is told */
+    healedT=0;const tb=o.settings.tripBegun;if(tb!=null&&!(typeof tb==='number'&&Number.isFinite(tb)&&tb>0&&tb<=8.64e15)){const {tripBegun,...rest}=o.settings;o.settings=rest;healedT=1}
     return o};
   try{raw=localStorage.getItem(KEY)}catch(e){status='full'}
   const keepBrokenRaw=s=>{try{
@@ -1365,7 +1390,8 @@ function localStore(){
   /* a change is kept only if the browser stored it: otherwise the screen goes back to what is stored and the caller says so.
      all: «Очистить всё» — it may go over damaged data that couldn't be kept aside, he asked to delete everything */
   const mut=(f,all)=>{fresh();const d={...data,items:[...data.items],debts:[...data.debts]}, r=f(d);
-    if(status==='broken'&&!kept&&!all){tell();throw fail()}
+    /* the damaged text had no room to be put aside: room may have come since (another tab freed it) — it is tried again first, the step-back copy giving up its place if need be */
+    if(status==='broken'&&!kept&&!all){kept=true;keepBrokenRaw(last);if(!kept){try{localStorage.removeItem(KEY+'-prev')}catch(e){}kept=true;keepBrokenRaw(last)}if(!kept){tell();throw fail()}}
     const s=JSON.stringify(d);
     /* no room: the step-back copy (see prev) gives up its place first — nothing reads it, and what is saved now matters more */
     try{localStorage.setItem(KEY,s)}catch(e){try{if(localStorage.getItem(KEY+'-prev')===null)throw e;localStorage.removeItem(KEY+'-prev');localStorage.setItem(KEY,s)}catch(x){status='full';tell();throw fail()}}
@@ -1398,8 +1424,11 @@ function localStore(){
     get healed(){return healed},
     get healedSum(){return healedSum},
     get healedZakat(){return healedZ},
+    get healedTrip(){return healedT},
     broken,
     brokenText(k){try{return localStorage.getItem(k)}catch(e){return null}},
+    /* the damaged text that had no room to be put aside is in a file now (brokenDl): what is saved next may go over it */
+    rawSaved(){kept=true},
     subscribe(fn){cb=fn;tell()},
     add:one('add'),update:one('update'),remove:one('remove'),restore:one('restore'),patchSettings:one('patchSettings'),
     addDebt:one('addDebt'),updateDebt:one('updateDebt'),removeDebt:one('removeDebt'),restoreDebt:one('restoreDebt'),
@@ -1417,7 +1446,7 @@ function initStore(){
   /* ask the browser not to clear this site's data on its own (it may say no — that's fine) */
   try{navigator.storage?.persist?.()?.catch?.(()=>{})}catch(e){}
   let migrated=false;
-  s.subscribe((d,outer)=>{state.items=d.items||[];state.debts=d.debts||[];state.settings=d.settings||{};state.ready=true;outer?keepTyped(render):render();
+  s.subscribe((d,outer)=>{state.items=d.items||[];state.debts=d.debts||[];state.settings=d.settings||{};state.ready=true;outer?keepOuter():render();
     if(migrated) return;
     migrated=true;
     /* nothing is written over data that didn't read, or into a browser that keeps nothing */
@@ -1431,7 +1460,7 @@ function initStore(){
     /* records (and zakat data) whose date or sum didn't read were fixed on the way in (see localStore): it is kept now, and he is asked to check them */
     const n=s.healed, m=s.healedSum, rw=k=>`у ${k} ${plural(k,'записи','записей','записей')}`;
     const r=[n?`${rw(n)} была неверная дата — поставлен день, когда ${n===1?'её':'их'} внесли`:'',m?`${rw(m)} была неверная сумма — поставлено ${money(0)}`:''].filter(Boolean).join('; ');
-    const msg=[r?r.replace(/^у/,'У')+'. Проверьте в «Записях».':'',s.healedZakat?'В закяте были неверные даты или суммы — проверьте его на вкладке «Деньги».':''].filter(Boolean).join(' ');
+    const msg=[r?r.replace(/^у/,'У')+'. Проверьте в «Записях».':'',s.healedZakat?'В закяте были неверные даты или суммы — проверьте его на вкладке «Деньги».':'',s.healedTrip?'Отметка «Командировка началась» не прочиталась и снята — если командировка идёт, отметьте начало снова на «Итогах».':''].filter(Boolean).join(' ');
     if(msg) s.batch(()=>{}).then(()=>toast(msg,null,9000),x=>toast(saveErr(x)));
   });
 }
@@ -1446,6 +1475,18 @@ function keepTyped(f){
   f();
   for(const [k,v,c] of was){const x=find(k);if(!x||typed(x))continue;if(x.type==='checkbox'||x.type==='radio')x.checked=c;else x.value=v}
   const x=fk&&find(fk);if(x&&document.activeElement!==x){x.focus({preventScroll:true});if(sel)try{x.setSelectionRange(...sel)}catch(e){}}
+}
+/* an open «Изменить запись»: keepTyped put back the category picked in it without a change event — its «На что потратили» /
+   «Что за доход» field is shown or hidden for it (and named), so the outer keepTyped can put the cursor back into that field */
+const catFollow=()=>document.querySelectorAll('#itemEditHost form[data-edit] select[name=cat]:not(:disabled)').forEach(c=>c.onchange?.());
+/* another open copy of the app saved (the storage event): drawn again as at midnight (refreshToday) — the zakat settings get their
+   question about past years again from the start date kept (its answer stays only if the question is the same), and an open «Откуда?»
+   step shows the balances as they are now */
+function keepOuter(){
+  const q0=$('zPastBox')?.dataset.h;
+  keepTyped(()=>{keepTyped(render);$('zStart')?.dispatchEvent(new Event('input'));catFollow()});
+  const pb=$('zPastBox');if(pb&&pb.dataset.h!==q0)pb.querySelectorAll('input:checked').forEach(x=>x.checked=false);
+  document.querySelectorAll('#accGo,#zPayGo').forEach(b=>b._tiles?.());
 }
 /* only the changed keys are written, on top of what is stored now; if the browser refuses, the screen goes back by itself */
 async function saveSettings(patch){
@@ -1462,16 +1503,17 @@ const HIDE_BROKEN='expenses-v1-hide-broken';
 const brokenNew=()=>{const k=store?.broken?.()||[], last=k[k.length-1];let h=null;try{h=localStorage.getItem(HIDE_BROKEN)}catch(e){}return last&&last!==h?last:null};
 function hideBroken(){const k=store?.broken?.()||[];try{if(k.length)localStorage.setItem(HIDE_BROKEN,k[k.length-1])}catch(e){}renderSys()}
 /* the damaged saved text as it was, to get the records out of it by hand */
-async function brokenDl(){const k=store?.broken?.()||[], t=k.map(x=>store.brokenText(x)).filter(Boolean).join('\n\n');if(!t){toast('Повреждённых данных нет');return}
-  const r=await saveFile(`moi-rashody-damaged-${iso(new Date())}.txt`,t,'text/plain');if(r)toast('Повреждённые данные сохранены в файл');else if(r===false)toast(FILE_ERR)}
+/* nothing could be put aside (no room): the damaged text is still the saved data itself */
+async function brokenDl(){const b=store?.broken?.()||[], own=!b.length&&store?.status==='broken', k=own?['expenses-v1']:b, t=k.map(x=>store.brokenText(x)).filter(Boolean).join('\n\n');if(!t){toast('Повреждённых данных нет');return}
+  const r=await saveFile(`moi-rashody-damaged-${iso(new Date())}.txt`,t,'text/plain');if(r){if(own)store.rawSaved();toast(own?'Повреждённые данные сохранены в файл. Проверьте, что он скачался: следующее сохранение запишется поверх них.':'Повреждённые данные сохранены в файл')}else if(r===false)toast(FILE_ERR)}
 function renderSys(){
   const st=store?.status, b=$('sysAlerts'), al=(t,bt,c='bad')=>`<div class="alert ${c}"><span>${t}</span><div class="sysacts">${bt}</div></div>`;
   /* nothing could be kept aside (st 'broken', no saved copy): the warning can't be hidden — nothing is written over that data anyway */
   const bk=brokenNew(), lost=st==='broken'&&!bk&&!(store?.broken?.()||[]).length;
   /* a new version came while something was being typed: it waits in one slim line at the very top until he taps — the form below hardly moves */
   const h=(state.newVer?'<div class="upd"><span>Есть новая версия</span><button type="button" class="linkbtn" id="sysUpd">Обновить</button></div>':'')
-    +(bk||lost?al('Прежние записи не загрузились: сохранённые данные повреждены. '+(bk?'Их текст хранится отдельно и не будет стёрт — загрузите резервную копию или скачайте этот текст.':'Они не стёрты: поверх них ничего не записывается. Загрузите резервную копию.'),
-      '<button class="primary" id="sysRestore">Загрузить копию</button>'+(bk?'<button class="ghost" id="sysBrokenDl">Скачать текст</button><button class="linkbtn" id="sysBrokenHide">Скрыть</button>':'')):'')
+    +(bk||lost?al('Прежние записи не загрузились: сохранённые данные повреждены. '+(bk?'Их текст хранится отдельно и не будет стёрт — загрузите резервную копию или скачайте этот текст.':'Они не стёрты: поверх них ничего не записывается. Скачайте их текст, затем загрузите резервную копию.'),
+      '<button class="primary" id="sysRestore">Загрузить копию</button><button class="ghost" id="sysBrokenDl">Скачать текст</button>'+(bk?'<button class="linkbtn" id="sysBrokenHide">Скрыть</button>':'')):'')
     +(st==='full'?al('Записи не сохраняются: память браузера заполнена или недоступна. Скачайте резервную копию, чтобы ничего не потерять.','<button class="primary" id="sysBackup">Скачать копию</button>'):'');
   if(b.dataset.h===h) return;
   b.dataset.h=h;b.innerHTML=h;
@@ -1479,10 +1521,16 @@ function renderSys(){
   if($('sysBrokenDl')) $('sysBrokenDl').onclick=brokenDl;
   if($('sysBrokenHide')) $('sysBrokenHide').onclick=hideBroken;
   if($('sysBackup')) $('sysBackup').onclick=()=>$('backupBtn').onclick();
-  if($('sysUpd')) $('sysUpd').onclick=()=>location.reload();
+  if($('sysUpd')) $('sysUpd').onclick=()=>{try{viewKeep()}catch(e){}location.reload()};
 }
 
 /* ---------- helpers ---------- */
+/* a field whose value was refused: marked invalid and tied to the message about it (as #wInput, #zAmt), so a screen reader says both;
+   typing in it takes the mark off. A message without an id gets one */
+let feN=0;
+const fieldErr=(x,er)=>{if(!x||!er)return;if(!er.id)er.id='fErr'+(++feN);const d=x.getAttribute('aria-describedby'), add=!(d||'').split(' ').includes(er.id);
+  x.setAttribute('aria-invalid','true');if(add)x.setAttribute('aria-describedby',d?d+' '+er.id:er.id);
+  x.addEventListener('input',()=>{x.removeAttribute('aria-invalid');if(add){if(d)x.setAttribute('aria-describedby',d);else x.removeAttribute('aria-describedby')}},{once:true})};
 const monthKey=()=>`${state.y}-${pad(state.m+1)}`;
 const monthLbl=()=>monthName.format(new Date(state.y,state.m,1)).replace(' г.','');
 const inMonth=()=>state.items.filter(i=>typeof i.date==='string'&&i.date.startsWith(monthKey()));
@@ -1521,9 +1569,14 @@ function toastPlace(t){
 }
 /* a screen reader hears this without anything shown (e.g. the question of an armed «Удалить») */
 const say=t=>{const s=$('say');if(!s)return;s.textContent='';clearTimeout(s._c);setTimeout(()=>{s.textContent=t;s._c=setTimeout(()=>s.textContent='',8000)},60)};
+/* a keyboard focus; before iOS 15.4 :focus-visible is unknown (matches throws) — taken for none */
+const fvis=el=>{try{return el.matches(':focus-visible')}catch(e){return false}};
 /* act: [label, fn] — a second button, e.g. «Показать» the month a record went to. «Отменить» also brings back the month on screen */
 function toast(msg,undo,ms,act){const t=$('toast'), ym=[state.y,state.m];t.replaceChildren(Object.assign(document.createElement('span'),{textContent:msg}));
-  if(undo){const b=document.createElement('button');b.className='undo';b.textContent='Отменить';b.onclick=async()=>{toastOff();try{await undo();if(state.y!==ym[0]||state.m!==ym[1]){state.y=ym[0];state.m=ym[1];render()}toast('Отменено')}catch(e){toast('Не получилось отменить')}};t.append(b)}
+  /* «Отменить» pressed from the keyboard goes away with its message: the focus goes back where it was when the message came
+     («Добавить расход» after a record), not to the page's start (a tap or a click: nothing changes) */
+  if(undo){const from=document.activeElement, b=document.createElement('button');b.className='undo';b.textContent='Отменить';b.onclick=async()=>{const kb=fvis(b);toastOff();try{await undo();if(state.y!==ym[0]||state.m!==ym[1]){state.y=ym[0];state.m=ym[1];render()}toast('Отменено')}catch(e){toast('Не получилось отменить')}
+    const o=kb&&document.activeElement===document.body?refind(from):null;if(o&&o!==document.body&&o.getClientRects().length)o.focus({preventScroll:true})};t.append(b)}
   if(act){const b=document.createElement('button');b.className='undo';b.textContent=act[0];b.onclick=()=>{toastOff();act[1]()};t.append(b)}
   t.classList.remove('out');t.style.transform=t.style.opacity='';t.hidden=false;toastPlace(t);clearTimeout(toastT);
   /* a long message stays longer: there is time to read it */
@@ -1531,8 +1584,8 @@ function toast(msg,undo,ms,act){const t=$('toast'), ym=[state.y,state.m];t.repla
 /* the message swiped away: past 70px (or a quick flick) it slides off that side and goes; a shorter move puts it back.
    While the finger is on it, it doesn't go by itself; let go — it stays 2 more seconds. A swipe that started on «Отменить» doesn't press it */
 (function toastSwipe(){
-  const t=$('toast');let x0=null,y0=0,t0=0,dx=0,moved=false;
-  t.addEventListener('pointerdown',e=>{if(t.hidden||e.button>0)return;x0=e.clientX;y0=e.clientY;t0=performance.now();dx=0;moved=false;t.classList.remove('out');clearTimeout(toastT)});
+  const t=$('toast');let x0=null,y0=0,t0=0,dx=0,moved=false,pid=null;
+  t.addEventListener('pointerdown',e=>{if(t.hidden||e.button>0)return;x0=e.clientX;y0=e.clientY;t0=performance.now();pid=e.pointerId;dx=0;moved=false;t.classList.remove('out');clearTimeout(toastT)});
   t.addEventListener('pointermove',e=>{if(x0===null)return;dx=e.clientX-x0;
     if(!moved&&Math.abs(dx)>8&&Math.abs(dx)>Math.abs(e.clientY-y0)){moved=true;try{t.setPointerCapture(e.pointerId)}catch(_){}}
     if(moved){t.style.transform=`translateX(${dx}px)`;t.style.opacity=String(Math.max(.2,1-Math.abs(dx)/(t.offsetWidth||300)))}});
@@ -1543,22 +1596,30 @@ function toast(msg,undo,ms,act){const t=$('toast'), ym=[state.y,state.m];t.repla
     const fast=Math.abs(dx)/Math.max(1,performance.now()-t0)>.5;t.classList.add('out');
     if(Math.abs(dx)>70||fast&&Math.abs(dx)>24){t.style.transform=`translateX(${(dx>0?1:-1)*(innerWidth)}px)`;t.style.opacity='0';toastT=setTimeout(toastOff,180)}
     else{t.style.transform=t.style.opacity='';toastT=setTimeout(toastOff,2000)}};
-  t.addEventListener('pointerup',up);t.addEventListener('pointercancel',up);
+  /* let go anywhere: a mouse let go off the message (it is captured only after a sideways move) still gives it its 2 seconds;
+     only the pointer that pressed it (a second finger elsewhere is not it) */
+  const upAt=e=>{if(e.pointerId===pid)up()};window.addEventListener('pointerup',upAt,true);window.addEventListener('pointercancel',upAt,true);
   /* the click that ends a swipe is not a press of the button it started on */
   t.addEventListener('click',e=>{if(moved){e.stopPropagation();e.preventDefault()}},true);
+  /* the keyboard on «Отменить» / «Показать» (WCAG 2.2.1): while its focus is there the message doesn't go by itself, as under a finger;
+     the focus leaves it — 2 more seconds. A button focused by a click or a tap keeps the timer: pressing it closes the message anyway */
+  t.addEventListener('focusin',e=>{if(fvis(e.target))clearTimeout(toastT)});
+  t.addEventListener('focusout',e=>{if(x0===null&&!t.hidden&&!t.contains(e.relatedTarget)){clearTimeout(toastT);toastT=setTimeout(toastOff,2000)}});
 })();
 /* a tap that changes what is under the finger (a window opens, a form or buttons appear, a row moves): the second tap of the same
    quick double tap lands on the new thing — for a moment it is let go of. Two-step confirmations keep their own 600 ms */
 let freshTill=0;
 const fresh=(ms=400)=>{freshTill=performance.now()+ms};
-document.addEventListener('click',e=>{if(e.isTrusted&&e.detail>0&&performance.now()<freshTill){e.preventDefault();e.stopPropagation()}},true);
+/* the moment of the tap, not of its handling: a slow first draw of a sheet keeps the second tap of a double tap waiting past freshTill (never later than now) */
+const evT=e=>Math.min(e.timeStamp||Infinity,performance.now());
+document.addEventListener('click',e=>{if(e.isTrusted&&e.detail>0&&evT(e)<freshTill){e.preventDefault();e.stopPropagation()}},true);
 /* a double tap never zooms the page (touch-action does it; this is for an iPhone that zooms anyway): a second tap on the same
    spot within 300 ms, outside a field, is not handed to the browser — the tap itself still presses what is under the finger
    (unless fresh() lets go of it). Pinching with two fingers is left alone */
 {let t0=0, x0=0, y0=0, sx=0, sy=0, multi=false;
   document.addEventListener('touchstart',e=>{multi=e.touches.length>1;const t=e.touches[0];sx=t.clientX;sy=t.clientY},{passive:true});
   document.addEventListener('touchend',e=>{
-    const t=e.changedTouches[0], n=performance.now();
+    const t=e.changedTouches[0], n=evT(e);
     if(multi||e.touches.length||!t){t0=0;return}
     /* a swipe is not a tap */
     if(Math.hypot(t.clientX-sx,t.clientY-sy)>10){t0=0;return}
@@ -1572,7 +1633,8 @@ document.addEventListener('click',e=>{if(e.isTrusted&&e.detail>0&&performance.no
   },{passive:false});
 }
 /* Записи on the month of that date (a record saved or moved there) */
-const showMonth=d=>{const [y,m]=d.split('-').map(Number);state.y=y;state.m=m-1;state.scopeFilter='';state.accFilter=null;setTab('history')};
+/* the pressed «Показать» went with its message: the focus goes to the month shown (its title), not to the page's start */
+const showMonth=d=>{const [y,m]=d.split('-').map(Number);state.y=y;state.m=m-1;state.scopeFilter='';state.accFilter=null;setTab('history');$('hTitle').focus({preventScroll:true})};
 /* a sum typed in a field: «15 000», «15000,50», «15000.50» (a pasted «₽» is fine); anything else — «1e5», «12abc», «1,000,000»,
    «15.000», «0,555» — is NaN, so the form shows NUM_ERR instead of guessing. dec: digits allowed after the comma */
 const NUM_ERR='Введите сумму числом, например 15 000,50';
@@ -1580,7 +1642,9 @@ const NUM_ERR='Введите сумму числом, например 15 000,
 const FUTURE_ERR='Дата не может быть позже сегодняшней.';
 /* a form's date: a later one is said as soon as it is picked, and the message goes once the date is fixed
    (listened on the form, after its other watchers, so they don't take it away) */
-const futWatch=(f,d,er)=>['input','change'].forEach(t=>f.addEventListener(t,()=>{if(d.value>iso(now)){er.textContent=FUTURE_ERR;er.hidden=false}else if(er.textContent===FUTURE_ERR)er.hidden=true}));
+/* defaultValue: the day the form opened with (a record's or a debt's own, written a time zone ahead — «tomorrow» here) is not said:
+   only a later day picked in it */
+const futWatch=(f,d,er)=>['input','change'].forEach(t=>f.addEventListener(t,()=>{if(d.value>iso(now)&&d.value!==d.defaultValue){er.textContent=FUTURE_ERR;er.hidden=false}else if(er.textContent===FUTURE_ERR)er.hidden=true}));
 function parseNum(s,dec=2){const t=String(s).replace(/₽/g,'').replace(/\s+/g,' ').trim(), m=t.match(/^(\d{1,3}(?: \d{3})+|\d+)(?:[.,](\d*))?$/);
   if(!m||(m[2]||'').length>dec) return NaN;
   const v=+(m[1].replace(/ /g,'')+'.'+(m[2]||0));return v<1e10?r2(v):NaN}
@@ -1596,7 +1660,7 @@ function render(){
   /* a redraw that replaces the focused button (the save landing a moment later draws the zakat window again) puts the focus on its new copy */
   const fo=document.activeElement;
   /* one part that fails to draw (damaged saved data) doesn't leave the other tabs at «Загружаю…» */
-  for(const f of [renderTabs,renderSys,renderLedger,renderDebts]) try{f()}catch(e){console.error(e)}
+  for(const f of [renderTabs,renderSys,scopeFollow,renderLedger,renderDebts]) try{f()}catch(e){console.error(e)}
   try{renderItemEditor()}catch(e){console.error(e)}
   if(fo&&fo!==document.body&&!fo.isConnected){const n=refind(fo);if(n&&n.getClientRects().length)n.focus({preventScroll:true})}
   /* held: where the tap left it — after the redraw and whatever its handler brought into view right after (inView; the top is not that) */
@@ -1633,7 +1697,8 @@ function renderLedger(){
   /* a trip still going on, its money spent and more paid from his own pocket: that overspend is his own spending this month —
      it counts in the limit now; when the trip ends it becomes the «Докинул на командировку» record, which counts the same way */
   const tn=isCurrentMonth()?tripNow():null, over=tn&&tn.got&&tn.left<0?r2(-tn.left):0, inLimit=r2(inLimit0+over);
-  $('total').textContent=moneyR(inLimit);
+  /* _full: the whole sum, kept for fitBig (on a narrow phone it may show it without kopecks) */
+  $('total').textContent=$('total')._full=moneyR(inLimit);
   /* _full: the whole sum, kept for fitMonth (it may show it shorter) */
   $('incomeTotal').textContent=$('incomeTotal')._full=moneyR(earned);
   $('allOut').textContent=$('allOut')._full=moneyR(spent);
@@ -1648,9 +1713,12 @@ function renderLedger(){
   /* things that need an action — between the month card and the form */
   const al=$('alerts');al.innerHTML=zakatAlert+brokerAlert+renderDataBox();
   if($('bkGo')) $('bkGo').onclick=()=>$('backupBtn').onclick();
-  if($('zPay')) $('zPay').onclick=()=>zPaySheet(zLedger(zset()).owed);
+  if($('zPay')) $('zPay').onclick=()=>zPaySheet(zLedger(zShown||zset()).owed);
   if($('zDipGo')) $('zDipGo').onclick=openZakat;
-  if($('oPay')) $('oPay').onclick=e=>{fresh();state.xfer={from:'vtb',to:'broker',amount:+e.currentTarget.dataset.v};state.xferOpen=true;setTab('money');$('xForm')?.scrollIntoView?.({block:'center'})};
+  /* «Перевести» opens the transfer on «Деньги» as its «⇄ Перевод между счетами» does: closed, the focus goes back to that link (this button
+     is left on a hidden tab). The sum as in every field — with a comma */
+  if($('oPay')) $('oPay').onclick=e=>{fresh();const v=+e.currentTarget.dataset.v;setTab('money');$('xOpen')?.focus({preventScroll:true});
+    state.xfer={from:'vtb',to:'broker',amount:vIn(v)};state.xferOpen=true;render();$('xForm')?.scrollIntoView?.({block:'center'})};
   renderWallets();
   renderBreakdown(out,inc,trip.filter(i=>typeOf(i)==='out'));
   renderList(items);
@@ -1669,6 +1737,8 @@ function fitMonth(){
   const put=g=>els.forEach(e=>e.textContent=g(e.textContent));
   fit();if(!wide()) return;
   put(t=>t.replace(/(\d[\d\u00a0\u202f ]*),(\d\d)/,(m,a,k)=>fmt0.format(Math.round(+a.replace(/\D/g,'')+k/100))));
+  /* «Разница» from the two sums as they now read, not rounded apart from them: «Доходы − Расходы» adds up on screen (the exact one stays in its title) */
+  const n=x=>{const t=$(x).textContent;return (t[0]==='−'?-1:1)*t.replace(/\D/g,'')}, bl=$('balance'), d=n('incomeTotal')-n('allOut');if(bl.textContent!==bl._full)bl.textContent=(d>0?'+':d<0?'−':'')+fmt0.format(Math.abs(d))+'\u00a0₽';
   els.forEach(e=>{if(e._full&&e.textContent!==e._full)e.title=e._full});
   fit();if(!wide()) return;
   els.forEach(e=>e.style.whiteSpace='normal');put(t=>t.replace(/\u00a0₽/,' ₽'));
@@ -1677,10 +1747,17 @@ function fitMonth(){
 /* the big sums (Учёт, «Деньги», «Долги»): as large as the design says, smaller only while the text doesn't fit the card */
 function fitBig(){
   const r=document.createRange();
-  for(const e of ['total','moneyTotal','debtTotal'].map($)){e.style.fontSize='';if(!e.clientWidth)continue;
+  for(const e of ['total','moneyTotal','debtTotal'].map($)){e.style.fontSize='';if(e._full){e.textContent=e._full;e.removeAttribute('title')}if(!e.clientWidth)continue;
     let f=parseFloat(getComputedStyle(e).fontSize);e.style.whiteSpace='nowrap';r.selectNodeContents(e);
-    while(f>20&&r.getBoundingClientRect().width>e.clientWidth+0.5){f-=1;e.style.fontSize=f+'px'}
-    /* even 20px is too wide: it wraps (overflow-wrap) rather than run off the card */
+    /* «Траты в лимит» (_full; as wide as its column): a fraction of a pixel too wide already wraps (clientWidth is rounded).
+       «Всего денег» is as wide as its text (clientWidth = the text, rounded): -0.5 would always read «too wide» there — it keeps +0.5 */
+    const over=()=>r.getBoundingClientRect().width>e.clientWidth+(e._full?-0.5:0.5);
+    while(f>14&&over()){f-=1;e.style.fontSize=f+'px'}
+    /* «Траты в лимит» still too wide at 14px (hundreds of millions on a narrow phone, a page zoomed to 200%): as in fitMonth the kopecks go
+       (the whole sum in the title), then it may go onto a second line only before «₽» or between digit groups — never inside the number */
+    if(e._full&&over()){e.textContent=e._full.replace(/(\d[\d\u00a0\u202f ]*),(\d\d)/,(m,a,k)=>fmt0.format(Math.round(+a.replace(/\D/g,'')+k/100)));
+      if(e.textContent!==e._full)e.title=e._full;r.selectNodeContents(e);if(over())e.textContent=e.textContent.replace(/[\u00a0\u202f]/g,' ')}
+    /* even 14px is too wide: it wraps (overflow-wrap) rather than run off the card */
     e.style.whiteSpace=''}
 }
 /* an account's balance on a tile («Откуда?», «Оплата закята») stays one number: a smaller font while it doesn't fit,
@@ -1689,7 +1766,8 @@ function fitTiles(){
   const r=document.createRange();
   for(const e of document.querySelectorAll('.accs .tile small')){e.style.fontSize='';const p=e.parentElement, s=getComputedStyle(p), w=p.clientWidth-parseFloat(s.paddingLeft)-parseFloat(s.paddingRight);
     if(!w||!e.textContent)continue;let f=12;e.style.whiteSpace='nowrap';r.selectNodeContents(e);
-    while(f>9&&r.getBoundingClientRect().width>w+0.5){f-=0.5;e.style.fontSize=f+'px'}
+    /* a fraction of a pixel too wide already wraps (w is from the rounded clientWidth) */
+    while(f>9&&r.getBoundingClientRect().width>w-0.5){f-=0.5;e.style.fontSize=f+'px'}
     e.style.whiteSpace=''}
 }
 window.addEventListener('resize',()=>{fitMonth();fitBig();fitTiles()});
@@ -1699,6 +1777,12 @@ document.fonts?.addEventListener?.('loadingdone',()=>fitMonth());
 /* Trip money is a running balance, not per month: a trip can span two months */
 /* the zero «Командировка закончилась» leaves was never typed: a record dated back after it goes to the trip going on now, not «already counted» */
 const tripAnc=(st,end)=>st&&!+st.amount&&+end&&Math.abs((st.at||0)-end)<=5000?{...st,reset:1}:st;
+/* «Командировка началась» (settings.tripBegun, its moment): only a mark — trip money is counted as before (what came earlier is this trip's too).
+   It holds till the trip ends; one not later than the last end (left by a version without it), or past any date (damaged), is none. 0 — not marked */
+function tripOn(){const b=+state.settings.tripBegun||0;return b>(+state.settings.tripEnd||0)&&b<=8.64e15?b:0}
+/* Личное/Командировка on Учёт: «Командировка» by default while a trip is marked as begun. The switch moves only when that default changes
+   (the mark set or taken off — Итоги, «Отменить», another copy of the app, a loaded copy); a tap on it stays; «Доход» stays personal */
+function scopeFollow(){const d=tripOn()?'trip':'own';if(d===(state.scopeDef||'own'))return;state.scopeDef=d;if(state.type==='out'){state.scope=d;renderChips()}}
 /* pastTrip: a record saved after a trip ended but dated before that day went to that trip (its result record's created) — while that trip stays ended */
 const inPast=i=>+i.pastTrip>0&&+i.pastTrip<=(+state.settings.tripEnd||0)+5000;
 const tripAfter=()=>{const st=tripAnc(state.settings.tripStart,state.settings.tripEnd)||{at:0};return state.items.filter(i=>isTrip(i)&&!inAnchor(i,st)&&!inPast(i))};
@@ -1714,7 +1798,7 @@ const zeroEnd=i=>TRIP_END.includes(catOf(i.cat).id)&&!(Math.abs(+i.amount||0)>=0
 /* what a record does to the trip money: + came in, − spent */
 const tripVal=i=>isTrip(i)?(typeOf(i)==='in'?1:typeOf(i)==='out'?-1:0)*(+i.amount||0):0;
 /* the trip as it was before it ended: its start balance and the end of the trip before it — o: the same write as the record change */
-const tripReopen=(o,p)=>o.patchSettings({tripStart:p.tripStart||null,tripEnd:+p.tripEnd||0});
+const tripReopen=(o,p)=>o.patchSettings({tripStart:p.tripStart||null,tripEnd:+p.tripEnd||0,tripBegun:+p.tripBegun>0?+p.tripBegun:null});
 /* a record of a trip that already ended → the record that holds that trip's result
    (none if the trip balance typed back then already held this record, or the record is from a trip before that one — its result was deleted) */
 function tripClosed(i){
@@ -1740,7 +1824,7 @@ function pastTripOf(i){
 function lateTrip(){
   const end=+state.settings.tripEnd||0, px=end&&state.items.find(x=>catOf(x.cat).id==='trip_extra'&&+x.amount>=0.005&&!tripSync(x)&&Math.abs((x.created||0)-end)<=5000)||null,
     r=px&&repList().find(y=>Math.abs((+y.at||0)-(px.created||0))<=5000), t=tripNow(), ps=px?.tripPrev?.tripStart;
-  return {px,p0:!!r&&!(+r.allow>0)&&!(+r.start>0)&&!(+r.over>0)&&!(t.avail>0)&&!(t.spent>0)
+  return {px,p0:!!r&&!(+r.allow>0)&&!(+r.start>0)&&!(+r.over>0)&&!(t.avail>0)&&!(t.spent>0)&&!tripOn()
     &&!!tripAnc(state.settings.tripStart,end)?.reset&&(!ps||!!tripAnc(ps,px.tripPrev.tripEnd)?.reset)};
 }
 /* the trip result after its money changed by d: a leftover is «Остаток командировочных», a minus — «Докинул на командировку» */
@@ -1766,11 +1850,14 @@ const endDel=(o,x,back)=>{if(x&&TRIP_END.includes(catOf(x.cat).id)){const z={...
 /* the latest «Командировка закончилась» record: deleting it opens that trip again — as it was (tripPrev), or for an older record from its result.
    Not once a trip balance was typed after it («Сверить»): that typed balance stays */
 function tripEndPrev(it){
-  const end=+state.settings.tripEnd||0, c=it.created||0, p=it.tripPrev, st=state.settings.tripStart;
+  const end=+state.settings.tripEnd||0, c=it.created||0, p=it.tripPrev, st=state.settings.tripStart, tb=tripOn()||null; /* tb: a start marked since that trip ended — kept when that trip had no mark of its own */
   if(!TRIP_END.includes(catOf(it.cat).id)||tripSync(it)||!end||Math.abs(end-c)>5000||(st&&(+st.amount||Math.abs((st.at||0)-end)>5000))) return null;
-  if(p&&typeof p==='object'&&(p.tripStart==null||typeof p.tripStart.amount==='number')) return {tripStart:p.tripStart||null,tripEnd:+p.tripEnd||0};
-  return {tripStart:{amount:closeAfter(it,0),at:c},tripEnd:state.items.filter(x=>x!==it&&TRIP_END.includes(catOf(x.cat).id)&&(x.created||0)<c).reduce((m,x)=>Math.max(m,x.created||0),0)};
+  if(p&&typeof p==='object'&&(p.tripStart==null||typeof p.tripStart.amount==='number')) return {tripStart:p.tripStart||null,tripEnd:+p.tripEnd||0,tripBegun:+p.tripBegun>0?+p.tripBegun:tb};
+  return {tripStart:{amount:closeAfter(it,0),at:c},tripEnd:state.items.filter(x=>x!==it&&TRIP_END.includes(catOf(x.cat).id)&&(x.created||0)<c).reduce((m,x)=>Math.max(m,x.created||0),0),tripBegun:tb};
 }
+/* the trip as deleting its result opens it again (tp, see tripEndPrev): its balance counted from the records, as the trip line will show it —
+   not the result's own sum, which may have been changed by hand or kept by a change saved without «Поправить итог на разницу» */
+const reopenLeft=tp=>{const s=state.settings;state.settings={...s,tripStart:tp.tripStart,tripEnd:tp.tripEnd};try{return tripBalance()}finally{state.settings=s}};
 /* the trip going on now (since the last «Командировка закончилась»): trip money received — the typed balance and what came after it — and spent.
    A balance below zero (a trip opened again with its overspend) counts as spent; left is always tripBalance().
    got: this trip has had trip money — some came, or it was opened again with its overspend (that money was recorded back then) */
@@ -1810,7 +1897,7 @@ function repClean(r){
   if(!r||typeof r!=='object'||Array.isArray(r)||!day(r.from)||!day(r.to)||!Array.isArray(r.cats)) return null;
   const o={...r,at:n(r.at),allow:n(r.allow),start:n(r.start),over:n(r.over),left:n(r.left),
     cats:r.cats.filter(c=>Array.isArray(c)&&typeof c[0]==='string'&&Number.isFinite(+c[1])).map(c=>[c[0],r2(+c[1])])}, p=r.partner;
-  delete o.partner;
+  delete o.partner;if(!day(o.begun))delete o.begun;
   if(p&&typeof p==='object'&&!Array.isArray(p)) o.partner={ids:Array.isArray(p.ids)?p.ids.filter(i=>typeof i==='string'):[],
     names:Array.isArray(p.names)?p.names.filter(x=>typeof x==='string'&&x.trim()):[],amount:n(p.amount),ret:n(p.ret),left:n(p.left)};
   return o;
@@ -1818,13 +1905,13 @@ function repClean(r){
 const repList=()=>Array.isArray(state.settings.tripReports)?state.settings.tripReports.map(repClean).filter(Boolean):[];
 /* at: the moment the trip ended; left: its result (+ the rest that became his income, − the overspend he paid) */
 function tripReport(at,left){
-  const st=state.settings.tripStart, b0=+st?.amount||0, after=tripAfter(), outs=after.filter(i=>typeOf(i)==='out'), by={};
+  const st=state.settings.tripStart, b0=+st?.amount||0, after=tripAfter(), outs=after.filter(i=>typeOf(i)==='out'), by={}, tb=tripOn(), bd=tb?anchorDay({at:tb}):'';
   for(const i of outs){const c=catOf(i.cat).id;by[c]=r2((by[c]||0)+(+i.amount||0))}
-  /* from the first record of this trip (or the trip money typed for it) to today */
+  /* from the day it began («Командировка началась» — kept as begun), else from the first record of this trip (or the trip money typed for it); to today */
   const ds=after.map(i=>i.date).filter(s=>typeof s==='string'&&s<=iso(now));if(b0>0&&st.at) ds.push(anchorDay(st));
   /* the partner's part of what he paid for both («Заплатил и за напарника»): the loans saved with this trip's records */
   const cs=new Set(outs.map(i=>i.created||0)), pd=state.debts.filter(d=>d.trip&&!d.mine&&cs.has(+d.created||0));
-  return {at,from:ds.sort()[0]||iso(now),to:iso(now),allow:r2(sum(after.filter(i=>typeOf(i)==='in'))),start:r2(Math.max(0,b0)),over:r2(Math.max(0,-b0)),
+  return {at,from:bd||ds.sort()[0]||iso(now),to:iso(now),...(bd?{begun:bd}:{}),allow:r2(sum(after.filter(i=>typeOf(i)==='in'))),start:r2(Math.max(0,b0)),over:r2(Math.max(0,-b0)),
     cats:Object.entries(by).sort((a,b)=>b[1]-a[1]||byRank(a[0],b[0])),left:r2(left),
     ...(pd.length?{partner:{ids:pd.map(d=>d.id),names:[...new Set(pd.map(d=>d.name.trim()))],amount:r2(sum(pd)),ret:r2(pd.reduce((s,d)=>s+(+d.returned||0),0)),left:r2(pd.reduce((s,d)=>s+debtLeft(d),0))}}:{})};
 }
@@ -1836,7 +1923,7 @@ function repFix(o,x,a,b,dl,dd){
   const mv=(i,s)=>{if(!i||!isTrip(i))return;const v=s*(+i.amount||0);
     if(typeOf(i)==='in')r.allow=r2((+r.allow||0)+v);else if(typeOf(i)==='out'){const c=catOf(i.cat).id, e=r.cats.find(z=>z[0]===c);if(e)e[1]=r2(e[1]+v);else r.cats.push([c,r2(v)])}};
   mv(a,-1);mv(b,1);r.cats=r.cats.filter(c=>c[1]>=0.005).sort((p,q)=>q[1]-p[1]||byRank(p[0],q[0]));r.left=closeAfter(x,r2(tv(b)-tv(a)));
-  if(typeof b?.date==='string'&&b.date<r.from) r.from=b.date;
+  if(typeof b?.date==='string'&&b.date<r.from&&!r.begun) r.from=b.date;
   if(dl){const p=r.partner||{ids:[],names:[],amount:0,ret:0,left:0};
     r.partner={...p,ids:[...(p.ids||[]),dl.id],names:[...new Set([...(p.names||[]),dl.name.trim()])],amount:r2((+p.amount||0)+dl.amount),left:r2((+p.left||0)+dl.amount)}}
   /* dd: the partner's loan deleted with a — it leaves the report (his name too, when no loan left there is his) */
@@ -1908,37 +1995,42 @@ function renderTrip(trip){
   }
   const any=st||state.items.some(isTrip);
   /* the same words as the trip line on Учёт: this trip's money and spending, not the month's */
-  const {avail,spent,got}=tripNow();
+  const {avail,spent,got}=tripNow(), on=tripOn();
   box.innerHTML=`${!got&&spent>0?`<span>Потрачено в командировке</span><b>${moneyR(spent)}</b><small>командировочные не внесены</small>`
     :bal<0?`<span>Перерасход командировочных</span><b class="neg">${moneyR(-bal)}</b>`:`<span>Осталось командировочных</span><b>${any?moneyR(bal):'—'}</b>`}
-    ${avail>0&&spent>0?`<small>выдано\u00a0${moneyR(avail)}\u00a0· потрачено\u00a0${moneyR(spent)}</small>`:''}
-    <div class="acts tacts"><button class="linkbtn" id="tEdit" aria-haspopup="dialog">${st?'Сверить':'Указать остаток'}</button><button class="linkbtn" id="tAllow" aria-haspopup="dialog">+ Пришли командировочные</button>${rb}${avail>0||spent>0?`<button class="linkbtn" id="tEnd">Командировка закончилась</button>`:''}</div>`;
+    ${avail>0&&spent>0?`<small>выдано\u00a0${moneyR(avail)}\u00a0· потрачено\u00a0${moneyR(spent)}</small>`:''}${on?`<small>идёт с ${dayText(anchorDay({at:on}))}</small>`:''}
+    <div class="acts tacts"><button class="linkbtn" id="tEdit" aria-haspopup="dialog">${st?'Сверить':'Указать остаток'}</button><button class="linkbtn" id="tAllow" aria-haspopup="dialog">+ Пришли командировочные</button>${rb}${on?'':'<button class="linkbtn" id="tBegin">Командировка началась</button>'}${avail>0||spent>0||on?`<button class="linkbtn" id="tEnd">Командировка закончилась</button>`:''}</div>`;
   rOn();
   /* a field gets the cursor only when he opens its form with a tap (never on a redraw), and the page doesn't move for it */
   $('tEdit').onclick=()=>{fresh();state.editing='trip';render();$('tInput')?.focus({preventScroll:true})};
   /* trip over: what is left becomes his income (the broker % as with any income); an overspend paid from his own money
-     becomes his expense outside the monthly limit. The next trip starts from zero; nothing is owed between accounts any more.
+     becomes his expense, counted in the monthly limit. The next trip starts from zero; nothing is owed between accounts any more.
      The record keeps the trip as it was (tripPrev): «Отменить» in the toast, or deleting the record, opens the trip again.
      Spent to the kopeck: no record, the trip just ends (only «Отменить» opens it again) — the line on Учёт goes, the next trip starts from zero */
   if($('tEnd')) $('tEnd').onclick=async e=>{
     const b=e.currentTarget, v=r2(bal), z=Math.abs(v)<0.005;
-    if(!b.dataset.armed){b.dataset.armed=Date.now();b.textContent=z?'Командировочные потрачены ровно. Закрыть — нажмите ещё раз':v>0?`Остаток ${money(v)} станет вашим доходом. Нажмите ещё раз`:!got?`Командировочные ещё не внесены — закрыть, и ${money(-v)} станут вашим расходом? Нажмите ещё раз`:`Перерасход ${money(-v)} — записать как ваш расход. Нажмите ещё раз`;b.style.color='var(--bad)';
+    if(!b.dataset.armed){b.dataset.armed=Date.now();b.textContent=!(avail>0)&&!(spent>0)?'Командировочных и трат не было — отметка начала снимется. Нажмите ещё раз':z?'Командировочные потрачены ровно. Закрыть — нажмите ещё раз':v>0?`Остаток ${money(v)} станет вашим доходом. Нажмите ещё раз`:!got?`Командировочные ещё не внесены — закрыть, и ${money(-v)} станут вашим расходом? Нажмите ещё раз`:`Перерасход ${money(-v)} — записать как ваш расход. Нажмите ещё раз`;b.style.color='var(--bad)';
       setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent='Командировка закончилась';b.style.color=''}},5000);return}
     /* a quick double tap is not a confirmation */
     if(Date.now()-b.dataset.armed<600) return;
-    b.disabled=true;const at=Date.now(), d=iso(now), prev={tripStart:st||null,tripEnd:+state.settings.tripEnd||0}, rep=tripReport(at,v);
+    /* only its start was marked — no trip money, nothing spent: the mark goes, with no record and no report («Отменить» puts it back);
+       «Командировка началась» comes up in its place (fresh: a quick extra tap doesn't mark it again) */
+    if(!(avail>0)&&!(spent>0)){b.disabled=true;fresh();try{await store.batch(o=>o.patchSettings({tripBegun:null}));$('tBegin')?.focus({preventScroll:true});
+        toast('Командировка закрыта: командировочных и трат не было',()=>store.batch(o=>o.patchSettings({tripBegun:on}))
+          .then(()=>{const a=document.activeElement, t=$('tEnd');if((!a||a===document.body||$('tripStat').contains(a))&&t?.getClientRects().length)t.focus({preventScroll:true})}))}catch(x){b.disabled=false;toast(saveErr(x))}return}
+    b.disabled=true;const at=Date.now(), d=iso(now), prev={tripStart:st||null,tripEnd:+state.settings.tripEnd||0,tripBegun:on||null}, rep=tripReport(at,v), rp0=state.settings.tripReports;
     try{
       /* the record, the trip's end and its report in one write */
       const id=await store.batch(o=>{const id=z?null:o.add(v>0?{type:'in',cat:'trip_left',amount:v,acc:'',date:d,note:'командировка закончилась — остаток стал личным',created:at,tripPrev:prev}
-        :{type:'out',cat:'trip_extra',amount:-v,acc:'',date:d,note:'командировочных не хватило — добавлено из своих',created:at,tripPrev:prev});o.patchSettings({tripStart:{amount:0,at},tripEnd:at,tripReports:[...repList(),rep].slice(-10)});return id});
+        :{type:'out',cat:'trip_extra',amount:-v,acc:'',date:d,note:'командировочных не хватило — добавлено из своих',created:at,tripPrev:prev});o.patchSettings({tripStart:{amount:0,at},tripEnd:at,tripBegun:null,tripReports:[...repList(),rep].slice(-10)});return id});
       const pct=brokerPctAt(at);
       /* the report comes up at once; «Отменить» in the message over it opens the trip again and takes the report away (the window closes).
          Closed, it gives the focus to «Отчёт по прошлой командировке» — «Командировка закончилась» is gone */
       $('tRep')?.focus({preventScroll:true});repSheet(rep);
-      toast(z?'Командировка закрыта: командировочные потрачены ровно':v>0?`Остаток ${money(v)} записан в доходы${pct?` · ${fmt.format(pct)}% на брокер`:''}`:!got?`Командировочные не внесены — ${money(-v)} записаны в расходы из своих денег, входят в лимит месяца · когда придут, запишите их в «+ Пришли командировочные» с отметкой «Это за прошлую командировку»`:`Перерасход ${money(-v)} записан в расходы из своих денег, входит в лимит месяца`,
+      toast(z?'Командировка закрыта: командировочные потрачены ровно':v>0?`Остаток ${money(v)} записан в доходы${pct?` · ${fmt.format(pct)}% на брокер`:''}`:!got?`Командировочные не внесены — ${money(-v)} записаны в расходы из своих денег, входят в лимит месяца`:`Перерасход ${money(-v)} записан в расходы из своих денег, входит в лимит месяца`,
         /* the report closes (renderTrip) and its link may be gone: the focus goes to «Командировка закончилась», drawn again —
            unless it is somewhere else on the page by now */
-        ()=>store.batch(o=>{if(id){endDel(o,state.items.find(i=>i.id===id));o.remove(id)}tripReopen(o,prev);o.patchSettings({tripReports:repList().filter(r=>r.at!==at)})})
+        ()=>store.batch(o=>{if(id){endDel(o,state.items.find(i=>i.id===id));o.remove(id)}tripReopen(o,prev);o.patchSettings({tripReports:rp0})})
           .then(()=>{const a=document.activeElement, t=$('tEnd');if((!a||a===document.body||$('tripStat').contains(a))&&t?.getClientRects().length)t.focus({preventScroll:true})}));
       /* the window has risen into place: the message stays right above it */
       setTimeout(()=>{if(!$('toast').hidden)toastPlace($('toast'))},250);
@@ -1946,15 +2038,24 @@ function renderTrip(trip){
   };
   /* the form's «Записать» appears where the link was: a quick second tap doesn't save 28 500 ₽ unseen */
   $('tAllow').onclick=()=>{fresh();state.editing='allow';render();$('aInput')?.focus({preventScroll:true})};
+  /* «Командировка началась»: only the mark (tripBegun) — trip money that came before stays this trip's; new expenses on Учёт start on «Командировка».
+     «Командировка закончилась» stands in its place now: the focus goes there, and a quick second tap is let go of (fresh) — it would only arm it */
+  if($('tBegin')) $('tBegin').onclick=async()=>{fresh();
+    /* a phone clock behind the last end still marks it: a mark counts only later than that end (tripOn) */
+    try{await store.batch(o=>o.patchSettings({tripBegun:Math.max(Date.now(),(+o.settings().tripEnd||0)+1)}));$('tEnd')?.focus({preventScroll:true});
+      toast('Командировка началась · новые расходы — сразу в командировку',()=>store.batch(o=>o.patchSettings({tripBegun:null}))
+        .then(()=>{const a=document.activeElement, t=$('tBegin');if((!a||a===document.body||$('tripStat').contains(a))&&t?.getClientRects().length)t.focus({preventScroll:true})}))}
+    catch(x){toast(saveErr(x))}};
   /* «Указать остаток» / «+ Пришли командировочные»: a window over the page, high enough that the keyboard doesn't cover it */
   const win=(id,title,field,btn,note)=>`<div class="wmodal" role="dialog" aria-modal="true" aria-labelledby="${id}T"><div class="sheet-bg" data-tclose></div>
-    <form class="wallet-edit" id="${id}Form" novalidate><div class="dp-head"><div class="dp-t"><b id="${id}T" tabindex="-1">${title}</b></div><button type="button" class="dp-x" data-tclose aria-label="Закрыть">✕</button></div>${field}${note?`<p>${note}</p>`:''}
+    <form class="wallet-edit" id="${id}Form" novalidate><div class="dp-head"><div class="dp-t"><b id="${id}T" tabindex="-1">${title}</b></div><button type="button" class="dp-x" data-tclose aria-label="Закрыть">✕</button></div>${field}<p class="err" role="alert" id="${id}Err" hidden></p>${note?`<p>${note}</p>`:''}
     <div class="row"><button class="primary" type="submit">${btn}</button><button class="linkbtn" type="button" data-tclose>Отмена</button></div></form></div>`;
   if(state.editing==='trip'){
     /* an overspend (his own money, counted in the limit) doesn't vanish with a typed balance: said here, and kept as «Докинул на командировку» */
     const ov=got&&bal<0?r2(-bal):0;
     host.insertAdjacentHTML('beforeend',win('t','Сколько сейчас осталось командировочных',`<input id="tInput" class="num" inputmode="decimal" placeholder="Например, 12000" value="${st&&bal>=0?vIn(bal):''}" aria-label="Остаток командировочных">`,'Сохранить',(ov?`Сейчас перерасход ${money(ov)} — он запишется вашим расходом «${CAT.trip_extra.name}» и останется в лимите месяца. `:'')+'Дальше к этой сумме прибавятся новые командировочные и вычтутся траты в командировке.'));
-    $('tForm').onsubmit=async e=>{e.preventDefault();const raw=$('tInput').value, v=parseNum(raw);if(!(v>=0)){toast(NUM_ERR);return}state.editing=null;
+    $('tInput').oninput=()=>$('tErr').hidden=true;
+    $('tForm').onsubmit=async e=>{e.preventDefault();const raw=$('tInput').value, v=parseNum(raw);if(!(v>=0)||v>MAX_ENTRY){const er=$('tErr');er.textContent=v>MAX_ENTRY?BIG_ERR():NUM_ERR+'.';er.hidden=false;fieldErr($('tInput'),er);$('tInput').focus({preventScroll:true});return}state.editing=null;
       const t=tripNow(), over=t.got&&t.left<0?r2(-t.left):0, at=Date.now(), st0=state.settings.tripStart||null;
       if(!over){if(await saveSettings({tripStart:{amount:v,at}})) toast('Остаток командировочных: '+money(v));else reopen('trip','#tInput',raw);return}
       /* the record as «Командировка закончилась» writes it, and the balance — one write. Its tripPrev is the balance typed now, at its own moment
@@ -1967,9 +2068,10 @@ function renderTrip(trip){
   if(state.editing==='allow'){
     /* the last trip ended with his own money put in: money coming now may be for it — ticked at once only when surely so (lateTrip) */
     const {px,p0}=lateTrip();
-    host.insertAdjacentHTML('beforeend',win('a','Пришли командировочные на Т-Банк',`<input id="aInput" class="num" inputmode="decimal" value="${TRIP_ALLOWANCE}" aria-label="Сумма командировочных">`
+    host.insertAdjacentHTML('beforeend',win('a','Пришли командировочные на Т\u2011Банк',`<input id="aInput" class="num" inputmode="decimal" value="${TRIP_ALLOWANCE}" aria-label="Сумма командировочных">`
       +(px?`<label class="echk"><input type="checkbox" id="aPast"${p0?' checked':''}>Это за прошлую командировку: закончилась ${dayText(anchorDay({at:+state.settings.tripEnd}))}, докинули из своих ${money(+px.amount)}</label>`:''),'Записать'));
-    $('aForm').onsubmit=async e=>{e.preventDefault();const raw=$('aInput').value, v=parseNum(raw);if(!(v>0)){toast(isNaN(v)?NUM_ERR:'Введите сумму больше нуля');return}
+    $('aInput').oninput=()=>$('aErr').hidden=true;
+    $('aForm').onsubmit=async e=>{e.preventDefault();const raw=$('aInput').value, v=parseNum(raw);if(!(v>0)||v>MAX_ENTRY){const er=$('aErr');er.textContent=v>MAX_ENTRY?BIG_ERR():raw.trim()&&isNaN(v)?NUM_ERR+'.':'Введите сумму больше нуля.';er.hidden=false;fieldErr($('aInput'),er);$('aInput').focus({preventScroll:true});return}
       const r0={type:'in',amount:Math.round(v*100)/100,cat:'t_allow',scope:'trip',acc:TRIP_ACC,date:iso(now),note:'',created:Date.now()};
       /* that trip takes it as a record dated back into it does (pastTrip): its result and report follow in the same write —
          only when its result is found, else the money would belong to no trip */
@@ -2019,27 +2121,29 @@ function renderBroker(inc,out){
   const box=$('brokerBox'), pct=brokerPctOf();
   if(state.editing==='pct'){
     box.innerHTML=`<form class="inline-edit" id="pForm" novalidate><input id="pInput" class="num" inputmode="decimal" placeholder="Например, 10" value="${vIn(pct)}" aria-label="Процент с дохода на брокер"><span>%</span><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="pCancel">Отмена</button><p class="err" role="alert" id="pErr" hidden></p></form><div class="row"><span>Новый процент — для доходов, записанных с этой минуты; прошлые месяцы не пересчитываются. 0 — ничего не откладывать.</span></div>`;
-    $('pForm').onsubmit=e=>{e.preventDefault();const v=parseNum($('pInput').value.replace('%','')), er=$('pErr');
+    $('pForm').onsubmit=async e=>{e.preventDefault();const raw=$('pInput').value, v=parseNum(raw.replace('%','')), er=$('pErr');
       if(!(v>=0&&v<=100)){er.textContent=v>100?'Процент — не больше 100.':'Введите процент числом, например 10 (0 — не откладывать).';er.hidden=false;$('pInput').focus({preventScroll:true});return}
       state.editing=null;
       if(v===pct){render();return}
       const h0=state.settings.brokerPctHist, h=[...(Array.isArray(h0)&&h0.length?h0:[{pct,from:0}]),{pct:v,from:Date.now()}];
       /* the whole history is kept: dropping an old change would recount the incomes saved under it (past months). One entry per change made by hand */
-      saveSettings({brokerPct:v,brokerPctHist:h});
+      if(!await saveSettings({brokerPct:v,brokerPctHist:h})){reopen('pct','#pInput',raw);const x=$('pErr');if(x){x.textContent=saveErr(saveSettings.err);x.hidden=false}return}
       toast(v?`На брокер ${fmt.format(v)}% — с новых доходов`:'Процент на брокер — 0: с новых доходов ничего не откладывается')};
     $('pCancel').onclick=()=>{state.editing=null;render()};
+    $('pInput').oninput=()=>$('pErr').hidden=true;
     return '';
   }
   if(state.editing==='owed'){
     const cur=brokerOwed(), over=cur!==null&&cur<=-0.01;
     /* an overpayment isn't put into the field: empty — it stays as it is */
     box.innerHTML=`<form class="inline-edit" id="oForm" novalidate><input id="oInput" class="num" inputmode="decimal" placeholder="${over?'0':'Например, 8000'}" value="${cur===null||over?'':vIn(Math.max(0,cur))}" aria-label="Долг себе на брокер сейчас"><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="oCancel">Отмена</button><p class="err" role="alert" id="oErr" hidden></p></form><div class="row"><span>${over?`Сейчас переплата ${moneyR(-cur)}: она уменьшит то, что положено с новых доходов. Оставьте поле пустым, чтобы её сохранить. `:''}Сколько вы сейчас должны себе на брокер. Дальше приложение само прибавит % с новых доходов, вычтет переводы на брокер и прибавит снова то, что выведено с брокерского счёта.</span></div>`;
-    $('oForm').onsubmit=e=>{e.preventDefault();const s=$('oInput').value.trim(), v=parseNum(s), er=$('oErr');
+    $('oForm').onsubmit=async e=>{e.preventDefault();const s=$('oInput').value.trim(), v=parseNum(s), er=$('oErr');
       /* nothing typed (an overpayment stays as it is): nothing changes; the same sum is still saved — it dates the check, so records saved before it count as included */
       if(!s){state.editing=null;render();return}
       if(!(v>=0)){er.textContent=NUM_ERR+'.';er.hidden=false;$('oInput').focus({preventScroll:true});return}
-      state.editing=null;saveSettings({brokerOwed:{amount:v,at:Date.now()}});toast('Долг себе на брокер: '+money(v))};
+      state.editing=null;if(!await saveSettings({brokerOwed:{amount:v,at:Date.now()}})){reopen('owed','#oInput',s);const x=$('oErr');if(x){x.textContent=saveErr(saveSettings.err);x.hidden=false}return}toast('Долг себе на брокер: '+money(v))};
     $('oCancel').onclick=()=>{state.editing=null;render()};
+    $('oInput').oninput=()=>$('oErr').hidden=true;
     return '';
   }
   /* a card of short rows: the % (its link on the right), the month — положено, отложено, what is left to put aside — and the debt to himself */
@@ -2083,7 +2187,7 @@ const dayShort=DF({day:'numeric',month:'short'});
 const kop=t=>esc(t).replace(/,(\d\d)/,'<span class="kop">,$1</span>');
 /* under the ring: what was spent this month outside the limit, as a plain row */
 const limLines=out=>out>=0.01?`<div><span>Вне лимита</span><b>${moneyR(out)}</b></div>`:'';
-/* savings, charity and a trip overspend paid from his own money don't count toward the monthly spending limit (Семья does) */
+/* savings and charity don't count toward the monthly spending limit (Семья does, and so does a trip overspend paid from his own money) */
 const NOT_IN_LIMIT=['invest','broker','sadaqa','zakat'];
 /* out: this month's own spending left out of the limit — Учёт says it, so its sum and «Расходы» in Итоги don't seem to disagree */
 const NOT_IN_TXT='Не входят: брокер, копильник, садака, закят. Перерасход командировочных входит';
@@ -2102,7 +2206,7 @@ function limFormOn(p,budget,done,then){
   const bf=$(p+'Form'), er=$(p+'Err'), inp=$(p+'Input');
   inp.oninput=()=>{delete bf.dataset.armed;er.hidden=true};
   bf.onsubmit=e=>{e.preventDefault();const s=inp.value.trim(), v=s?parseNum(s):0;
-    if(isNaN(v)){delete bf.dataset.armed;er.textContent=NUM_ERR+'.';er.hidden=false;inp.focus({preventScroll:true});return}
+    if(isNaN(v)){delete bf.dataset.armed;er.textContent=NUM_ERR+'.';er.hidden=false;fieldErr(inp,er);inp.focus({preventScroll:true});return}
     if(!v&&budget){if(!bf.dataset.armed){bf.dataset.armed=Date.now();er.textContent='Пусто — значит без лимита. Нажмите «Сохранить» ещё раз, чтобы убрать лимит.';er.hidden=false;return}
       if(Date.now()-bf.dataset.armed<600) return}
     done();saveSettings({budget:v>0?v:0,limitDefault:false});then();if(!v&&budget)toast('Лимит убран')};
@@ -2118,8 +2222,11 @@ function renderBudget(spent,out){
     /* this month, while something is left: how much a day that is */
     const p=spent/budget, left=r2(budget-spent), pd=left>=0.01&&isCurrentMonth()?perDay(left):'';
     /* the ring: how much of the limit is spent — green, yellow from 85 %, red when over */
-    meter.className='ring'+(p>=1?' bad':p>=.85?' warn':'');meter.style.setProperty('--p',Math.min(100,p*100));meter.setAttribute('aria-valuenow',Math.round(Math.min(1,p)*100));meter.setAttribute('aria-valuetext',`потрачено ${moneyR(spent)} из ${moneyR(budget)}`);
-    $('limitPct').textContent=Math.round(p*100)+'%';
+    meter.className='ring'+(left<0?' bad':p>=.85?' warn':'');meter.style.setProperty('--p',Math.min(100,p*100));meter.setAttribute('aria-valuenow',Math.round(Math.min(1,p)*100));meter.setAttribute('aria-valuetext',`потрачено ${moneyR(spent)} из ${moneyR(budget)}`);
+    /* «100%» only for the limit spent to the kopeck: 99,98 % reads 99%, over by a kopeck — 101%; from 1000 % the number would run onto
+       the ring: «>999%», smaller (.over) */
+    const pc=left>=0.01?Math.min(99,Math.round(p*100)):left<0?Math.max(101,Math.round(p*100)):100;
+    $('limitPct').textContent=(pc>999?'>999':pc)+'%';meter.classList.toggle('over',pc>999);meter.setAttribute('aria-valuenow',Math.min(100,pc));
     lo.textContent='из '+moneyR(budget)+(def?' · изменить':'');if(def)lo.removeAttribute('aria-label');else lo.setAttribute('aria-label','Лимит '+moneyR(budget)+' — изменить');
     /* what is left: yellow when under 15 % of the limit is left, red «превышен» when over */
     $('limitLeft').innerHTML=left>=0?`<span class="${left<budget*.15?'warn':'good'}">осталось ${moneyR(left)}</span>`:`<span class="bad">превышен на ${moneyR(-left)}</span>`;
@@ -2144,11 +2251,13 @@ function limFill(spent,budget,def){
     ${zRow('Потрачено в лимит',money(spent))}${!budget?'':left>=0?zRow('Осталось',money(left),pd,'zsum'):zRow('Превышен на',money(-left),'','zsum zbad')}</div>
     `;
   if(ed) limFormOn('lim',budget,()=>{state.limSheet.edit=false},()=>$('limSet')?.focus({preventScroll:true}));
-  else $('limSet').onclick=()=>{fresh();state.limSheet.edit=true;render();$('limInput')?.focus({preventScroll:true})};
+  else $('limSet').onclick=()=>{fresh();toastOff();state.limSheet.edit=true;render();$('limInput')?.focus({preventScroll:true})};
   /* the window grew or shrank (its field, «Лимит убран»): a message on screen stays above it */
   if(!$('toast').hidden) toastPlace($('toast'));
 }
 function limSheet(edit){
+  /* the limit typed in: the last record's message goes (only hidden, nothing undone) — on a small screen it lies over the field (owner's choice, 24.10.2026) */
+  if(edit)toastOff();
   state.pend=null;state.catSheet=null;state.limSheet={edit:!!edit};state.repSheet=null;
   $('sheet').classList.remove('cats');$('sheetBack').style.visibility='hidden';$('sheetBack').onclick=null;
   $('sheet').hidden=false;
@@ -2170,6 +2279,8 @@ const WALLETS=[
 ];
 const WHELP='Впишите, сколько там сейчас. Дальше сумма будет меняться сама: доходы и расходы с этого счёта и переводы. Записи с более ранней датой считаются уже учтёнными в ней.';
 const WNAME=Object.fromEntries(WALLETS.map(w=>[w.id,w.name]));
+/* an account's name, '' for one the app doesn't know (a hand-made copy) — never a part of every object («constructor», «toString») */
+const wName=x=>hasOwn(WNAME,x)?WNAME[x]:'';
 const WGEN={tbank:'Т-Банка',sber:'Сбербанка',vtb:'ВТБ',pocket:'Налички',cash:'Подушки',broker:'Брокерского счёта',piggy:'Копильника'};
 /* «со Сбербанка», «с Налички» / «на Наличку», «на Подушку» — an account after a preposition in toasts */
 const WACC={pocket:'Наличку',cash:'Подушку'};
@@ -2325,7 +2436,8 @@ function renderWallets(){
       const cur=walletValue(ed.id), w0=ws[ed.id];
       state.editing=null;
       /* zeros left by «Очистить всё» in older versions were never typed: the first real amount just becomes the balance */
-      const first=cur===null||(w0?.reset&&!state.items.some(i=>!inAnchor(i,w0)&&walletDelta(i,ed.id)));
+      /* records saved after those zeros don't make them typed: what the tile shows was never checked — no «неучтённый доход» out of it */
+      const first=cur===null||!!w0?.reset;
       /* a whole ruble off or more, in kopecks: 1.15−0.15 is 0.9999999999999999 in float */
       if(!first&&Math.abs(r2(v-cur))>=1){state.recon={id:ed.id,from:cur,to:v};render();return}
       /* kopecks off: a new typed balance, it holds every record saved up to now; the same sum: only checked (reAnchor) */
@@ -2333,6 +2445,8 @@ function renderWallets(){
       if(await saveSettings({wallets:{...ws,[ed.id]:reAnchor(ws[ed.id],v,ed.id)}})) toast(`${ed.name}: ${money(v)}${same?' — сумма та же, сверено':''}`);
       else{reopen('w-'+ed.id,'#wInput',raw);const er=$('wErr');if(er){er.textContent=saveErr(saveSettings.err);er.hidden=false}}};
     $('wCancel').onclick=()=>{fresh();state.editing=null;render()};
+    /* typing the sum again takes the old message away, as in the main form */
+    $('wInput').oninput=()=>{$('wErr').hidden=true;$('wInput').setAttribute('aria-invalid',false)};
   }
 }
 
@@ -2355,19 +2469,25 @@ function bindXfer(){
   /* «⇄»: the two accounts change places — as if both were picked by hand (the same change handlers; the overspend warning goes) */
   $('xSwap').onclick=()=>{const f=$('xFrom'),t=$('xTo'),a=f.value;f.value=t.value;t.value=a;[f,t].forEach(s=>s.dispatchEvent(new Event('change',{bubbles:true})))};
   $('xCancel').onclick=()=>{state.xferOpen=false;render()};
-  $('xAmount').oninput=e=>state.xfer.amount=e.target.value;
+  /* typing the sum again takes the old message away (an overspend warning went with it already — overOff) */
+  $('xAmount').oninput=e=>{state.xfer.amount=e.target.value;$('xErr').hidden=true};
   $('xNote').oninput=e=>state.xfer.note=e.target.value;
   const xb=$('xForm').querySelector('button[type=submit]');overWatch($('xForm'),xb,$('xErr'));
   $('xForm').onsubmit=async e=>{
     e.preventDefault();
+    /* past midnight before the minute timer ran: today moves first — the transfer gets the day every other record gets and «Записи» go to its month.
+       At that moment the form is drawn anew: everything below is read from the screen after it, the button too */
+    refreshToday();
     const from=$('xFrom').value,to=$('xTo').value,raw=$('xAmount').value,v=parseNum(raw),note=$('xNote').value.trim(),err=$('xErr');
     if(from===to){err.textContent='Выберите два разных счёта.';err.hidden=false;return}
-    if(!(v>0)){err.textContent=isNaN(v)?NUM_ERR+'.':'Введите сумму больше нуля.';err.hidden=false;$('xAmount').focus({preventScroll:true});return}
+    if(!(v>0)){err.textContent=raw.trim()&&isNaN(v)?NUM_ERR+'.':'Введите сумму больше нуля.';err.hidden=false;fieldErr($('xAmount'),err);$('xAmount').focus({preventScroll:true});return}
+    /* the same cap as a new record and its edit: an extra zero is a typo, not a transfer */
+    if(v>MAX_ENTRY){err.textContent=BIG_ERR();err.hidden=false;fieldErr($('xAmount'),err);$('xAmount').focus({preventScroll:true});return}
     /* more than the account holds: said first, a second «Перевести» goes ahead */
-    if(overStop($('xForm'),overdraw({type:'transfer',from,to,amount:r2(v),date:iso(new Date()),created:Date.now()}),m=>{err.textContent=m;err.hidden=false},xb,'перевести','перевода')) return;
+    if(overStop($('xForm'),overdraw({type:'transfer',from,to,amount:r2(v),date:iso(now),created:Date.now()}),m=>{err.textContent=m;err.hidden=false},$('xForm').querySelector('button[type=submit]'),'перевести','перевода')) return;
     /* the form folds up and the accounts slide under the finger: the second tap of a double tap opens none of them */
     state.xfer={from,to};state.xferOpen=false;fresh();
-    try{await store.add({type:'transfer',from,to,amount:Math.round(v*100)/100,date:iso(new Date()),...(note?{note}:{}),created:Date.now()});toast(`Перевод: ${WNAME[from]} → ${WNAME[to]}, ${money(v)}`)}
+    try{await store.add({type:'transfer',from,to,amount:Math.round(v*100)/100,date:iso(now),...(note?{note}:{}),created:Date.now()});toast(`Перевод: ${WNAME[from]} → ${WNAME[to]}, ${money(v)}`)}
     /* the store already drew the screen back (the form is gone): it opens again with what was typed */
     catch(x){state.xfer={from,to,amount:raw,note};state.xferOpen=true;render();$('xAmount')?.focus({preventScroll:true});const m=x?.code==='quota_exceeded'?saveErr(x):'Не получилось сохранить перевод. Попробуйте ещё раз.', er=$('xErr');if(er){er.textContent=m;er.hidden=false}toast(m)}
   };
@@ -2453,14 +2573,16 @@ function zBuild(){
     let A=anchors(ws[id]).sort((x,y)=>x.at-y.at);
     /* «Очистить всё» zeros were never typed by him */
     if(A.length>1)A=A.filter(x=>!x.reset);
+    /* inAnchor with each balance's day worked out once: hundreds of balances × every record made two Dates a pair (1,2 s at 400) */
+    const dy=A.map(anchorDay), inA=(i,n)=>(i.created||0)<=(A[n].at||0)||(!A[n].reset&&i.date<dy[n]);
     const t=firstAt(A[0]);let b=A[0].amount;const its=[];per[id]={d:{}};
     for(const i of state.items){
       if(typeof i.date!=='string')continue;
       const v=walletDelta(i,id);if(!v)continue;
-      its.push([i,v]);if(inAnchor(i,A[0]))b-=v;add(id,i.date,v);
+      its.push([i,v]);if(inA(i,0))b-=v;add(id,i.date,v);
       if(!first||i.date<first)first=i.date;
     }
-    for(let n=1;n<A.length;n++){let r=A[n-1].amount;for(const [i,v] of its) if(!inAnchor(i,A[n-1])&&inAnchor(i,A[n])) r+=v;
+    for(let n=1;n<A.length;n++){let r=A[n-1].amount;for(const [i,v] of its) if(!inA(i,n-1)&&inA(i,n)) r+=v;
       const x=A[n].amount-r;
       if(x<-0.005){const d=iso(new Date(firstAt(A[n])));add(id,d,x);fixes.push({id,from:iso(new Date(A[n-1].at)),d,left:-x})}
       else if(x>0.005){if(n===1)b+=x;else add(id,iso(new Date(A[n-1].at)),x)}}
@@ -2613,7 +2735,8 @@ const zkMoved=k0=>{const k=zLedger(zset()).owed;return Math.abs(k-k0)>=0.005?(k>
 /* labels saved by older versions («Долг Аня: закят за 1 год») read as the new ones — the name stays as typed */
 const zxLabel=x=>String(x.label||'Закят с долга').replace(/^Долг (.+): закят за (.+)$/,'Закят с долга: $1 — за $2');
 /* lunar years that have already ended since a chosen start date, and the start of the year running now */
-function zPast(start){let s=start,n=0;const T=iso(now);while(n<60){const e=hawlEnd(s);if(e>T)break;s=e;n++}return {n,cur:s}}
+/* however long ago (a year typed wrong, 1960): a cut at 60 left the year «running now» decades back and «уже отдан» charged the rest; 3000 only guards the loop */
+function zPast(start){let s=start,n=0;const T=iso(now);while(n<3000){const e=hawlEnd(s);if(e>T)break;s=e;n++}return {n,cur:s}}
 /* one line of the zakat window: name (with a small note under it) on the left, the sum on the right */
 const zRow=(label,value,sub,cls,more)=>`<div class="zrow${cls?' '+cls:''}"><div><span>${label}</span>${sub?`<small>${sub}</small>`:''}${more||''}</div><b>${value}</b></div>`;
 const zDateRow=(label,d,extra)=>`<div class="zrow"><div><span>${label}</span></div><div class="zd"><b>${hijri(d)?NBH(hijri(d)):gDate(d)}</b><small>${hijri(d)?gDate(d):''}${extra?(hijri(d)?' · ':'')+extra:''}</small></div></div>`;
@@ -2622,14 +2745,17 @@ const zLine1=t=>`<span class="zh"><span>🌙 Закят</span><span>${t}<span ar
 const zLineCols=cols=>`<span class="zh"><span>🌙 Закят<span class="zgt" aria-hidden="true"> ›</span></span></span><span class="zcols">${cols.map(([l,v,c])=>`<span><small>${l}</small><b${c?` class="${c}"`:''}>${v}</b></span>`).join('')}</span>`;
 const zShort=DF({day:'numeric',month:'short',year:'numeric'});
 const zDay=s=>zShort.format(isoToDate(s)).replace(' г.','');
-let zBusy=false;
+/* zShown: the year renderZakat showed — «Оплатить» on Учёт offers the sum its line says (memory refused: that year is not saved) */
+let zBusy=false, zShown=null;
 function renderZakat(){
   const box=$('zakatBox');if(!box||!state.ready) return '';
   const M0=zModel();
   /* not while the browser refuses to keep changes: the same year would be saved again and again */
-  if(!zBusy&&!store?.status){const next=zRoll(M0);if(next){zBusy=true;setTimeout(()=>{saveSettings({zakat:next}).finally(()=>{zBusy=false;render()})},0)}}
-  const z=zset(), M=M0, T=iso(now), nisab=zNisab(z), L=zLedger(z), metal=zMetal(z);
-  const owed=L.owed;let dip=null, line='';
+  const next=zBusy?null:zRoll(M0);
+  if(next&&!store?.status){zBusy=true;setTimeout(()=>{saveSettings({zakat:next}).finally(()=>{zBusy=false;render()})},0)}
+  /* memory refused (nothing is saved): the year moved on is still what is shown — a due date long past never shows as one to come */
+  const z=store?.status&&next||zset(), M=M0, T=iso(now), nisab=zNisab(z), L=zLedger(z), metal=zMetal(z);
+  const owed=L.owed;let dip=null, line='';zShown=z;
   let html='<div class="zk">';
   const setup=!(z.price>0)||!(z.start||z.wait);
   if(setup){
@@ -2742,7 +2868,7 @@ function zForm(z){
     <label>Нисаб считать по (Муфтият ЧР — по серебру)<select id="zMetal"><option value="silver" ${metal==='silver'?'selected':''}>серебру — 595 г</option><option value="gold" ${metal==='gold'?'selected':''}>золоту — 85 г</option></select></label>
     <label><span id="zPriceL">Цена грамма ${METAL[metal]}, ₽</span><input id="zPrice" class="num" inputmode="decimal" placeholder="Например, 215" value="${+z.price>0?esc(String(+z.price).replace('.',',')):''}"></label>
     <div class="zhint"><span>Учётная цена ЦБ: cbr.ru → «Драгоценные металлы»</span><span>Нисаб: <b id="zNis">${z.price?money(zNisab(z)):'—'}</b></span></div>
-    <label>Когда ваши деньги дошли до нисаба<input id="zStart" type="date" max="${iso(now)}" value="${isoOk(z.start)?z.start:''}"></label>
+    <label>Когда ваши деньги дошли до нисаба<input id="zStart" type="date" min="1900-01-01" max="${iso(now)}" value="${isoOk(z.start)?z.start:''}"></label>
     <p id="zStartH">${zStartHint(z.start)}</p>
     <div id="zPastBox"></div>
     <label>Брокерский счёт сейчас (бумаги + свободные деньги), ₽<input id="zBroker" class="num" inputmode="decimal" placeholder="${bNow===null?'Например, 150 000':'Сейчас: '+money(bNow)}" value=""></label>
@@ -2817,14 +2943,18 @@ function bindZakat(z,M){
   /* a change in the form takes the old error away */
   metalSel.onchange=upd;$('zPrice').oninput=upd;$('zStart').oninput=upd;$('zStart').onchange=upd;f.addEventListener('input',()=>$('zErr').hidden=true);f.addEventListener('change',()=>$('zErr').hidden=true);
   /* the error in red over «Сохранить», and the finger / keyboard goes where it is about (the first choice of a question) */
-  f.onsubmit=e=>{e.preventDefault();const err=$('zErr'), bad=(t,el)=>{err.textContent=t;err.hidden=false;const x=el||f.querySelector('.zpast input');x?.focus?.({preventScroll:true});inView(x)};
+  f.onsubmit=e=>{e.preventDefault();const err=$('zErr'), bad=(t,el)=>{err.textContent=t;err.hidden=false;const x=el||f.querySelector('.zpast input');if(el)fieldErr(el,err);x?.focus?.({preventScroll:true});inView(x)};
     const metal=metalSel.value, price=parseNum($('zPrice').value,9), start=$('zStart').value, bv=$('zBroker').value.trim(), b=parseNum(bv);
     if(!(price>0)) return bad('Впишите цену грамма числом, например 215.',$('zPrice'));
     if(!start&&!z.start&&!z.wait) return bad('Укажите дату, когда деньги дошли до нисаба.',$('zStart'));
     if(start&&start>iso(now)) return bad('Дата не может быть позже сегодняшней.',$('zStart'));
+    /* a year typed wrong (0203): such a date isn't counted right — the years after it are written without leading zeros */
+    if(start&&start<'1900-01-01') return bad('Проверьте год: дата слишком ранняя.',$('zStart'));
     if(bv&&!(b>=0)) return bad('Брокерский счёт — числом, например 150000.',$('zBroker'));
     const nz={...z,metal,price:r2(price)};
-    if(price!==+z.price||metal!==z.metal) nz.priceAt=Date.now();
+    /* a new price or metal — or the same price saved once «обновите её» is shown (he checked it): the reminder starts over.
+       Saved within those 30 days for the date or the broker only, it is not taken for a check */
+    if(price!==+z.price||metal!==z.metal||Date.now()-z.priceAt>30*864e5) nz.priceAt=Date.now();
     if(start&&start!==z.start){
       const p=zPast(start), ch=f.querySelector('[name="zPast"]:checked')?.value, dk=f.querySelector('[name="zDrop"]:checked')?.value;
       const drop=(z.years||[]).filter(y=>y.due>start), first=!z.start&&!z.wait&&!(z.years||[]).length;
@@ -2915,7 +3045,7 @@ function catOpts(type,scope,sel){
 }
 function editRow(i){
   const t=typeOf(i), opt=(list,sel)=>list.map(([v,n])=>`<option value="${esc(v)}" ${v===sel?'selected':''}>${esc(n)}</option>`).join('');
-  let f=`<label>Сумма<input name="amount" class="num" inputmode="decimal" value="${vIn(+i.amount||0)}" autocomplete="off"></label><label>Дата<input name="date" type="date" max="${iso(now)}" value="${esc(i.date)}"></label>`;
+  let f=`<label>Сумма<input name="amount" class="num" inputmode="decimal" value="${vIn(+i.amount||0)}" autocomplete="off"></label><label>Дата<input name="date" type="date" max="${esc(i.date>iso(now)?i.date:iso(now))}" value="${esc(i.date)}"></label>`;
   if(t==='tr') f+=`<label>Откуда<select name="from">${opt(EDIT_ACCS(),i.from)}</select></label><label>Куда<select name="to">${opt(EDIT_ACCS(),i.to)}</select></label>
     <label class="full">Комментарий<input name="note" value="${esc(i.note||'')}" maxlength="80"></label>`;
   else if(t==='debt'){const d=recDebt(i);f+=`<label class="full">${({back:'Куда вернули',in:'На какой счёт пришли',pay:'С какого счёта отдали'})[i.dir]||'С какого счёта дали'}<select name="acc">${opt(EDIT_ACCS(),i.acc)}</select></label>`
@@ -2943,15 +3073,22 @@ function editRow(i){
 function renderItemEditor(){
   const host=$('itemEditHost'), i=state.editItem&&state.items.find(x=>x.id===state.editItem);
   if(!host)return;
+  /* drawn again over its own open form (another open copy of the app saved, midnight): the «Расход/Доход», «Личное/Командировка» he
+     picked there stay (pk); keepTyped puts back the fields — the category too, its list being of the picked kind again */
+  const f0=i&&host.querySelector('form[data-edit]'), pk=f0&&f0.dataset.edit===i.id?['et','es'].filter(k=>f0.dataset[k]&&f0.dataset[k]!==f0.dataset[k+'0']).map(k=>[k,f0.dataset[k]]):[];
+  /* «Доход», «Командировка»… focused there from the keyboard: the focus stays on its new copy, not on the window's title */
+  const ae=document.activeElement, fb=f0&&f0.dataset.edit===i.id&&f0.contains(ae)&&ae.matches('button[data-et],button[data-es]')?(ae.dataset.et?['et',ae.dataset.et]:['es',ae.dataset.es]):null;
   host.innerHTML=i?`<div class="wmodal item-editor-modal" data-item-edit role="dialog" aria-modal="true" aria-labelledby="itemEditTitle">
     <div class="sheet-bg" data-itemeditclose></div>
     <section class="item-editor-panel">
-      <div class="debt-add-head"><div><b id="itemEditTitle" tabindex="-1">Изменить запись</b><span>${esc(nameOf(i))} · ${moneyR(+i.amount||0)}</span></div><button type="button" class="dp-x" data-itemeditclose aria-label="Закрыть окно редактирования">✕</button></div>
+      <div class="debt-add-head"><div><b id="itemEditTitle" tabindex="-1">Изменить запись</b><span>${esc(typeOf(i)==='tr'?'Перевод':nameOf(i))} · ${moneyR(+i.amount||0)}</span></div><button type="button" class="dp-x" data-itemeditclose aria-label="Закрыть окно редактирования">✕</button></div>
       ${editRow(i)}
     </section>
   </div>`:'';
   host.querySelectorAll('[data-itemeditclose]').forEach(b=>b.onclick=closeItemEditor);
   bindEdits(host);armDeletes(host,delItem,'Запись удалена',delAsk);
+  /* et0/es0: the record's own kind — a pick differs from it */
+  const f=host.querySelector('form[data-edit]');if(f){f.dataset.et0=f.dataset.et||'';f.dataset.es0=f.dataset.es||'';pk.forEach(([k,v])=>{if(f.dataset[k]!==v)f.querySelector(`button[data-${k}="${v}"]`)?.onclick()});if(fb)f.querySelector(`button[data-${fb[0]}="${fb[1]}"]`)?.focus({preventScroll:true})}
 }
 function closeItemEditor(){
   const id=state.editItem;fresh();state.editItem=null;state.actItem=null;render();
@@ -2975,12 +3112,14 @@ function bindEdits(root){
     f.onsubmit=async e=>{
       e.preventDefault();
       const err=f.querySelector('.err'), E=f.elements, i=state.items.find(x=>x.id===f.dataset.edit);
-      const fail=m=>{err.textContent=m;err.hidden=false};
-      const v=parseNum(E.amount.value); if(!(v>0)) return fail(isNaN(v)?NUM_ERR+'.':'Введите сумму больше нуля.');
+      /* an error about the sum goes as the sum is typed again, as in the other forms (one another check put there since stays) */
+      const fail=m=>{err.textContent=m;err.hidden=false;if(!(parseNum(E.amount.value)>0)||m===BIG_ERR()){fieldErr(E.amount,err);E.amount.addEventListener('input',()=>{if(err.textContent===m)err.hidden=true},{once:true})}};
+      const v=parseNum(E.amount.value); if(!(v>0)) return fail(E.amount.value.trim()&&isNaN(v)?NUM_ERR+'.':'Введите сумму больше нуля.');
       /* the same cap as a new record (a sum already over it, saved before the cap, may stay) */
       if(v>MAX_ENTRY&&Math.abs(v-(+i.amount||0))>=0.005) return fail(BIG_ERR());
       const p={amount:Math.round(v*100)/100,date:E.date.value||i.date};
-      if(p.date>iso(now)) return fail(FUTURE_ERR);
+      /* its own day may be «tomorrow» here (written a time zone ahead): only a later day picked now is stopped */
+      if(p.date>iso(now)&&p.date!==i.date) return fail(FUTURE_ERR);
       if(E.from){if(E.from.value===E.to.value) return fail('Выберите два разных счёта.');p.from=E.from.value;p.to=E.to.value}
       if(E.acc) p.acc=E.acc.value||'';
       /* the result of an ended trip lies on no account: its money is already counted where the trip money was */
@@ -3018,7 +3157,9 @@ function bindEdits(root){
       /* moved to another month: it leaves this list, so say where it went and offer to go there */
       const moved=p.date.slice(0,7)!==String(i.date).slice(0,7);
       /* its report follows too (a new category with the same sum as well) */
-      try{const tn=await store.batch(o=>{o.update(i.id,p);if(dp)o.updateDebt(d.id,dp);if(zx)o.patchSettings({zakat:zx.z});tfx.forEach(([x,,a,b])=>repFix(o,x,a,b));
+      /* a trip result's own sum fixed here: its % moves the debt to the broker typed since («Сверить»), as tripCloseFix does — else deleting it
+         and ending the trip again owes the difference twice */
+      try{const tn=await store.batch(o=>{o.update(i.id,p);if(TRIP_END.includes(catOf(i.cat).id))brokerFix(o,i,{...i,...p});if(dp)o.updateDebt(d.id,dp);if(zx)o.patchSettings({zakat:zx.z});tfx.forEach(([x,,a,b])=>repFix(o,x,a,b));
         return tfx.filter(([,td])=>Math.abs(td)>=0.005).map(([x,td])=>' · итог командировки теперь '+tripCloseFix(o,x,td)).join('')});
         /* a zakat payment changed: what is owed now */
         const zn=(zx&&Math.abs(zx.amount-(+zx.x.amount||0))>=0.005?` · закят ${zxWhat(i)}: ${money(zx.amount)}`:'')+zkMoved(zk0);
@@ -3049,7 +3190,7 @@ function itemRow(i,showDate,af,own){
   const ic=t==='tr'?'⇄':t==='debt'?'🤝':(ICON[catOf(i.cat).id]||'•');
   return `<div class="item ${cls}"${t==='in'||t==='out'?` style="--c:${cvar(i.cat)}"`:''}><span class="ic" aria-hidden="true">${ic}</span>
     <div class="what">${what}</div>
-    <button type="button" class="amt ${acls}" data-act="${id}" aria-expanded="${open}" aria-label="Действия с записью ${esc(amt)}">${amt}</button>
+    <button type="button" class="amt ${acls}" data-act="${id}" aria-expanded="${open}" aria-label="Действия с записью: ${esc(t==='tr'?`Перевод ${wName(i.from)||'?'} → ${wName(i.to)||'?'}`:t==='debt'?i.label||'Долг':(own?i.label||i.note||nameOf(i):nameOf(i))+(isTrip(i)?', командировка':''))}, ${esc(amt)}${dd?', '+dd:''}">${amt}</button>
     ${open?`<div class="itemacts"><button type="button" class="linkbtn" data-open="${id}">Изменить</button><button type="button" class="del" data-id="${id}">Удалить</button></div>`:''}</div>`;
 }
 /* «Заплатил и за напарника»: the partner's loan saved in the same write as this expense (saveEntry gives both the same created,
@@ -3062,7 +3203,7 @@ const delItem=async(id,keep)=>{const it=state.items.find(i=>i.id===id), d=it&&re
   /* a deleted return: the «закят с долга» it brought goes too — the debt is open again, its zakat comes with the next return */
   const zx=d&&dp&&typeof dp==='object'?zxFix(it,0):null, zk0=zLedger(zset()).owed;
   /* a record of an ended trip: the trip result follows; the latest «Командировка закончилась» record: that trip goes on again */
-  const tc=it&&tripClosed(it), tc0=tc&&{...tc}, tp=it&&tripEndPrev(it), s0={tripStart:state.settings.tripStart||null,tripEnd:+state.settings.tripEnd||0}, rp0=state.settings.tripReports;
+  const tc=it&&tripClosed(it), tc0=tc&&{...tc}, tp=it&&tripEndPrev(it), s0={tripStart:state.settings.tripStart||null,tripEnd:+state.settings.tripEnd||0,tripBegun:tripOn()||null}, rp0=state.settings.tripReports;
   /* paid for the partner too: his loan and all its records (the loan, returns, садака) go with it, as delDebt takes them; keep — «Только трату» */
   const pd=!keep&&it?ptDebt(it):null, pr=pd?debtRecs(pd):[], pz=pd?debtZx(pd):[], js=x=>JSON.stringify(x);
   /* the record, its debt and its trip — one write; the trip going on again has no report any more */
@@ -3083,7 +3224,7 @@ const delAsk=id=>{const it=state.items.find(i=>i.id===id), d=it&&recDebt(it);if(
   const dp=d?debtPatch(d,it,0):null, dl=dp&&typeof dp==='object'?debtLeft({...d,...dp}):0, zi=dp&&typeof dp==='object'?zxOf(it):-1;
   const dq=dp&&typeof dp==='object'?(debtLeft(d)>0?`Долг: ${d.name} — станет ${money(dl)}. `:`Долг снова откроется: ${d.name} — ${money(dl)}. `)+(zi>=0?`Закят ${zxWhat(it)} (${money(+zset().extra[zi].amount||0)}) снимется. `:''):'';
   const q=tc?`${on}Командировка уже закончилась — её итог станет ${closeTxt(closeAfter(tc,-tripVal(it)))}. Удалить?`
-    :tp?on+(catOf(it.cat).id==='trip_left'?`Командировка снова пойдёт: ${money(+it.amount||0)} вернутся в командировочные. Удалить?`:`Командировка снова пойдёт, с перерасходом ${money(+it.amount||0)}. Удалить?`):on||dq?on+dq+'Удалить?':'';
+    :tp?on+(L=>Math.abs(L)<0.005?'Командировка снова пойдёт. Удалить?':L>0?`Командировка снова пойдёт: ${money(L)} вернутся в командировочные. Удалить?`:`Командировка снова пойдёт, с перерасходом ${money(-L)}. Удалить?`)(reopenLeft(tp)):on||dq?on+dq+'Удалить?':'';
   /* paid for the partner too: his loan goes with it, its returns and садака named (no balance may show them) — or «Только трату» */
   const pd=it&&ptDebt(it), sh=pd?recsShift([it,...debtRecs(pd)]):'', pw=pd?[+pd.returned>0?`возвратами (${money(+pd.returned)})`:'',+pd.forgiven>0?`садакой (${money(+pd.forgiven)})`:''].filter(Boolean).join(' и '):'';
   return pd?[`Удалится и долг: ${pd.name} — ${money(+pd.amount||0)}${pw?', вместе с '+pw:''}.${sh?' '+sh+'.':''}${debtZxAsk(pd)} ${q||'Точно?'}`,['Только трату',x=>delItem(x,true),'долг напарника останется']]:q};
@@ -3137,10 +3278,12 @@ function monthStats(k){
   const it=state.items.filter(i=>typeof i.date==='string'&&i.date.startsWith(k));
   const own=it.filter(i=>!isTrip(i)), out=own.filter(i=>typeOf(i)==='out'), inc=own.filter(i=>typeOf(i)==='in'), lim=out.filter(i=>!NOT_IN_LIMIT.includes(catOf(i.cat).id));
   const by=list=>{const m={};list.forEach(i=>{const c=catOf(i.cat).id;m[c]=(m[c]||0)+(+i.amount||0)});return m}, cs=id=>sum(out.filter(i=>catOf(i.cat).id===id));
+  /* the month going on: the overspend of a trip not yet ended counts in its limit, as on Учёт (renderLedger) — under «Докинул на командировку», the record it becomes when the trip ends */
+  const tn=k===`${now.getFullYear()}-${pad(now.getMonth()+1)}`?tripNow():null, ov=tn&&tn.got&&tn.left<0?r2(-tn.left):0, limBy=by(lim);if(ov)limBy.trip_extra=(limBy.trip_extra||0)+ov;
   /* any: a month with only trip, zakat or broker records is not an empty one.
      broker / piggy: what went in minus what came out — in kopecks, so 0,1 + 0,2 − 0,3 is 0 and «В копильник» stays hidden */
-  return {any:it.length>0,inc:sum(inc),incBy:by(inc),lim:sum(lim),limBy:by(lim),
-    broker:r2(toBroker(own)),piggy:r2(cs('invest')+sum(own.filter(i=>typeOf(i)==='tr'&&i.to==='piggy'))-sum(own.filter(i=>typeOf(i)==='tr'&&i.from==='piggy'))),sadaqa:cs('sadaqa'),zakat:cs('zakat'),extra:cs('trip_extra'),
+  return {any:it.length>0,inc:sum(inc),incBy:by(inc),lim:sum(lim)+ov,limBy,
+    broker:r2(toBroker(own)),piggy:r2(cs('invest')+sum(own.filter(i=>typeOf(i)==='tr'&&i.to==='piggy'))-sum(own.filter(i=>typeOf(i)==='tr'&&i.from==='piggy'))),sadaqa:cs('sadaqa'),zakat:cs('zakat'),
     trip:sum(it.filter(i=>isTrip(i)&&typeOf(i)==='out'))};
 }
 /* Итоги: Расходы | Доходы | Брокер | Командировка | Сравнение */
@@ -3167,7 +3310,8 @@ function applyStatView(index){
 }
 function renderStatSeg(){
   const v=SV.some(([k])=>k===state.statView)?state.statView:'out';
-  $('statSeg').innerHTML=SV.map(([k,n])=>`<button type="button" data-svb="${k}" aria-pressed="${k===v}">${n}</button>`).join('');
+  /* made once, then only marked (applyStatView): buttons made anew took the keyboard focus away with the one pressed */
+  if(!$('statSeg').children.length) $('statSeg').innerHTML=SV.map(([k,n])=>`<button type="button" data-svb="${k}" aria-pressed="${k===v}">${n}</button>`).join('');
   $('statSeg').querySelectorAll('[data-svb]').forEach(b=>b.onclick=()=>setStatView(b.dataset.svb));
   const index=SV.findIndex(([k])=>k===v),track=$('statsTrack');
   applyStatView(index);track.style.transform=`translate3d(calc(-${index*20}% - ${index*STAT_GAP}px),0,0)`;
@@ -3254,20 +3398,22 @@ function renderCompare(){
   $('cmpA').innerHTML=opt(keys,A);$('cmpB').innerHTML=opt(others,B);$('cmpAv').textContent=mFull(A);$('cmpBv').textContent=mFull(B);
   $('cmpA').onchange=e=>{state.cmpA=e.target.value;render()};$('cmpB').onchange=e=>{state.cmpB=e.target.value;render()};
   const a=monthStats(A), b=monthStats(B);
-  const m0=n=>{const v=Math.round(n*100)/100;return (v<0?'−':'')+(Number.isInteger(v)?fmt0:fmt2).format(Math.abs(v))};
+  /* a sum may go on a second line only between its digit groups (<wbr>; a narrow phone, see CSS) — never inside one */
+  const m0=n=>{const v=Math.round(n*100)/100;return (v<0?'−':'')+(Number.isInteger(v)?fmt0:fmt2).format(Math.abs(v)).replace(/[\u00a0\u202f]/g,'<wbr>$&')};
   const hd=k=>mShort.format(keyDate(k))+(A.slice(0,4)!==B.slice(0,4)?' '+k.slice(0,4):'');
   /* good = green: income up, spending down; savings and trip money shown neutral */
   const delta=(x,y,kind)=>{const d=Math.round((x-y)*100)/100;if(d===0)return '<span class="cmp-delta" style="color:var(--muted)">0</span>';
-    const good=kind==='out'?d<0:kind==='in'?d>0:null;return `<span class="cmp-delta" style="color:${good===null?'var(--muted)':good?'var(--good)':'var(--bad)'}">${d>0?'+':'−'}${m0(Math.abs(d))}</span>`};
-  const row=(name,x,y,kind,cls='')=>`<div class="cmp-row ${cls}"><span class="cmp-name">${name}</span><span class="cmp-amount">${m0(x)}</span><span class="cmp-amount">${m0(y)}</span>${delta(x,y,kind)}</div>`;
+    const good=kind==='out'?d<0:kind==='in'?d>0:null;return `<span class="cmp-delta" style="color:${good===null?'var(--muted)':good?'var(--good-ink)':'var(--bad)'}">${d>0?'+':'−'}${m0(Math.abs(d))}</span>`};
+  /* «командировочных», «Командировка»: a narrow column breaks them at a soft hyphen (with a dash), not anywhere inside the word */
+  const row=(name,x,y,kind,cls='')=>`<div class="cmp-row ${cls}"><span class="cmp-name">${name.replace(/команди(?=ров)/gi,'$&\u00ad')}</span><span class="cmp-amount">${m0(x)}</span><span class="cmp-amount">${m0(y)}</span>${delta(x,y,kind)}</div>`;
   /* the categories in the one fixed order, as on the tiles — a row stays in its place from month to month */
-  const cats=(ma,mb,kind)=>Object.keys({...ma,...mb}).filter(c=>Math.round(ma[c]||0)||Math.round(mb[c]||0)).sort(byRank).map(c=>row(esc(CAT[c]?.name||'Другое'),ma[c]||0,mb[c]||0,kind,'sub')).join('');
+  const cats=(ma,mb,kind)=>Object.keys({...ma,...mb}).filter(c=>Math.abs(ma[c]||0)>=0.005||Math.abs(mb[c]||0)>=0.005).sort(byRank).map(c=>row(esc(CAT[c]?.name||'Другое'),ma[c]||0,mb[c]||0,kind,'sub')).join('');
   if(!a.any&&!b.any){$('cmp').innerHTML='<div class="empty"><p>Записей за эти месяцы пока нет.</p></div>';return}
   $('cmp').innerHTML=`<div class="cmp"><div class="cmp-head"><span>Категория</span><span>${esc(cap(hd(A)))}</span><span>${esc(cap(hd(B)))}</span><span>Разница</span></div>
     ${row('Траты в&nbsp;лимит',a.lim,b.lim,'out','t')}${cats(a.limBy,b.limBy,'out')}
     ${row('Доходы',a.inc,b.inc,'in','t')}${cats(a.incBy,b.incBy,'in')}
     ${row('На брокер',a.broker,b.broker,'save','t')}${a.piggy||b.piggy?row('В копильник',a.piggy,b.piggy,'save'):''}${a.sadaqa||b.sadaqa?row('Садака',a.sadaqa,b.sadaqa,'save'):''}${a.zakat||b.zakat?row('Закят',a.zakat,b.zakat,'save'):''}
-    ${a.extra||b.extra?row('Докинул на командировку',a.extra,b.extra,'out'):''}
+
     ${a.trip||b.trip?row('Командировка',a.trip,b.trip,'save','t'):''}</div>`;
 }
 /* fn may resolve to an undo — then the toast offers «Отменить» — or to [undo, what the toast says]; ask(id): the question of the first tap,
@@ -3344,6 +3490,10 @@ const accSel=(attr,id,sel,lbl)=>`<label class="dacc"><span>${lbl}</span><select 
 const closedBox=(key,list,one)=>`<details data-cbox="${key}"${state[key]||list.some(d=>state.editing==='de-'+d.id)?' open':''}><summary>Закрытые (${list.length})</summary>${list.map(d=>one(d,false)).join('')}</details>`;
 const bindClosedBox=list=>list.querySelectorAll('[data-cbox]').forEach(x=>x.ontoggle=()=>state[x.dataset.cbox]=x.open);
 const debtPeople=list=>new Set(list.map(d=>nk(d.name))).size;
+/* «Отменить» of one return, payment or forgiving (as gBack's for a person's loans): its record (rid; «Мне простили» has none)
+   and the zakat it brought go, the debt is as it was before (d) */
+const debtUndo=(d,rid)=>{const was={returned:+d.returned||0,forgiven:+d.forgiven||0,closedAt:d.closedAt||0};
+  return ()=>store.batch(o=>{if(rid){const z=o.settings().zakat||{};o.remove(rid);if((z.extra||[]).some(x=>x.rec===rid))o.patchSettings({zakat:{...z,extra:z.extra.filter(x=>x.rec!==rid)}})}o.updateDebt(d.id,was)})};
 function renderDebts(){
   renderOwe();
   const debts=state.debts.filter(d=>!d.mine);
@@ -3396,11 +3546,13 @@ function renderDebts(){
   /* the window goes by itself when the person has nothing left to return */
   /* «Закрытые» the same way: one line per person (how many loans, how much came back); tap — a window with each of them */
   const cgroups=[];closed.forEach(d=>{const k=nk(d.name), c=+d.created||0;let g=cgroups.find(x=>x.k===k);if(!g){g={k,name:d.name.trim(),c,list:[]};cgroups.push(g)}else if(c>=g.c){g.name=d.name.trim();g.c=c}g.list.push(d)});
-  const cBack=g=>r2(g.list.reduce((s,d)=>s+(+d.returned||0),0)), cSub=g=>{const n=g.list.length;return `${n} ${plural(n,'долг','долга','долгов')}`+(g.list.some(d=>+d.forgiven>0)?' · есть прощённые':'')};
-  const cgHtml=g=>`<button type="button" class="dgroup closed" data-dg="x:${esc(g.k)}" aria-haspopup="dialog"><b>${esc(gName(g))}</b><span class="sumv">${moneyR(cBack(g))}</span><small>${cSub(g)} · вернул всё</small></button>`;
+  const cBack=g=>r2(g.list.reduce((s,d)=>s+(+d.returned||0),0)), cFg=g=>r2(g.list.reduce((s,d)=>s+(+d.forgiven||0),0)), cSub=g=>{const n=g.list.length;return `${n} ${plural(n,'долг','долга','долгов')}`};
+  /* forgiven loans didn't come back: said so — and when nothing came back, the sum shown is what was forgiven, not «0 ₽» */
+  const cHow=g=>cFg(g)<0.005?'вернул всё':cBack(g)<0.005?(g.list.length>1?'прощены':'прощён'):'вернул часть · прощено '+moneyR(cFg(g)), cSum=g=>cBack(g)>=0.005?cBack(g):cFg(g);
+  const cgHtml=g=>`<button type="button" class="dgroup closed" data-dg="x:${esc(g.k)}" aria-haspopup="dialog"><b>${esc(gName(g))}</b><span class="sumv">${moneyR(cSum(g))}</span><small>${cSub(g)} · ${cHow(g)}</small></button>`;
   const cModal=g=>`<div class="wmodal" role="dialog" aria-modal="true" aria-labelledby="dpT"><div class="sheet-bg" data-dpclose></div><div class="dg dperson">
-      <div class="dp-head"><div class="dp-t"><b id="dpT" tabindex="-1">${esc(gName(g))}</b><small>${cSub(g)} · закрыты</small></div><button type="button" class="dp-x" data-dpclose aria-label="Закрыть">✕</button></div>
-      <div class="dp-sum"><span>Вернул всего</span><b>${moneyR(cBack(g))}</b></div>
+      <div class="dp-head"><div class="dp-t"><b id="dpT" tabindex="-1">${esc(gName(g))}</b><small>${cSub(g)} · ${cHow(g)}</small></div><button type="button" class="dp-x" data-dpclose aria-label="Закрыть">✕</button></div>
+      <div class="dp-sum"><span>${cBack(g)>=0.005?'Вернул всего':'Прощено'}</span><b>${moneyR(cSum(g))}</b></div>
       <div class="dinner"><div class="dinner-head">Закрытые долги</div>${g.list.map(d=>one(d,false,true,false)).join('')}</div></div></div>`;
   const cBox=()=>`<details data-cbox="closedOpen"${state.closedOpen?' open':''}><summary>Закрытые (${cgroups.length} ${plural(cgroups.length,'человек','человека','человек')})</summary>${cgroups.map(cgHtml).join('')}</details>`;
   const og=groups.find(g=>g.k===state.openDebt), oc=cgroups.find(g=>'x:'+g.k===state.openDebt);if(!og&&!oc)state.openDebt=null;
@@ -3421,7 +3573,7 @@ function renderDebts(){
   /* the list is drawn again and the next loan's buttons come up under the finger: the second tap of a double tap is let go of (fresh) */
   list.querySelectorAll('[data-full]').forEach(b=>b.onclick=async()=>{
     const d=state.debts.find(x=>x.id===b.dataset.full), acc=retAccOf(d);b.disabled=true;fresh();
-    try{const left=debtLeft(d), zk=await store.batch(o=>{const r=o.add(backRec(d,left));o.updateDebt(d.id,{returned:r2((+d.amount||0)-(+d.forgiven||0)),closedAt:Date.now()});return zDebtBack(o,d,left,r)});toast(`${d.name} — вернули ${money(left)} ${toAcc(acc)}, долг закрыт`+zkNote(zk,true))}catch(e){b.disabled=false;toast(saveErr(e))}
+    try{const left=debtLeft(d);let rid;const zk=await store.batch(o=>{rid=o.add(backRec(d,left));o.updateDebt(d.id,{returned:r2((+d.amount||0)-(+d.forgiven||0)),closedAt:Date.now()});return zDebtBack(o,d,left,rid)});toast(`${d.name} — вернули ${money(left)} ${toAcc(acc)}, долг закрыт`+zkNote(zk,true),debtUndo(d,rid))}catch(e){b.disabled=false;toast(saveErr(e))}
   });
   /* forgiving a debt: the rest becomes садака. No account is touched — the money already left when it was lent. */
   list.querySelectorAll('[data-forgive]').forEach(b=>b.onclick=async()=>{
@@ -3432,10 +3584,10 @@ function renderDebts(){
     if(Date.now()-b.dataset.armed<600) return;
     b.disabled=true;fresh();
     try{
-      const zk=await store.batch(o=>{const r=o.add({type:'out',amount:Math.round(left*100)/100,cat:'sadaqa',acc:'',date:iso(now),note:'прощён долг: '+d.name,debt:d.id,created:Date.now()});
+      let rid;const zk=await store.batch(o=>{const r=rid=o.add({type:'out',amount:Math.round(left*100)/100,cat:'sadaqa',acc:'',date:iso(now),note:'прощён долг: '+d.name,debt:d.id,created:Date.now()});
         o.updateDebt(d.id,{forgiven:r2((+d.forgiven||0)+left),closedAt:Date.now()});return zDebtBack(o,d,left,r)});
       /* Shafi'i: forgiving doesn't remove the zakat on a debt for the years it was owed — that part belongs to the poor */
-      toast(`Долг прощён: ${d.name} — ${money(left)} записано в садаку`+(zk?` · закят с долга ${money(zk.amount)} к оплате`:''));
+      toast(`Долг прощён: ${d.name} — ${money(left)} записано в садаку`+(zk?` · закят с долга ${money(zk.amount)} к оплате`:''),debtUndo(d,rid));
     }catch(e){b.disabled=false;toast(saveErr(e))}
   });
   /* doubtful debt (can't pay, delays, denies, or not due yet): counts toward nisab, its zakat is paid when the money comes back */
@@ -3447,13 +3599,13 @@ function renderDebts(){
   list.querySelectorAll('form[data-part]').forEach(f=>{
     f.querySelector('[data-cancel]').onclick=()=>{fresh();state.editing=null;render()};
     f.onsubmit=async e=>{e.preventDefault();
-      const d=state.debts.find(x=>x.id===f.dataset.part), raw=f.querySelector('input').value, v=parseNum(raw), acc=retAccOf(d);
+      const d=state.debts.find(x=>x.id===f.dataset.part), raw=f.querySelector('input').value, v=raw.trim()?parseNum(raw):0, acc=retAccOf(d);
       if(!(v>0)){toast(isNaN(v)?NUM_ERR:'Введите сумму больше нуля');return}
       /* more than is left: only what is left is recorded — and the toast says that sum */
       const take=r2(Math.min(v,debtLeft(d))), ret=r2((+d.returned||0)+take), patch={returned:ret}, rest=debtLeft({...d,...patch});
       if(rest<=0) patch.closedAt=Date.now();
       state.editing=null;fresh();
-      try{const zk=await store.batch(o=>{const r=o.add(backRec(d,take));o.updateDebt(d.id,patch);return zDebtBack(o,d,take,r)});toast(`${d.name} — вернули ${money(take)} ${toAcc(acc)}${rest>0?', осталось '+money(rest):', долг закрыт'}`+zkNote(zk))}catch(x){reopen('d-'+d.id,'form[data-part] input',raw);toast(saveErr(x))}
+      try{let rid;const zk=await store.batch(o=>{rid=o.add(backRec(d,take));o.updateDebt(d.id,patch);return zDebtBack(o,d,take,rid)});toast(`${d.name} — вернули ${money(take)} ${toAcc(acc)}${rest>0?', осталось '+money(rest):', долг закрыт'}`+zkNote(zk),debtUndo(d,rid))}catch(x){reopen('d-'+d.id,'form[data-part] input',raw);toast(saveErr(x))}
     };
   });
   /* a person's loans at once: v goes to them oldest first (the last one it reaches may stay partly open) — a return record for each,
@@ -3477,7 +3629,7 @@ function renderDebts(){
   list.querySelectorAll('form[data-gpart]').forEach(f=>{
     f.querySelector('[data-gcancel]').onclick=()=>{fresh();state.editing=null;render()};
     f.onsubmit=async e=>{e.preventDefault();
-      const g=gOf(f.dataset.gpart), raw=f.querySelector('input').value, v=parseNum(raw);if(!g)return;
+      const g=gOf(f.dataset.gpart), raw=f.querySelector('input').value, v=raw.trim()?parseNum(raw):0;if(!g)return;
       if(!(v>0)){toast(isNaN(v)?NUM_ERR:'Введите сумму больше нуля');return}
       /* more than all of his loans: only what is left is recorded — and the toast says that sum */
       state.editing=null;fresh();
@@ -3523,20 +3675,20 @@ function renderOwe(){
     if(overStop(b,overdraw(payRec(d,left)),toast,b,'отдать всё')){clearTimeout(b._ot);b._ot=setTimeout(()=>{if(b.isConnected)overOff(b,b)},5000);return}
     /* the next debt's «Отдал всё» comes up under the finger */
     b.disabled=true;fresh();
-    try{await store.batch(o=>{o.add(payRec(d,left));o.updateDebt(d.id,{returned:r2((+d.amount||0)-(+d.forgiven||0)),closedAt:Date.now()})});toast(`Долг отдан: ${d.name} — ${money(left)} ${fromAcc(acc)}`)}catch(e){b.disabled=false;toast(saveErr(e))}});
+    try{let rid;await store.batch(o=>{rid=o.add(payRec(d,left));o.updateDebt(d.id,{returned:r2((+d.amount||0)-(+d.forgiven||0)),closedAt:Date.now()})});toast(`Долг отдан: ${d.name} — ${money(left)} ${fromAcc(acc)}`,debtUndo(d,rid))}catch(e){b.disabled=false;toast(saveErr(e))}});
   list.querySelectorAll('[data-oforgive]').forEach(b=>b.onclick=async()=>{const d=state.debts.find(x=>x.id===b.dataset.oforgive), left=debtLeft(d);
     if(!b.dataset.armed){b.dataset.armed=Date.now();b.textContent=`Точно простили ${money(left)}?`;setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent='Мне простили'}},4000);return}
     /* a quick double tap is not a confirmation */
     if(Date.now()-b.dataset.armed<600) return;
-    b.disabled=true;fresh();try{await store.updateDebt(d.id,{forgiven:r2((+d.forgiven||0)+left),closedAt:Date.now()});toast(`Долг прощён: ${d.name} — ${money(left)}, отдавать не нужно`)}catch(e){b.disabled=false;toast(saveErr(e))}});
+    b.disabled=true;fresh();try{await store.updateDebt(d.id,{forgiven:r2((+d.forgiven||0)+left),closedAt:Date.now()});toast(`Долг прощён: ${d.name} — ${money(left)}, отдавать не нужно`,debtUndo(d,null))}catch(e){b.disabled=false;toast(saveErr(e))}});
   list.querySelectorAll('[data-opartbtn]').forEach(b=>b.onclick=()=>{fresh();state.editing='o-'+b.dataset.opartbtn;render();const x=list.querySelector('form[data-opart] input');x?.focus({preventScroll:true});inView(x?.closest('.debt'))});
   list.querySelectorAll('form[data-opart]').forEach(f=>{f.querySelector('[data-ocancel]').onclick=()=>{fresh();state.editing=null;render()};
     const sb=f.querySelector('button[type=submit]');overWatch(f,sb);
-    f.onsubmit=async e=>{e.preventDefault();const d=state.debts.find(x=>x.id===f.dataset.opart), raw=f.querySelector('input').value, v=parseNum(raw), acc=payAccOf(d);
+    f.onsubmit=async e=>{e.preventDefault();const d=state.debts.find(x=>x.id===f.dataset.opart), raw=f.querySelector('input').value, v=raw.trim()?parseNum(raw):0, acc=payAccOf(d);
       if(!(v>0)){toast(isNaN(v)?NUM_ERR:'Введите сумму больше нуля');return}
       const take=r2(Math.min(v,debtLeft(d))), ret=r2((+d.returned||0)+take), patch={returned:ret}, rest=debtLeft({...d,...patch});if(rest<=0) patch.closedAt=Date.now();
       if(overStop(f,overdraw(payRec(d,take)),toast,sb,'записать')) return;
-      state.editing=null;fresh();try{await store.batch(o=>{o.add(payRec(d,take));o.updateDebt(d.id,patch)});toast(`Отдано: ${d.name} — ${money(take)} ${fromAcc(acc)}${rest>0?', осталось '+money(rest):', долг закрыт'}`)}catch(x){reopen('o-'+d.id,'form[data-opart] input',raw);toast(saveErr(x))}}});
+      state.editing=null;fresh();try{let rid;await store.batch(o=>{rid=o.add(payRec(d,take));o.updateDebt(d.id,patch)});toast(`Отдано: ${d.name} — ${money(take)} ${fromAcc(acc)}${rest>0?', осталось '+money(rest):', долг закрыт'}`,debtUndo(d,rid))}catch(x){reopen('o-'+d.id,'form[data-opart] input',raw);toast(saveErr(x))}}});
   bindDebtEdit(list);
   armDeletes(list,delDebt,'Долг удалён',debtAsk);
 }
@@ -3545,7 +3697,7 @@ function debtEditForm(d){
   return `<form class="dedit" data-deform="${esc(d.id)}" novalidate>
     <label class="full">${d.mine?'У кого взяли':'Имя'}<input name="who" maxlength="60" value="${esc(d.name)}" autocomplete="off"></label>
     <label>Сумма, ₽<input name="amount" class="num" inputmode="decimal" value="${String(r2(+d.amount||0)).replace('.',',')}" autocomplete="off"></label>
-    <label>Дата<input name="date" type="date" max="${iso(now)}" value="${esc(d.date||'')}"></label>
+    <label>Дата<input name="date" type="date" max="${esc((d.date||'')>iso(now)?d.date:iso(now))}" value="${esc(d.date||'')}"></label>
     <label class="full">Комментарий<input name="note" maxlength="80" value="${esc(d.note||'')}"></label>
     <p class="err full" role="alert" hidden></p>
     <div class="row full"><button class="primary" type="submit">Сохранить</button><button class="linkbtn" type="button" data-decancel>Отмена</button></div></form>`;
@@ -3567,12 +3719,14 @@ function bindDebtEdit(list){
     f.querySelector('[data-decancel]').onclick=()=>{fresh();state.editing=null;render()};
     overWatch(f,f.querySelector('button[type=submit]'),f.querySelector('.err'));futWatch(f,f.elements.date,f.querySelector('.err'));
     f.onsubmit=async e=>{e.preventDefault();
-      const d=state.debts.find(x=>x.id===f.dataset.deform), err=f.querySelector('.err'), bad=t=>{err.textContent=t;err.hidden=false};
+      const d=state.debts.find(x=>x.id===f.dataset.deform), err=f.querySelector('.err'), bad=t=>{err.textContent=t;err.hidden=false;const e=f.elements, x=!e.who.value.trim()?e.who:!(parseNum(e.amount.value)>0)?e.amount:null;if(x)fieldErr(x,err)};
       const name=f.elements.who.value.trim(), amount=Math.round(parseNum(f.elements.amount.value)*100)/100, date=f.elements.date.value||d.date, note=f.elements.note.value.trim();
       const back=(+d.returned||0)+(+d.forgiven||0);
       if(!name) return bad('Впишите имя.');
-      if(!(amount>0)) return bad(isNaN(amount)?NUM_ERR+'.':'Впишите сумму больше нуля.');
-      if(date>iso(now)) return bad(FUTURE_ERR);
+      if(!(amount>0)) return bad(f.elements.amount.value.trim()&&isNaN(amount)?NUM_ERR+'.':'Впишите сумму больше нуля.');
+      /* the same cap as a new debt; a sum already over it (saved before the cap) may stay as it is. bad() marks only an empty or unread sum */
+      if(amount>MAX_ENTRY&&Math.abs(amount-(+d.amount||0))>=0.005){fieldErr(f.elements.amount,err);return bad(BIG_ERR())}
+      if(date>iso(now)&&date!==d.date) return bad(FUTURE_ERR);
       if(amount<back-0.005) return bad(`Уже ${d.mine?'отдано':'вернули'} ${money(back)} — сумма не может быть меньше.`);
       const patch={name,amount,date,note,closedAt:amount-back>0.005?0:(d.closedAt||Date.now())};
       const pre=d.mine?'Взял в долг: ':'Дал в долг: ', rec=loanRec(d);
@@ -3597,17 +3751,19 @@ $('oAcc').innerHTML=[...ACCS.map(([v,n])=>`<option value="${v}" ${v==='tbank'?'s
 $('oweForm').onsubmit=async e=>{
   e.preventDefault();
   const err=$('oweErr'), name=$('oName').value.trim(), amount=parseNum($('oAmount').value);
-  if(!name){err.textContent='Впишите, у кого взяли.';err.hidden=false;$('oName').focus({preventScroll:true});return}
-  if(!(amount>0)){err.textContent=isNaN(amount)?NUM_ERR+'.':'Впишите сумму больше нуля.';err.hidden=false;$('oAmount').focus({preventScroll:true});return}
+  if(!name){err.textContent='Впишите, у кого взяли.';err.hidden=false;fieldErr($('oName'),err);$('oName').focus({preventScroll:true});return}
+  if(!(amount>0)){err.textContent=$('oAmount').value.trim()&&isNaN(amount)?NUM_ERR+'.':'Впишите сумму больше нуля.';err.hidden=false;fieldErr($('oAmount'),err);$('oAmount').focus({preventScroll:true});return}
+  if(amount>MAX_ENTRY){err.textContent=BIG_ERR();err.hidden=false;fieldErr($('oAmount'),err);$('oAmount').focus({preventScroll:true});return}
   if($('oDate').value>iso(now)){err.textContent=FUTURE_ERR;err.hidden=false;$('oDate').focus({preventScroll:true});return}
   err.hidden=true;
   try{
     const amt=Math.round(amount*100)/100, date=$('oDate').value||iso(now), acc=$('oAcc').value;
     const rec={type:'debt',dir:'in',amount:amt,acc,date,label:'Взял в долг: '+name,created:Date.now()};
     /* the debt and its record — one write: a failed save leaves neither, so a second try doesn't make two debts */
-    await store.batch(o=>{const did=o.addDebt({name,amount:amt,returned:0,date,note:$('oNote').value.trim(),mine:true,created:rec.created});if(acc)o.add({...rec,debt:did})});
+    /* «Отменить» in the message: the debt and its record go in one write, as with a partner's debt */
+    let did,rid;await store.batch(o=>{did=o.addDebt({name,amount:amt,returned:0,date,note:$('oNote').value.trim(),mine:true,created:rec.created});if(acc)rid=o.add({...rec,debt:did})});
     /* the next debt starts from today and the usual account again */
-    $('oName').value='';$('oAmount').value='';$('oNote').value='';$('oDate').value=iso(now);$('oAcc').value='tbank';closeOweAddModal();toast(`Взято в долг: ${name} — ${money(amt)}`+(acc?' '+toAcc(acc)+heldNote(rec):''));
+    $('oName').value='';$('oAmount').value='';$('oNote').value='';$('oDate').value=iso(now);$('oAcc').value='tbank';closeOweAddModal();toast(`Взято в долг: ${name} — ${money(amt)}`+(acc?' '+toAcc(acc)+heldNote(rec):''),()=>store.batch(o=>o.removeDebt(did,rid?[rid]:[])));
   }catch(x){err.textContent=saveErr(x);err.hidden=false}
 };
 $('dDate').value=iso(now);$('dDate').max=iso(now);
@@ -3619,8 +3775,9 @@ $('dAcc').innerHTML=[...ACCS.map(([v,n])=>`<option value="${v}" ${v==='cash'?'se
 $('debtForm').onsubmit=async e=>{
   e.preventDefault();
   const err=$('debtErr'), name=$('dName').value.trim(), amount=parseNum($('dAmount').value);
-  if(!name){err.textContent='Впишите, кто взял в долг.';err.hidden=false;$('dName').focus({preventScroll:true});return}
-  if(!(amount>0)){err.textContent=isNaN(amount)?NUM_ERR+'.':'Впишите сумму больше нуля.';err.hidden=false;$('dAmount').focus({preventScroll:true});return}
+  if(!name){err.textContent='Впишите, кто взял в долг.';err.hidden=false;fieldErr($('dName'),err);$('dName').focus({preventScroll:true});return}
+  if(!(amount>0)){err.textContent=$('dAmount').value.trim()&&isNaN(amount)?NUM_ERR+'.':'Впишите сумму больше нуля.';err.hidden=false;fieldErr($('dAmount'),err);$('dAmount').focus({preventScroll:true});return}
+  if(amount>MAX_ENTRY){err.textContent=BIG_ERR();err.hidden=false;fieldErr($('dAmount'),err);$('dAmount').focus({preventScroll:true});return}
   if($('dDate').value>iso(now)){err.textContent=FUTURE_ERR;err.hidden=false;$('dDate').focus({preventScroll:true});return}
   const amt=Math.round(amount*100)/100, date=$('dDate').value||iso(now), acc=$('dAcc').value, btn=$('debtForm').querySelector('.submit');
   const rec={type:'debt',dir:'out',amount:amt,acc,date,label:'Дал в долг: '+name,created:Date.now()};
@@ -3628,12 +3785,14 @@ $('debtForm').onsubmit=async e=>{
   if(acc&&overStop($('debtForm'),overdraw(rec),m=>{err.textContent=m;err.hidden=false},btn,'записать долг')) return;
   err.hidden=true;
   try{
-    await store.batch(o=>{const did=o.addDebt({name,amount:amt,returned:0,date,note:$('dNote').value.trim(),created:rec.created});if(acc)o.add({...rec,debt:did})});
+    let did,rid;await store.batch(o=>{did=o.addDebt({name,amount:amt,returned:0,date,note:$('dNote').value.trim(),created:rec.created});if(acc)rid=o.add({...rec,debt:did})});
     overOff($('debtForm'),btn);
-    $('dName').value='';$('dAmount').value='';$('dNote').value='';$('dDate').value=iso(now);$('dAcc').value='cash';closeDebtAddModal();toast(`Дано в долг: ${name} — ${money(amt)}`+(acc?' '+fromAcc(acc)+heldNote(rec):''));
+    $('dName').value='';$('dAmount').value='';$('dNote').value='';$('dDate').value=iso(now);$('dAcc').value='cash';closeDebtAddModal();toast(`Дано в долг: ${name} — ${money(amt)}`+(acc?' '+fromAcc(acc)+heldNote(rec):''),()=>store.batch(o=>o.removeDebt(did,rid?[rid]:[])));
   }catch(x){err.textContent=saveErr(x);err.hidden=false}
 };
 overWatch($('debtForm'),$('debtForm').querySelector('.submit'),$('debtErr'));futWatch($('debtForm'),$('dDate'),$('debtErr'));futWatch($('oweForm'),$('oDate'),$('oweErr'));
+/* typing a name or a sum takes the old message away (a later date still in the field says its own again — futWatch) */
+['oName','oAmount'].forEach(k=>$(k).addEventListener('input',()=>$('oweErr').hidden=true));['dName','dAmount'].forEach(k=>$(k).addEventListener('input',()=>$('debtErr').hidden=true));
 
 /* ---------- entry form ---------- */
 /* «300 маршрутка», «22 663,50 зп», «300р», «10000» → {amount, word}. The sum is strict: digits (thousands may be split by spaces),
@@ -3682,7 +3841,8 @@ function renderChips(){
   $('hint').hidden=s!=='trip'||t!=='in';
   $('hint').textContent=t==='in'?`Командировочные считаются отдельно и не входят в личные доходы.`:'';
 }
-$('tOut').onclick=()=>{state.type='out';renderChips()};
+/* back from «Доход»: the expense starts where the switch stands by default (scopeFollow) — «Личное» as before, unless a trip is marked as begun */
+$('tOut').onclick=()=>{if(state.type==='in')state.scope=state.scopeDef||'own';state.type='out';renderChips()};
 $('tIn').onclick=()=>{state.type='in';state.scope='own';renderChips()};
 $('sOwn').onclick=()=>{state.scope='own';renderChips()};
 $('sTrip').onclick=()=>{state.scope='trip';renderChips()};
@@ -3722,7 +3882,7 @@ function refreshToday(){
      the zakat settings: a start date kept that way gets its nisab, hint and question about past years again (upd — nothing is saved),
      the outer keepTyped puts back the answer picked in #zPastBox, which upd builds anew */
   const q0=$('zPastBox')?.dataset.h;
-  keepTyped(()=>{keepTyped(render);$('zStart')?.dispatchEvent(new Event('input'))});
+  keepTyped(()=>{keepTyped(render);$('zStart')?.dispatchEvent(new Event('input'));catFollow()});
   /* the new day changed the question about past years (one more lunar year ended): the answer to the old one is not carried over */
   const pb=$('zPastBox');if(pb&&pb.dataset.h!==q0)pb.querySelectorAll('input:checked').forEach(x=>x.checked=false);
 }
@@ -3745,15 +3905,19 @@ const refind=o=>{if(!o||o.isConnected)return o;if(o.id)return $(o.id);const a=[.
 function dlgSync(){
   const open=dlgOpen(), keys=open.map(d=>d.k), gone=dlgStack.filter(d=>!keys.includes(d.k)), ae=document.activeElement;
   dlgStack=dlgStack.filter(d=>keys.includes(d.k));
+  /* a window gone (saved, closed): what lay under it comes up under the finger — the second tap of the same double tap is let go of, as when one opens */
+  if(gone.length)fresh();
   for(const d of open) if(!dlgStack.some(x=>x.k===d.k)){
     /* what opened it: that of the window it replaces (the account window → the check of its sum), else the focused control,
        else the one just tapped (Safari doesn't focus a tapped button) */
-    const o=gone.find(g=>g.opener)?.opener||(ae&&ae!==document.body&&!d.el.contains(ae)?ae:lastTap&&performance.now()-lastTap.t<1500&&!d.el.contains(lastTap.el)?lastTap.el:null);
-    dlgStack.push({k:d.k,opener:o});fresh()}
+    const g=gone.find(x=>x.opener), o=g?.opener||(ae&&ae!==document.body&&!d.el.contains(ae)?ae:lastTap&&performance.now()-lastTap.t<1500&&!d.el.contains(lastTap.el)?lastTap.el:null);
+    /* it takes the place of a window that comes back when it goes (a person's window → «Изменить долг»): the control pressed there (at) gets the focus then */
+    dlgStack.push({k:d.k,opener:o,...(g&&g.atK!==d.k&&lastTap&&performance.now()-lastTap.t<1500&&!lastTap.el.isConnected?{at:lastTap.el,atK:g.k}:{})});fresh()}
   dlgInert.forEach(x=>x.inert=false);dlgInert=[];
-  const top=open[open.length-1], back=gone.length?refind(gone[gone.length-1].opener):null, seen=o=>o&&o.getClientRects().length;
+  const top=open[open.length-1], gl=gone[gone.length-1], seen=o=>o&&o.getClientRects().length, ba=top&&gl&&top.k===gl.atK?refind(gl.at):null, back=seen(ba)&&top.el.contains(ba)?ba:gl?refind(gl.opener):null;
   if(top){
-    for(let el=top.el;el.parentElement&&el!==document.body;el=el.parentElement) for(const x of el.parentElement.children) if(x!==el&&x.id!=='toast'&&!x.inert&&x.tagName!=='SCRIPT'){x.inert=true;dlgInert.push(x)}
+    /* #toast and #say (the screen reader's voice) stay live: a question asked in a window («Удалить?», a copy to load) is heard */
+    for(let el=top.el;el.parentElement&&el!==document.body;el=el.parentElement) for(const x of el.parentElement.children) if(x!==el&&x.id!=='toast'&&x.id!=='say'&&!x.inert&&x.tagName!=='SCRIPT'){x.inert=true;dlgInert.push(x)}
     if(!top.el.contains(document.activeElement)) (seen(back)&&top.el.contains(back)?back:top.k==='sheet'?$('sheetTitle'):top.k==='zakat'?$('zakatSheetT'):top.el.querySelector('[tabindex="-1"]'))?.focus({preventScroll:true});
   }else if(seen(back)) back.focus({preventScroll:true});
 }
@@ -3840,6 +4004,9 @@ function accPicker(go,label,extra=''){
 function bindAccPicker(go,label,onGo,outAmt,ready,check){
   const body=$('sheetBody'), sel=body.querySelector('.accsel'), btn=$(go), warn=body.querySelector('.accwarn');let acc=null, armed=null;
   const refresh=()=>{armed=null;warn.hidden=true;btn.disabled=!acc||(ready?!ready():false);if(acc)btn.textContent=label(acc)};
+  /* another open copy of the app saved (keepOuter): the tiles show the balances as they are now; a «будет −…» said on the old ones goes —
+     the next tap checks again. Any other message there («Не сохранилось…») stays */
+  btn._tiles=()=>{body.querySelectorAll('[data-acc] small').forEach(s=>{const v=walletValue(s.parentElement.dataset.acc);s.textContent=v===null?'':moneyR(v).replace(/\u00a0(?=\d)/g,' ');s.classList.toggle('neg',v<0)});if(armed)refresh();fitTiles()};
   body.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{acc=b.dataset.acc;
     body.querySelectorAll('[data-acc]').forEach(x=>x.setAttribute('aria-pressed',x===b));
     sel.innerHTML=`<span class="am big" aria-hidden="true">${ACC_MARK[acc]}</span><b>${ACC_NAME[acc]}</b>`;
@@ -3861,7 +4028,8 @@ function stepAcc(){
   const p=state.pend;
   /* ‹ always: a wrong guess («победа» is not food) is changed right here */
   sheetFrame(p.type==='in'?'Куда пришли?':'Откуда?',()=>CAT[p.cat].custom?stepLabel():stepCat());
-  $('sheetSub').textContent+=' · '+(p.label||CAT[p.cat].name);
+  /* the name typed for «Другое» only while «Другое» is picked (‹ back to the tiles keeps it for its field) */
+  $('sheetSub').textContent+=' · '+(CAT[p.cat].custom&&p.label||CAT[p.cat].name);
   const sign=p.type==='in'?'+':'−';
   /* comment right here, before «Записать»: whatever was typed after the amount or under «+ комментарий» is already in it */
   if(!p.noteTyped) p.sheetNote=entryNote(p);
@@ -3935,6 +4103,8 @@ async function saveEntry(acc,opt={}){
     /* the next record starts from today again; the summary stays on this month — the toast says which day it went to */
     if(!opt.keepForm){$('amount').value='';$('note').value='';$('note').hidden=true;$('noteBtn').hidden=false;
       $('date').value=iso(now);$('date').hidden=true;dateTouched=false;dateLabel();$('formErr').hidden=true}
+    /* a trip marked as begun: the next expense starts on «Командировка» again — «Личное» was for that one record */
+    if(!opt.keepForm&&state.scopeDef==='trip'&&state.type==='out')state.scope='trip';
     renderChips();render();
     const dn=p.date===iso(now)?'':relDay(p.date)==='вчера'?' · вчера':' · за '+relDay(p.date), away=p.date.slice(0,7)!==iso(now).slice(0,7);
     /* zakat dated before the app started counting it goes to no year */
@@ -3950,7 +4120,7 @@ async function saveEntry(acc,opt={}){
 }
 $('form').onsubmit=e=>{
   e.preventDefault();
-  const err=$('formErr'), bad=t=>{err.textContent=t;err.hidden=false;return false};
+  const err=$('formErr'), bad=t=>{err.textContent=t;err.hidden=false;fieldErr(t===FUTURE_ERR?$('date'):$('amount'),err);return false};
   const raw=$('amount').value.trim(), {amount,word}=parseEntry(raw);
   if(!(amount>0)){bad(raw&&isNaN(amount)?NUM_ERR+'.':'Введите сумму больше нуля.');$('amount').focus({preventScroll:true});return}
   if(amount>MAX_ENTRY){bad(BIG_ERR());$('amount').focus({preventScroll:true});return}
@@ -3969,11 +4139,13 @@ $('form').onsubmit=e=>{
 };
 /* ‹ › on Записи and Итоги: one month back or on (never past this month) */
 function prevMonth(){state.m--;if(state.m<0){state.m=11;state.y--}render()}
-function nextMonth(){if(isCurrentMonth())return;state.m++;if(state.m>11){state.m=0;state.y++}render()}
+/* back on this month «›» turns off under the keyboard's focus: it goes to «‹» of the same bar, not to the page's start */
+function nextMonth(){if(isCurrentMonth())return;state.m++;if(state.m>11){state.m=0;state.y++}const b=document.activeElement;render();
+  if(b&&b.disabled&&/^[hs]Next$/.test(b.id))$(b.id[0]+'Prev').focus({preventScroll:true})}
 /* a tab opens at its top (the only redraw that doesn't keep the scroll) */
 /* the windows of the tab left behind close with it (a toast's «Показать» can switch tabs under one): an unseen window would stay on top and keep everything else inert */
-function setTab(t){if(t==='ledger'){state.y=now.getFullYear();state.m=now.getMonth()}state.tab=t;state.editing=null;toTop=true;
-  $('debtAddModal').hidden=true;$('oweAddModal').hidden=true;if(!$('bkModal').hidden){$('bkModal').hidden=true;wipeReset()}
+function setTab(t){if(!$('sheet').hidden)closeSheet();if(!$('zakatSheet').hidden)closeZakat();if(t==='ledger'){state.y=now.getFullYear();state.m=now.getMonth()}state.tab=t;state.editing=null;toTop=true;
+  $('debtAddModal').hidden=true;$('oweAddModal').hidden=true;if(!$('bkModal').hidden){$('bkModal').hidden=true;wipeReset();restoreReset()}
   /* the transfer and the check of a sum are windows of «Деньги» (oPay opens the transfer and then goes there) */
   if(t!=='money'){state.xferOpen=false;state.recon=null}
   render();$('scroller').scrollTo(0,0);try{history.replaceState(null,'',t==='ledger'?'#':'#'+t)}catch(e){}}
@@ -3984,13 +4156,18 @@ $('tabMoney').onclick=()=>setTab('money');
 $('tabDebts').onclick=()=>setTab('debts');
 $('tabStats').onclick=()=>setTab('stats');
 $('tabHistory').onclick=()=>setTab('history');
-$('toHistory').onclick=()=>setTab('history');
+/* «Все записи →»: all of them — no account or trip filter left from before (as «Показать» does) */
+$('toHistory').onclick=()=>{state.accFilter=null;state.scopeFilter='';setTab('history')};
 /* the tab bar from the keyboard: ← → Home End go along it (as it is drawn) and open that tab */
 document.querySelector('.tabs').addEventListener('keydown',e=>{const b=[...document.querySelectorAll('.tabs [role="tab"]')], i=b.indexOf(document.activeElement), j={ArrowLeft:i-1,ArrowRight:i+1,Home:0,End:b.length-1}[e.key];
   if(i<0||j===undefined)return;e.preventDefault();const n=b[(j+b.length)%b.length];n.click();n.focus()});
 $('hPrev').onclick=$('sPrev').onclick=prevMonth;
 $('hNext').onclick=$('sNext').onclick=nextMonth;
 if(['#debts','#money','#history','#stats'].includes(location.hash)) state.tab=location.hash.slice(1);
+/* a hash typed by hand, a bookmark or the browser's «Назад» opens its tab (setTab's replaceState fires no hashchange — no loop).
+   The windows a tap on the tab bar never leaves open (all behind them is inert) close too: «Изменить запись», a person's window on «Долги» */
+addEventListener('hashchange',()=>{const t=location.hash.slice(1), n=['debts','money','history','stats'].includes(t)?t:'ledger';
+  if(n!==state.tab){state.editItem=null;state.actItem=null;state.openDebt=null;state.openDebtItem=null;state.openOwe=null;setTab(n)}});
 
 /* ---------- backup, restore, export ---------- */
 /* iPhone / iPad and the home-screen app: a file goes through the share sheet («Сохранить в Файлы») — a plain download may do nothing there */
@@ -4010,7 +4187,7 @@ function renderDataBox(){
   $('exportBtn').textContent='CSV за '+monthLbl().split(' ')[0];$('exportBtn').setAttribute('aria-label','Скачать CSV за '+monthLbl());
   if(!state.ready||!store) return '';
   const lb=+state.settings.lastBackup||0;
-  $('brokenDlBtn').hidden=!store.broken().length;
+  $('brokenDlBtn').hidden=!store.broken().length&&store.status!=='broken';
   /* three lines: where the records are, what to do once a week, when the last copy was */
   $('bkLast').textContent=lb?' · '+dShort.format(new Date(lb)).replace('.',''):' · копии нет';$('bkLast').className=!lb||Date.now()-lb>7*864e5?'old':'';
   $('storeNote').innerHTML=`<span>Записи хранятся только на этом телефоне.</span><span>Раз в неделю скачивайте копию: ${BK_SAFE} — так она уцелеет, даже если потерять телефон.</span><span>${lb?'Последняя копия: '+esc(dayText(iso(new Date(lb)))):'Копию вы ещё не скачивали'}</span>`;
@@ -4018,6 +4195,8 @@ function renderDataBox(){
   return state.items.length>=10&&!(Date.now()-lb<7*864e5)?`<div class="alert"><span>${lb?'Резервной копии не было больше недели':'Резервной копии ещё нет'} — сохраните её в iCloud Drive</span><button class="primary" id="bkGo">Скачать</button></div>`:'';
 }
 $('backupBtn').onclick=async()=>{
+  /* the saved data didn't read (or its text waits aside) and nothing else is here: an empty file would pass for a real copy (and count as one) — the damaged text is offered instead */
+  const s=state.settings;if((store?.status==='broken'||store?.broken?.().length)&&!(state.items.length||state.debts.length||Object.keys(s.wallets||{}).length||s.zakat||s.tripStart||s.brokerOwed)){toast('Сохранённые записи повреждены — копия была бы пустой. Скачайте их текст, чтобы ничего не потерять.',null,8000,['Скачать текст',brokenDl]);return}
   /* records keep their ids: the «закят с долга» a return brought stays linked to it after a restore (normBackup gives new ones) */
   const data=JSON.stringify({app:'moi-rashody',version:1,exported:new Date().toISOString(),items:state.items,debts:state.debts,settings:state.settings},null,1);
   const r=await saveFile(`moi-rashody-backup-${iso(new Date())}.json`,data,'application/json');
@@ -4033,13 +4212,14 @@ const wipeReset=()=>{const b=$('wipeBtn');clearTimeout(wipeT);delete b.dataset.a
 /* it comes up under the finger with the first tap: for 600 ms a tap on it is the second tap of the same double tap — no download */
 $('wipeBk').onclick=()=>{if(Date.now()-$('wipeBtn').dataset.armed<600)return;wipeReset();$('backupBtn').onclick()};
 $('brokenDlBtn').onclick=brokenDl;
-const closeBk=()=>{$('bkModal').hidden=true;wipeReset();dlgSync()};
+/* a closed window drops both questions: «Очистить всё» and a picked copy waiting for its second tap */
+const closeBk=()=>{$('bkModal').hidden=true;wipeReset();restoreReset();dlgSync()};
 $('bkOpen').onclick=()=>{$('bkModal').hidden=false;dlgSync()};
 $('bkModal').querySelectorAll('[data-bkclose]').forEach(b=>b.onclick=closeBk);
 $('wipeBtn').onclick=async()=>{
   const b=$('wipeBtn');
   /* the button grows and «Сначала скачать копию» comes up under the finger: the second tap of a double tap is let go of (fresh) */
-  if(!b.dataset.armed){fresh();b.dataset.armed=Date.now();b.textContent=`Точно? Удалятся все записи, долги, остатки счетов, настройки и история закята${store?.broken?.().length?', а также сохранённый текст повреждённых данных':''}. Нажмите ещё раз`;$('wipeBk').hidden=false;$('wipeBk').scrollIntoView?.({block:'nearest'});wipeT=setTimeout(wipeReset,8000);return}
+  if(!b.dataset.armed){fresh();b.dataset.armed=Date.now();b.textContent=`Точно? Удалятся все записи, долги, остатки счетов, настройки и история закята${store?.broken?.().length||store?.status==='broken'?', а также сохранённый текст повреждённых данных':''}. Нажмите ещё раз`;$('wipeBk').hidden=false;$('wipeBk').scrollIntoView?.({block:'nearest'});wipeT=setTimeout(wipeReset,8000);return}
   /* a quick double tap is not a confirmation */
   if(Date.now()-b.dataset.armed<600) return;
   wipeReset();b.disabled=true;b.textContent='Очищаю…';
@@ -4056,6 +4236,10 @@ const NOT_BACKUP='Это не резервная копия «Моих расх�
 const isoOk=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&iso(isoToDate(s))===s;
 function normBackup(d){
   if(!d||typeof d!=='object'||d.app!=='moi-rashody'||!Array.isArray(d.items)) throw NOT_BACKUP;
+  /* made by a newer version (its format may differ, e.g. kopecks): this one would read it wrong */
+  if(+d.version>1) throw 'она сделана более новой версией приложения — обновите приложение и загрузите её снова';
+  /* nested deeper than the app ever saves (≈8 levels): kept, it would stop every later save (JSON.stringify runs out of stack) */
+  const deep=(v,n)=>{if(n>40)throw 'в файле слишком глубоко вложенные данные';if(v&&typeof v==='object')for(const k in v)deep(v[k],n+1)};deep(d,0);
   const show=v=>{const s=typeof v==='string'?v:JSON.stringify(v)??String(v);return ` «${s.length>24?s.slice(0,24)+'…':s}»`};
   const no=(w,what,v)=>{throw `у ${w} ${what}${v===undefined?'':show(v)}`};
   const obj=(v,w)=>v&&typeof v==='object'&&!Array.isArray(v)?v:no(w,'неверные данные',v);
@@ -4068,18 +4252,22 @@ function normBackup(d){
   const tm=(o,ks,w)=>ks.forEach(k=>set(o,k,v=>N(v,w,'неверное время')));
   const day=(v,w)=>isoOk(v)?v:no(w,'неверная дата',v);
   const amt=(v,w)=>r2(N(v,w,'неверная сумма'));
+  /* a record's day, as in every form: not later than today (a day of slack — a phone in another time zone); a later one isn't seen in «Записи» but moves the account */
+  const soon=iso(new Date(Date.now()+864e5));
   const items=d.items.map((x,n)=>{const w=`записи № ${n+1}`, i={...obj(x,w)};
-    i.date=day(i.date,w);i.amount=amt(i.amount,w);T(i,['type','cat','acc','from','to','label','note','dir','scope','debt'],w);tm(i,['created'],w);delete i.id;return i});
+    i.date=day(i.date,w);if(i.date>soon)no(w,'дата в будущем',i.date);i.amount=amt(i.amount,w);T(i,['type','cat','acc','from','to','label','note','dir','scope','debt'],w);tm(i,['created'],w);delete i.id;return i});
   const debts=(d.debts==null?[]:list(d.debts,'списка долгов')).map((x,n)=>{const w=`долга № ${n+1}`, o={...obj(x,w)};
     if(typeof o.name!=='string'||!o.name.trim()) no(w,'нет имени');
     o.amount=amt(o.amount,w);set(o,'returned',v=>amt(v,w));set(o,'forgiven',v=>amt(v,w));
     if(o.date==='') delete o.date;set(o,'date',v=>day(v,w));T(o,['note','id'],w);tm(o,['created','closedAt'],w);return o});
   const sw='настроек', st={...(d.settings==null?{}:obj(d.settings,sw))};
   set(st,'budget',v=>N(v,sw,'неверный лимит'));set(st,'brokerPct',v=>N(v,sw,'неверный процент на брокер'));tm(st,['tripEnd','lastBackup'],sw);
+  /* the start mark: a moment (> 0) or none — as the app keeps it (localStore) */
+  set(st,'tripBegun',v=>{const n=N(v,sw,'неверное время');return n>0&&n<=8.64e15?n:no(sw,'неверное время',v)});
   /* a typed balance: its sum (may be below zero), when it was typed, the earlier ones */
   const anc=(v,w)=>{const a={...obj(v,w)};set(a,'amount',s=>r2(N(s,w,'неверная сумма',-Infinity)));tm(a,['at','checked','since'],w);
     set(a,'hist',h=>list(h,w).map(x=>{const y={...obj(x,w)};y.amount=r2(N(y.amount,w,'неверная сумма',-Infinity));tm(y,['at','since'],w);return y}));return a};
-  set(st,'wallets',v=>Object.fromEntries(Object.entries(obj(v,'счетов')).filter(([,a])=>a!=null).map(([k,a])=>[k,anc(a,`счёта «${WNAME[k]||k}»`)])));
+  set(st,'wallets',v=>Object.fromEntries(Object.entries(obj(v,'счетов')).filter(([,a])=>a!=null).map(([k,a])=>[k,anc(a,`счёта «${wName(k)||k}»`)])));
   set(st,'tripStart',v=>anc(v,'остатка командировочных'));set(st,'brokerOwed',v=>anc(v,'долга себе на брокер'));
   set(st,'brokerPctHist',v=>list(v,sw).map(x=>{const h={...obj(x,sw)};h.pct=N(h.pct,sw,'неверный процент на брокер');tm(h,['from'],sw);return h}));
   set(st,'zakat',v=>{const w='настроек закята', z={...obj(v,w)};
@@ -4111,14 +4299,14 @@ function normBackup(d){
 }
 /* the file is read first; if there is anything to lose, the button says what is in it and a second tap replaces */
 let restorePend=null, restoreT;
-const restoreReset=()=>{const b=$('restoreBtn');clearTimeout(restoreT);restorePend=null;b.textContent='Загрузить копию';b.style.color=''};
+const restoreReset=()=>{const b=$('restoreBtn');clearTimeout(restoreT);restorePend=null;b.textContent='Загрузить копию';b.style.color='';b.setAttribute('aria-label','Загрузить резервную копию')};
 const nRec=d=>`${d.items.length} ${plural(d.items.length,'запись','записи','записей')}, ${d.debts.length} ${plural(d.debts.length,'долг','долга','долгов')}`;
 /* the store redraws the screen itself; a drawing error after a good save is not a failed restore */
 async function applyRestore(d){
   state.editing=null;state.recon=null;state.xferOpen=false;
   /* the last backup is the newest one known: this phone's, the file's own, or the file itself (it is a backup made that day) */
   const lb=Math.min(Date.now(),Math.max(+state.settings.lastBackup||0,+d.settings.lastBackup||0,d.exAt||0));
-  try{await store.replaceAll(lb?{...d,settings:{...d.settings,lastBackup:lb}}:d)}catch(x){toast(x?.big?'Копия не поместилась в память браузера: она слишком большая. Текущие данные не изменились.':saveErr(x));return}
+  try{await store.replaceAll(lb?{...d,settings:{...d.settings,lastBackup:lb}}:d)}catch(x){toast(x?.big?'Копия не поместилась в память браузера: она слишком большая. Текущие данные не изменились.':x?.code==='quota_exceeded'&&store.status==='broken'?'Копия не загружена: повреждённые данные некуда отложить, и они были бы стёрты. Сначала скачайте их текст, затем загрузите копию снова.':saveErr(x));return}
   /* a copy is loaded: the warning about damaged data has done its job (the damaged text itself stays, see «Данные и резервная копия») */
   hideBroken();
   toast('Загружено: '+nRec(d));
@@ -4139,8 +4327,12 @@ $('restoreFile').onchange=async e=>{
   const st=state.settings;
   /* nothing to lose (a fresh start, or saved data that didn't read): no question */
   if(!(state.items.length||state.debts.length||Object.keys(st.wallets||{}).length||st.zakat||st.tripStart||st.brokerOwed)){applyRestore(d);return}
+  /* picked from the banner: the question is asked in the window on «Деньги» — on a closed one it is neither seen nor answered */
+  if($('bkModal').hidden){if(state.tab!=='money')setTab('money');$('bkModal').hidden=false;dlgSync()}
   const b=$('restoreBtn');restorePend={d,t:Date.now()};b.style.color='var(--bad)';
   b.textContent=`Копия${d.when?' от '+d.when:''}: ${nRec(d)}. Текущие данные заменятся — нажмите ещё раз`;
+  /* the screen reader hears the question: the button's fixed label (aria-label) would stand for it instead of this text */
+  b.removeAttribute('aria-label');say(b.textContent);
   b.scrollIntoView?.({block:'center'});restoreT=setTimeout(restoreReset,15000);
 };
 $('exportBtn').onclick=async()=>{
@@ -4148,14 +4340,22 @@ $('exportBtn').onclick=async()=>{
   if(!rows.length){toast(`За ${ml} записей нет`);return}
   /* a cell that starts like a formula (= + - @) stays plain text in Excel / Numbers */
   const q=s=>{let v=String(s??'');if(/^[=+\-@\t\r]/.test(v))v="'"+v;return `"${v.replace(/"/g,'""')}"`};
-  const lim=i=>typeOf(i)!=='out'?'':isTrip(i)||NOT_IN_LIMIT.includes(catOf(i.cat).id)?'нет':'да';
-  const csv='\ufeffДата;Тип;Раздел;Категория;Счёт;Сумма;В лимит;Комментарий\n'+rows.map(i=>{const t=typeOf(i);return [i.date,t==='in'?'Доход':t==='tr'?'Перевод':t==='debt'?({back:'Возврат долга',in:'Взял в долг',pay:'Отдал долг'}[i.dir]||'Дал в долг'):'Расход',t==='tr'?'':isTrip(i)?'Командировка':'Личное',q(t==='tr'?'':nameOf(i)),q(t==='tr'?`${WNAME[i.from]} → ${WNAME[i.to]}`:WNAME[i.acc]||''),String(i.amount).replace('.',','),lim(i),q(i.note)].join(';')}).join('\n');
+  /* an account or a debt's way the app doesn't know (a hand-made copy): «?» or empty, never «undefined» or a part of every object */
+  const wn=wName, lim=i=>typeOf(i)!=='out'?'':isTrip(i)||NOT_IN_LIMIT.includes(catOf(i.cat).id)?'нет':'да';
+  const csv='\ufeffДата;Тип;Раздел;Категория;Счёт;Сумма;В лимит;Комментарий\n'+rows.map(i=>{const t=typeOf(i);return [i.date,t==='in'?'Доход':t==='tr'?'Перевод':t==='debt'?(['back','in','pay'].includes(i.dir)?{back:'Возврат долга',in:'Взял в долг',pay:'Отдал долг'}[i.dir]:'Дал в долг'):'Расход',t==='tr'?'':isTrip(i)?'Командировка':'Личное',q(t==='tr'?'':nameOf(i)),q(t==='tr'?`${wn(i.from)||'?'} → ${wn(i.to)||'?'}`:wn(i.acc)),String(i.amount).replace('.',','),lim(i),q(i.note)].join(';')}).join('\n');
   const r=await saveFile(`moi-rashody-${monthKey()}.csv`,csv,'text/csv');
   if(r) toast(`CSV за ${ml} сохранён`);else if(r===false) toast(FILE_ERR);
 };
 renderChips();
 render();
+/* a reload onto a new version (the worker, below) comes back to the month, filters, «Итоги» view and place he was at — this tab only, read once */
+const VIEW_K='moi-rashody-view', viewKeep=()=>{try{sessionStorage.setItem(VIEW_K,JSON.stringify({tab:state.tab,y:state.y,m:state.m,sf:state.scopeFilter,af:state.accFilter,sv:state.statView,a:state.cmpA,b:state.cmpB,top:$('scroller').scrollTop}))}catch(e){}};
+let view0=null;try{view0=JSON.parse(sessionStorage.getItem(VIEW_K));sessionStorage.removeItem(VIEW_K)}catch(e){}
+if(view0?.tab!==state.tab) view0=null;
+else if(state.tab!=='ledger'&&Number.isInteger(view0.y)&&Number.isInteger(view0.m)&&view0.m>=0&&view0.m<12&&view0.y*12+view0.m<=now.getFullYear()*12+now.getMonth())
+  Object.assign(state,{y:view0.y,m:view0.m,scopeFilter:view0.sf||'',accFilter:view0.af||null,statView:view0.sv,cmpA:view0.a,cmpB:view0.b});
 initStore();
+if(view0?.top>0) requestAnimationFrame(()=>{$('scroller').scrollTop=view0.top});
 </script>
 
 <script>
@@ -4170,9 +4370,11 @@ if('serviceWorker' in navigator){
     :!/^(file|checkbox|radio|hidden)$/.test(x.type)&&x.value.trim()&&x.value!==x.defaultValue;
   const busy=()=>!$('sheet').hidden||!$('zakatSheet').hidden||!!document.querySelector('.wmodal:not([hidden])')||!!state.editing||!!state.editItem||!!state.xferOpen
     ||[...document.querySelectorAll('input,textarea,select')].some(changed);
-  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!hadSW||reloaded)return;
-    if(!busy()){reloaded=true;location.reload();return}
-    state.newVer=true;renderSys();toast('Есть новая версия',null,8000,['Обновить',()=>location.reload()])});
+  /* the reload keeps the month, filters and place (viewKeep); a message with «Отменить» or «Показать» stays its time first — the record can still be undone */
+  const go=()=>{try{viewKeep()}catch(e){}location.reload()};
+  navigator.serviceWorker.addEventListener('controllerchange',function upd(){if(!hadSW||reloaded)return;const t=$('toast');if(!t.hidden&&t.querySelector('button')){setTimeout(upd,500);return}
+    if(!busy()){reloaded=true;go();return}
+    state.newVer=true;renderSys();toast('Есть новая версия',null,8000,['Обновить',go])});
   /* at once, not on «load»: the offline copy starts being saved right away */
   navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{});
 }

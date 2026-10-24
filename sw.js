@@ -1,5 +1,5 @@
 // Opens instantly from the saved copy, then quietly fetches the fresh version for next launch.
-const CACHE = 'moi-rashody-v133';
+const CACHE = 'moi-rashody-v134';
 // the fonts are the app's own files: saved with the page at install, so offline every one of them is at hand
 const FONTS = ['GolosText-cyrillic-q5uCsoe9Lv', 'GolosText-latin-q5uCsoe9Lv', 'IBMPlexMono-cyrillic--F63fjptAg', 'IBMPlexMono-latin--F63fjptAg', 'IBMPlexMono-cyrillic--F6qfjptAg', 'IBMPlexMono-latin--F6qfjptAg', 'Unbounded-cyrillic-Yq6W-LOTXC', 'Unbounded-latin-Yq6W-LOTXC',
   // ₽ for each face (it is in neither the Latin nor the Cyrillic file)
@@ -25,6 +25,8 @@ self.addEventListener('fetch', e => {
   if (url.origin !== location.origin) return;
   const nav = e.request.mode === 'navigate', page = PAGE.includes(url.origin + url.pathname);
   e.respondWith(caches.open(CACHE).then(async c => {
+    // the caches cleared by another app on this address: opening the page online puts back what is missing of FILES (fonts, icons, launch screens)
+    if (nav && page) e.waitUntil(c.keys().then(ks => { const have = new Set(ks.map(r => r.url)), miss = FILES.map(u => new URL(u, location).href).filter(u => !have.has(u) && !PAGE.includes(u)); return miss.length && c.addAll(miss.map(u => new Request(u, { cache: 'reload' }))); }).catch(() => {}));
     const hit = await c.match(page ? PAGE[0] : e.request, { ignoreSearch: true });
     // a font's file name carries its version: the saved copy is used as it is, the server isn't asked again
     if (hit && url.pathname.endsWith('.woff2')) return hit;
