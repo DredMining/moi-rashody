@@ -484,7 +484,7 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5"/><path d="M19 12a7 7 0 1 1-2-4.9L20 12"/></svg>
         <span class="toolbar-label">Обновить</span>
       </button>
-      <button class="tool-button" id="orientationToggle" type="button" aria-pressed="false" aria-label="Переключить в альбомную ориентацию" title="Переключить ориентацию телефона">
+      <button class="tool-button" id="orientationToggle" type="button" aria-pressed="false" title="Переключить ориентацию телефона">
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.3"/><path d="M10 5h4M11 18.5h2"/></svg>
         <span class="toolbar-label" id="orientationLabel">Портретная</span>
       </button>
@@ -574,10 +574,6 @@
           `Симулятор iPhone 17 Pro Max Silver, ${landscape ? "альбомная" : "портретная"} ориентация`
         );
         orientationToggle.setAttribute("aria-pressed", String(landscape));
-        orientationToggle.setAttribute(
-          "aria-label",
-          `Переключить в ${landscape ? "портретную" : "альбомную"} ориентацию`
-        );
         orientationLabel.textContent = landscape ? "Альбомная" : "Портретная";
         void screen.offsetWidth;
         resizeFrame();
