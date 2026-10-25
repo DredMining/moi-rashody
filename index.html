@@ -4183,6 +4183,8 @@ function stepCat(){
 function stepLabel(){
   const p=state.pend;
   sheetFrame(p.type==='in'?'Что за доход?':'На что потратили?',()=>stepCat());
+  /* a field to type in: the window stands in the middle, over the keyboard, as the limit's does (the next step goes back to the bottom) */
+  $('sheet').classList.add('centered');
   $('sheetBody').innerHTML=`<form class="inline-edit" id="lblForm" novalidate style="flex-direction:column;align-items:stretch"><input id="lblInput" maxlength="40" placeholder="${p.type==='in'?'Например, продал телефон':'Например, подарок'}" value="${esc((p.label||p.word||'').slice(0,40))}" aria-label="Название" aria-describedby="lblErr"><p class="err" role="alert" id="lblErr" hidden></p><button class="submit" type="submit">Дальше</button></form>`;
   $('lblInput').focus({preventScroll:true});
   /* an empty name is said right under the field, in the sheet */
