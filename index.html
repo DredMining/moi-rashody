@@ -921,7 +921,9 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:500
 #tripLeftLine b.none{font-family:var(--f-body);font-size:13px;color:var(--muted)}
 .sheet{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center}
 .sheet.centered{align-items:center;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
-.sheet.centered .sheet-panel{width:min(520px,100%);max-height:calc(100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px);max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px);border-bottom:1px solid var(--line);border-radius:var(--r-xl)}
+/* a window in the middle comes up where it stands (as the zakat card), not from the bottom; the safe area is the backdrop's, not its own */
+.sheet.centered .sheet-panel{width:min(520px,100%);max-height:calc(100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px);max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px);border-bottom:1px solid var(--line);border-radius:var(--r-xl);padding-bottom:20px;animation-name:zpop}
+.sheet.centered .sheet-go{bottom:-20px;margin-bottom:-20px;padding-bottom:20px}
 .sheet-bg{position:absolute;inset:0;background:rgb(0 0 0 / .55)}
 .sheet-panel{position:relative;width:min(720px,100%);max-height:85vh;overflow-y:auto;overscroll-behavior:contain;background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:var(--r-xl) var(--r-xl) 0 0;padding:12px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;animation:up .18s ease-out}
 @keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
@@ -947,7 +949,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:500
 .crow .ca.spend{color:var(--spend)}
 .crow .ca.pos{color:var(--good)}
 .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.tile{background:var(--bg);border:1px solid var(--field-line);border-radius:14px;padding:12px 6px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--ink);font-size:13px;line-height:1.2;text-align:center;min-width:0;overflow-wrap:anywhere}
+.tile{background:var(--bg);border:1px solid var(--field-line);border-radius:14px;padding:12px 6px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--ink);font-size:13px;line-height:1.2;text-align:center;min-width:0;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto}
 .tile .ic{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:color-mix(in srgb,var(--c) 22%,transparent);border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
 .tile[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
 .tile small{font-family:var(--f-num);color:var(--muted);font-size:12px;overflow-wrap:normal}
@@ -1259,15 +1261,15 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
 const CATS=[
   {id:'bus',name:'Маршрутка',g:'daily',c:'p1',kw:['маршрутка','автобус','проезд']},
   {id:'snack',name:'Сушняк',g:'daily',c:'p7',kw:['сушняк','сок','соки','кофе','тоник','вода','энергетик']},
-  {id:'lunch',name:'Питание вне дома',g:'daily',c:'p2',kw:['обед','ужин','завтрак','столовая','кафе','питание']},
-  {id:'clothing',name:'Одежда',g:'daily',c:'p5',kw:['одежда','одежду','кофта','футболка','джинсы','куртка','обувь','кроссовки']},
+  {id:'lunch',name:'Питание вне дома',g:'daily',c:'p2',kw:['обед','ужин','завтрак','столовая','кафе','питание','фастфуд','шаурма','бургер','пицца']},
   {id:'subs',name:'Связь и подписки',g:'daily',c:'p8',kw:['впн','vpn','премиум','мегафон','связь','wifi','интернет','телефон','подписка','ии','claude','клод','chatgpt','gpt','чатгпт','нейросеть','нейросети']},
   {id:'grocery',name:'Продукты',g:'daily',c:'p3',kw:['продукты','магазин','хлеб']},
-  {id:'taxi',name:'Такси',g:'daily',c:'p6',kw:['такси']},
+  {id:'clothing',name:'Одежда',g:'daily',c:'p5',kw:['одежда','одежду','кофта','футболка','джинсы','куртка','обувь','кроссовки']},
   {id:'wb',name:'Wildberries',g:'daily',c:'p4',kw:['wildberries','вайлдберриз','валдберис','вайлдбериз','вб','wb']},
+  {id:'taxi',name:'Такси',g:'daily',c:'p6',kw:['такси']},
   {id:'fuel',name:'Бензин',g:'daily',c:'p9',kw:['бензин','заправка','азс','топливо']},
-  {id:'health',name:'Здоровье и уход',g:'daily',c:'p4',kw:['анализы','лекарство','аптека','чистка','дерматолог','врач']},
-  {id:'fastfood',name:'Фастфуд',g:'daily',c:'p5',kw:['фастфуд','шаурма','бургер','пицца']},
+  {id:'health',name:'Здоровье и уход',g:'daily',c:'p7',kw:['анализы','лекарство','аптека','чистка','дерматолог','врач']},
+  {id:'leisure',name:'Развлечение',g:'daily',c:'p5',kw:['развлечение','кино','боулинг','бильярд','концерт']},
   {id:'family',name:'Семья',g:'sep',c:'p3',kw:['семья','мама','ма']},
   {id:'broker',name:'Брокер',g:'sep',c:'p1',kw:['брокер']},
   {id:'invest',name:'Копильник',g:'sep',c:'p7',kw:['инвестиции','копилка','копильник']},
@@ -1292,8 +1294,9 @@ const CATS=[
   {id:'t_allow',name:'Командировочные',g:'tripin',c:'p1',kw:['командировочные','кмнд']},
   {id:'other',name:'Другое',g:'daily',c:'p8',kw:[],custom:true}
 ];
-const LEGACY={ai:'subs',food:'grocery',cafe:'lunch',transport:'taxi',fun:'other',shop:'other',study:'other',gifts:'other',home:'other',clothes:'other'};
-const ICON={bus:'🚌',taxi:'🚕',fuel:'⛽',lunch:'🍽️',clothing:'👕',fastfood:'🍔',snack:'🥤',wb:'🛍️',grocery:'🛒',health:'💊',subs:'📱',family:'👨‍👩‍👦',broker:'📈',invest:'🪙',sadaqa:'🤲',zakat:'🌙',
+/* fastfood: the tile gave way to «Развлечение» (owner's choice, 31.10.2026) — its old records are eating out */
+const LEGACY={ai:'subs',food:'grocery',cafe:'lunch',transport:'taxi',fun:'other',shop:'other',study:'other',gifts:'other',home:'other',clothes:'other',fastfood:'lunch'};
+const ICON={bus:'🚌',taxi:'🚕',fuel:'⛽',lunch:'🍽️',clothing:'👕',leisure:'🎉',snack:'🥤',wb:'🛍️',grocery:'🛒',health:'💊',subs:'📱',family:'👨‍👩‍👦',broker:'📈',invest:'🪙',sadaqa:'🤲',zakat:'🌙',
   salary:'💼',stipend:'🎓',side:'🛠️',bonus:'🎁',dividends:'📊',interest:'💰',gift:'💝',trip_left:'🧳',trip_extra:'🧳',in_other:'➕',t_taxi:'🚕',t_grocery:'🛒',t_flat:'🏠',t_fuel:'⛽',t_other:'➕',t_allow:'✈️',other:'➕'};
 const CAT=Object.fromEntries(CATS.map(c=>[c.id,c]));
 /* a category's place in that order: by group (personal spending, «Отдельно», income, trip), as CATS lists them, «Другое» last */
@@ -2054,7 +2057,7 @@ function repLines(r){
   const p=r.partner, ds=p?(p.ids||[]).map(id=>state.debts.find(d=>d.id===id)):[];
   /* the partner's debts as they are now; one of them deleted since — as they were that day */
   const pr=p&&(ds.length&&ds.every(Boolean)?{ret:r2(ds.reduce((s,d)=>s+(+d.returned||0),0)),left:r2(ds.reduce((s,d)=>s+debtLeft(d),0))}:{ret:+p.ret||0,left:+p.left||0});
-  const cats=[...r.cats.map(([c,v])=>[CAT[c]?.name||'Другое',+v||0]),...(+r.over>0?[['Перерасход на начало',+r.over]]:[])], spent=r2(cats.reduce((s,x)=>s+x[1],0)), L=+r.left||0;
+  const cats=[...r.cats.map(([c,v])=>[catOf(c).name,+v||0]),...(+r.over>0?[['Перерасход на начало',+r.over]]:[])], spent=r2(cats.reduce((s,x)=>s+x[1],0)), L=+r.left||0;
   /* what a balance typed in the trip corrected: the result less what came in and went out (0 in a report of a trip without one);
      of it, his own money put in for an overspend then («Докинул на командировку» saved with that balance) is a line of its own */
   const f0=r2(L-((+r.allow||0)+(+r.start||0)-spent)), tu=Math.abs(f0)>=0.005?repTopUp(r):0, fx=r2(f0-tu);
@@ -4024,7 +4027,7 @@ function kwHit(k,x){
 }
 /* two category words in one entry («шаурма кофе», «продукты такси»): the categories are tried in the order they always were,
    not in the order of the tiles — moving a tile doesn't change what a typed word picks. The ones not named keep the order of CATS */
-const KW_ORDER=['bus','taxi','fuel','lunch','fastfood','snack','wb','grocery','health','subs'];
+const KW_ORDER=['bus','taxi','fuel','lunch','snack','wb','grocery','health','subs'];
 const kwRank=c=>{const k=KW_ORDER.indexOf(c.id);return k<0?KW_ORDER.length+CATS.indexOf(c):k};
 /* the category a word after the sum points to, and the rest of that text (it becomes the comment) */
 function guessHit(word,type,scope){
@@ -4153,11 +4156,14 @@ document.addEventListener('keydown',e=>{
 function closeSheet(){$('sheet').hidden=true;state.pend=null;state.catSheet=null;state.limSheet=null;state.repSheet=null;$('sheet').classList.remove('cats','centered');dlgSync()}
 $('sheet').querySelectorAll('[data-close]').forEach(b=>b.onclick=closeSheet);
 /* a message on screen («Отменить» of the record just saved) doesn't lie over the next record's tiles: when the sheet opens or closes,
-   a step makes it taller or shorter, or it has risen into place (animation up), the message is placed again above it (toastPlace) */
+   a step makes it taller or shorter, or it has come into place (its animation), the message is placed again above it (toastPlace).
+   A window in the middle comes up scaled down a little: the balances on the account tiles are fitted again once it stands at full size */
 {const sp=$('sheet').querySelector('.sheet-panel'), tp=()=>{if(!$('toast').hidden)toastPlace($('toast'))};
-  if(window.ResizeObserver) new ResizeObserver(tp).observe(sp);sp.addEventListener('animationend',tp)}
+  if(window.ResizeObserver) new ResizeObserver(tp).observe(sp);sp.addEventListener('animationend',()=>{tp();fitTiles()})}
 function sheetFrame(title,back){
-  const p=state.pend;state.catSheet=null;state.limSheet=null;state.repSheet=null;$('sheet').classList.remove('cats','centered');
+  const p=state.pend;state.catSheet=null;state.limSheet=null;state.repSheet=null;$('sheet').classList.remove('cats');
+  /* every step of a record (На что? → the name for «Другое» → Откуда?) is a window in the middle of the screen (owner's choice, 31.10.2026) */
+  $('sheet').classList.add('centered');
   $('sheetTitle').textContent=title;
   $('sheetSub').textContent=`${p.type==='in'?'+':'−'}${money(p.amount)}${p.scope==='trip'?' · командировка':''}`;
   $('sheetBack').style.visibility=back?'visible':'hidden';$('sheetBack').onclick=back||null;
@@ -4183,8 +4189,6 @@ function stepCat(){
 function stepLabel(){
   const p=state.pend;
   sheetFrame(p.type==='in'?'Что за доход?':'На что потратили?',()=>stepCat());
-  /* a field to type in: the window stands in the middle, over the keyboard, as the limit's does (the next step goes back to the bottom) */
-  $('sheet').classList.add('centered');
   $('sheetBody').innerHTML=`<form class="inline-edit" id="lblForm" novalidate style="flex-direction:column;align-items:stretch"><input id="lblInput" maxlength="40" placeholder="${p.type==='in'?'Например, продал телефон':'Например, подарок'}" value="${esc((p.label||p.word||'').slice(0,40))}" aria-label="Название" aria-describedby="lblErr"><p class="err" role="alert" id="lblErr" hidden></p><button class="submit" type="submit">Дальше</button></form>`;
   $('lblInput').focus({preventScroll:true});
   /* an empty name is said right under the field, in the sheet */
