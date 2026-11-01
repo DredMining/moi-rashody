@@ -3472,7 +3472,7 @@ function renderList(items){
   $('hTitle').textContent=$('sTitle').textContent=monthLbl();
   $('hNext').disabled=$('sNext').disabled=isCurrentMonth();
   const list=$('list'), af=state.accFilter||null, sf=state.scopeFilter||'';histItems=items;
-  $('scopeFilter').innerHTML=SF.map(([v,n])=>`<button type="button" data-sf="${v}" aria-pressed="${sf===v}">${n}</button>`).join('');
+  $('scopeFilter').innerHTML=SF.map(([v,n])=>`<button type="button" data-sf="${v}" aria-pressed="${(histTo??sf)===v}">${n}</button>`).join('');
   $('scopeFilter').querySelectorAll('[data-sf]').forEach(b=>b.onclick=()=>histGo(SF.findIndex(([v])=>v===b.dataset.sf)));
   $('accFilter').innerHTML=[['','Все счета'],...ACCS.map(([id])=>[id,ACC_SHORT[id]]),['broker','Брокер'],['piggy','Копильник']].map(([id,n])=>`<button type="button" class="chip" data-af="${id}" aria-pressed="${(af||'')===id}">${n}</button>`).join('');
   $('accFilter').querySelectorAll('[data-af]').forEach(b=>b.onclick=()=>{state.accFilter=b.dataset.af||null;render()});
@@ -3484,8 +3484,9 @@ function renderList(items){
 }
 /* Все / Личное / Командировка one after another, as the pages of Итоги (owner's choice, 01.11.2026): swiped, or a button pressed, the list
    goes off to the side and the chosen one comes in from the other. That one is drawn for the time of the move only (hist-peek: nothing in it
-   can be pressed or found), then the list is drawn anew in its place. histEnd: ends the move under way at once */
-let histEnd=null;
+   can be pressed or found), then the list is drawn anew in its place. histEnd: ends the move under way at once; histTo: the filter it goes to —
+   its button is pressed from the start of the move, as on Итоги (a redraw on the way keeps it so) */
+let histEnd=null, histTo=null;
 const histAt=()=>Math.max(0,SF.findIndex(([v])=>v===(state.scopeFilter||'')));
 /* the list of filter i, beside the list on its side; none past the first or the last */
 function histPeek(i){
@@ -3513,10 +3514,11 @@ function histGo(i){
   const tr=$('listTrack'), vp=$('listViewport'), dir=Math.sign(i-cur);
   if(!state.ready){state.scopeFilter=SF[i][0];fresh();render();return}
   histPeek(i);vp.classList.add('is-moving');tr.classList.remove('is-dragging');void tr.offsetWidth;
+  histTo=SF[i][0];$('scopeFilter').querySelectorAll('[data-sf]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sf===histTo)));
   histWait(()=>{
     /* a filter button focused from the keyboard: the focus stays on the one pressed now (the buttons are drawn anew) */
     const fo=$('scopeFilter').contains(document.activeElement);
-    tr.classList.add('is-dragging');state.scopeFilter=SF[i][0];fresh();render();
+    tr.classList.add('is-dragging');histTo=null;state.scopeFilter=SF[i][0];fresh();render();
     tr.querySelector('.hist-peek')?.remove();tr.style.transform='';vp.classList.remove('is-moving');void tr.offsetWidth;tr.classList.remove('is-dragging');
     if(fo) $('scopeFilter').querySelector('[aria-pressed="true"]')?.focus({preventScroll:true});
   });
