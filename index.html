@@ -198,10 +198,10 @@ button{cursor:pointer}
 /* «Куда ушли деньги» and the incomes: each group (Повседневные, Отдельно, Командировка, Доходы по источникам) is one card under a small
    grey label (h3), 12px from the next group; its categories are rows split by thin lines.
    A row is a 36px button (--h-m), its line included: the name and the sum (12px) on one line, the bar under them. The rows touch,
-   so the whole card is rows a finger can hit */
-#incomeBreakdown{gap:6px}
+   so the whole card is rows a finger can hit. The trip card's «Командировка» stands over it the same way (owner's choice, 01.11.2026) */
+#incomeBreakdown,#tripCard{gap:6px}
 .bdwrap .bd{gap:6px}
-#breakdown .bd h3,#incomeBreakdown>h2,[data-sv="broker"] .bd h3{margin:0 0 0 2px;font-size:var(--fs-xs);line-height:1.2}
+#breakdown .bd h3,#incomeBreakdown>h2,[data-sv="broker"] .bd h3,#tripCard>h2{margin:0 0 0 2px;font-size:var(--fs-xs);line-height:1.2}
 .bdwrap .bars{gap:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
 .bdwrap .bar{min-height:var(--h-m);padding:5px var(--pad-card) 6px;row-gap:4px;border-bottom:1px solid var(--line)}
 .bdwrap .bar .name,.bdwrap .bar .val{font-size:12px}
@@ -212,7 +212,7 @@ button{cursor:pointer}
 .bars .bar:focus-visible{outline-offset:-2px}
 #tripCard .stat{border:0;background:none;padding:0}
 /* on «Итоги» the trip card is as small as the category cards above it: tight padding, its links are S buttons (32px, --h-s) */
-#tripCard{padding:10px var(--pad-card) 6px;gap:4px}
+#tripPanel{padding:10px var(--pad-card) 6px;gap:4px}
 #tripCard .stat b{font-size:15px}
 #tripStat .tacts .linkbtn{font-size:var(--fs-xs);min-height:var(--h-s)}
 /* the trip window's field is one line high (in .wallet-edit a field normally stands in a row) */
@@ -382,7 +382,16 @@ input.num::placeholder{font-family:var(--f-body)}
 .dayhead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted);padding-block:10px 6px;border-bottom:1px solid var(--line)}
 /* Записи: each day is its own card, the date stands out */
 .recs{display:flex;flex-direction:column;gap:12px;min-width:0}
-.recs #list{display:flex;flex-direction:column;gap:6px}
+.recs #list,.hist-peek{display:flex;flex-direction:column;gap:6px}
+/* Все / Личное / Командировка go by as the pages of Итоги: the list follows the finger, the chosen one stands beside it, 12px apart,
+   for the time of the move only (hist-peek); up and down stays the page's own scrolling. The row of accounts scrolls sideways itself:
+   no touch-action over it */
+#listTrack{position:relative;transition:transform .3s cubic-bezier(.22,.61,.36,1)}
+#listTrack.is-dragging{transition:none;user-select:none;-webkit-user-select:none}
+#listViewport.is-moving{overflow-x:clip}
+.hist-peek{position:absolute;top:0;left:calc(100% + 12px);width:100%}
+.hist-peek[data-dir="-1"]{left:auto;right:calc(100% + 12px)}
+#viewHistory>.monthbar,#scopeFilter,#viewHistory .recs{touch-action:pan-y pinch-zoom}
 /* Записи: dense rows — more of the month on one screen */
 .recs .item{font-size:13px;gap:8px;padding-block:3px}
 .recs .item>.ic{width:24px;height:24px;font-size:12px}
@@ -1105,7 +1114,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     <div class="seg seg3" id="scopeFilter" role="group" aria-label="Чьи деньги"></div>
     <div class="chips" id="accFilter" role="group" aria-label="Фильтр по счёту"></div>
     <section class="recs" aria-label="Записи за месяц">
-      <div id="list"></div>
+      <div id="listViewport"><div id="listTrack"><div id="list"></div></div></div>
     </section>
   </div>
 
@@ -1200,9 +1209,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
           </section>
         </div>
         <div class="stats-page" data-stat-page="trip">
-          <section class="panel" id="tripCard" data-sv="trip" aria-labelledby="tripH">
+          <section class="bdwrap" id="tripCard" data-sv="trip" aria-labelledby="tripH">
             <h2 id="tripH">Командировка</h2>
-            <div class="stat wide" id="tripStat"></div>
+            <div class="panel" id="tripPanel"><div class="stat wide" id="tripStat"></div></div>
           </section>
         </div>
         <div class="stats-page" data-stat-page="cmp">
@@ -3435,34 +3444,91 @@ function renderRecent(){
   box.innerHTML=last.map(i=>itemRow(i,true)).join('');
   bindEdits(box);armDeletes(box,delItem,'Запись удалена',delAsk);
 }
-function renderList(items){
-  renderRecent();
-  renderCompare();
-  $('hTitle').textContent=$('sTitle').textContent=monthLbl();
-  $('hNext').disabled=$('sNext').disabled=isCurrentMonth();
-  const list=$('list'), af=state.accFilter||null, sf=state.scopeFilter||'';
-  /* personal money and trip money apart, then by account */
-  $('scopeFilter').innerHTML=[['','Все'],['own','Личное'],['trip','Командировка']].map(([v,n])=>`<button type="button" data-sf="${v}" aria-pressed="${sf===v}">${n}</button>`).join('');
-  $('scopeFilter').querySelectorAll('[data-sf]').forEach(b=>b.onclick=()=>{state.scopeFilter=b.dataset.sf;render()});
-  $('accFilter').innerHTML=[['','Все счета'],...ACCS.map(([id])=>[id,ACC_SHORT[id]]),['broker','Брокер'],['piggy','Копильник']].map(([id,n])=>`<button type="button" class="chip" data-af="${id}" aria-pressed="${(af||'')===id}">${n}</button>`).join('');
-  $('accFilter').querySelectorAll('[data-af]').forEach(b=>b.onclick=()=>{state.accFilter=b.dataset.af||null;render()});
+/* Записи: personal money and trip money apart (sf), then by account (af) */
+const SF=[['','Все'],['own','Личное'],['trip','Командировка']];
+/* the month's records of that filter, newest first */
+function listShown(items,sf,af){
   const touches=i=>!af||(typeOf(i)==='tr'?(i.from===af||i.to===af):(i.acc===af||(af==='broker'&&catOf(i.cat).id==='broker'&&typeOf(i)==='out')||(af==='piggy'&&catOf(i.cat).id==='invest'&&typeOf(i)==='out')));
   const inScope=i=>!sf||(sf==='trip'?isTrip(i):!isTrip(i));
-  const shown=items.filter(i=>!zeroEnd(i)&&touches(i)&&inScope(i)).sort(byNewest);
-  if(!state.ready){list.innerHTML='<div class="empty"><p>Загружаю записи…</p></div>';return}
-  if(!shown.length){
-    const inMsg=af||sf?'Записей с таким фильтром в этом месяце нет.':'В этом месяце записей нет.';
-    list.innerHTML=`<div class="empty"><p>${inMsg}</p></div>`;return;
-  }
+  return items.filter(i=>!zeroEnd(i)&&touches(i)&&inScope(i)).sort(byNewest);
+}
+const listEmpty=(af,sf)=>`<div class="empty"><p>${af||sf?'Записей с таким фильтром в этом месяце нет.':'В этом месяце записей нет.'}</p></div>`;
+/* those records day by day */
+function listHtml(shown,af){
   const groups={};shown.forEach(i=>(groups[i.date]??=[]).push(i));
   const afW=af&&WALLETS.find(w=>w.id===af), afT=afW?` title="${esc('Движение по счёту «'+afW.name+'»')}"`:'';
-  list.innerHTML=Object.entries(groups).map(([d,arr])=>{
+  return Object.entries(groups).map(([d,arr])=>{
     /* the day's sums are exactly the signed rows shown: personal ones, then trip ones in the trip colour */
     const tot=(p,tr)=>r2(arr.filter(i=>isTrip(i)===tr).reduce((a,i)=>{const v=rowDelta(i,af);return a+(p?Math.max(v,0):Math.max(-v,0))},0)),
       chip=(v,s,c,tr)=>v?`<span class="${c}"${tr?' title="командировка" aria-label="командировка '+s+money(v)+'"':''}>${s}${money(v)}</span>`:'';
     return `<div class="day"><div class="dayhead"><h3>${dayName.format(isoToDate(d))}</h3><span class="num"${afT}>${chip(tot(1,false),'+','pos')}${chip(tot(0,false),'−','out')}${chip(tot(1,true),'+','trip',1)}${chip(tot(0,true),'−','trip',1)}</span></div>${arr.map(i=>itemRow(i,false,af)).join('')}</div>`;
   }).join('');
+}
+/* the month's records the list was last drawn from: the one beside it (histPeek) is drawn from them too */
+let histItems=[];
+function renderList(items){
+  renderRecent();
+  renderCompare();
+  $('hTitle').textContent=$('sTitle').textContent=monthLbl();
+  $('hNext').disabled=$('sNext').disabled=isCurrentMonth();
+  const list=$('list'), af=state.accFilter||null, sf=state.scopeFilter||'';histItems=items;
+  $('scopeFilter').innerHTML=SF.map(([v,n])=>`<button type="button" data-sf="${v}" aria-pressed="${sf===v}">${n}</button>`).join('');
+  $('scopeFilter').querySelectorAll('[data-sf]').forEach(b=>b.onclick=()=>histGo(SF.findIndex(([v])=>v===b.dataset.sf)));
+  $('accFilter').innerHTML=[['','Все счета'],...ACCS.map(([id])=>[id,ACC_SHORT[id]]),['broker','Брокер'],['piggy','Копильник']].map(([id,n])=>`<button type="button" class="chip" data-af="${id}" aria-pressed="${(af||'')===id}">${n}</button>`).join('');
+  $('accFilter').querySelectorAll('[data-af]').forEach(b=>b.onclick=()=>{state.accFilter=b.dataset.af||null;render()});
+  const shown=listShown(items,sf,af);
+  if(!state.ready){list.innerHTML='<div class="empty"><p>Загружаю записи…</p></div>';return}
+  if(!shown.length){list.innerHTML=listEmpty(af,sf);return}
+  list.innerHTML=listHtml(shown,af);
   bindEdits(list);armDeletes(list,delItem,'Запись удалена',delAsk);
+}
+/* Все / Личное / Командировка one after another, as the pages of Итоги (owner's choice, 01.11.2026): swiped, or a button pressed, the list
+   goes off to the side and the chosen one comes in from the other. That one is drawn for the time of the move only (hist-peek: nothing in it
+   can be pressed or found), then the list is drawn anew in its place. histEnd: ends the move under way at once */
+let histEnd=null;
+const histAt=()=>Math.max(0,SF.findIndex(([v])=>v===(state.scopeFilter||'')));
+/* the list of filter i, beside the list on its side; none past the first or the last */
+function histPeek(i){
+  const tr=$('listTrack'), old=tr.querySelector('.hist-peek'), dir=Math.sign(i-histAt());
+  if(old&&+old.dataset.i===i) return;
+  old?.remove();if(!dir||i<0||i>=SF.length) return;
+  const af=state.accFilter||null, shown=listShown(histItems,SF[i][0],af), pk=document.createElement('div');
+  pk.className='hist-peek';pk.inert=true;pk.setAttribute('aria-hidden','true');pk.dataset.i=i;pk.dataset.dir=dir;
+  pk.innerHTML=shown.length?listHtml(shown,af):listEmpty(af,SF[i][0]);
+  pk.querySelectorAll('[data-act],[data-open],[data-id]').forEach(b=>['data-act','data-open','data-id'].forEach(a=>b.removeAttribute(a)));
+  tr.append(pk);
+}
+/* fn once the list has slid where it goes (its transition over, or a moment after: no transitionend comes without the animation) */
+function histWait(fn){
+  const tr=$('listTrack');let t=0;
+  const end=()=>{if(histEnd!==end)return;histEnd=null;clearTimeout(t);tr.removeEventListener('transitionend',te);fn()};
+  const te=e=>{if(e.target===tr&&e.propertyName==='transform')end()};
+  histEnd=end;tr.addEventListener('transitionend',te);t=setTimeout(end,450);
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) queueMicrotask(end);
+}
+/* to filter i: the list slides off to the side, then it is that filter's list in its place */
+function histGo(i){
+  histEnd?.();
+  const cur=histAt();if(i<0||i>=SF.length||i===cur){histBack();return}
+  const tr=$('listTrack'), vp=$('listViewport'), dir=Math.sign(i-cur);
+  if(!state.ready){state.scopeFilter=SF[i][0];fresh();render();return}
+  histPeek(i);vp.classList.add('is-moving');tr.classList.remove('is-dragging');void tr.offsetWidth;
+  histWait(()=>{
+    /* a filter button focused from the keyboard: the focus stays on the one pressed now (the buttons are drawn anew) */
+    const fo=$('scopeFilter').contains(document.activeElement);
+    tr.classList.add('is-dragging');state.scopeFilter=SF[i][0];fresh();render();
+    tr.querySelector('.hist-peek')?.remove();tr.style.transform='';vp.classList.remove('is-moving');void tr.offsetWidth;tr.classList.remove('is-dragging');
+    if(fo) $('scopeFilter').querySelector('[aria-pressed="true"]')?.focus({preventScroll:true});
+  });
+  tr.style.transform=`translate3d(calc(${dir>0?'-100% - ':'100% + '}12px),0,0)`;
+}
+/* let go short (or the move broken off): the list slides back into its place */
+function histBack(){
+  histEnd?.();
+  const tr=$('listTrack'), vp=$('listViewport'), done=()=>{tr.querySelector('.hist-peek')?.remove();vp.classList.remove('is-moving')};
+  tr.classList.remove('is-dragging');
+  if(!tr.style.transform){done();return}
+  histWait(done);tr.style.transform='';
 }
 /* ---------- month comparison ---------- */
 const mLabel=DF({month:'long',year:'numeric'});
@@ -3513,34 +3579,39 @@ function renderStatSeg(){
   applyStatView(index);track.style.transform=`translate3d(calc(-${index*20}% - ${index*STAT_GAP}px),0,0)`;
   requestAnimationFrame(()=>syncStatsViewport(index));
 }
-function bindStatsSwipe(){
-  const surface=$('scroller'),track=$('statsTrack'),useTouchEvents='ontouchstart' in window;let down=null,touchDown=null,blockClickUntil=0;
-  const indexNow=()=>Math.max(0,SV.findIndex(([k])=>k===$('viewStats').dataset.view));
-  const snapBack=()=>{const i=indexNow();track.classList.remove('is-dragging');track.style.transform=`translate3d(calc(-${i*20}% - ${i*STAT_GAP}px),0,0)`};
-  const resetPointer=()=>{down=null;if(track.classList.contains('is-dragging'))snapBack()};
-  const resetTouch=()=>{touchDown=null;if(track.classList.contains('is-dragging'))snapBack()};
-  const ignored=target=>target.closest?.('input,textarea,select,[contenteditable="true"],.wmodal,.sheet,.zsheet');
+/* a swipe between a tab's pages (Итоги: its five views; Записи: Все / Личное / Командировка): the page follows the finger; past a threshold
+   (or a quick flick) it goes to the next one, a shorter move puts it back; the first and the last page give only a little. Up and down
+   stays the page's own scrolling. o: on() — its tab is open; skip — where a touch is no swipe (a row scrolled sideways itself); n — pages;
+   at() — the page shown; width(); start() — a move begins; drag(offset,dx) — the page moved by offset; go(i) — let go: to page i;
+   cancel() — let go short, or the move broken off (a second finger, the app left) */
+function bindSwipe(o){
+  const surface=$('scroller'),useTouchEvents='ontouchstart' in window;let down=null,touchDown=null,blockClickUntil=0,live=false;
+  const stop=()=>{if(live){live=false;o.cancel()}};
+  const resetPointer=()=>{down=null;stop()};
+  const resetTouch=()=>{touchDown=null;stop()};
+  const ignored=target=>target.closest?.('input,textarea,select,[contenteditable="true"],.wmodal,.sheet,.zsheet'+(o.skip?','+o.skip:''));
   const move=(g,x,y,e)=>{
     const dx=x-g.x,dy=y-g.y;
-    if(!g.dragging){if(Math.abs(dx)<4||Math.abs(dx)<Math.abs(dy)*.35)return;g.dragging=true;track.classList.add('is-dragging');if(g.pointerId!=null)try{surface.setPointerCapture(g.pointerId)}catch{}}
+    if(!g.dragging){if(Math.abs(dx)<4||Math.abs(dx)<Math.abs(dy)*.35)return;g.dragging=live=true;o.start();if(g.pointerId!=null)try{surface.setPointerCapture(g.pointerId)}catch{}}
     if(e?.cancelable)e.preventDefault();
-    const index=indexNow(),width=$('viewStats').clientWidth||surface.clientWidth,edge=(index===0&&dx>0)||(index===SV.length-1&&dx<0),offset=edge?dx*.2:dx;
-    track.style.transform=`translate3d(calc(-${index*20}% - ${index*STAT_GAP}px + ${offset}px),0,0)`;
+    const index=o.at(),edge=(index===0&&dx>0)||(index===o.n-1&&dx<0);
+    o.drag(edge?dx*.2:dx,dx);
     const at=performance.now();g.velocity=(x-g.lastX)/Math.max(1,at-g.lastAt);g.lastX=x;g.lastAt=at;
   };
-  const complete=(g,x,y)=>{
+  const complete=(g,x)=>{
     if(!g.dragging)return;
+    live=false;
     const dx=x-g.x,elapsed=Math.max(1,performance.now()-g.startAt),speed=Math.max(Math.abs(dx)/elapsed,Math.abs(g.velocity));
     blockClickUntil=performance.now()+500;
-    const current=indexNow(),width=$('viewStats').clientWidth||surface.clientWidth,threshold=Math.max(20,Math.min(34,width*.07));
+    const current=o.at(),threshold=Math.max(20,Math.min(34,o.width()*.07));
     const qualifies=Math.abs(dx)>=threshold||(Math.abs(dx)>=12&&speed>=.35);
-    const next=qualifies?Math.max(0,Math.min(SV.length-1,current+(dx<0?1:-1))):current;
-    track.classList.remove('is-dragging');if(next!==current)setStatView(SV[next][0]);else snapBack();
+    const next=qualifies?Math.max(0,Math.min(o.n-1,current+(dx<0?1:-1))):current;
+    if(next!==current)o.go(next);else o.cancel();
   };
   surface.addEventListener('pointerdown',e=>{
     if(e.pointerType==='touch'&&useTouchEvents)return;
     blockClickUntil=0;
-    if(state.tab!=='stats'||!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0)||ignored(e.target)){resetPointer();return}
+    if(!o.on()||!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0)||ignored(e.target)){resetPointer();return}
     down={id:e.pointerId,pointerId:e.pointerId,x:e.clientX,y:e.clientY,lastX:e.clientX,lastAt:performance.now(),startAt:performance.now(),velocity:0,dragging:false};
   },{passive:true});
   surface.addEventListener('pointermove',e=>{
@@ -3557,7 +3628,7 @@ function bindStatsSwipe(){
   surface.addEventListener('lostpointercapture',cancelPointer,{passive:true});
   surface.addEventListener('touchstart',e=>{
     blockClickUntil=0;
-    if(state.tab!=='stats'||e.touches.length!==1||ignored(e.target)){resetTouch();return}
+    if(!o.on()||e.touches.length!==1||ignored(e.target)){resetTouch();return}
     const t=e.touches[0];touchDown={id:t.identifier,x:t.clientX,y:t.clientY,lastX:t.clientX,lastAt:performance.now(),startAt:performance.now(),velocity:0,dragging:false};
   },{passive:true});
   surface.addEventListener('touchmove',e=>{
@@ -3575,9 +3646,18 @@ function bindStatsSwipe(){
     if(performance.now()>blockClickUntil)return;
     blockClickUntil=0;e.preventDefault();e.stopImmediatePropagation();
   },true);
-  window.addEventListener('resize',()=>syncStatsViewport(),{passive:true});
 }
-bindStatsSwipe();
+{const track=$('statsTrack'), at=()=>Math.max(0,SV.findIndex(([k])=>k===$('viewStats').dataset.view)),
+    x=(i,d=0)=>`translate3d(calc(-${i*20}% - ${i*STAT_GAP}px + ${d}px),0,0)`;
+  bindSwipe({on:()=>state.tab==='stats',n:SV.length,at,width:()=>$('viewStats').clientWidth||$('scroller').clientWidth,
+    start:()=>track.classList.add('is-dragging'),drag:d=>{track.style.transform=x(at(),d)},
+    go:i=>{track.classList.remove('is-dragging');setStatView(SV[i][0])},
+    cancel:()=>{track.classList.remove('is-dragging');track.style.transform=x(at())}});
+  window.addEventListener('resize',()=>syncStatsViewport(),{passive:true})}
+bindSwipe({on:()=>state.tab==='history'&&state.ready,skip:'#accFilter',n:SF.length,at:histAt,width:()=>$('viewHistory').clientWidth||$('scroller').clientWidth,
+  start:()=>{histEnd?.();$('listTrack').classList.add('is-dragging');$('listViewport').classList.add('is-moving')},
+  drag:(d,dx)=>{histPeek(histAt()+(dx<0?1:-1));$('listTrack').style.transform=`translate3d(${d}px,0,0)`},
+  go:histGo,cancel:histBack});
 function renderCompare(){
   const cur=`${now.getFullYear()}-${pad(now.getMonth()+1)}`;
   const keys=[...new Set([monthKey(),cur,...state.items.filter(i=>typeof i.date==='string').map(i=>i.date.slice(0,7)).filter(k=>/^\d{4}-(0[1-9]|1[0-2])$/.test(k))])].sort().reverse();
