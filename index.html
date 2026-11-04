@@ -1312,7 +1312,8 @@ const ICON={bus:'🚌',taxi:'🚕',fuel:'⛽',lunch:'🍽️',clothing:'👕',le
   salary:'💼',stipend:'🎓',side:'🛠️',bonus:'🎁',dividends:'📊',interest:'💰',gift:'💝',trip_left:'🧳',trip_extra:'🧳',in_other:'➕',t_taxi:'🚕',t_grocery:'🛒',t_flat:'🏠',t_fuel:'⛽',t_other:'➕',t_allow:'✈️',other:'➕'};
 const CAT=Object.fromEntries(CATS.map(c=>[c.id,c]));
 /* a category's place in that order: by group (personal spending, «Отдельно», income, trip), as CATS lists them, «Другое» last */
-const CAT_RANK=Object.fromEntries(CATS.map((c,n)=>[c.id,['daily','sep','in','trip','tripin'].indexOf(c.g)*1000+(c.custom?999:n)]));
+const SEP_ORDER=['sadaqa','family','broker','invest','zakat']; /* «Отдельно» in the owner's order (04.11.2026): tiles, edit form, comparison. CATS keeps its own, it also decides what a typed word picks */
+const CAT_RANK=Object.fromEntries(CATS.map((c,n)=>[c.id,['daily','sep','in','trip','tripin'].indexOf(c.g)*1000+(c.custom?999:SEP_ORDER.includes(c.id)?SEP_ORDER.indexOf(c.id):n)]));
 const byRank=(a,b)=>(CAT_RANK[a]??1e5)-(CAT_RANK[b]??1e5);
 /* Object.hasOwn only since iOS 15.4 */
 const hasOwn=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
@@ -3228,7 +3229,7 @@ function catOpts(type,scope,sel){
   const pool=poolFor(type,scope).filter(c=>!c.auto||c.id===sel), on=pool.some(c=>c.id===sel)?sel:pool.find(c=>c.id===SCOPE_TWIN[sel])?.id||'';
   const o=c=>`<option value="${c.id}" ${c.id===on?'selected':''}>${esc(c.name)}</option>`, sep=pool.filter(c=>c.g==='sep');
   return (on?'':'<option value="" selected disabled>Выберите категорию</option>')+pool.filter(c=>c.g!=='sep').sort((a,b)=>!!a.custom-!!b.custom).map(o).join('')
-    +(sep.length?`<optgroup label="Отдельно">${['sadaqa','zakat','broker','family','invest',...sep.map(c=>c.id)].filter((id,n,a)=>a.indexOf(id)===n&&sep.some(c=>c.id===id)).map(id=>o(CAT[id])).join('')}</optgroup>`:'');
+    +(sep.length?`<optgroup label="Отдельно">${[...SEP_ORDER,...sep.map(c=>c.id)].filter((id,n,a)=>a.indexOf(id)===n&&sep.some(c=>c.id===id)).map(id=>o(CAT[id])).join('')}</optgroup>`:'');
 }
 function editRow(i){
   const t=typeOf(i), opt=(list,sel)=>list.map(([v,n])=>`<option value="${esc(v)}" ${v===sel?'selected':''}>${esc(n)}</option>`).join('');
@@ -4266,7 +4267,7 @@ function stepCat(){
   sheetFrame(p.type==='in'?'Что за доход?':'На что?',null);
   /* the tiles in the one fixed order (CATS), «Другое» last */
   $('sheetBody').innerHTML=groups.map(([h,g])=>{
-    const list=g==='sep'?['sadaqa','zakat','broker','family','invest'].map(id=>CAT[id]):CATS.filter(c=>c.g===g&&!c.auto).sort((a,b)=>byRank(a.id,b.id));
+    const list=g==='sep'?SEP_ORDER.map(id=>CAT[id]):CATS.filter(c=>c.g===g&&!c.auto).sort((a,b)=>byRank(a.id,b.id));
     return `${h?`<h3>${h}</h3>`:''}<div class="tiles">${list.map(c=>tile(c)).join('')}</div>`;
   }).join('');
   $('sheetBody').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{p.cat=b.dataset.pick;afterCat()});
