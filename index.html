@@ -957,14 +957,14 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:500
 .crow .ca{font-family:var(--f-num);font-weight:500;white-space:nowrap}
 .crow .ca.spend{color:var(--spend)}
 .crow .ca.pos{color:var(--good)}
-.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.tile{background:var(--bg);border:1px solid var(--field-line);border-radius:14px;padding:12px 6px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--ink);font-size:13px;line-height:1.2;text-align:center;min-width:0;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto}
-.tile .ic{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:color-mix(in srgb,var(--c) 22%,transparent);border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-inline:-8px}
+.tile{background:var(--bg);border:1px solid var(--field-line);border-radius:14px;padding:8px 2px 7px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink);font-size:clamp(10.5px,2.9vw,12px);line-height:1.2;text-align:center;min-width:0;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto}
+.tile .ic{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:16px;background:color-mix(in srgb,var(--c) 22%,transparent);border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
 .tile[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
 .tile small{font-family:var(--f-num);color:var(--muted);font-size:12px;overflow-wrap:normal}
 .tile small.neg{color:var(--bad)}
 /* five accounts in two rows (3 + 2), so the whole step fits a small phone */
-.accs{grid-template-columns:repeat(6,minmax(0,1fr))}
+.accs{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-inline:0}
 .accs .tile{grid-column:span 2;flex-direction:column;justify-content:center;gap:4px;padding:10px 4px 8px;font-size:14px;text-align:center}
 .accs .tile:nth-child(n+4){grid-column:span 3}
 .accs .tile .am{width:34px;height:34px}
@@ -1009,6 +1009,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
    «Данные и копия» and «⇄ Перевод» on two lines: their tap areas (44px over a 20px line) don't lie over each other; the copy's buttons
    one to a line; a debt window's «Должен 1 239 567,89 ₽» — the sum on a line of its own, split between digit groups if it must;
    «Сравнение»: the two months' sums a half each, «Разница» on a line of its own under them */
+/* «На что?»: narrower than 360px «Развлечение» no longer fits a quarter of the window, so three tiles to a row */
+@media (max-width:359px){.tiles:not(.accs){grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:319px){.lhead{flex-wrap:wrap;justify-content:center}.lr{flex-basis:100%}.panel.mcard,.bar{grid-template-columns:minmax(0,1fr)}#scopeFilter{height:auto}.whead{flex-wrap:wrap}
   .mfoot{row-gap:24px}.bkgrid{grid-template-columns:minmax(0,1fr)}.dp-sum{flex-wrap:wrap;row-gap:0}.dp-sum b{flex-shrink:1}
   .cmp-head,.cmp-row{grid-template-columns:repeat(2,minmax(0,1fr))}.cmp-delta,.cmp-head>span:last-child{grid-column:1/-1}}
@@ -1279,6 +1281,7 @@ const CATS=[
   {id:'fuel',name:'Бензин',g:'daily',c:'p9',kw:['бензин','заправка','азс','топливо']},
   {id:'health',name:'Здоровье и уход',g:'daily',c:'p7',kw:['анализы','лекарство','аптека','чистка','дерматолог','врач']},
   {id:'leisure',name:'Развлечение',g:'daily',c:'p5',kw:['развлечение','кино','боулинг','бильярд','концерт']},
+  {id:'fine',name:'Штраф',g:'daily',c:'p2',kw:['штраф','гибдд']},
   {id:'family',name:'Семья',g:'sep',c:'p3',kw:['семья','мама','ма']},
   {id:'broker',name:'Брокер',g:'sep',c:'p1',kw:['брокер']},
   {id:'invest',name:'Копильник',g:'sep',c:'p7',kw:['инвестиции','копилка','копильник']},
@@ -1305,7 +1308,7 @@ const CATS=[
 ];
 /* fastfood: the tile gave way to «Развлечение» (owner's choice, 31.10.2026) — its old records are eating out */
 const LEGACY={ai:'subs',food:'grocery',cafe:'lunch',transport:'taxi',fun:'other',shop:'other',study:'other',gifts:'other',home:'other',clothes:'other',fastfood:'lunch'};
-const ICON={bus:'🚌',taxi:'🚕',fuel:'⛽',lunch:'🍽️',clothing:'👕',leisure:'🎉',snack:'🥤',wb:'🛍️',grocery:'🛒',health:'💊',subs:'📱',family:'👨‍👩‍👦',broker:'📈',invest:'🪙',sadaqa:'🤲',zakat:'🌙',
+const ICON={bus:'🚌',taxi:'🚕',fuel:'⛽',lunch:'🍽️',clothing:'👕',leisure:'🎉',fine:'🚨',snack:'🥤',wb:'🛍️',grocery:'🛒',health:'💊',subs:'📱',family:'👨‍👩‍👦',broker:'📈',invest:'🪙',sadaqa:'🤲',zakat:'🌙',
   salary:'💼',stipend:'🎓',side:'🛠️',bonus:'🎁',dividends:'📊',interest:'💰',gift:'💝',trip_left:'🧳',trip_extra:'🧳',in_other:'➕',t_taxi:'🚕',t_grocery:'🛒',t_flat:'🏠',t_fuel:'⛽',t_other:'➕',t_allow:'✈️',other:'➕'};
 const CAT=Object.fromEntries(CATS.map(c=>[c.id,c]));
 /* a category's place in that order: by group (personal spending, «Отдельно», income, trip), as CATS lists them, «Другое» last */
