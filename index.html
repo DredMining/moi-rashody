@@ -958,7 +958,11 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:500
 .crow .ca.spend{color:var(--spend)}
 .crow .ca.pos{color:var(--good)}
 .tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-inline:-8px}
-.tile{background:var(--bg);border:1px solid var(--field-line);border-radius:14px;padding:8px 2px 7px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink);font-size:clamp(10.5px,2.9vw,12px);line-height:1.2;text-align:center;min-width:0;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto}
+/* «На что?»: narrower than 375px «Развлечение» no longer fits a quarter of the window at the least size of type, so three tiles to a row */
+@media (max-width:374px){.tiles:not(.accs){grid-template-columns:repeat(3,minmax(0,1fr))}}
+/* the grid stands 8px past the window's content on each side: «Отдельно» starts where its tiles start */
+.tiles:not(.accs)+h3{margin-inline:-8px}
+.tile{background:var(--bg);border:1px solid var(--field-line);border-radius:14px;padding:8px 2px 7px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink);font-size:clamp(var(--fs-2xs),2.9vw,12px);line-height:1.2;text-align:center;min-width:0;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto}
 .tile .ic{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:16px;background:color-mix(in srgb,var(--c) 22%,transparent);border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
 .tile[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
 .tile small{font-family:var(--f-num);color:var(--muted);font-size:12px;overflow-wrap:normal}
@@ -1009,8 +1013,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
    «Данные и копия» and «⇄ Перевод» on two lines: their tap areas (44px over a 20px line) don't lie over each other; the copy's buttons
    one to a line; a debt window's «Должен 1 239 567,89 ₽» — the sum on a line of its own, split between digit groups if it must;
    «Сравнение»: the two months' sums a half each, «Разница» on a line of its own under them */
-/* «На что?»: narrower than 360px «Развлечение» no longer fits a quarter of the window, so three tiles to a row */
-@media (max-width:359px){.tiles:not(.accs){grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:319px){.lhead{flex-wrap:wrap;justify-content:center}.lr{flex-basis:100%}.panel.mcard,.bar{grid-template-columns:minmax(0,1fr)}#scopeFilter{height:auto}.whead{flex-wrap:wrap}
   .mfoot{row-gap:24px}.bkgrid{grid-template-columns:minmax(0,1fr)}.dp-sum{flex-wrap:wrap;row-gap:0}.dp-sum b{flex-shrink:1}
   .cmp-head,.cmp-row{grid-template-columns:repeat(2,minmax(0,1fr))}.cmp-delta,.cmp-head>span:last-child{grid-column:1/-1}}
@@ -1267,7 +1269,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
 
 <script>
 /* g: daily / sep = personal expenses, in = personal income, trip / tripin = business-trip money, legacy = old records only.
-   The order here is the one order of the categories everywhere they are listed (the tiles of «На что?», the edit form, the comparison):
+   The order here is the one order of the categories everywhere they are listed (the tiles of «На что?», the edit form, the comparison), but for «Отдельно», which has SEP_ORDER:
    it never follows how often one is used, so a tile stays where the finger remembers it; «Другое» goes last in its group */
 const CATS=[
   {id:'bus',name:'Маршрутка',g:'daily',c:'p1',kw:['маршрутка','автобус','проезд']},
@@ -1311,8 +1313,9 @@ const LEGACY={ai:'subs',food:'grocery',cafe:'lunch',transport:'taxi',fun:'other'
 const ICON={bus:'🚌',taxi:'🚕',fuel:'⛽',lunch:'🍽️',clothing:'👕',leisure:'🎉',fine:'🚨',snack:'🥤',wb:'🛍️',grocery:'🛒',health:'💊',subs:'📱',family:'👨‍👩‍👦',broker:'📈',invest:'🪙',sadaqa:'🤲',zakat:'🌙',
   salary:'💼',stipend:'🎓',side:'🛠️',bonus:'🎁',dividends:'📊',interest:'💰',gift:'💝',trip_left:'🧳',trip_extra:'🧳',in_other:'➕',t_taxi:'🚕',t_grocery:'🛒',t_flat:'🏠',t_fuel:'⛽',t_other:'➕',t_allow:'✈️',other:'➕'};
 const CAT=Object.fromEntries(CATS.map(c=>[c.id,c]));
-/* a category's place in that order: by group (personal spending, «Отдельно», income, trip), as CATS lists them, «Другое» last */
-const SEP_ORDER=['sadaqa','family','broker','invest','zakat']; /* «Отдельно» in the owner's order (04.11.2026): tiles, edit form, comparison. CATS keeps its own, it also decides what a typed word picks */
+/* «Отдельно» in the owner's order (04.11.2026), on the tiles and in the edit form. CATS keeps its own: it also decides what a typed word picks */
+const SEP_ORDER=['sadaqa','family','broker','invest','zakat'];
+/* a category's place in that order: by group (personal spending, «Отдельно», income, trip), as CATS lists them («Отдельно» as SEP_ORDER), «Другое» last */
 const CAT_RANK=Object.fromEntries(CATS.map((c,n)=>[c.id,['daily','sep','in','trip','tripin'].indexOf(c.g)*1000+(c.custom?999:SEP_ORDER.includes(c.id)?SEP_ORDER.indexOf(c.id):n)]));
 const byRank=(a,b)=>(CAT_RANK[a]??1e5)-(CAT_RANK[b]??1e5);
 /* Object.hasOwn only since iOS 15.4 */
@@ -4112,8 +4115,9 @@ function kwHit(k,x){
   return x.startsWith(st)&&ENDING.test(x.slice(st.length))&&(st.length>3||x.length-st.length<=2);
 }
 /* two category words in one entry («шаурма кофе», «продукты такси»): the categories are tried in the order they always were,
-   not in the order of the tiles — moving a tile doesn't change what a typed word picks. The ones not named keep the order of CATS */
-const KW_ORDER=['bus','taxi','fuel','lunch','snack','wb','grocery','health','subs'];
+   not in the order of the tiles — moving a tile doesn't change what a typed word picks. The ones not named keep the order of CATS.
+   «Штраф» goes first: «штраф за проезд» is a fine, not a ride */
+const KW_ORDER=['fine','bus','taxi','fuel','lunch','snack','wb','grocery','health','subs'];
 const kwRank=c=>{const k=KW_ORDER.indexOf(c.id);return k<0?KW_ORDER.length+CATS.indexOf(c):k};
 /* the category a word after the sum points to, and the rest of that text (it becomes the comment) */
 function guessHit(word,type,scope){
@@ -4265,7 +4269,7 @@ function stepCat(){
   const p=state.pend;
   const groups=p.scope==='trip'?[['','trip']]:p.type==='in'?[['','in']]:[['','daily'],['Отдельно','sep']];
   sheetFrame(p.type==='in'?'Что за доход?':'На что?',null);
-  /* the tiles in the one fixed order (CATS), «Другое» last */
+  /* the tiles in the one fixed order (byRank, «Отдельно» as SEP_ORDER), «Другое» last */
   $('sheetBody').innerHTML=groups.map(([h,g])=>{
     const list=g==='sep'?SEP_ORDER.map(id=>CAT[id]):CATS.filter(c=>c.g===g&&!c.auto).sort((a,b)=>byRank(a.id,b.id));
     return `${h?`<h3>${h}</h3>`:''}<div class="tiles">${list.map(c=>tile(c)).join('')}</div>`;
