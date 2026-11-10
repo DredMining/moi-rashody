@@ -519,6 +519,8 @@ input.num::placeholder{font-family:var(--f-body)}
 #viewLedger .tripline{gap:5px;padding-top:6px}
 /* the month card: a ring of how much of the limit is spent, beside it the sum, «из 35 000 · осталось …»;
    under them «Вне лимита» as a plain row, then the trip money in its own small plate */
+/* «Ноябрь 2026» over the month card belongs to the black look alone (it is shown and drawn in that look's block, at the end of the styles) */
+.bigmonth{display:none}
 .lhead{display:flex;align-items:center;gap:14px}
 .ring{--p:0;--rc:var(--good);flex:none;width:103px;height:103px;border-radius:50%;background:conic-gradient(var(--rc) calc(var(--p) * 1%),var(--track) 0);display:grid;place-items:center}
 .ring.warn{--rc:var(--warn)}.ring.bad{--rc:var(--bad)}
@@ -1076,6 +1078,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
 @media (prefers-color-scheme: dark){
   /* the big sum of a tab is larger: up to 44px (fitBig still makes it smaller while it doesn't fit) */
   :root{--fs-hero:clamp(30px,10vw,44px)}
+  /* the page's title over the month card: the month «Учёт» shows, large; its year smaller and quieter */
+  .bigmonth{display:block;padding:4px 2px 0;font-family:var(--f-body);font-size:clamp(28px,7.7vw,34px);font-weight:700;line-height:1.1;letter-spacing:-.02em;text-transform:none;color:var(--ink)}
+  .bigmonth span{text-transform:capitalize}
+  .bigmonth small{font-size:.5em;font-weight:500;letter-spacing:0;color:var(--muted)}
   /* the month card: no ring — the sum takes the card's whole width; the share of the limit is a bar with its percent, under the lines.
      The same element and the same --p as the ring: only its drawing differs */
   .lhead{flex-direction:column;align-items:stretch;gap:10px}
@@ -1101,6 +1107,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   <div class="alerts" id="sysAlerts" role="alert"></div>
 
   <div id="viewLedger" role="tabpanel" aria-labelledby="tabLedger">
+  <h2 class="bigmonth"><span id="lMonth"></span> <small id="lYear"></small></h2>
   <section class="sumcard" aria-label="Траты в лимит за месяц">
     <div class="lhead">
       <div class="ring" id="limitMeter" role="progressbar" aria-label="Лимит на месяц" aria-valuemin="0" aria-valuemax="100"><div><b id="limitPct">—</b></div></div>
@@ -1861,6 +1868,8 @@ function renderLedger(){
   const ov=tripOverRec(), over=ov?ov.amount:0, out=ov?[...out0,ov]:out0, spent=r2(spent0+over), bal=r2(earned-spent), inLimit=r2(inLimit0+over);
   /* _full: the whole sum, kept for fitBig (on a narrow phone it may show it without kopecks) */
   $('total').textContent=$('total')._full=moneyR(inLimit);
+  /* the black look's title over the month card: the month this card is of (the night-blue look keeps the title hidden) */
+  {const [mn,yr]=monthLbl().split(' ');$('lMonth').textContent=mn;$('lYear').textContent=yr||''}
   /* _full: the whole sum, kept for fitMonth (it may show it shorter) */
   $('incomeTotal').textContent=$('incomeTotal')._full=moneyR(earned);
   $('allOut').textContent=$('allOut')._full=moneyR(spent);
