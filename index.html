@@ -1097,15 +1097,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   .ring::before{content:'';flex:1;height:8px;border-radius:var(--r-pill);background:linear-gradient(90deg,var(--rc) calc(var(--p) * 1%),var(--track) 0)}
   .ring>div{display:block;width:auto;height:auto;border-radius:0;background:none}
   .ring b,.ring.over b{font-size:var(--fs-sm);font-weight:600}
-  /* headings in plain letters: a section's title larger and in the text's colour; a group's label and a card's label stay quiet.
+  /* a section's title is larger and in the text's colour — in capitals, as every heading and label of the app: plain letters were tried
+     here and the owner turned them down (10.11.2026), so a group's label and a card's label are as in the night-blue look.
      One face in this look: the month's title of «Записи» and «Итоги» is set in the text face too */
   :root{--f-display:var(--f-body)}
-  h2{font-size:var(--fs-xl);font-weight:700;line-height:1.2;letter-spacing:0;text-transform:none;color:var(--ink)}
-  h3,.lr #sumLabel,.debt-overview-head .lbl,.mtot .lbl,.dp-section-title,.dinner-head,.dperson .debt-actions-label{letter-spacing:0;text-transform:none}
-  h3{font-size:var(--fs-sm)}
-  .lr #sumLabel,.debt-overview-head .lbl,.mtot .lbl{font-weight:500}
-  /* a group's title over its card («Доходы по источникам», «Командировка» on Итоги) keeps the size of the groups' labels beside it */
-  #incomeBreakdown>h2,#tripCard>h2{font-size:var(--fs-xs);font-weight:600;color:var(--muted)}
+  h2{font-size:var(--fs-xl);font-weight:700;line-height:1.2;letter-spacing:.02em;color:var(--ink)}
+  /* a group's title over its card («Доходы по источникам», «Командировка» on Итоги) keeps the look of the groups' labels beside it */
+  #incomeBreakdown>h2,#tripCard>h2{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;color:var(--muted)}
   .monthbar .title{font-size:var(--fs-lg);font-weight:600}
   /* the main button of a form is 52px. «Новая запись» is the main screen's form, less tight here: its sum 56px with larger, bolder figures —
      the first thing typed; its switches 38px in a 3px groove, its chips 36px. The picked half of a switch follows the corner of its groove */
