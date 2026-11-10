@@ -119,6 +119,7 @@
   // имитация safe-area iPhone на открытой странице (встроенный браузер env() не эмулирует): отступ сверху и переменная рамки снизу
   P.safe = (top, bottom) => { let st = document.getElementById('__probe_safe'); if (!st) { st = document.createElement('style'); st.id = '__probe_safe'; document.head.appendChild(st); }
     st.textContent = '.app{padding-top:' + top + 'px!important;background-size:100% ' + top + 'px!important}'; document.documentElement.style.setProperty('--simulator-safe-bottom', bottom + 'px'); document.documentElement.style.setProperty('--simulator-safe-top', top + 'px'); return [top, bottom]; };
-  P.noanim = () => { let st = document.getElementById('__probe_noanim'); if (!st) { st = document.createElement('style'); st.id = '__probe_noanim'; st.textContent = '*,*::before,*::after{animation:none!important;transition:none!important}'; document.head.appendChild(st); } return 1; };
+  // без анимаций и без мигающего курсора: снимки одного и того же состояния получаются одинаковыми
+  P.noanim = () => { let st = document.getElementById('__probe_noanim'); if (!st) { st = document.createElement('style'); st.id = '__probe_noanim'; st.textContent = '*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}'; document.head.appendChild(st); } return 1; };
   window.__probe = P;
 })();

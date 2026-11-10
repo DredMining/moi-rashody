@@ -27,7 +27,8 @@ const F = "const f=document.querySelector('iframe.app-frame'),w=f.contentWindow,
   const done = [];
   const shot = async (name, bottom) => {
     await sleep(350);
-    const r = await ev("const r=document.getElementById('phone').getBoundingClientRect(); return [r.left,r.top,r.width,r.height]");
+    // часы рамки стоят на одном времени: снимки разных прогонов можно сравнивать попиксельно
+    const r = await ev("document.getElementById('statusTime').textContent='9:41'; const r=document.getElementById('phone').getBoundingClientRect(); return [r.left,r.top,r.width,r.height]");
     const clip = bottom ? { x: r[0] + 8, y: r[1] + r[3] - 150, width: r[2] - 16, height: 142, scale: 2 } : { x: r[0] - 14, y: r[1] - 14, width: r[2] + 28, height: r[3] + 28, scale: 1 };
     const s = await send('Page.captureScreenshot', { format: 'png', clip });
     const file = path.join(OUT, 'ramka_' + name + '.png'); fs.writeFileSync(file, Buffer.from(s.data, 'base64')); done.push(name + ' ' + Math.round(fs.statSync(file).size / 1024) + ' КБ');
