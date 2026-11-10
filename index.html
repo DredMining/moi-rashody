@@ -190,7 +190,7 @@ button{cursor:pointer}
 .stat small{font-size:var(--fs-2xs);color:var(--muted)}
 .stat.wide{grid-column:1/-1}
 .panel.mcard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px;background:var(--surface);border-radius:var(--r)}
-.mcard .mcol{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;padding:8px 4px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--inset);text-align:center}
+.mcard .mcol{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;padding:8px 4px;border:1px solid transparent;border-radius:var(--r-md);background:var(--inset);text-align:center}
 .mcard .mdiff>span,.mcard .mdiff>b{color:var(--warn-ink)}
 .mcard .mdiff{transition:background-color .22s ease,box-shadow .22s ease}
 /* «Разница» in the colour of its sign: a tint and a thin ring, no glow (a glow blurs the figures) */
@@ -570,7 +570,8 @@ input.num::placeholder{font-family:var(--f-body)}
 /* the limit's columns: as «Всего денег» on «Деньги» — split by thin lines, a small grey label over each value */
 .lparts{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px}
 /* each sum in its own small block, its label and value in the middle of it */
-.lparts>div{display:flex;flex-direction:column;align-items:center;text-align:center;gap:1px;min-width:0;padding:5px 4px;background:var(--inset);border:1px solid var(--line);border-radius:var(--r-md)}
+/* a block inside a card is told apart by its fill alone, no frame in a frame (the edge is kept see-through, so nothing moves) */
+.lparts>div{display:flex;flex-direction:column;align-items:center;text-align:center;gap:1px;min-width:0;padding:5px 4px;background:var(--inset);border:1px solid transparent;border-radius:var(--r-md)}
 .lparts span{max-width:100%;font-size:var(--fs-2xs);line-height:1.3;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lparts b{font-family:var(--f-num);font-weight:500;font-size:min(14px,3.6vw);line-height:1.3;white-space:nowrap;font-variant-numeric:tabular-nums}
 .lparts b.neg{color:var(--bad)}
@@ -579,16 +580,17 @@ input.num::placeholder{font-family:var(--f-body)}
 .lparts .kop{font-size:max(var(--fs-2xs),.8em);color:var(--muted)}
 .alerts{display:flex;flex-direction:column;gap:var(--gap-stack)}
 .alerts:empty{display:none}
-.alert{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:0 var(--r) var(--r) 0;padding:10px var(--pad-card);font-size:var(--fs-base)}
+.alert{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:inset 3px 0 0 var(--alert-c,var(--warn));padding:10px var(--pad-card);font-size:var(--fs-base)}
 .alert>span{flex:1 1 10em;min-width:0;overflow-wrap:anywhere}
 .alert b{font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
 .alert .primary,.alert .ghost{flex:none;padding:8px 12px;margin-left:auto}
-.alert.bad{border-left-color:var(--bad)}
+/* a reminder is a card like the others — the same corners all round; its colour is a strip along the left edge */
+.alert.bad{--alert-c:var(--bad)}
 .sysacts{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2);margin-left:auto}
 .sysacts .primary,.sysacts .ghost{margin-left:0}
 /* «Есть новая версия · Обновить»: one slim line (the button's 44px reach goes past it), half of it in the page's top margin and
    the gap under it — the form below moves down by little */
-#sysAlerts .upd{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);min-height:30px;padding:0 14px 0 12px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 var(--r-md) var(--r-md) 0;font-size:var(--fs-sm);line-height:1.2}
+#sysAlerts .upd{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);min-height:30px;padding:0 14px 0 12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:inset 3px 0 0 var(--accent);font-size:var(--fs-sm);line-height:1.2}
 #sysAlerts .upd:first-child{margin-top:-8px}
 #sysAlerts .upd:last-child{margin-bottom:-8px}
 #sysAlerts .upd>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -669,7 +671,7 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 .zback{border:0;background:none;color:var(--accent);font-weight:600;font-size:var(--fs-md);padding:8px 8px 8px 0;min-height:var(--h-l);flex:none}
 .zgo{display:flex;justify-content:space-between;align-items:center;width:100%;border:1px solid var(--field-line);border-radius:var(--r-md);background:var(--inset);color:var(--accent);font-size:var(--fs-md);font-weight:500;padding:12px;text-align:left}
 .zgo span:last-child{font-size:var(--fs-xl);line-height:1}
-.zcard{background:var(--inset);border:1px solid var(--line);border-radius:var(--r-md);padding:2px 12px}
+.zcard{background:var(--inset);border:1px solid transparent;border-radius:var(--r-md);padding:2px 12px}
 .zrow{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-3);padding:11px 0;border-bottom:1px solid var(--line);font-size:var(--fs-md);line-height:1.3}
 .zrow:last-child{border-bottom:0}
 .zrow>div{display:flex;flex-direction:column;gap:2px;min-width:0;overflow-wrap:anywhere}
@@ -797,7 +799,7 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 .mparts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:100%;margin-top:6px}
 .mparts .mbar{grid-column:1/-1;display:flex;gap:2px;height:6px;margin-bottom:2px}
 .mparts .mbar i{display:block;min-width:4px;border-radius:var(--r-pill)}
-.mparts>div:not(.mbar){display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;padding:5px 4px;background:var(--inset);border:1px solid var(--line);border-radius:var(--r-md)}
+.mparts>div:not(.mbar){display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;padding:5px 4px;background:var(--inset);border:1px solid transparent;border-radius:var(--r-md)}
 .mparts>div>span{display:flex;align-items:center;gap:var(--sp-1);max-width:100%;font-size:var(--fs-2xs);line-height:1.3;color:var(--muted);white-space:nowrap}
 .mparts>div>span::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--c);flex:none}
 .mparts b{font-family:var(--f-num);font-weight:500;font-size:min(14px,3.5vw);line-height:1.3;white-space:nowrap}
@@ -828,11 +830,11 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 /* every window's ✕ (and the step sheet's ‹): one round 40px button on a soft fill; its tap area reaches 44px */
 .dp-x,.sheet-head .iconbtn,.zsheet-head .iconbtn{position:relative;width:40px;height:40px;flex:none;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--muted);font-size:17px;line-height:1;cursor:pointer}
 .dp-x::after,.sheet-head .iconbtn::after,.zsheet-head .iconbtn::after{content:'';position:absolute;inset:-2px}
-.dp-sum{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-3);padding:5px 8px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--inset);font-size:var(--fs-sm);color:var(--muted)}
+.dp-sum{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-3);padding:5px 8px;border:1px solid transparent;border-radius:var(--r-md);background:var(--inset);font-size:var(--fs-sm);color:var(--muted)}
 /* the sum keeps its one line (its label wraps instead; a <wbr> would break even under nowrap); narrower than 320px it may split
    between digit groups (moneyW), see below */
 .dp-sum b{font-family:var(--f-num);font-size:var(--fs-xl);font-weight:500;color:var(--ink);flex-shrink:0}
-.dp-repay{display:flex;flex-direction:column;gap:var(--sp-1);padding:4px 8px 6px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--inset)}
+.dp-repay{display:flex;flex-direction:column;gap:var(--sp-1);padding:4px 8px 6px;border:1px solid transparent;border-radius:var(--r-md);background:var(--inset)}
 .dp-section-title,.dinner-head{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 /* the account on its own line, 6px under it «Вернул всё» on the left half and «Вернул часть» on the right (the same for «Отдал всё / часть»);
    a form («Записать») takes the whole width */
@@ -845,7 +847,7 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 .dinner-head{padding:5px 8px 0;border-top:1px solid var(--line)}
 .dinner>.debt:last-child{border-bottom:1px solid var(--line);padding-bottom:6px}
 /* a loan's buttons in the person's window: close together, a few to a line */
-.dperson .debt{gap:6px;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--inset)}
+.dperson .debt{gap:6px;padding:8px 10px;border:1px solid transparent;border-radius:var(--r-md);background:var(--inset)}
 .dperson .debt .acts{gap:6px 8px;margin-top:6px;padding-top:8px;border-top:1px solid var(--line)}
 .dperson .debt-return,.dperson .debt-manage{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;width:100%}
 .dperson .debt-return{row-gap:6px;padding:6px;border-radius:var(--r-md);background:var(--raised)}
