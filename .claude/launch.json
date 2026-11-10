@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "style-audit",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["audit/tools/serve.js", ".", "8791"],
+      "port": 8791
+    }
+  ]
+}
