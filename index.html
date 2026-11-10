@@ -1690,21 +1690,24 @@ function toast(msg,undo,ms,act){const t=$('toast'), ym=[state.y,state.m];t.repla
   t.addEventListener('focusout',e=>{if(x0===null&&!t.hidden&&!t.contains(e.relatedTarget)){clearTimeout(toastT);toastT=setTimeout(toastOff,2000)}});
 })();
 /* a tap that changes what is under the finger (a window opens, a form or buttons appear, a row moves): the second tap of the same
-   quick double tap lands on the new thing — for a moment it is let go of. Two-step confirmations keep their own 600 ms */
-let freshTill=0;
-const fresh=(ms=400)=>{freshTill=performance.now()+ms};
+   quick double tap lands on the new thing — for a moment it is let go of. Two-step confirmations keep their own 600 ms.
+   Only where that tap was (a double tap lands on one spot — within a finger, 40 px, as below): a press somewhere else is a new one and
+   goes through at once — another button, a row, «Отменить» in the message (owner's choice, 10.11.2026). tapX, tapY: the last press */
+let freshTill=0, freshX=0, freshY=0, tapX=0, tapY=0;
+const fresh=(ms=400)=>{freshTill=performance.now()+ms;freshX=tapX;freshY=tapY};
 /* the moment of the tap, not of its handling: a slow first draw of a sheet keeps the second tap of a double tap waiting past freshTill (never later than now) */
 const evT=e=>Math.min(e.timeStamp||Infinity,performance.now());
-document.addEventListener('click',e=>{if(e.isTrusted&&e.detail>0&&evT(e)<freshTill){e.preventDefault();e.stopPropagation()}},true);
+const isFresh=e=>evT(e)<freshTill&&Math.hypot(e.clientX-freshX,e.clientY-freshY)<40;
+document.addEventListener('click',e=>{if(e.isTrusted&&e.detail>0&&isFresh(e)){e.preventDefault();e.stopPropagation()}},true);
 /* its mouse press too: the second click of a double click doesn't take the focus out of what just opened (to the page, or to a button of the new window).
    A mouse only (pointerdown says which): a finger's second tap is let go of below, and what a finger's tap focuses stays as it was */
-let ptr='';document.addEventListener('pointerdown',e=>{ptr=e.pointerType},true);
-document.addEventListener('mousedown',e=>{if(e.isTrusted&&ptr==='mouse'&&evT(e)<freshTill)e.preventDefault()},true);
+let ptr='';document.addEventListener('pointerdown',e=>{ptr=e.pointerType;tapX=e.clientX;tapY=e.clientY},true);
+document.addEventListener('mousedown',e=>{if(e.isTrusted&&ptr==='mouse'&&isFresh(e))e.preventDefault()},true);
 /* a double tap never zooms the page (touch-action does it; this is for an iPhone that zooms anyway): a second tap on the same
    spot within 300 ms, outside a field, is not handed to the browser — the tap itself still presses what is under the finger
    (unless fresh() lets go of it). Pinching with two fingers is left alone */
 {let t0=0, x0=0, y0=0, sx=0, sy=0, multi=false;
-  document.addEventListener('touchstart',e=>{multi=e.touches.length>1;const t=e.touches[0];sx=t.clientX;sy=t.clientY},{passive:true});
+  document.addEventListener('touchstart',e=>{multi=e.touches.length>1;const t=e.touches[0];sx=tapX=t.clientX;sy=tapY=t.clientY},{passive:true});
   document.addEventListener('touchend',e=>{
     const t=e.changedTouches[0], n=evT(e);
     if(multi||e.touches.length||!t){t0=0;return}
@@ -3494,17 +3497,30 @@ function renderList(items){
    can be pressed or found), then the list is drawn anew in its place. histEnd: ends the move under way at once; histTo: the filter it goes to —
    its button is pressed from the start of the move, as on Итоги (a redraw on the way keeps it so) */
 let histEnd=null, histTo=null;
+/* where the page will stand with that list in its place: no further down than its first record, nor than a shorter list lets the page go
+   (owner's choice, 10.11.2026: the chosen list is shown from its start). The list beside is drawn that much lower, so nothing jumps.
+   histFull: how tall the page was before that list was put beside (a longer one makes the page taller for the time of the move) */
+let histScroll=null, histFull=0;
 const histAt=()=>Math.max(0,SF.findIndex(([v])=>v===(state.scopeFilter||'')));
 /* the list of filter i, beside the list on its side; none past the first or the last */
 function histPeek(i){
   const tr=$('listTrack'), old=tr.querySelector('.hist-peek'), dir=Math.sign(i-histAt());
   if(old&&+old.dataset.i===i) return;
-  old?.remove();if(!dir||i<0||i>=SF.length) return;
+  old?.remove();histScroll=null;if(!dir||i<0||i>=SF.length) return;
   const af=state.accFilter||null, shown=listShown(histItems,SF[i][0],af), pk=document.createElement('div');
   pk.className='hist-peek';pk.inert=true;pk.setAttribute('aria-hidden','true');pk.dataset.i=i;pk.dataset.dir=dir;
   pk.innerHTML=shown.length?listHtml(shown,af):listEmpty(af,SF[i][0]);
   pk.querySelectorAll('[data-act],[data-open],[data-id]').forEach(b=>['data-act','data-open','data-id'].forEach(a=>b.removeAttribute(a)));
-  tr.append(pk);
+  tr.append(pk);requestAnimationFrame(histPlace);
+}
+/* how far down the list beside is drawn. It measures the page — not in the finger's move itself (a quick flick is told by its speed,
+   and measuring there slowed it), but a frame later: by then that list is still off the screen; or at once as the finger lets go */
+function histPlace(){
+  const tr=$('listTrack'), pk=tr.querySelector('.hist-peek'), sc=$('scroller');
+  if(!pk||histScroll!==null) return;
+  const top=tr.getBoundingClientRect().top-sc.getBoundingClientRect().top+sc.scrollTop;
+  histScroll=Math.max(0,Math.min(sc.scrollTop,top-8,histFull-tr.offsetHeight+pk.offsetHeight-sc.clientHeight));
+  pk.style.top=(sc.scrollTop-histScroll)+'px';
 }
 /* fn once the list has slid where it goes (its transition over, or a moment after: no transitionend comes without the animation) */
 function histWait(fn){
@@ -3519,14 +3535,20 @@ function histGo(i){
   histEnd?.();
   const cur=histAt();if(i<0||i>=SF.length||i===cur){histBack();return}
   const tr=$('listTrack'), vp=$('listViewport'), dir=Math.sign(i-cur);
-  if(!state.ready){state.scopeFilter=SF[i][0];fresh();render();return}
-  histPeek(i);vp.classList.add('is-moving');tr.classList.remove('is-dragging');void tr.offsetWidth;
+  /* at the press (or as the finger lets go), as on Итоги — not as the list arrives: by then the next press is a new one, and it was lost */
+  fresh();
+  if(!state.ready){state.scopeFilter=SF[i][0];render();return}
+  if(!tr.querySelector('.hist-peek')) histFull=$('scroller').scrollHeight;
+  histPeek(i);histPlace();vp.classList.add('is-moving');tr.classList.remove('is-dragging');void tr.offsetWidth;
   histTo=SF[i][0];$('scopeFilter').querySelectorAll('[data-sf]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sf===histTo)));
   histWait(()=>{
     /* a filter button focused from the keyboard: the focus stays on the one pressed now (the buttons are drawn anew) */
     const fo=$('scopeFilter').contains(document.activeElement);
-    tr.classList.add('is-dragging');histTo=null;state.scopeFilter=SF[i][0];fresh();render();
-    tr.querySelector('.hist-peek')?.remove();tr.style.transform='';vp.classList.remove('is-moving');void tr.offsetWidth;tr.classList.remove('is-dragging');
+    const to=histScroll;histScroll=null;
+    tr.classList.add('is-dragging');histTo=null;state.scopeFilter=SF[i][0];render();
+    tr.querySelector('.hist-peek')?.remove();tr.style.transform='';vp.classList.remove('is-moving');
+    if(to!==null) $('scroller').scrollTop=to;
+    void tr.offsetWidth;tr.classList.remove('is-dragging');
     if(fo) $('scopeFilter').querySelector('[aria-pressed="true"]')?.focus({preventScroll:true});
   });
   tr.style.transform=`translate3d(calc(${dir>0?'-100% - ':'100% + '}12px),0,0)`;
@@ -3534,7 +3556,7 @@ function histGo(i){
 /* let go short (or the move broken off): the list slides back into its place */
 function histBack(){
   histEnd?.();
-  const tr=$('listTrack'), vp=$('listViewport'), done=()=>{tr.querySelector('.hist-peek')?.remove();vp.classList.remove('is-moving')};
+  const tr=$('listTrack'), vp=$('listViewport'), done=()=>{tr.querySelector('.hist-peek')?.remove();histScroll=null;vp.classList.remove('is-moving')};
   tr.classList.remove('is-dragging');
   if(!tr.style.transform){done();return}
   histWait(done);tr.style.transform='';
@@ -3664,7 +3686,7 @@ function bindSwipe(o){
     cancel:()=>{track.classList.remove('is-dragging');track.style.transform=x(at())}});
   window.addEventListener('resize',()=>syncStatsViewport(),{passive:true})}
 bindSwipe({on:()=>state.tab==='history'&&state.ready,skip:'#accFilter',n:SF.length,at:histAt,width:()=>$('viewHistory').clientWidth||$('scroller').clientWidth,
-  start:()=>{histEnd?.();$('listTrack').classList.add('is-dragging');$('listViewport').classList.add('is-moving')},
+  start:()=>{histEnd?.();histFull=$('scroller').scrollHeight;$('listTrack').classList.add('is-dragging');$('listViewport').classList.add('is-moving')},
   drag:(d,dx)=>{histPeek(histAt()+(dx<0?1:-1));$('listTrack').style.transform=`translate3d(${d}px,0,0)`},
   go:histGo,cancel:histBack});
 function renderCompare(){
