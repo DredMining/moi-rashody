@@ -2469,7 +2469,8 @@ function renderBudget(spent,out){
 /* the limit window: the month's limit (changed right here), what is spent in it, what is left or how much it is over, the meter */
 function limFill(spent,budget,def){
   const ed=state.limSheet.edit, left=r2(budget-spent), pd=left>=0.01&&isCurrentMonth()?perDay(left):'';
-  $('sheet').classList.toggle('centered',ed);
+  /* in the middle from the start, as the steps of a record: «Изменить» no longer makes the window jump from the bottom to the middle */
+  $('sheet').classList.add('centered');
   $('sheetTitle').textContent='Лимит';
   $('sheetSub').textContent=monthLbl();
   $('sheetBody').innerHTML=`<div class="zcard">${ed?`<div class="zrow zedit"><div><span>Лимит на месяц</span>${limForm('lim',budget)}</div></div>`
