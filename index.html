@@ -334,7 +334,7 @@ input[type="date"]::-webkit-date-and-time-value{color:var(--ink);-webkit-text-fi
 .xfer{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px 4px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:12px}
 .xfer>.dp-head,.xfer .full{grid-column:1/-1}
 .xfer label{display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--fs-xs);color:var(--muted);min-width:0}
-/* «Откуда» and «Куда»: M fields (36px; the type stays 16px — under it the iPhone zooms in), «⇄» between them swaps the two.
+/* «Откуда» and «Куда»: fields of the same 44px as the sum under them (the type stays 16px — under it the iPhone zooms in), «⇄» between them swaps the two.
    «⇄» 32px wide, the columns 4px apart and the arrow's side 4px: «Брокерский счёт» still fits whole in a 440px window */
 .xfer select{min-height:var(--h-l);padding:4px 4px 4px 8px;line-height:1.2}
 .xfer .xswap{align-self:end;width:var(--h-s);min-height:var(--h-l);padding:0;font-size:18px;line-height:1}
@@ -561,6 +561,10 @@ input.num::placeholder{font-family:var(--f-body)}
 #addBox .seg{padding:2px;gap:2px}
 #addBox .seg button{font-size:var(--fs-sm);min-height:var(--h-m);padding:4px}
 #addBox .form{gap:var(--sp-2)}
+/* the message of «Новая запись» stands by the field it is about: a mistake in the sum — right under the sum (its order lifts it there),
+   any other (a date later than today) — where it is in the page, under the date and the comment */
+#form>.amount{order:-2}
+#form:has(#amount[aria-invalid="true"])>#formErr{order:-1}
 #addBox .amount input{font-size:18px;padding-block:7px}
 #addBox .amount span{font-size:16px}
 #addBox .chipbtn{font-size:var(--fs-xs);min-height:var(--h-s);padding:4px 12px}
@@ -999,11 +1003,14 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
 @media (max-width:374px){.tiles:not(.accs){grid-template-columns:repeat(3,minmax(0,1fr))}}
 /* even rows: a tile with a one-line name is as tall as one with two (15px of padding, the 32px icon, a 4px gap, two lines of 1.2, the edge) */
 .tiles:not(.accs)>.tile{min-height:calc(53px + 2.4em)}
-/* no tile is left alone on a last row. Five tiles («Отдельно», a trip's categories) stand in one row of five where their words fit (430px and wider);
-   a last tile alone on its row («Другое») takes the whole row, its icon and word side by side */
+/* no tile is left alone on a last row. Five tiles («Отдельно», a trip's categories): one row of five where their words fit (430px and wider;
+   no side padding there — «Копильник» keeps a few pixels to spare), three and two on a narrower phone. A last tile alone on its row
+   («Другое» of the thirteen) takes the whole row, its icon and word side by side — never an ordinary category */
 @media (min-width:430px){.tiles:not(.accs):has(>.tile:nth-child(5):last-child){grid-template-columns:repeat(5,minmax(0,1fr))}
+  .tiles:not(.accs):has(>.tile:nth-child(5):last-child)>.tile{padding-inline:0}
   .tiles:not(.accs)>.tile:last-child:nth-child(4n+1):nth-child(n+6){grid-column:1/-1;flex-direction:row;justify-content:center;gap:var(--sp-2);min-height:var(--h-l);padding-block:6px}}
-@media (min-width:375px) and (max-width:429px){.tiles:not(.accs)>.tile:last-child:nth-child(4n+1){grid-column:1/-1;flex-direction:row;justify-content:center;gap:var(--sp-2);min-height:var(--h-l);padding-block:6px}}
+@media (min-width:375px) and (max-width:429px){.tiles:not(.accs):has(>.tile:nth-child(5):last-child){grid-template-columns:repeat(3,minmax(0,1fr))}
+  .tiles:not(.accs)>.tile:last-child:nth-child(4n+1):nth-child(n+6){grid-column:1/-1;flex-direction:row;justify-content:center;gap:var(--sp-2);min-height:var(--h-l);padding-block:6px}}
 @media (max-width:374px){.tiles:not(.accs)>.tile:last-child:nth-child(3n+1){grid-column:1/-1;flex-direction:row;justify-content:center;gap:var(--sp-2);min-height:var(--h-l);padding-block:6px}}
 /* the grid stands 8px past the window's content on each side: «Отдельно» starts where its tiles start */
 .tiles:not(.accs)+h3{margin-inline:-8px}
@@ -1123,11 +1130,11 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     </div>
     <form class="form" id="form" novalidate>
       <label class="amount"><input id="amount" autocomplete="off" inputmode="decimal" placeholder="0" aria-label="Сумма" aria-describedby="formErr"><span>₽</span></label>
-      <p class="err" role="alert" id="formErr" hidden></p>
       <p class="hint" id="hint" hidden></p>
       <div class="extras"><button type="button" class="chipbtn" id="dateBtn" aria-label="Дата записи: Сегодня">Сегодня</button><button type="button" class="chipbtn" id="noteBtn">+ комментарий</button></div>
       <input id="date" type="date" aria-label="Дата" hidden>
       <input id="note" placeholder="Комментарий" maxlength="80" aria-label="Комментарий" hidden>
+      <p class="err" role="alert" id="formErr" hidden></p>
       <button class="submit" id="submitBtn" type="submit">Добавить расход</button>
     </form>
   </section>
