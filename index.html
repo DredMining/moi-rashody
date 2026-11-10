@@ -1117,10 +1117,11 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   #addBox .chipbtn{font-size:var(--fs-sm);min-height:var(--h-m);padding:4px 14px}
   .seg button{border-radius:calc(var(--r-md) - 3px)}
   /* where the larger type would not fit, the size stays as it was: the five words of the Итоги switch (11–12px by the screen's width,
-     as before; under 360px its own rule above still holds); five tiles in one row («Копильник» keeps its 7px to spare);
+     as before; under 360px its own rule above still holds); five tiles in one row («Копильник» keeps its 7px to spare; the tiles
+     stay as tall as the other tiles of the window);
      a second button beside the main one (two of them side by side wrap on a narrower phone) */
   @media (min-width:360px){#statSeg button{font-size:clamp(11px,2.9vw,12px)}}
-  @media (min-width:430px){.tiles:not(.accs):has(>.tile:nth-child(5):last-child)>.tile{font-size:11px}}
+  @media (min-width:430px){.tiles:not(.accs):has(>.tile:nth-child(5):last-child)>.tile{font-size:11px;min-height:calc(53px + 2.4 * var(--fs-2xs))}}
   .ghost{font-size:var(--fs-base)}
 }
 /* «reduce motion» on the phone: nothing slides or fades, the windows included */
