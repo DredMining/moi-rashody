@@ -1098,6 +1098,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   [data-theme="dark"] .ring::before{content:'';flex:1;height:8px;border-radius:var(--r-pill);background:linear-gradient(90deg,var(--rc) calc(var(--p) * 1%),var(--track) 0)}
   [data-theme="dark"] .ring>div{display:block;width:auto;height:auto;border-radius:0;background:none}
   [data-theme="dark"] .ring b,[data-theme="dark"] .ring.over b{font-size:var(--fs-sm);font-weight:600}
+  /* the limit's bar and percent: taken off the month card at the owner's word (10.11.2026) — the night-blue look keeps its ring */
+  [data-theme="dark"] .ring{display:none}
   /* a section's title is larger and in the text's colour — in capitals, as every heading and label of the app: plain letters were tried
      here and the owner turned them down (10.11.2026), so a group's label and a card's label are as in the night-blue look.
      One face in this look: the month's title of «Записи» and «Итоги» is set in the text face too */
