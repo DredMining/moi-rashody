@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <!-- nothing on this page may send data anywhere: only its own files, fonts included -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<script>try{var t=localStorage.getItem('rashody-theme');document.documentElement.setAttribute('data-theme',(t==='dark'||t==='light')?t:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Мои расходы</title>
 <meta name="description" content="Ведите учёт доходов и расходов, счетов, долгов, командировочных и закята. Записи хранятся только на вашем устройстве.">
@@ -102,7 +103,7 @@ img{max-width:100%}
   color-scheme:dark;
 }
 /* the phone's light appearance: the first look, colour for colour as it was before the two looks (still dark: color-scheme stays dark) */
-@media (prefers-color-scheme: light){:root{
+:root[data-theme="light"]{
   --bg:#0D1320; --surface:#151E30; --ink:#E6ECF7; --muted:#8E9AB3; --line:#2A3550;
   --accent:#5B8CFF; --accent-soft:#1B2A4A;
   --good:#5EDB94; --warn:#FFC94D; --bad:#FF7A7A;
@@ -112,7 +113,7 @@ img{max-width:100%}
   --inset:var(--bg); --seg-on:var(--raised); --seg-out:var(--out); --seg-in:var(--in); --seg-own:var(--own); --seg-trip:var(--trip); --seg-ink:var(--on-fill); --fab:var(--accent);
   --raised:var(--surface); --seg-ring:var(--field-line); --seg-id-ring:0 0 #0000; --track:var(--line);
   --toast-bg:var(--ink); --toast-ink:var(--bg); --toast-ring:0 0 #0000;
-}}
+}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:var(--fs-md);line-height:1.5;font-variant-numeric:tabular-nums}
 .wrap{max-width:720px;margin:0 auto;padding-inline:16px;padding-block:16px 24px;display:flex;flex-direction:column;gap:var(--sp-4)}
@@ -509,7 +510,8 @@ input.num::placeholder{font-family:var(--f-body)}
   /* a sum too long for its third goes on between digit groups (<wbr> in renderCompare) — never cut */
   .cmp-amount,.cmp-delta{font-size:var(--fs-xs);white-space:normal}
 }
-.sumcard{background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:10px}
+.sumcard{background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:10px;position:relative}
+.theme-toggle{position:absolute;top:var(--pad-card);right:var(--pad-card);width:var(--h-s);height:var(--h-s);padding:0;border:1px solid var(--field-line);border-radius:50%;background:var(--inset);color:var(--ink);font-size:15px;line-height:1;display:grid;place-items:center}
 /* Учёт a size smaller: the card, the new record and the last records fit more on the screen
    (the sum field stays at 16px and over — a smaller one makes the iPhone zoom in when it is tapped).
    The small blocks under the meters: lower, a size smaller */
@@ -1073,57 +1075,55 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   .cmp-head,.cmp-row{grid-template-columns:repeat(2,minmax(0,1fr))}.cmp-delta,.cmp-head>span:last-child{grid-column:1/-1}}
 @media (max-width:480px){.form{grid-template-columns:minmax(0,1fr)}.segs{grid-template-columns:1fr}}
 /* ---- the black look only (the phone's dark appearance); the night-blue look keeps the ring and its sizes ---- */
-@media (prefers-color-scheme: dark){
-  /* the big sum of a tab is larger: up to 44px (fitBig still makes it smaller while it doesn't fit) */
-  :root{--fs-hero:clamp(30px,10vw,44px);
+/* the big sum of a tab is larger: up to 44px (fitBig still makes it smaller while it doesn't fit) */
+  :root[data-theme="dark"]{--fs-hero:clamp(30px,10vw,44px);
     /* cards lie flat on the black page: no edge, rounder corners, more room inside and between them.
        A window keeps its thin edge — it floats over the page. Corners: a button / field / block in a card 14, a card 20, a window 28 */
     --card-line:transparent;--pad-card:16px;--gap-stack:16px;--r-md:14px;--r-lg:20px;--r-xl:28px;
     /* type a step larger: nothing under 12, lists and reminders 15, text and buttons 16 */
     --fs-2xs:12px;--fs-base:15px;--fs-md:16px}
   /* a reminder's colour: a short straight bar inside its left edge (a strip along the edge would bend round the larger corner) */
-  .alert,#sysAlerts .upd{box-shadow:none;background-image:linear-gradient(var(--alert-c,var(--warn)),var(--alert-c,var(--warn)));background-repeat:no-repeat;background-position:6px 50%;background-size:3px calc(100% - 20px)}
-  #sysAlerts .upd{--alert-c:var(--accent);background-size:3px calc(100% - 12px)}
+  [data-theme="dark"] .alert,[data-theme="dark"] #sysAlerts .upd{box-shadow:none;background-image:linear-gradient(var(--alert-c,var(--warn)),var(--alert-c,var(--warn)));background-repeat:no-repeat;background-position:6px 50%;background-size:3px calc(100% - 20px)}
+  [data-theme="dark"] #sysAlerts .upd{--alert-c:var(--accent);background-size:3px calc(100% - 12px)}
   /* «К оплате» in the zakat window: its red is a short straight bar as well (a 3px edge would bend round the corner) */
-  .zdue{border-left:1px solid var(--line);background-image:linear-gradient(var(--bad),var(--bad));background-repeat:no-repeat;background-position:6px 50%;background-size:3px calc(100% - 16px)}
-  .zdue,#zakatSheet .zdue{padding-left:16px}
+  [data-theme="dark"] .zdue{border-left:1px solid var(--line);background-image:linear-gradient(var(--bad),var(--bad));background-repeat:no-repeat;background-position:6px 50%;background-size:3px calc(100% - 16px)}
+  [data-theme="dark"] .zdue,[data-theme="dark"] #zakatSheet .zdue{padding-left:16px}
   /* a card with a glow («Мне должны», «Всего денег»): the glow is drawn from the card's very edge — under an edge that is not seen
      the picture would otherwise start again, a 1px line of the far side's colour */
-  .debt-overview,.total.mtot{background-origin:border-box}
+  [data-theme="dark"] .debt-overview,[data-theme="dark"] .total.mtot{background-origin:border-box}
   /* the month card: no ring — the sum takes the card's whole width; the share of the limit is a bar with its percent, under the lines.
      The same element and the same --p as the ring: only its drawing differs */
-  .lhead{flex-direction:column;align-items:stretch;gap:10px}
-  .ring{order:2;display:flex;align-items:center;gap:10px;width:auto;height:auto;border-radius:0;background:none}
-  .ring::before{content:'';flex:1;height:8px;border-radius:var(--r-pill);background:linear-gradient(90deg,var(--rc) calc(var(--p) * 1%),var(--track) 0)}
-  .ring>div{display:block;width:auto;height:auto;border-radius:0;background:none}
-  .ring b,.ring.over b{font-size:var(--fs-sm);font-weight:600}
+  [data-theme="dark"] .lhead{flex-direction:column;align-items:stretch;gap:10px}
+  [data-theme="dark"] .ring{order:2;display:flex;align-items:center;gap:10px;width:auto;height:auto;border-radius:0;background:none}
+  [data-theme="dark"] .ring::before{content:'';flex:1;height:8px;border-radius:var(--r-pill);background:linear-gradient(90deg,var(--rc) calc(var(--p) * 1%),var(--track) 0)}
+  [data-theme="dark"] .ring>div{display:block;width:auto;height:auto;border-radius:0;background:none}
+  [data-theme="dark"] .ring b,[data-theme="dark"] .ring.over b{font-size:var(--fs-sm);font-weight:600}
   /* a section's title is larger and in the text's colour — in capitals, as every heading and label of the app: plain letters were tried
      here and the owner turned them down (10.11.2026), so a group's label and a card's label are as in the night-blue look.
      One face in this look: the month's title of «Записи» and «Итоги» is set in the text face too */
-  :root{--f-display:var(--f-body)}
-  h2{font-size:var(--fs-lg);font-weight:700;line-height:1.2;letter-spacing:.02em;color:var(--ink)}
+  :root[data-theme="dark"]{--f-display:var(--f-body)}
+  [data-theme="dark"] h2{font-size:var(--fs-lg);font-weight:700;line-height:1.2;letter-spacing:.02em;color:var(--ink)}
   /* a group's title over its card («Доходы по источникам», «Командировка» on Итоги) keeps the look of the groups' labels beside it */
-  #incomeBreakdown>h2,#tripCard>h2{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;color:var(--muted)}
-  .monthbar .title{font-size:var(--fs-lg);font-weight:600}
+  [data-theme="dark"] #incomeBreakdown>h2,[data-theme="dark"] #tripCard>h2{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;color:var(--muted)}
+  [data-theme="dark"] .monthbar .title{font-size:var(--fs-lg);font-weight:600}
   /* the main button of a form is 52px. «Новая запись» is the main screen's form, less tight here: its sum 56px with larger, bolder figures —
      the first thing typed; its switches 38px in a 3px groove, its chips 36px. The picked half of a switch follows the corner of its groove */
-  .submit{min-height:52px}
-  #addBox .amount input{min-height:56px;font-size:24px;font-weight:600}
-  #addBox .amount span{font-size:var(--fs-xl)}
-  #addBox .seg{padding:3px;gap:3px}
-  #addBox .seg button{font-size:var(--fs-base);min-height:38px}
-  #addBox .chipbtn{font-size:var(--fs-sm);min-height:var(--h-m);padding:4px 14px}
-  .seg button{border-radius:calc(var(--r-md) - 3px)}
+  [data-theme="dark"] .submit{min-height:52px}
+  [data-theme="dark"] #addBox .amount input{min-height:56px;font-size:24px;font-weight:600}
+  [data-theme="dark"] #addBox .amount span{font-size:var(--fs-xl)}
+  [data-theme="dark"] #addBox .seg{padding:3px;gap:3px}
+  [data-theme="dark"] #addBox .seg button{font-size:var(--fs-base);min-height:38px}
+  [data-theme="dark"] #addBox .chipbtn{font-size:var(--fs-sm);min-height:var(--h-m);padding:4px 14px}
+  [data-theme="dark"] .seg button{border-radius:calc(var(--r-md) - 3px)}
   /* where the larger type would not fit, the size stays as it was: the five words of the Итоги switch (11–12px by the screen's width,
      as before; under 360px its own rule above still holds); five tiles in one row («Копильник» keeps its 7px to spare; the tiles
      stay as tall as the other tiles of the window);
      a second button beside the main one (two of them side by side wrap on a narrower phone) */
-  @media (min-width:360px){#statSeg button{font-size:clamp(11px,2.9vw,12px)}}
-  @media (min-width:430px){.tiles:not(.accs):has(>.tile:nth-child(5):last-child)>.tile{font-size:11px;min-height:calc(53px + 2.4 * var(--fs-2xs))}}
-  .ghost{font-size:var(--fs-base)}
+  @media (min-width:360px){[data-theme="dark"] #statSeg button{font-size:clamp(11px,2.9vw,12px)}}
+  @media (min-width:430px){[data-theme="dark"] .tiles:not(.accs):has(>.tile:nth-child(5):last-child)>.tile{font-size:11px;min-height:calc(53px + 2.4 * var(--fs-2xs))}}
+  [data-theme="dark"] .ghost{font-size:var(--fs-base)}
   /* the sums of the zakat card on Деньги stand three in a row: at 15px they run into the card's padding on a 375–390px phone */
-  .zline .zcols b{font-size:14px}
-}
+  [data-theme="dark"] .zline .zcols b{font-size:14px}
 /* «reduce motion» on the phone: nothing slides or fades, the windows included */
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
 /* Windows high contrast (forced colors) draws a picked and a plain button alike: what is picked («Расход», a filter, a tab) gets a ring
@@ -1142,6 +1142,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
 
   <div id="viewLedger" role="tabpanel" aria-labelledby="tabLedger">
   <section class="sumcard" aria-label="Траты в лимит за месяц">
+    <button type="button" id="themeToggle" class="theme-toggle" aria-label="Переключить вид: тёмный или светлый">🌓</button>
     <div class="lhead">
       <div class="ring" id="limitMeter" role="progressbar" aria-label="Лимит на месяц" aria-valuemin="0" aria-valuemax="100"><div><b id="limitPct">—</b></div></div>
       <div class="lr"><span id="sumLabel">Траты в лимит за месяц</span><span class="big" id="total">0 ₽</span>
@@ -4806,6 +4807,14 @@ $('exportBtn').onclick=async()=>{
   const r=await saveFile(`moi-rashody-${monthKey()}.csv`,csv,'text/csv');
   if(r) toast(`CSV за ${ml} сохранён`);else if(r===false) toast(FILE_ERR);
 };
+(function(){
+  const KEY='rashody-theme';
+  const mq=matchMedia('(prefers-color-scheme: dark)');
+  const applyTheme=t=>{document.documentElement.setAttribute('data-theme',t);const b=$('themeToggle');if(b){b.textContent=t==='dark'?'☀️':'🌙'}};
+  applyTheme(document.documentElement.getAttribute('data-theme')||(mq.matches?'dark':'light'));
+  mq.addEventListener('change',e=>{try{if(!localStorage.getItem(KEY))applyTheme(e.matches?'dark':'light')}catch(x){}});
+  $('themeToggle').onclick=()=>{const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';try{localStorage.setItem(KEY,next)}catch(e){}applyTheme(next)};
+})();
 renderChips();
 render();
 /* a reload onto a new version (the worker, below) comes back to the month, filters, «Итоги» view and place he was at — this tab only, read once */
