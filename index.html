@@ -1065,6 +1065,18 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   .mfoot{row-gap:24px}.bkgrid{grid-template-columns:minmax(0,1fr)}.dp-sum{flex-wrap:wrap;row-gap:0}.dp-sum b{flex-shrink:1}
   .cmp-head,.cmp-row{grid-template-columns:repeat(2,minmax(0,1fr))}.cmp-delta,.cmp-head>span:last-child{grid-column:1/-1}}
 @media (max-width:480px){.form{grid-template-columns:minmax(0,1fr)}.segs{grid-template-columns:1fr}}
+/* ---- the black look only (the phone's dark appearance); the night-blue look keeps the ring and its sizes ---- */
+@media (prefers-color-scheme: dark){
+  /* the big sum of a tab is larger: up to 44px (fitBig still makes it smaller while it doesn't fit) */
+  :root{--fs-hero:clamp(30px,10vw,44px)}
+  /* the month card: no ring — the sum takes the card's whole width; the share of the limit is a bar with its percent, under the lines.
+     The same element and the same --p as the ring: only its drawing differs */
+  .lhead{flex-direction:column;align-items:stretch;gap:10px}
+  .ring{order:2;display:flex;align-items:center;gap:10px;width:auto;height:auto;border-radius:0;background:none}
+  .ring::before{content:'';flex:1;height:8px;border-radius:var(--r-pill);background:linear-gradient(90deg,var(--rc) calc(var(--p) * 1%),var(--track) 0)}
+  .ring>div{display:block;width:auto;height:auto;border-radius:0;background:none}
+  .ring b,.ring.over b{font-size:var(--fs-sm);font-weight:600}
+}
 /* «reduce motion» on the phone: nothing slides or fades, the windows included */
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
 /* Windows high contrast (forced colors) draws a picked and a plain button alike: what is picked («Расход», a filter, a tab) gets a ring
