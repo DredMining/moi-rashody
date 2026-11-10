@@ -1086,6 +1086,12 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   /* a reminder's colour: a short straight bar inside its left edge (a strip along the edge would bend round the larger corner) */
   .alert,#sysAlerts .upd{box-shadow:none;background-image:linear-gradient(var(--alert-c,var(--warn)),var(--alert-c,var(--warn)));background-repeat:no-repeat;background-position:6px 50%;background-size:3px calc(100% - 20px)}
   #sysAlerts .upd{--alert-c:var(--accent);background-size:3px calc(100% - 12px)}
+  /* «К оплате» in the zakat window: its red is a short straight bar as well (a 3px edge would bend round the corner) */
+  .zdue{border-left:1px solid var(--line);background-image:linear-gradient(var(--bad),var(--bad));background-repeat:no-repeat;background-position:6px 50%;background-size:3px calc(100% - 16px)}
+  .zdue,#zakatSheet .zdue{padding-left:16px}
+  /* a card with a glow («Мне должны», «Всего денег»): the glow is drawn from the card's very edge — under an edge that is not seen
+     the picture would otherwise start again, a 1px line of the far side's colour */
+  .debt-overview,.total.mtot{background-origin:border-box}
   /* the page's title over the month card: the month «Учёт» shows, large; its year smaller and quieter */
   .bigmonth{display:block;padding:4px 2px 0;font-family:var(--f-body);font-size:clamp(28px,7.7vw,34px);font-weight:700;line-height:1.1;letter-spacing:-.02em;text-transform:none;color:var(--ink)}
   .bigmonth span{text-transform:capitalize}
@@ -1123,6 +1129,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   @media (min-width:360px){#statSeg button{font-size:clamp(11px,2.9vw,12px)}}
   @media (min-width:430px){.tiles:not(.accs):has(>.tile:nth-child(5):last-child)>.tile{font-size:11px;min-height:calc(53px + 2.4 * var(--fs-2xs))}}
   .ghost{font-size:var(--fs-base)}
+  /* the sums of the zakat card on Деньги stand three in a row: at 15px they run into the card's padding on a 375–390px phone */
+  .zline .zcols b{font-size:14px}
 }
 /* «reduce motion» on the phone: nothing slides or fades, the windows included */
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
