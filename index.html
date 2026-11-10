@@ -1080,7 +1080,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   :root{--fs-hero:clamp(30px,10vw,44px);
     /* cards lie flat on the black page: no edge, rounder corners, more room inside and between them.
        A window keeps its thin edge — it floats over the page. Corners: a button / field / block in a card 14, a card 20, a window 28 */
-    --card-line:transparent;--pad-card:16px;--gap-stack:16px;--r-md:14px;--r-lg:20px;--r-xl:28px}
+    --card-line:transparent;--pad-card:16px;--gap-stack:16px;--r-md:14px;--r-lg:20px;--r-xl:28px;
+    /* type a step larger: nothing under 12, lists and reminders 15, text and buttons 16 */
+    --fs-2xs:12px;--fs-base:15px;--fs-md:16px}
   /* a reminder's colour: a short straight bar inside its left edge (a strip along the edge would bend round the larger corner) */
   .alert,#sysAlerts .upd{box-shadow:none;background-image:linear-gradient(var(--alert-c,var(--warn)),var(--alert-c,var(--warn)));background-repeat:no-repeat;background-position:6px 50%;background-size:3px calc(100% - 20px)}
   #sysAlerts .upd{--alert-c:var(--accent);background-size:3px calc(100% - 12px)}
@@ -1114,6 +1116,12 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   #addBox .seg button{font-size:var(--fs-base);min-height:38px}
   #addBox .chipbtn{font-size:var(--fs-sm);min-height:var(--h-m);padding:4px 14px}
   .seg button{border-radius:calc(var(--r-md) - 3px)}
+  /* where the larger type would not fit, the size stays as it was: the five words of the Итоги switch (11–12px by the screen's width,
+     as before; under 360px its own rule above still holds); five tiles in one row («Копильник» keeps its 7px to spare);
+     a second button beside the main one (two of them side by side wrap on a narrower phone) */
+  @media (min-width:360px){#statSeg button{font-size:clamp(11px,2.9vw,12px)}}
+  @media (min-width:430px){.tiles:not(.accs):has(>.tile:nth-child(5):last-child)>.tile{font-size:11px}}
+  .ghost{font-size:var(--fs-base)}
 }
 /* «reduce motion» on the phone: nothing slides or fades, the windows included */
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
