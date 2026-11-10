@@ -66,7 +66,7 @@ img{max-width:100%}
   /* one accent for «Добавить расход» and «Добавить доход»: the kind of record is told by the switch above, not by the button's colour */
   --out:#B23A55; --in:#B23A55; --own:#243F75; --trip:#7A5A1E;
   /* buttons with white text on the accent, the edge of a field / chip / tile (3:1), the link in the light toast, account marks' rim, the strip under the status bar */
-  --accent-btn:#B23A55; --field-line:#7A6E74; --toast-link:#8E2440; --badge-ink:#1A1405; --good-ink:var(--good); --mark-edge:rgb(255 255 255 / .5); --sbar:var(--bg);
+  --accent-btn:#B23A55; --field-line:#7A6E74; --toast-link:var(--accent); --badge-ink:#1A1405; --good-ink:var(--good); --mark-edge:rgb(255 255 255 / .5); --sbar:var(--bg);
   /* yellow as text (a fill or a line keeps --warn) */
   --warn-ink:var(--warn);
   --f-display:"Unbounded", "Golos Text", system-ui, sans-serif;
@@ -97,6 +97,8 @@ img{max-width:100%}
   /* a block raised over an inset plate; the ring of a picked segment (3:1 to its plate and to the groove) — here every picked segment has it,
      the fill alone is too close to the groove; the empty part of a meter, a bar or the limit's ring */
   --raised:#3B3237; --seg-ring:#958990; --seg-id-ring:inset 0 0 0 1.5px var(--seg-ring); --track:#4A4046;
+  /* the message box: a dark plate with a thin ring here (a light one would be the brightest thing on a black screen) */
+  --toast-bg:var(--raised); --toast-ink:var(--ink); --toast-ring:0 0 0 1px var(--seg-ring);
   color-scheme:dark;
 }
 /* the phone's light appearance: the first look, colour for colour as it was before the two looks (still dark: color-scheme stays dark) */
@@ -109,6 +111,7 @@ img{max-width:100%}
   --accent-btn:#3B6BE0; --field-line:#606E8D; --toast-link:#1F4FD1;
   --inset:var(--bg); --seg-on:var(--raised); --seg-out:var(--out); --seg-in:var(--in); --seg-own:var(--own); --seg-trip:var(--trip); --seg-ink:var(--on-fill); --fab:var(--accent);
   --raised:var(--surface); --seg-ring:var(--field-line); --seg-id-ring:0 0 #0000; --track:var(--line);
+  --toast-bg:var(--ink); --toast-ink:var(--bg); --toast-ring:0 0 #0000;
 }}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:var(--fs-md);line-height:1.5;font-variant-numeric:tabular-nums}
@@ -889,6 +892,12 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 /* buttons: L (44px) by default; in a card, an alert or a dense window M (36px) or S (32px) — see --h-* */
 .ghost{border:1px solid var(--field-line);background:transparent;border-radius:var(--r-md);padding:8px 14px;min-height:var(--h-l);font-weight:500}
 .primary{border:0;background:var(--accent-btn);color:var(--accent-ink);border-radius:var(--r-md);padding:8px 14px;min-height:var(--h-l);font-weight:600}
+/* a touch answers at once: what is pressed dims and gives a little (the tab bar and the rows of accounts and categories have their own answer);
+   the browser's grey flash is off, so the answer is the same everywhere */
+.submit,.primary,.ghost,.chip,.chipbtn,.tile,.debt-add-trigger,.zgo,.qchip,.seg button,.linkbtn,.iconbtn,.dp-x,.dgroup,.dtap,.zback,.del,.item .amt,.pswitch,.toast .undo{-webkit-tap-highlight-color:transparent}
+.submit,.primary,.ghost,.chip,.chipbtn,.tile,.debt-add-trigger,.zgo,.qchip{transition:transform .12s ease,opacity .12s ease}
+.submit:active:not(:disabled),.primary:active,.ghost:active,.chip:active,.chipbtn:active,.tile:active,.debt-add-trigger:active,.zgo:active,.qchip:active{transform:scale(.98);opacity:.82}
+.seg button:active,.linkbtn:active,.iconbtn:active:not(:disabled),.dp-x:active,.dgroup:active,.dtap:active,.zback:active,.del:active,.item .amt:active,.pswitch:active,.toast .undo:active{opacity:.6}
 /* «Сохранить» of a small form in a card (the limit, the broker's percent, the debt to oneself): the same filled button as any other save */
 .ghost[type="submit"]{border-color:transparent;background:var(--accent-btn);color:var(--accent-ink);font-weight:600}
 
@@ -1020,7 +1029,10 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
 .accs .tile .nm{font-weight:600}
 /* the message box: over every window (sheets 50, the zakat window 45), as wide as its text up to the screen less 16px each side;
    toast() moves it above an open sheet, or to the top while a window covers the screen or the keyboard is up */
-.toast{position:fixed;left:16px;right:16px;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:70;margin-inline:auto;width:-webkit-fit-content;width:fit-content;max-width:480px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:2px 12px;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:var(--r-md);font-size:var(--fs-base);overflow-wrap:anywhere;box-shadow:var(--shadow-toast)}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:70;margin-inline:auto;width:-webkit-fit-content;width:fit-content;max-width:480px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:2px 12px;background:var(--toast-bg);color:var(--toast-ink);padding:10px 16px;border-radius:var(--r-md);font-size:var(--fs-base);overflow-wrap:anywhere;box-shadow:var(--toast-ring),var(--shadow-toast)}
+/* one button («Отменить») stays on the text's line: the text wraps beside it, the box is lower; two buttons go under the text as before */
+.toast:not(:has(.undo~.undo)){flex-wrap:nowrap}
+.toast:not(:has(.undo~.undo)) .undo{margin-left:0}
 .toast>span{flex:1 1 auto;min-width:0}
 /* swiped left or right with a finger: it follows the finger and goes off the side (toastSwipe); scrolling up and down stays the page's */
 .toast{touch-action:pan-y;-webkit-user-select:none;user-select:none}
