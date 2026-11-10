@@ -88,6 +88,9 @@ img{max-width:100%}
   --on-fill:#FFFFFF; --scrim:rgb(0 0 0 / .55);
   /* small shadows: the round «+», a message box, a picked segment, a switch's knob */
   --shadow-fab:0 4px 14px rgb(0 0 0 / .28); --shadow-toast:0 8px 24px rgb(0 0 0 / .3); --shadow-seg:0 1px 2px rgb(0 0 0 / .12); --shadow-knob:0 1px 3px rgb(0 0 0 / .35);
+  /* roles the two looks fill differently: a block inside a card (a field, a small plate), the fill of a picked «Расход / Доход / Личное / Командировка»
+     and its text, the round «+» of the tab bar */
+  --inset:var(--bg); --seg-out:var(--out); --seg-in:var(--in); --seg-own:var(--own); --seg-trip:var(--trip); --seg-ink:var(--on-fill); --fab:var(--accent);
   color-scheme:dark;
 }
 @media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
@@ -149,9 +152,9 @@ button{cursor:pointer}
 .tabs button[aria-selected="true"] .ico{background:var(--accent-soft);color:var(--accent)}
 .tabs button:active .ico{background:var(--accent-soft)}
 /* Учёт in the middle: a round blue «+», inside the bar, below its top line */
-.tabs .tab-main .ico{width:40px;height:40px;border-radius:50%;margin-top:-3px;background:var(--accent);color:var(--accent-ink);box-shadow:var(--shadow-fab);border:3px solid var(--surface)}
+.tabs .tab-main .ico{width:40px;height:40px;border-radius:50%;margin-top:-3px;background:var(--fab);color:var(--accent-ink);box-shadow:var(--shadow-fab);border:3px solid var(--surface)}
 .tabs .tab-main .ico svg{width:24px;height:24px;stroke-width:2.4}
-.tabs .tab-main[aria-selected="true"] .ico,.tabs .tab-main:active .ico{background:var(--accent);color:var(--accent-ink)}
+.tabs .tab-main[aria-selected="true"] .ico,.tabs .tab-main:active .ico{background:var(--fab);color:var(--accent-ink)}
 .tabs .tab-main:active .ico{transform:scale(.94)}
 .tabs .badge{position:absolute;top:0;right:8px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--warn);color:var(--badge-ink);font-family:var(--f-num);font-size:var(--fs-2xs);font-weight:600;line-height:17px;text-align:center;box-shadow:0 0 0 2px var(--surface)}
 .tabs .badge:empty{display:none}
@@ -176,7 +179,7 @@ button{cursor:pointer}
 /* the hero's label, as «Всего денег» */
 .debt-overview-head .lbl{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
 .debt-overview-meta{display:flex;align-items:center;gap:var(--sp-2);min-width:0;padding-top:8px;border-top:1px solid var(--line)}
-.debt-overview-people{width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:var(--r-sm);background:var(--bg);color:var(--accent)}
+.debt-overview-people{width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:var(--r-sm);background:var(--inset);color:var(--accent)}
 .debt-overview-people svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .debt-overview .sub{min-width:0;font-size:var(--fs-xs);font-weight:500;line-height:1.3;overflow-wrap:anywhere}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -185,12 +188,12 @@ button{cursor:pointer}
 .stat small{font-size:var(--fs-2xs);color:var(--muted)}
 .stat.wide{grid-column:1/-1}
 .panel.mcard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px;background:var(--surface);border-radius:var(--r)}
-.mcard .mcol{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;padding:8px 4px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg);text-align:center}
+.mcard .mcol{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;padding:8px 4px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--inset);text-align:center}
 .mcard .mdiff>span,.mcard .mdiff>b{color:var(--warn-ink)}
 .mcard .mdiff{transition:background-color .22s ease,box-shadow .22s ease}
 /* «Разница» in the colour of its sign: a tint and a thin ring, no glow (a glow blurs the figures) */
-.mcard .mdiff[data-tone="positive"]{background:color-mix(in srgb,var(--good) 9%,var(--bg));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--good) 30%,transparent)}
-.mcard .mdiff[data-tone="negative"]{background:color-mix(in srgb,var(--bad) 9%,var(--bg));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--bad) 30%,transparent)}
+.mcard .mdiff[data-tone="positive"]{background:color-mix(in srgb,var(--good) 9%,var(--inset));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--good) 30%,transparent)}
+.mcard .mdiff[data-tone="negative"]{background:color-mix(in srgb,var(--bad) 9%,var(--inset));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--bad) 30%,transparent)}
 .mcard .mdiff[data-tone="positive"]>span,.mcard .mdiff[data-tone="positive"]>b{color:var(--good-ink)}
 .mcard .mdiff[data-tone="negative"]>span,.mcard .mdiff[data-tone="negative"]>b{color:var(--bad)}
 .mcard .mdiff[data-tone="positive"]>span::before{background:var(--good)}
@@ -289,7 +292,7 @@ button{cursor:pointer}
 
 /* Form */
 /* equal halves (thirds); a label that doesn't fit takes the room it needs, and on a very narrow screen the next one goes under it */
-.seg{display:flex;flex-wrap:wrap;background:var(--bg);border:1px solid var(--field-line);border-radius:var(--r-md);padding:3px;gap:3px}
+.seg{display:flex;flex-wrap:wrap;background:var(--inset);border:1px solid var(--field-line);border-radius:var(--r-md);padding:3px;gap:3px}
 .seg button{flex:1 1 0;min-width:max-content;min-height:var(--h-l);border:0;background:transparent;border-radius:var(--r-sm);padding:8px;font-weight:500;color:var(--muted)}
 /* the chosen one: a white pill with an edge and bold text, not only a different colour */
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--shadow-seg)}
@@ -319,7 +322,7 @@ button{cursor:pointer}
 .form .amount span{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:22px;color:var(--muted)}
 .hint{grid-column:1/-1;font-size:var(--fs-xs);color:var(--muted);margin:-4px 0 0}
 /* 16px at least, so iOS never zooms into a field; what is typed or chosen reads as data (--ink), the hint stays grey */
-input,select{width:100%;border:1px solid var(--field-line);background:var(--bg);border-radius:var(--r-md);padding:10px 12px;min-width:0;font-size:var(--fs-field);color:var(--ink)}
+input,select{width:100%;border:1px solid var(--field-line);background:var(--inset);border-radius:var(--r-md);padding:10px 12px;min-width:0;font-size:var(--fs-field);color:var(--ink)}
 select,input[type="date"]{-webkit-text-fill-color:var(--ink)}
 input[type="date"]::-webkit-date-and-time-value{color:var(--ink);-webkit-text-fill-color:var(--ink)}
 .xfer{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px 4px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:12px}
@@ -345,10 +348,10 @@ input.num::placeholder{font-family:var(--f-body)}
 .submit.in{background:var(--good);color:var(--surface)}
 #submitBtn{background:var(--out);color:var(--on-fill)}
 #submitBtn.in{background:var(--in);color:var(--on-fill)}
-#tOut[aria-pressed="true"]{background:var(--out);color:var(--on-fill)}
-#tIn[aria-pressed="true"]{background:var(--in);color:var(--on-fill)}
-#sOwn[aria-pressed="true"]{background:var(--own);color:var(--on-fill)}
-#sTrip[aria-pressed="true"]{background:var(--trip);color:var(--on-fill)}
+#tOut[aria-pressed="true"]{background:var(--seg-out);color:var(--seg-ink)}
+#tIn[aria-pressed="true"]{background:var(--seg-in);color:var(--seg-ink)}
+#sOwn[aria-pressed="true"]{background:var(--seg-own);color:var(--seg-ink)}
+#sTrip[aria-pressed="true"]{background:var(--seg-trip);color:var(--seg-ink)}
 .err{grid-column:1/-1;color:var(--bad);font-size:var(--fs-sm);margin:0}
 
 /* Breakdown */
@@ -430,9 +433,9 @@ input.num::placeholder{font-family:var(--f-body)}
 .item:last-child{border-bottom:0}
 /* small category icon on a soft tint of its colour */
 .item>.ic{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:14px;line-height:1;flex:none;background:var(--accent-soft);background:color-mix(in srgb,var(--c,var(--muted)) 20%,transparent)}
-.item.tr>.ic{background:var(--bg);border:1px solid var(--line);color:var(--muted);font-size:13px}
+.item.tr>.ic{background:var(--inset);border:1px solid var(--line);color:var(--muted);font-size:13px}
 .item .what{min-width:0;background:none;border:0;padding:0;text-align:left;cursor:pointer;color:inherit;font:inherit;display:block}
-.item-edit{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-2);padding:12px;margin-block:6px;border:1px solid var(--accent);border-radius:var(--r-md);background:var(--bg)}
+.item-edit{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-2);padding:12px;margin-block:6px;border:1px solid var(--accent);border-radius:var(--r-md);background:var(--inset)}
 .item-edit label{display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--fs-xs);color:var(--muted);min-width:0}
 /* the form lies on the page colour: its fields are white, so they stand out from it */
 .item-edit input,.item-edit select{background:var(--surface)}
@@ -469,7 +472,7 @@ input.num::placeholder{font-family:var(--f-body)}
 .cmp-sel{display:flex;gap:6px;align-items:center}
 /* a month: its whole name a size smaller (13px) in a box; the list itself lies over the box, see-through and at 16px (a smaller one
    makes the iPhone zoom in when it is tapped) — a tap or the keyboard opens the phone's own list, the focus ring is drawn on the box */
-.cmp-pick{position:relative;flex:1 1 0;min-width:0;display:flex;align-items:center;min-height:var(--h-m);padding:0 24px 0 10px;border:1px solid var(--field-line);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);font-size:var(--fs-sm);font-weight:500;line-height:1.2}
+.cmp-pick{position:relative;flex:1 1 0;min-width:0;display:flex;align-items:center;min-height:var(--h-m);padding:0 24px 0 10px;border:1px solid var(--field-line);border-radius:var(--r-sm);background:var(--inset);color:var(--ink);font-size:var(--fs-sm);font-weight:500;line-height:1.2}
 .cmp-pick::after{content:'';position:absolute;right:10px;top:50%;width:6px;height:6px;margin-top:-5px;border:solid var(--muted);border-width:0 1.5px 1.5px 0;transform:rotate(45deg);pointer-events:none}
 .cmp-pv{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .cmp-pick select{position:absolute;inset:0;width:100%;height:100%;min-height:0;margin:0;padding:0;border:0;opacity:0;font-size:var(--fs-field);cursor:pointer}
@@ -485,7 +488,7 @@ input.num::placeholder{font-family:var(--f-body)}
 .cmp-head{padding:2px 5px;color:var(--muted);font-size:var(--fs-2xs);line-height:1.15}
 .cmp-head>span:not(:first-child){text-align:right}
 .cmp-row{padding:2px 5px;border-bottom:1px solid var(--line)}
-.cmp-row.t{margin-block:2px;padding:3px 5px;border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));border-radius:var(--r-sm);background:color-mix(in srgb,var(--accent) 5%,var(--bg))}
+.cmp-row.t{margin-block:2px;padding:3px 5px;border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));border-radius:var(--r-sm);background:color-mix(in srgb,var(--accent) 5%,var(--inset))}
 .cmp-name{min-width:0;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto;font-size:var(--fs-xs);line-height:1.2;font-weight:600}
 .cmp-row.sub .cmp-name{padding-left:5px;color:var(--muted);font-weight:500}
 .cmp-amount,.cmp-delta{min-width:0;overflow:hidden;font-family:var(--f-num);font-size:var(--fs-xs);font-variant-numeric:tabular-nums;font-weight:500;text-align:right;text-overflow:clip;white-space:nowrap}
@@ -520,7 +523,7 @@ input.num::placeholder{font-family:var(--f-body)}
 /* the hero's label, as «Всего денег» and «Мне должны» */
 .lr #sumLabel{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;line-height:1.2;color:var(--muted)}
 /* the small blocks inside the month card (the limit's line, «Вне лимита», the trip money) are told apart by their fill alone, no frame */
-.lof{display:flex;align-items:center;justify-content:space-between;gap:4px 8px;flex-wrap:wrap;padding:4px 8px;border-radius:var(--r-md);background:var(--bg);font-size:var(--fs-xs);line-height:1.25;color:var(--muted);overflow-wrap:anywhere}
+.lof{display:flex;align-items:center;justify-content:space-between;gap:4px 8px;flex-wrap:wrap;padding:4px 8px;border-radius:var(--r-md);background:var(--inset);font-size:var(--fs-xs);line-height:1.25;color:var(--muted);overflow-wrap:anywhere}
 /* «из 30 000 ₽» changes the limit: the line stays small, its tap area (::after) is 44px tall over the sum and «Вне лимита» around it,
    the focus ring stays round the words. One line as long as it fits — up to the card's edge, over its padding as on a 320px phone;
    wider (larger letter and word spacing, a zoomed page) it goes on a second line instead of past the screen's edge */
@@ -531,10 +534,10 @@ input.num::placeholder{font-family:var(--f-body)}
 .lrows:empty{display:none}
 /* «Вне лимита» never breaks: on a narrow phone its sum goes under it */
 .lrows>div>span{white-space:nowrap}
-.lrows>div{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 8px;padding:4px 8px;border-radius:var(--r-md);background:var(--bg);font-size:var(--fs-2xs);line-height:1.2;color:var(--muted)}
+.lrows>div{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 8px;padding:4px 8px;border-radius:var(--r-md);background:var(--inset);font-size:var(--fs-2xs);line-height:1.2;color:var(--muted)}
 .lrows b{font-family:var(--f-num);font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}
 #viewLedger .lrows b{font-size:var(--fs-xs)}
-#viewLedger .tripline{margin:0;padding:7px 10px;gap:var(--sp-1);border:0;border-radius:var(--r-md);background:var(--bg)}
+#viewLedger .tripline{margin:0;padding:7px 10px;gap:var(--sp-1);border:0;border-radius:var(--r-md);background:var(--inset)}
 #viewLedger .tripline .meter{height:4px}
 /* «🧳 Командировочные» stays one piece: on a narrow phone «выдано …» goes under it */
 .thead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 8px;font-size:var(--fs-xs);line-height:1.2;color:var(--muted)}
@@ -559,7 +562,7 @@ input.num::placeholder{font-family:var(--f-body)}
 /* the limit's columns: as «Всего денег» on «Деньги» — split by thin lines, a small grey label over each value */
 .lparts{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px}
 /* each sum in its own small block, its label and value in the middle of it */
-.lparts>div{display:flex;flex-direction:column;align-items:center;text-align:center;gap:1px;min-width:0;padding:5px 4px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md)}
+.lparts>div{display:flex;flex-direction:column;align-items:center;text-align:center;gap:1px;min-width:0;padding:5px 4px;background:var(--inset);border:1px solid var(--line);border-radius:var(--r-md)}
 .lparts span{max-width:100%;font-size:var(--fs-2xs);line-height:1.3;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lparts b{font-family:var(--f-num);font-weight:500;font-size:min(14px,3.6vw);line-height:1.3;white-space:nowrap;font-variant-numeric:tabular-nums}
 .lparts b.neg{color:var(--bad)}
@@ -636,7 +639,7 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 .zk .acts{display:flex;gap:8px 10px;flex-wrap:wrap;align-items:center}
 .zk .zwarn{display:flex;flex-direction:column;gap:var(--sp-2);border-left:3px solid var(--warn);padding:2px 0 2px 10px;font-size:var(--fs-sm)}
 .zk .zwarn p{margin:0}
-.zk .zwhy>summary{display:flex;justify-content:space-between;align-items:center;list-style:none;font-size:var(--fs-base);color:var(--accent);font-weight:500;cursor:pointer;padding:10px 12px;min-height:var(--h-l);border:1px solid var(--field-line);border-radius:var(--r-md);background:var(--bg)}
+.zk .zwhy>summary{display:flex;justify-content:space-between;align-items:center;list-style:none;font-size:var(--fs-base);color:var(--accent);font-weight:500;cursor:pointer;padding:10px 12px;min-height:var(--h-l);border:1px solid var(--field-line);border-radius:var(--r-md);background:var(--inset)}
 .zk .zwhy>summary::-webkit-details-marker{display:none}
 .zk .zwhy>summary::after{content:'›';content:'›'/'';transform:rotate(90deg);transition:transform .2s;font-size:18px;line-height:1}
 .zk .zwhy[open]>summary::after{transform:rotate(-90deg)}
@@ -656,9 +659,9 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 .zsheet-head{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:var(--sp-2);background:var(--surface);padding:12px 0 10px;margin-bottom:4px;border-bottom:1px solid var(--line)}
 .zsheet-head b{font-size:var(--fs-lg);font-weight:600;flex:1;min-width:0;overflow-wrap:anywhere}
 .zback{border:0;background:none;color:var(--accent);font-weight:600;font-size:var(--fs-md);padding:8px 8px 8px 0;min-height:var(--h-l);flex:none}
-.zgo{display:flex;justify-content:space-between;align-items:center;width:100%;border:1px solid var(--field-line);border-radius:var(--r-md);background:var(--bg);color:var(--accent);font-size:var(--fs-md);font-weight:500;padding:12px;text-align:left}
+.zgo{display:flex;justify-content:space-between;align-items:center;width:100%;border:1px solid var(--field-line);border-radius:var(--r-md);background:var(--inset);color:var(--accent);font-size:var(--fs-md);font-weight:500;padding:12px;text-align:left}
 .zgo span:last-child{font-size:var(--fs-xl);line-height:1}
-.zcard{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md);padding:2px 12px}
+.zcard{background:var(--inset);border:1px solid var(--line);border-radius:var(--r-md);padding:2px 12px}
 .zrow{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-3);padding:11px 0;border-bottom:1px solid var(--line);font-size:var(--fs-md);line-height:1.3}
 .zrow:last-child{border-bottom:0}
 .zrow>div{display:flex;flex-direction:column;gap:2px;min-width:0;overflow-wrap:anywhere}
@@ -712,7 +715,7 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 .zdates .zd,.zhist .zrow>div{flex:1 1 0;min-width:auto;overflow-wrap:break-word}
 .zhist .zrow>b{margin-left:auto}
 /* «К оплате» and «Оплатить»: a long sum makes the button go under it, never out of the box */
-.zdue{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 12px;background:var(--bg);border:1px solid var(--line);border-left:3px solid var(--bad);border-radius:var(--r-md);padding:12px}
+.zdue{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 12px;background:var(--inset);border:1px solid var(--line);border-left:3px solid var(--bad);border-radius:var(--r-md);padding:12px}
 .zdue>div{display:flex;flex-direction:column;min-width:0}
 .zdue span{font-size:var(--fs-sm);color:var(--muted)}
 .zdue b{font-family:var(--f-num);font-weight:600;font-size:clamp(18px,6.5vw,24px);color:var(--bad);overflow-wrap:anywhere}
@@ -786,7 +789,7 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 .mparts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:100%;margin-top:6px}
 .mparts .mbar{grid-column:1/-1;display:flex;gap:2px;height:6px;margin-bottom:2px}
 .mparts .mbar i{display:block;min-width:4px;border-radius:var(--r-pill)}
-.mparts>div:not(.mbar){display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;padding:5px 4px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md)}
+.mparts>div:not(.mbar){display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;padding:5px 4px;background:var(--inset);border:1px solid var(--line);border-radius:var(--r-md)}
 .mparts>div>span{display:flex;align-items:center;gap:var(--sp-1);max-width:100%;font-size:var(--fs-2xs);line-height:1.3;color:var(--muted);white-space:nowrap}
 .mparts>div>span::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--c);flex:none}
 .mparts b{font-family:var(--f-num);font-weight:500;font-size:min(14px,3.5vw);line-height:1.3;white-space:nowrap}
@@ -817,11 +820,11 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 /* every window's ✕ (and the step sheet's ‹): one round 40px button on a soft fill; its tap area reaches 44px */
 .dp-x,.sheet-head .iconbtn,.zsheet-head .iconbtn{position:relative;width:40px;height:40px;flex:none;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--muted);font-size:17px;line-height:1;cursor:pointer}
 .dp-x::after,.sheet-head .iconbtn::after,.zsheet-head .iconbtn::after{content:'';position:absolute;inset:-2px}
-.dp-sum{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-3);padding:5px 8px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg);font-size:var(--fs-sm);color:var(--muted)}
+.dp-sum{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-3);padding:5px 8px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--inset);font-size:var(--fs-sm);color:var(--muted)}
 /* the sum keeps its one line (its label wraps instead; a <wbr> would break even under nowrap); narrower than 320px it may split
    between digit groups (moneyW), see below */
 .dp-sum b{font-family:var(--f-num);font-size:var(--fs-xl);font-weight:500;color:var(--ink);flex-shrink:0}
-.dp-repay{display:flex;flex-direction:column;gap:var(--sp-1);padding:4px 8px 6px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg)}
+.dp-repay{display:flex;flex-direction:column;gap:var(--sp-1);padding:4px 8px 6px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--inset)}
 .dp-section-title,.dinner-head{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 /* the account on its own line, 6px under it «Вернул всё» on the left half and «Вернул часть» on the right (the same for «Отдал всё / часть»);
    a form («Записать») takes the whole width */
@@ -834,7 +837,7 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 .dinner-head{padding:5px 8px 0;border-top:1px solid var(--line)}
 .dinner>.debt:last-child{border-bottom:1px solid var(--line);padding-bottom:6px}
 /* a loan's buttons in the person's window: close together, a few to a line */
-.dperson .debt{gap:6px;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg)}
+.dperson .debt{gap:6px;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--inset)}
 .dperson .debt .acts{gap:6px 8px;margin-top:6px;padding-top:8px;border-top:1px solid var(--line)}
 .dperson .debt-return,.dperson .debt-manage{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;width:100%}
 .dperson .debt-return{row-gap:6px;padding:6px;border-radius:var(--r-md);background:var(--surface)}
@@ -908,7 +911,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
 .toast .undo{background:none;border:0;color:var(--toast-link);font-weight:700;min-height:var(--h-l);padding:8px 12px;margin:-6px -8px -6px auto;flex:none}
 .quick{grid-column:1/-1;display:flex;flex-direction:column;gap:6px}
 .quick .row{display:flex;gap:6px;flex-wrap:wrap}
-.qchip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:var(--r-md);padding:8px 10px;font-size:var(--fs-sm);display:inline-flex;gap:6px;align-items:center}
+.qchip{border:1px solid var(--line);background:var(--inset);color:var(--ink);border-radius:var(--r-md);padding:8px 10px;font-size:var(--fs-sm);display:inline-flex;gap:6px;align-items:center}
 .qchip b{font-family:var(--f-num);font-weight:500}
 .qchip .dot{width:8px;height:8px;border-radius:50%;background:var(--c)}
 .item .amt{background:none;border:0;color:inherit;font:inherit;font-family:var(--f-num);font-weight:500;padding:6px 0 6px 8px;min-height:40px;margin-block:-6px;cursor:pointer;overflow-wrap:anywhere;text-align:right}
@@ -968,7 +971,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
 @media (max-width:374px){.tiles:not(.accs){grid-template-columns:repeat(3,minmax(0,1fr))}}
 /* the grid stands 8px past the window's content on each side: «Отдельно» starts where its tiles start */
 .tiles:not(.accs)+h3{margin-inline:-8px}
-.tile{background:var(--bg);border:1px solid var(--field-line);border-radius:var(--r-lg);padding:8px 2px 7px;display:flex;flex-direction:column;align-items:center;gap:var(--sp-1);color:var(--ink);font-size:clamp(var(--fs-2xs),2.9vw,12px);line-height:1.2;text-align:center;min-width:0;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto}
+.tile{background:var(--inset);border:1px solid var(--field-line);border-radius:var(--r-lg);padding:8px 2px 7px;display:flex;flex-direction:column;align-items:center;gap:var(--sp-1);color:var(--ink);font-size:clamp(var(--fs-2xs),2.9vw,12px);line-height:1.2;text-align:center;min-width:0;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto}
 .tile .ic{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:16px;background:color-mix(in srgb,var(--c) 22%,transparent);border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
 .tile[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
 .tile small{font-family:var(--f-num);color:var(--muted);font-size:var(--fs-xs);overflow-wrap:normal}
