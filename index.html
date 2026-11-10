@@ -32,17 +32,13 @@
 body{margin:0;font-size:14px}
 img{max-width:100%}
 [hidden]{display:none!important}
-/* the fonts are the app's own files (fonts/), saved by the worker with the page: Unbounded — the month's title, Golos Text — text and big sums, IBM Plex Mono — numbers */
+/* the fonts are the app's own files (fonts/), saved by the worker with the page: Unbounded — the month's title, Golos Text — text and every number (tabular figures) */
 @font-face{font-family:'Golos Text';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/GolosText-cyrillic-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116}
 @font-face{font-family:'Golos Text';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/GolosText-latin-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
 @font-face{font-family:'Golos Text';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/GolosText-cyrillic-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116}
 @font-face{font-family:'Golos Text';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/GolosText-latin-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
 @font-face{font-family:'Golos Text';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/GolosText-cyrillic-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116}
 @font-face{font-family:'Golos Text';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/GolosText-latin-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
-@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/IBMPlexMono-cyrillic--F63fjptAg.woff2) format('woff2');unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116}
-@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/IBMPlexMono-latin--F63fjptAg.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
-@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/IBMPlexMono-cyrillic--F6qfjptAg.woff2) format('woff2');unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116}
-@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/IBMPlexMono-latin--F6qfjptAg.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
 @font-face{font-family:'Unbounded';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/Unbounded-cyrillic-Yq6W-LOTXC.woff2) format('woff2');unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116}
 @font-face{font-family:'Unbounded';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/Unbounded-latin-Yq6W-LOTXC.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
 @font-face{font-family:'Unbounded';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/Unbounded-cyrillic-Yq6W-LOTXC.woff2) format('woff2');unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116}
@@ -51,8 +47,6 @@ img{max-width:100%}
 @font-face{font-family:'Golos Text';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/GolosText-rub400-2626f3c1.woff2) format('woff2');unicode-range:U+20BD}
 @font-face{font-family:'Golos Text';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/GolosText-rub500-1ffbb4e5.woff2) format('woff2');unicode-range:U+20BD}
 @font-face{font-family:'Golos Text';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/GolosText-rub600-48126017.woff2) format('woff2');unicode-range:U+20BD}
-@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/IBMPlexMono-rub400-928d7d82.woff2) format('woff2');unicode-range:U+20BD}
-@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/IBMPlexMono-rub500-4b52133d.woff2) format('woff2');unicode-range:U+20BD}
 @font-face{font-family:'Unbounded';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/Unbounded-rub500-fd96e1a7.woff2) format('woff2');unicode-range:U+20BD}
 @font-face{font-family:'Unbounded';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/Unbounded-rub700-56dd8e8b.woff2) format('woff2');unicode-range:U+20BD}
 </style>
@@ -77,7 +71,8 @@ img{max-width:100%}
   --warn-ink:var(--warn);
   --f-display:"Unbounded", "Golos Text", system-ui, sans-serif;
   --f-body:"Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --f-num:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  /* numbers are set in the text face, with figures of one width (body sets tabular-nums): one face for every sum, big or small */
+  --f-num:var(--f-body);
   /* one scale for the whole app — type, spacing, corners, control heights (AUDIT_REPORT_UI_2026-10-21.md).
      Type: 11 — the least (badges, percents), 12 — labels and second lines, 13 — dense lists, links, chips, 15 — text and buttons,
      17 — a window's title, 20 — a sum inside a window, hero — the big sum of a tab; a field is 16px and over (iPhone zooms in under it) */
@@ -116,7 +111,7 @@ img{max-width:100%}
   --raised:var(--surface); --seg-ring:var(--field-line); --seg-id-ring:0 0 #0000; --track:var(--line);
 }}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:var(--fs-md);line-height:1.5}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:var(--fs-md);line-height:1.5;font-variant-numeric:tabular-nums}
 .wrap{max-width:720px;margin:0 auto;padding-inline:16px;padding-block:16px 24px;display:flex;flex-direction:column;gap:var(--sp-4)}
 /* App shell: the page itself never scrolls — only the content area does, so the tab bar can't move between tabs */
 html,body{height:var(--app-h,100%);overflow:hidden;overscroll-behavior:none}
