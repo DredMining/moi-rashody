@@ -1081,7 +1081,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
        A window keeps its thin edge — it floats over the page. Corners: a button / field / block in a card 14, a card 20, a window 28 */
     --card-line:transparent;--pad-card:16px;--gap-stack:16px;--r-md:14px;--r-lg:20px;--r-xl:28px;
     /* type a step larger: nothing under 12, lists and reminders 15, text and buttons 16 */
-    --fs-2xs:12px;--fs-base:15px;--fs-md:16px}
+    --fs-2xs:12px;--fs-base:15px;--fs-md:16px;
+    /* spending and minuses are red, not orange (owner, 11.11.2026) */
+    --bad:#FF5252}
   /* a reminder's colour: a short straight bar inside its left edge (a strip along the edge would bend round the larger corner) */
   [data-theme="dark"] .alert,[data-theme="dark"] #sysAlerts .upd{box-shadow:none;background-image:linear-gradient(var(--alert-c,var(--warn)),var(--alert-c,var(--warn)));background-repeat:no-repeat;background-position:6px 50%;background-size:3px calc(100% - 20px)}
   [data-theme="dark"] #sysAlerts .upd{--alert-c:var(--accent);background-size:3px calc(100% - 12px)}
