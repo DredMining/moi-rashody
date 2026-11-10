@@ -1105,6 +1105,15 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   /* a group's title over its card («Доходы по источникам», «Командировка» on Итоги) keeps the size of the groups' labels beside it */
   #incomeBreakdown>h2,#tripCard>h2{font-size:var(--fs-xs);font-weight:600;color:var(--muted)}
   .monthbar .title{font-size:var(--fs-lg);font-weight:600}
+  /* the main button of a form is 52px. «Новая запись» is the main screen's form, less tight here: its sum 56px with larger, bolder figures —
+     the first thing typed; its switches 38px in a 3px groove, its chips 36px. The picked half of a switch follows the corner of its groove */
+  .submit{min-height:52px}
+  #addBox .amount input{min-height:56px;font-size:24px;font-weight:600}
+  #addBox .amount span{font-size:var(--fs-xl)}
+  #addBox .seg{padding:3px;gap:3px}
+  #addBox .seg button{font-size:var(--fs-base);min-height:38px}
+  #addBox .chipbtn{font-size:var(--fs-sm);min-height:var(--h-m);padding:4px 14px}
+  .seg button{border-radius:calc(var(--r-md) - 3px)}
 }
 /* «reduce motion» on the phone: nothing slides or fades, the windows included */
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
