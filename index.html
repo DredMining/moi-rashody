@@ -1098,6 +1098,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   [data-theme="dark"] h2{font-size:var(--fs-xs);font-weight:600;line-height:1.2;letter-spacing:.06em;color:var(--muted)}
   /* the month's three sums on Итоги are bold, as the big sum of a tab */
   [data-theme="dark"] .mcard .mcol>b{font-weight:700}
+  /* a day's spending badge on Записи is red, so the minus reads at a glance (the rows' sums stay plain) */
+  [data-theme="dark"] .recs .dayhead .num>.out{--c:var(--bad)}
   [data-theme="dark"] .monthbar .title{font-size:var(--fs-lg);font-weight:600}
   /* the main button of a form is 52px. «Новая запись» is the main screen's form, less tight here: its sum 56px with larger, bolder figures —
      the first thing typed; its switches 38px in a 3px groove, its chips 36px. The picked half of a switch follows the corner of its groove */
