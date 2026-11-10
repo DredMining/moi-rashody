@@ -63,16 +63,16 @@ img{max-width:100%}
    light appearance — the app's first look, as it was: night-blue ground, blue accent (the @media block after :root).
    The white theme is gone. Category and account colours are the same in both looks. */
 :root{
-  --bg:#000000; --surface:#161215; --ink:#F7F3F4; --muted:#A79DA2; --line:#2E262B;
+  --bg:#000000; --surface:#161215; --ink:#F7F3F4; --muted:#A79DA2; --line:#383035;
   --accent:#F08CA0; --accent-ink:#FFFFFF; --accent-soft:#3A1C25;
   --good:#5AD49B; --warn:#F2B950; --bad:#FF7043;
   --p1:#5B8CFF; --p2:#FF9F6B; --p3:#5EDB94; --p4:#B79CFF; --p5:#F48FD8; --p6:#5CD6E6; --p7:#FFD166; --p8:#9AA6BF; --p9:#C2DE5E;
   /* an expense's sum is plain text here: the wine button and the orange «превышен» are the only reds on the screen */
   --sber:#3DBE79; --tbank:#E6BE55; --vtb:#5B9BFF; --pocket:#EEF1F6; --pillow:#C4A7FF; --spend:var(--ink);
   /* one accent for «Добавить расход» and «Добавить доход»: the kind of record is told by the switch above, not by the button's colour */
-  --out:#A8324C; --in:#A8324C; --own:#243F75; --trip:#7A5A1E;
+  --out:#B23A55; --in:#B23A55; --own:#243F75; --trip:#7A5A1E;
   /* buttons with white text on the accent, the edge of a field / chip / tile (3:1), the link in the light toast, account marks' rim, the strip under the status bar */
-  --accent-btn:#A8324C; --field-line:#6E6268; --toast-link:#8E2440; --badge-ink:#1A1405; --good-ink:var(--good); --mark-edge:rgb(255 255 255 / .5); --sbar:var(--bg);
+  --accent-btn:#B23A55; --field-line:#7A6E74; --toast-link:#8E2440; --badge-ink:#1A1405; --good-ink:var(--good); --mark-edge:rgb(255 255 255 / .5); --sbar:var(--bg);
   /* yellow as text (a fill or a line keeps --warn) */
   --warn-ink:var(--warn);
   --f-display:"Unbounded", "Golos Text", system-ui, sans-serif;
@@ -98,7 +98,10 @@ img{max-width:100%}
   --shadow-fab:0 4px 14px rgb(0 0 0 / .28); --shadow-toast:0 8px 24px rgb(0 0 0 / .3); --shadow-seg:0 1px 2px rgb(0 0 0 / .12); --shadow-knob:0 1px 3px rgb(0 0 0 / .35);
   /* roles the two looks fill differently: a block inside a card (a field, a small plate), the fill of a picked «Расход / Доход / Личное / Командировка»
      and its text, the round «+» of the tab bar */
-  --inset:#221C20; --seg-on:#3B3237; --seg-out:var(--seg-on); --seg-in:var(--seg-on); --seg-own:var(--seg-on); --seg-trip:var(--seg-on); --seg-ink:var(--ink); --fab:var(--accent-btn);
+  --inset:#221C20; --seg-on:var(--raised); --seg-out:var(--seg-on); --seg-in:var(--seg-on); --seg-own:var(--seg-on); --seg-trip:var(--seg-on); --seg-ink:var(--ink); --fab:var(--accent-btn);
+  /* a block raised over an inset plate; the ring of a picked segment (3:1 to its plate and to the groove) — here every picked segment has it,
+     the fill alone is too close to the groove; the empty part of a meter, a bar or the limit's ring */
+  --raised:#3B3237; --seg-ring:#958990; --seg-id-ring:inset 0 0 0 1.5px var(--seg-ring); --track:#4A4046;
   color-scheme:dark;
 }
 /* the phone's light appearance: the first look, colour for colour as it was before the two looks (still dark: color-scheme stays dark) */
@@ -109,7 +112,8 @@ img{max-width:100%}
   --spend:#F07F86;
   --out:#7E1F2E; --in:#17624A;
   --accent-btn:#3B6BE0; --field-line:#606E8D; --toast-link:#1F4FD1;
-  --inset:var(--bg); --seg-on:var(--surface); --seg-out:var(--out); --seg-in:var(--in); --seg-own:var(--own); --seg-trip:var(--trip); --seg-ink:var(--on-fill); --fab:var(--accent);
+  --inset:var(--bg); --seg-on:var(--raised); --seg-out:var(--out); --seg-in:var(--in); --seg-own:var(--own); --seg-trip:var(--trip); --seg-ink:var(--on-fill); --fab:var(--accent);
+  --raised:var(--surface); --seg-ring:var(--field-line); --seg-id-ring:0 0 #0000; --track:var(--line);
 }}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:var(--fs-md);line-height:1.5}
@@ -270,7 +274,7 @@ button{cursor:pointer}
 .wallet-edit .echk input{width:auto;flex:none;margin:0}
 .rule{display:flex;flex-direction:column;gap:6px}
 .rule .row{display:flex;justify-content:space-between;gap:var(--sp-2);font-size:var(--fs-sm);color:var(--muted);flex-wrap:wrap}
-.meter{height:8px;border-radius:var(--r-pill);background:var(--line);overflow:hidden}
+.meter{height:8px;border-radius:var(--r-pill);background:var(--track);overflow:hidden}
 .meter i{display:block;height:100%;border-radius:var(--r-pill);background:var(--good);transition:width .3s}
 .meter.acc i{background:var(--accent)}
 .meter.warn i{background:var(--warn)} .meter.bad i{background:var(--bad)}
@@ -294,7 +298,7 @@ button{cursor:pointer}
 .seg button{flex:1 1 0;min-width:max-content;min-height:var(--h-l);border:0;background:transparent;border-radius:var(--r-sm);padding:8px;font-weight:500;color:var(--muted)}
 /* the chosen one: a white pill with an edge and bold text, not only a different colour */
 .seg button[aria-pressed="true"]{background:var(--seg-on);color:var(--ink);font-weight:600;box-shadow:var(--shadow-seg)}
-.seg button[aria-pressed="true"]:not([id]){box-shadow:inset 0 0 0 1.5px var(--field-line),var(--shadow-seg)}
+.seg button[aria-pressed="true"]:not([id]){box-shadow:inset 0 0 0 1.5px var(--seg-ring),var(--shadow-seg)}
 .segs{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)}
 .segs.one{grid-template-columns:1fr}
 .form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
@@ -350,6 +354,8 @@ input.num::placeholder{font-family:var(--f-body)}
 #tIn[aria-pressed="true"]{background:var(--seg-in);color:var(--seg-ink)}
 #sOwn[aria-pressed="true"]{background:var(--seg-own);color:var(--seg-ink)}
 #sTrip[aria-pressed="true"]{background:var(--seg-trip);color:var(--seg-ink)}
+/* in the black look the four have no colour of their own: the same ring as any picked segment (in the night-blue look the ring is nothing) */
+#tOut[aria-pressed="true"],#tIn[aria-pressed="true"],#sOwn[aria-pressed="true"],#sTrip[aria-pressed="true"]{box-shadow:var(--seg-id-ring),var(--shadow-seg)}
 .err{grid-column:1/-1;color:var(--bad);font-size:var(--fs-sm);margin:0}
 
 /* Breakdown */
@@ -361,7 +367,7 @@ input.num::placeholder{font-family:var(--f-body)}
 .bar .name .dot{width:7px;height:7px;border-radius:50%;background:var(--c);flex:none}
 .bar .val{font-size:var(--fs-sm)}
 .bar .val small{font-size:var(--fs-2xs);color:var(--muted);margin-left:5px}
-.bar .track{grid-column:1/-1;height:4px;border-radius:var(--r-pill);background:var(--line);overflow:hidden}
+.bar .track{grid-column:1/-1;height:4px;border-radius:var(--r-pill);background:var(--track);overflow:hidden}
 .bar .track i{display:block;height:100%;background:var(--c);border-radius:var(--r-pill)}
 /* room around the chips so the focus ring is never cut by the scrolling row */
 /* the row goes on past the screen's edge: it fades out there, so the cut chip reads as «more to the side»; the last chip scrolls clear of the fade */
@@ -510,7 +516,7 @@ input.num::placeholder{font-family:var(--f-body)}
 /* the month card: a ring of how much of the limit is spent, beside it the sum, «из 35 000 · осталось …»;
    under them «Вне лимита» as a plain row, then the trip money in its own small plate */
 .lhead{display:flex;align-items:center;gap:14px}
-.ring{--p:0;--rc:var(--good);flex:none;width:103px;height:103px;border-radius:50%;background:conic-gradient(var(--rc) calc(var(--p) * 1%),var(--line) 0);display:grid;place-items:center}
+.ring{--p:0;--rc:var(--good);flex:none;width:103px;height:103px;border-radius:50%;background:conic-gradient(var(--rc) calc(var(--p) * 1%),var(--track) 0);display:grid;place-items:center}
 .ring.warn{--rc:var(--warn)}.ring.bad{--rc:var(--bad)}
 .ring>div{width:83px;height:83px;border-radius:50%;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
 .ring b{font-size:25px;font-weight:700;font-variant-numeric:tabular-nums}
@@ -838,7 +844,7 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 .dperson .debt{gap:6px;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--inset)}
 .dperson .debt .acts{gap:6px 8px;margin-top:6px;padding-top:8px;border-top:1px solid var(--line)}
 .dperson .debt-return,.dperson .debt-manage{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;width:100%}
-.dperson .debt-return{row-gap:6px;padding:6px;border-radius:var(--r-md);background:var(--surface)}
+.dperson .debt-return{row-gap:6px;padding:6px;border-radius:var(--r-md);background:var(--raised)}
 .dperson .debt-manage{padding-top:6px;border-top:1px dashed var(--line)}
 /* in a debt's own window («Я должен») its «Другие действия» stand right in the window, in line with the blocks above */
 .dperson>.debt-manage{padding:6px 8px 0}
