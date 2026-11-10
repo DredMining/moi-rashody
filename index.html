@@ -1092,13 +1092,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
      the picture would otherwise start again, a 1px line of the far side's colour */
   [data-theme="dark"] .debt-overview,[data-theme="dark"] .total.mtot{background-origin:border-box}
   /* the month card: the ring stays, as in the night-blue look — the owner brought it back (10.11.2026) after the bar, then no ring at all */
-  /* a section's title is larger and in the text's colour — in capitals, as every heading and label of the app: plain letters were tried
-     here and the owner turned them down (10.11.2026), so a group's label and a card's label are as in the night-blue look.
+  /* a section's title looks as the month card's label «Траты в лимит за месяц»: 12px, semibold, capitals, .06em, muted (owner, 10.11.2026).
      One face in this look: the month's title of «Записи» and «Итоги» is set in the text face too */
   :root[data-theme="dark"]{--f-display:var(--f-body)}
-  [data-theme="dark"] h2{font-size:var(--fs-lg);font-weight:700;line-height:1.2;letter-spacing:.02em;color:var(--ink)}
-  /* a group's title over its card («Доходы по источникам», «Командировка» on Итоги) keeps the look of the groups' labels beside it */
-  [data-theme="dark"] #incomeBreakdown>h2,[data-theme="dark"] #tripCard>h2{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;color:var(--muted)}
+  [data-theme="dark"] h2{font-size:var(--fs-xs);font-weight:600;line-height:1.2;letter-spacing:.06em;color:var(--muted)}
   [data-theme="dark"] .monthbar .title{font-size:var(--fs-lg);font-weight:600}
   /* the main button of a form is 52px. «Новая запись» is the main screen's form, less tight here: its sum 56px with larger, bolder figures —
      the first thing typed; its switches 38px in a 3px groove, its chips 36px. The picked half of a switch follows the corner of its groove */
