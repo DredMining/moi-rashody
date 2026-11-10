@@ -20,7 +20,8 @@ const F = "const f=document.querySelector('iframe.app-frame'),w=f.contentWindow,
   const ev = async expr => { const r = await send('Runtime.evaluate', { expression: `(async()=>{${expr}})()`, awaitPromise: true, returnByValue: true }); if (r.exceptionDetails) throw new Error((r.exceptionDetails.exception && r.exceptionDetails.exception.description) || r.exceptionDetails.text); return r.result.value; };
   await send('Page.enable'); await send('Runtime.enable');
   await send('Emulation.setDeviceMetricsOverride', { width: 520, height: 1080, deviceScaleFactor: 2, mobile: false });
-  await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'dark' }] });
+  // оформление телефона: SCHEME=light — светлое (тёмно-синий вид), по умолчанию тёмное («Чёрный и бордо»)
+  await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: process.env.SCHEME === 'light' ? 'light' : 'dark' }] });
   const open = async () => { await send('Page.navigate', { url: BASE + '/audit/preview/phone.html' }); await sleep(3000);
     await ev(F + "await new Promise((ok,no)=>{const s=d.createElement('script');s.src='/audit/tools/probe.js';s.onload=ok;s.onerror=no;d.head.appendChild(s)}); w.__probe.noanim(); return 1"); };
   const run = (steps, ms) => ev(F + `await w.__probe.run(${JSON.stringify(steps)}, ${ms || 600}); return 1`);

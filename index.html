@@ -7,7 +7,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Мои расходы</title>
 <meta name="description" content="Ведите учёт доходов и расходов, счетов, долгов, командировочных и закята. Записи хранятся только на вашем устройстве.">
-<meta name="theme-color" content="#0D1320">
+<!-- the colour of the browser's own bars follows the look: black for the phone's dark appearance, night-blue for the light one -->
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#0D1320">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -56,16 +58,22 @@ img{max-width:100%}
 </style>
 <style>
 /* Layout: one narrow column, dark-first pocket ledger — night-blue ground, bright blue accent; tabs (Учёт / Долги), month summary, money on hand, entry form, breakdown, day-by-day list */
+/* Two looks, both dark, picked by the phone's appearance (owner's choice, 10.11.2026):
+   dark appearance — «Чёрный и бордо»: true black ground, wine accent (the values right below);
+   light appearance — the app's first look, as it was: night-blue ground, blue accent (the @media block after :root).
+   The white theme is gone. Category and account colours are the same in both looks. */
 :root{
-  --bg:#0D1320; --surface:#151E30; --ink:#E6ECF7; --muted:#8E9AB3; --line:#2A3550;
-  --accent:#5B8CFF; --accent-ink:#FFFFFF; --accent-soft:#1B2A4A;
-  --good:#5EDB94; --warn:#FFC94D; --bad:#FF7A7A;
+  --bg:#000000; --surface:#161215; --ink:#F7F3F4; --muted:#A79DA2; --line:#2E262B;
+  --accent:#F08CA0; --accent-ink:#FFFFFF; --accent-soft:#3A1C25;
+  --good:#5AD49B; --warn:#F2B950; --bad:#FF7043;
   --p1:#5B8CFF; --p2:#FF9F6B; --p3:#5EDB94; --p4:#B79CFF; --p5:#F48FD8; --p6:#5CD6E6; --p7:#FFD166; --p8:#9AA6BF; --p9:#C2DE5E;
-  --sber:#3DBE79; --tbank:#E6BE55; --vtb:#5B9BFF; --pocket:#EEF1F6; --pillow:#C4A7FF; --spend:#F07F86;
-  --out:#7E1F2E; --in:#17624A; --own:#243F75; --trip:#7A5A1E;
-  /* buttons with white text on blue, the edge of a field / chip / tile (3:1), the link in the light toast, account marks' rim, the strip under the status bar */
-  --accent-btn:#3B6BE0; --field-line:#606E8D; --toast-link:#1F4FD1; --badge-ink:#1A1405; --good-ink:var(--good); --mark-edge:rgb(255 255 255 / .5); --sbar:var(--bg);
-  /* yellow as text (a fill or a line keeps --warn): darker in the light theme, so small words in it stay readable */
+  /* an expense's sum is plain text here: the wine button and the orange «превышен» are the only reds on the screen */
+  --sber:#3DBE79; --tbank:#E6BE55; --vtb:#5B9BFF; --pocket:#EEF1F6; --pillow:#C4A7FF; --spend:var(--ink);
+  /* one accent for «Добавить расход» and «Добавить доход»: the kind of record is told by the switch above, not by the button's colour */
+  --out:#A8324C; --in:#A8324C; --own:#243F75; --trip:#7A5A1E;
+  /* buttons with white text on the accent, the edge of a field / chip / tile (3:1), the link in the light toast, account marks' rim, the strip under the status bar */
+  --accent-btn:#A8324C; --field-line:#6E6268; --toast-link:#8E2440; --badge-ink:#1A1405; --good-ink:var(--good); --mark-edge:rgb(255 255 255 / .5); --sbar:var(--bg);
+  /* yellow as text (a fill or a line keeps --warn) */
   --warn-ink:var(--warn);
   --f-display:"Unbounded", "Golos Text", system-ui, sans-serif;
   --f-body:"Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -90,29 +98,19 @@ img{max-width:100%}
   --shadow-fab:0 4px 14px rgb(0 0 0 / .28); --shadow-toast:0 8px 24px rgb(0 0 0 / .3); --shadow-seg:0 1px 2px rgb(0 0 0 / .12); --shadow-knob:0 1px 3px rgb(0 0 0 / .35);
   /* roles the two looks fill differently: a block inside a card (a field, a small plate), the fill of a picked «Расход / Доход / Личное / Командировка»
      and its text, the round «+» of the tab bar */
-  --inset:var(--bg); --seg-out:var(--out); --seg-in:var(--in); --seg-own:var(--own); --seg-trip:var(--trip); --seg-ink:var(--on-fill); --fab:var(--accent);
+  --inset:#221C20; --seg-on:#3B3237; --seg-out:var(--seg-on); --seg-in:var(--seg-on); --seg-own:var(--seg-on); --seg-trip:var(--seg-on); --seg-ink:var(--ink); --fab:var(--accent-btn);
   color-scheme:dark;
 }
-@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
-  --bg:#EEF2F8; --surface:#FFFFFF; --ink:#111A2C; --muted:#5A6680; --line:#D6DEEB;
-  --accent:#2F5FE0; --accent-ink:#FFFFFF; --accent-soft:#E1E9FB;
-  --good:#15803D; --warn:#B45309; --bad:#B42330;
-  --p1:#2F5FE0; --p2:#C2410C; --p3:#15803D; --p4:#6D4AA8; --p5:#BE185D; --p6:#0E7490; --p7:#A16207; --p8:#64748B; --p9:#4D7C0F;
-  --sber:#137A45; --tbank:#876510; --vtb:#1D4ED8; --pocket:#111A2C; --pillow:#6D4AA8; --spend:#B42330;
-  --out:#7E1A2B; --in:#155C44; --own:#233E73; --trip:#76561A;
-  --accent-btn:#2F5FE0; --field-line:#7A869E; --toast-link:#8FB0FF; --badge-ink:#FFFFFF; --good-ink:#166534; --warn-ink:#92400E; --mark-edge:rgb(0 0 0 / .45); --sbar:#0D1320;
-  color-scheme:light;
+/* the phone's light appearance: the first look, colour for colour as it was before the two looks (still dark: color-scheme stays dark) */
+@media (prefers-color-scheme: light){:root{
+  --bg:#0D1320; --surface:#151E30; --ink:#E6ECF7; --muted:#8E9AB3; --line:#2A3550;
+  --accent:#5B8CFF; --accent-soft:#1B2A4A;
+  --good:#5EDB94; --warn:#FFC94D; --bad:#FF7A7A;
+  --spend:#F07F86;
+  --out:#7E1F2E; --in:#17624A;
+  --accent-btn:#3B6BE0; --field-line:#606E8D; --toast-link:#1F4FD1;
+  --inset:var(--bg); --seg-on:var(--surface); --seg-out:var(--out); --seg-in:var(--in); --seg-own:var(--own); --seg-trip:var(--trip); --seg-ink:var(--on-fill); --fab:var(--accent);
 }}
-:root[data-theme="light"]{
-  --bg:#EEF2F8; --surface:#FFFFFF; --ink:#111A2C; --muted:#5A6680; --line:#D6DEEB;
-  --accent:#2F5FE0; --accent-ink:#FFFFFF; --accent-soft:#E1E9FB;
-  --good:#15803D; --warn:#B45309; --bad:#B42330;
-  --p1:#2F5FE0; --p2:#C2410C; --p3:#15803D; --p4:#6D4AA8; --p5:#BE185D; --p6:#0E7490; --p7:#A16207; --p8:#64748B; --p9:#4D7C0F;
-  --sber:#137A45; --tbank:#876510; --vtb:#1D4ED8; --pocket:#111A2C; --pillow:#6D4AA8; --spend:#B42330;
-  --out:#7E1A2B; --in:#155C44; --own:#233E73; --trip:#76561A;
-  --accent-btn:#2F5FE0; --field-line:#7A869E; --toast-link:#8FB0FF; --badge-ink:#FFFFFF; --good-ink:#166534; --warn-ink:#92400E; --mark-edge:rgb(0 0 0 / .45); --sbar:#0D1320;
-  color-scheme:light;
-}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:var(--fs-md);line-height:1.5}
 .wrap{max-width:720px;margin:0 auto;padding-inline:16px;padding-block:16px 24px;display:flex;flex-direction:column;gap:var(--sp-4)}
@@ -295,7 +293,7 @@ button{cursor:pointer}
 .seg{display:flex;flex-wrap:wrap;background:var(--inset);border:1px solid var(--field-line);border-radius:var(--r-md);padding:3px;gap:3px}
 .seg button{flex:1 1 0;min-width:max-content;min-height:var(--h-l);border:0;background:transparent;border-radius:var(--r-sm);padding:8px;font-weight:500;color:var(--muted)}
 /* the chosen one: a white pill with an edge and bold text, not only a different colour */
-.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--shadow-seg)}
+.seg button[aria-pressed="true"]{background:var(--seg-on);color:var(--ink);font-weight:600;box-shadow:var(--shadow-seg)}
 .seg button[aria-pressed="true"]:not([id]){box-shadow:inset 0 0 0 1.5px var(--field-line),var(--shadow-seg)}
 .segs{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)}
 .segs.one{grid-template-columns:1fr}
