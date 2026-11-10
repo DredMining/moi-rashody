@@ -78,8 +78,8 @@ img{max-width:100%}
      17 — a window's title, 20 — a sum inside a window, hero — the big sum of a tab; a field is 16px and over (iPhone zooms in under it) */
   --fs-2xs:11px; --fs-xs:12px; --fs-sm:13px; --fs-md:15px; --fs-lg:17px; --fs-xl:20px; --fs-hero:clamp(26px,8vw,32px);
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px;
-  /* a card's padding, the gap between cards of a tab */
-  --pad-card:12px; --gap-stack:12px;
+  /* a card's padding, the gap between cards of a tab; the edge of a card that lies on the page (a window's edge is --line itself) */
+  --pad-card:12px; --gap-stack:12px; --card-line:var(--line);
   /* corners: a badge, a button / field / block inside a card, a card, a window */
   --r-sm:8px; --r-md:10px; --r-lg:14px; --r-xl:20px; --r-pill:99px; --r:var(--r-lg);
   /* control heights: L — a form's button and field, M — a button in a card, an alert or a dense window, S — a chip, a filter, a row's link */
@@ -174,7 +174,7 @@ button{cursor:pointer}
 .total .sub{font-size:var(--fs-sm);color:var(--muted)}
 /* the outstanding debt is a single glanceable card: total first, then how many people still owe.
    The two hero cards («Всего денег», «Мне должны») keep a soft accent glow; every other card is flat */
-.debt-overview{position:relative;display:flex;flex-direction:column;gap:var(--sp-2);padding:var(--pad-card);background:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--accent) 18%,var(--surface)),var(--surface) 66%);border:1px solid var(--line);border-radius:var(--r)}
+.debt-overview{position:relative;display:flex;flex-direction:column;gap:var(--sp-2);padding:var(--pad-card);background:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--accent) 18%,var(--surface)),var(--surface) 66%);border:1px solid var(--card-line);border-radius:var(--r)}
 .debt-overview-head{display:flex;align-items:center;gap:var(--sp-2);min-width:0}
 .debt-overview-icon{width:36px;height:36px;flex:none;display:grid;place-items:center;border-radius:var(--r-md);background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));color:var(--accent)}
 .debt-overview-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -184,7 +184,7 @@ button{cursor:pointer}
 .debt-overview-people{width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:var(--r-sm);background:var(--inset);color:var(--accent)}
 .debt-overview-people svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .debt-overview .sub{min-width:0;font-size:var(--fs-xs);font-weight:500;line-height:1.3;overflow-wrap:anywhere}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat{background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
 .stat>span{font-size:var(--fs-xs);color:var(--muted)}
 .stat b{font-family:var(--f-num);font-weight:500;font-size:var(--fs-lg);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .stat small{font-size:var(--fs-2xs);color:var(--muted)}
@@ -213,7 +213,7 @@ button{cursor:pointer}
 #incomeBreakdown,#tripCard{gap:6px}
 .bdwrap .bd{gap:6px}
 #breakdown .bd h3,#incomeBreakdown>h2,[data-sv="broker"] .bd h3,#tripCard>h2{margin:0 0 0 2px;font-size:var(--fs-xs);line-height:1.2}
-.bdwrap .bars{gap:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.bdwrap .bars{gap:0;background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);overflow:hidden}
 .bdwrap .bar{min-height:var(--h-m);padding:5px var(--pad-card) 6px;row-gap:4px;border-bottom:1px solid var(--line)}
 .bdwrap .bar .name,.bdwrap .bar .val{font-size:var(--fs-xs)}
 .bdwrap .bar .track{height:3px}
@@ -237,7 +237,7 @@ button{cursor:pointer}
 .stats-page>[data-sv]{width:100%;max-width:100%}
 #cmpBox>summary{display:none}
 #cmpBox>.morebody{padding-top:var(--pad-card)}
-.sv-empty{margin:0;padding:16px;text-align:center;font-size:var(--fs-md);color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.sv-empty{margin:0;padding:16px;text-align:center;font-size:var(--fs-md);color:var(--muted);background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r)}
 /* the trip links: 32px buttons (--h-s), the rows touch: «Сверить» / «+ Пришли командировочные» on the first line, «Командировка началась»
    (once begun — «Командировка закончилась» in its place) on the second, «Отчёт по прошлой командировке» on the third (owner's order, 24.10.2026).
    The words of the first line sit at the bottom of their 32px, those of the last at the top: the lines of text stand close,
@@ -250,7 +250,7 @@ button{cursor:pointer}
 .wallets{display:flex;flex-direction:column;gap:var(--gap-stack)}
 .wgroup{display:flex;flex-direction:column;gap:var(--sp-2)}
 /* «Деньги»: each group (Карты, Наличные, Накопления) is a card, its name and sum on top, its accounts as small blocks inside it */
-#wallets .wgroup{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:6px var(--pad-card) 4px;gap:0}
+#wallets .wgroup{background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);padding:6px var(--pad-card) 4px;gap:0}
 .whead{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-2);padding:0 2px 8px}
 .whead h3{margin:0}
 /* the group's sum in its own small block on the right */
@@ -288,7 +288,7 @@ button{cursor:pointer}
 .inline-edit .err{flex:1 1 100%}
 #lblForm input{width:100%}
 
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:var(--sp-3)}
+.panel{background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:var(--sp-3)}
 /* the tabs: cards one under another, the same gap on every tab (renderTabs shows one, display:flex) */
 [role="tabpanel"]{display:flex;flex-direction:column;gap:var(--gap-stack)}
 
@@ -304,7 +304,7 @@ button{cursor:pointer}
 .form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 .form>*{min-width:0}
 /* «+ Дал в долг» and «+ Взял в долг»: the same row-button, each opens its window */
-.debt-add-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:var(--h-l);padding:10px var(--pad-card);border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);font:inherit;font-size:var(--fs-md);font-weight:600;text-align:left;cursor:pointer}
+.debt-add-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:var(--h-l);padding:10px var(--pad-card);border:1px solid var(--card-line);border-radius:var(--r);background:var(--surface);color:var(--ink);font:inherit;font-size:var(--fs-md);font-weight:600;text-align:left;cursor:pointer}
 .debt-add-trigger::after{content:'›';content:'›'/'';font-size:20px;font-weight:400;line-height:1;color:var(--muted)}
 .wmodal:has(.debt-add-modal){align-items:center;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
 .debt-add-modal{position:relative;width:min(440px,100%);max-height:calc(100vh - 32px);max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px);overflow-y:auto;overscroll-behavior:contain;padding:var(--pad-card);border:1px solid var(--line);border-radius:var(--r-xl);background:var(--surface);box-shadow:var(--shadow-modal);animation:up .18s ease-out}
@@ -423,7 +423,7 @@ input.num::placeholder{font-family:var(--f-body)}
 #recent .item>.ic{width:24px;height:24px;font-size:12px}
 #recent .item .what>span{font-size:var(--fs-2xs)}
 #recent .item .amt{min-height:var(--h-m);margin-block:-4px}
-.recs .day{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:2px var(--pad-card) 0}
+.recs .day{background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);padding:2px var(--pad-card) 0}
 .recs .dayhead{align-items:center;font-size:var(--fs-sm);font-weight:600;color:var(--ink);padding-block:6px 4px}
 /* the day is a heading (h3) for a screen reader; it looks like the rest of its line */
 .dayhead>h3{font:inherit;letter-spacing:normal;text-transform:none;color:inherit}
@@ -435,7 +435,7 @@ input.num::placeholder{font-family:var(--f-body)}
 .recs .dayhead .num>.pos{--c:var(--good);color:var(--good-ink)}
 /* trip money of the day in the trip colour, like the «командировка» tag on its rows */
 .recs .dayhead .num>.trip{color:var(--on-fill);background:var(--trip);border-color:var(--trip)}
-.recs .empty{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.recs .empty{background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);padding:16px}
 /* the sum keeps its line while there is room; on a very narrow screen it breaks rather than push the row off the screen */
 .item{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,auto);gap:10px;align-items:center;padding-block:6px;border-bottom:1px solid var(--line);font-size:var(--fs-base)}
 .item:last-child{border-bottom:0}
@@ -509,7 +509,7 @@ input.num::placeholder{font-family:var(--f-body)}
   /* a sum too long for its third goes on between digit groups (<wbr> in renderCompare) — never cut */
   .cmp-amount,.cmp-delta{font-size:var(--fs-xs);white-space:normal}
 }
-.sumcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:10px}
+.sumcard{background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);padding:var(--pad-card);display:flex;flex-direction:column;gap:10px}
 /* Учёт a size smaller: the card, the new record and the last records fit more on the screen
    (the sum field stays at 16px and over — a smaller one makes the iPhone zoom in when it is tapped).
    The small blocks under the meters: lower, a size smaller */
@@ -586,7 +586,7 @@ input.num::placeholder{font-family:var(--f-body)}
 .lparts .kop{font-size:max(var(--fs-2xs),.8em);color:var(--muted)}
 .alerts{display:flex;flex-direction:column;gap:var(--gap-stack)}
 .alerts:empty{display:none}
-.alert{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:inset 3px 0 0 var(--alert-c,var(--warn));padding:10px var(--pad-card);font-size:var(--fs-base)}
+.alert{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);box-shadow:inset 3px 0 0 var(--alert-c,var(--warn));padding:10px var(--pad-card);font-size:var(--fs-base)}
 .alert>span{flex:1 1 10em;min-width:0;overflow-wrap:anywhere}
 .alert b{font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
 .alert .primary,.alert .ghost{flex:none;padding:8px 12px;margin-left:auto}
@@ -596,7 +596,7 @@ input.num::placeholder{font-family:var(--f-body)}
 .sysacts .primary,.sysacts .ghost{margin-left:0}
 /* «Есть новая версия · Обновить»: one slim line (the button's 44px reach goes past it), half of it in the page's top margin and
    the gap under it — the form below moves down by little */
-#sysAlerts .upd{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);min-height:30px;padding:0 14px 0 12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:inset 3px 0 0 var(--accent);font-size:var(--fs-sm);line-height:1.2}
+#sysAlerts .upd{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);min-height:30px;padding:0 14px 0 12px;background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r-md);box-shadow:inset 3px 0 0 var(--accent);font-size:var(--fs-sm);line-height:1.2}
 #sysAlerts .upd:first-child{margin-top:-8px}
 #sysAlerts .upd:last-child{margin-bottom:-8px}
 #sysAlerts .upd>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -632,7 +632,7 @@ input.num::placeholder{font-family:var(--f-body)}
 #wipeBk{scroll-margin-bottom:16px}
 .extras{grid-column:1/-1;display:flex;gap:var(--sp-2);flex-wrap:wrap}
 .chipbtn{border:1px solid var(--field-line);background:transparent;color:var(--muted);border-radius:var(--r-pill);padding:6px 14px;min-height:var(--h-l);font-size:var(--fs-sm)}
-details.more{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+details.more{background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r)}
 .morebody{padding:0 var(--pad-card) var(--pad-card);display:flex;flex-direction:column;gap:var(--sp-3)}
 .bdwrap{display:flex;flex-direction:column;gap:var(--sp-3)}
 /* Zakat */
@@ -703,7 +703,7 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 .zfoot{margin:0;padding:8px 0 10px;font-size:var(--fs-xs);color:var(--muted);line-height:1.4}
 /* «Брокер» and «Лимит» on «Итоги», as «Расходы»: a small grey label (h3) over each, under it one card of rows split by thin lines
    (a row 36px or more: the name on the left, the sum on the right); a form («Изменить %», «Сверить», «Изменить») opens in the same card */
-#viewStats [data-sv="broker"] .rule{gap:var(--sp-2);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:0 var(--pad-card)}
+#viewStats [data-sv="broker"] .rule{gap:var(--sp-2);background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);padding:0 var(--pad-card)}
 #viewStats [data-sv="broker"] .rule:has(>form){padding-block:var(--pad-card)}
 #viewStats .zcard{padding:0;border:0;border-radius:0;background:none}
 #viewStats .zrow{min-height:var(--h-m);gap:var(--sp-2);padding:5px 0;font-size:var(--fs-sm);line-height:1.2}
@@ -765,7 +765,7 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 #zakatBox .linkbtn{font-size:var(--fs-sm)}
 /* the zakat card on «Деньги»: «🌙 Закят ›», under it its figures in equal columns — a small grey label over each value;
    with no figures, one short line («настроить ›») */
-.zline{display:flex;flex-direction:column;gap:var(--sp-2);width:100%;min-height:var(--h-l);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px var(--pad-card);color:var(--ink);font-size:var(--fs-base);line-height:1.3;text-align:left}
+.zline{display:flex;flex-direction:column;gap:var(--sp-2);width:100%;min-height:var(--h-l);background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);padding:10px var(--pad-card);color:var(--ink);font-size:var(--fs-base);line-height:1.3;text-align:left}
 .zline:active{background:var(--accent-soft)}
 .zline .zh{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 10px;font-weight:600;font-size:var(--fs-md)}
 .zline .zh>span{white-space:nowrap}
@@ -797,7 +797,7 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 .wrow b.none{color:var(--accent);font-family:var(--f-body);font-size:var(--fs-xs);font-weight:500}
 /* «Всего денег»: a card with a soft accent glow; in its middle the label and the sum (kopecks smaller and grey),
    a bar split by how much each group holds, then cards / cash / savings each in its own small block, as the limit's on «Учёт» */
-.total.mtot{background:var(--surface);background:radial-gradient(120% 140% at 50% 0%,color-mix(in srgb,var(--accent) 24%,var(--surface)),var(--surface) 70%);border:1px solid var(--line);border-radius:var(--r);padding:12px;gap:2px;align-items:center;text-align:center}
+.total.mtot{background:var(--surface);background:radial-gradient(120% 140% at 50% 0%,color-mix(in srgb,var(--accent) 24%,var(--surface)),var(--surface) 70%);border:1px solid var(--card-line);border-radius:var(--r);padding:12px;gap:2px;align-items:center;text-align:center}
 #moneyTotal .kop{font-size:.6em;color:var(--muted);font-weight:600}
 .mtot .lbl{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
 .msub{font-size:var(--fs-xs);color:var(--muted);margin-top:2px}
@@ -1077,7 +1077,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
 /* ---- the black look only (the phone's dark appearance); the night-blue look keeps the ring and its sizes ---- */
 @media (prefers-color-scheme: dark){
   /* the big sum of a tab is larger: up to 44px (fitBig still makes it smaller while it doesn't fit) */
-  :root{--fs-hero:clamp(30px,10vw,44px)}
+  :root{--fs-hero:clamp(30px,10vw,44px);
+    /* cards lie flat on the black page: no edge, rounder corners, more room inside and between them.
+       A window keeps its thin edge — it floats over the page. Corners: a button / field / block in a card 14, a card 20, a window 28 */
+    --card-line:transparent;--pad-card:16px;--gap-stack:16px;--r-md:14px;--r-lg:20px;--r-xl:28px}
+  /* a reminder's colour: a short straight bar inside its left edge (a strip along the edge would bend round the larger corner) */
+  .alert,#sysAlerts .upd{box-shadow:none;background-image:linear-gradient(var(--alert-c,var(--warn)),var(--alert-c,var(--warn)));background-repeat:no-repeat;background-position:6px 50%;background-size:3px calc(100% - 20px)}
+  #sysAlerts .upd{--alert-c:var(--accent);background-size:3px calc(100% - 12px)}
   /* the page's title over the month card: the month «Учёт» shows, large; its year smaller and quieter */
   .bigmonth{display:block;padding:4px 2px 0;font-family:var(--f-body);font-size:clamp(28px,7.7vw,34px);font-weight:700;line-height:1.1;letter-spacing:-.02em;text-transform:none;color:var(--ink)}
   .bigmonth span{text-transform:capitalize}
