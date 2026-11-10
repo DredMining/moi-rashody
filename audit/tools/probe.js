@@ -75,7 +75,13 @@
     // размеры и положение набора элементов: для проверки симметрии и равных размеров
     box(sel) { return all(sel).map(el => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el); return { el: lab(el), x: +r.left.toFixed(1), y: +r.top.toFixed(1), w: +r.width.toFixed(1), h: +r.height.toFixed(1), fs: cs.fontSize, fw: cs.fontWeight, lh: cs.lineHeight, rad: cs.borderRadius, pad: cs.padding }; }); },
     style(sel, props) { return all(sel).map(el => { const cs = getComputedStyle(el), o = { el: lab(el) }; props.forEach(p => o[p] = cs[p]); return o; }); },
-    lines(el) { const r = document.createRange(); r.selectNodeContents(el); const tops = new Set(); [...r.getClientRects()].forEach(q => { if (q.width > 1) tops.add(Math.round(q.top / 4)); }); return tops.size; },
+    // число строк текста: куски разного кегля на одной строке (крупный месяц и мелкий год) считаются одной строкой —
+    // кусок относится к строке, если его середина по высоте лежит внутри неё (или середина строки — внутри него)
+    lines(el) { const r = document.createRange(); r.selectNodeContents(el); const rows = [];
+      [...r.getClientRects()].filter(q => q.width > 1).sort((a, b) => a.top - b.top).forEach(q => { const mid = (q.top + q.bottom) / 2;
+        const row = rows.find(w => (mid > w[0] && mid < w[1]) || ((w[0] + w[1]) / 2 > q.top && (w[0] + w[1]) / 2 < q.bottom));
+        if (row) { row[0] = Math.min(row[0], q.top); row[1] = Math.max(row[1], q.bottom); } else rows.push([q.top, q.bottom]); });
+      return rows.length; },
     // короткая сводка отклонений текущего состояния (для обхода по ширинам)
     scan() {
       const m = this.metrics(), o = {}, vh = innerHeight, vw = innerWidth;
