@@ -166,7 +166,7 @@ button{cursor:pointer}
 .monthbar{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2)}
 .monthbar .title{font-family:var(--f-display);font-size:16px;font-weight:500;text-transform:capitalize}
 .iconbtn{border:1px solid var(--field-line);background:var(--surface);border-radius:var(--r-md);width:44px;height:44px;display:grid;place-items:center;font-size:18px;line-height:1}
-.iconbtn:disabled{opacity:.35;cursor:default}
+.iconbtn:disabled{opacity:.4;cursor:default}
 .total{display:flex;flex-direction:column;gap:2px}
 .total .lbl{font-size:var(--fs-sm);color:var(--muted)}
 /* the big sum of a tab (Учёт, Деньги, Долги): one look everywhere — the text face, bold (fitBig makes it smaller only while it doesn't fit) */
@@ -855,7 +855,10 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 /* in a debt's own window («Я должен») its «Другие действия» stand right in the window, in line with the blocks above */
 .dperson>.debt-manage{padding:6px 8px 0}
 .dperson .debt-actions-label{flex:1 1 100%;font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.dperson .debt-manage>.linkbtn,.dperson .debt-manage>.del{min-height:var(--h-s);padding:6px 0;margin:0;font-size:var(--fs-xs)}
+.dperson .debt-manage>.linkbtn,.dperson .debt-manage>.del{min-height:var(--h-m);padding:6px 0;margin:0;font-size:var(--fs-sm)}
+/* «Удалить» stands apart, at the right edge: a finger aiming at «Изменить» does not land on it */
+.dperson .debt-manage{column-gap:var(--sp-4)}
+.dperson .debt-manage>.del{margin-left:auto}
 .dperson.dg{gap:6px}
 .dperson .dp-repay .acts>.dacc select{min-height:var(--h-m);padding:2px 8px;font-size:var(--fs-field)}
 .dperson .debt .head b,.dperson .debt .head .left{font-size:var(--fs-base)}
@@ -889,7 +892,9 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 .tag.trip{border-color:var(--trip);color:var(--on-fill);background:var(--trip)}
 .del{border:0;background:none;color:var(--muted);font-size:var(--fs-sm);padding:10px 12px;min-height:var(--h-l);border-radius:var(--r-sm)}
 .del.armed{color:var(--bad);font-weight:600}
-.empty{text-align:center;padding-block:24px;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center}
+/* «nothing here yet»: 16px over and under the words wherever it stands (in «Сравнение» the card's own 12px make up the rest) */
+.empty{text-align:center;padding-block:16px;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center}
+#cmp .empty{padding-block:4px}
 .empty p{margin:0;max-width:42ch}
 /* buttons: L (44px) by default; in a card, an alert or a dense window M (36px) or S (32px) — see --h-* */
 .ghost{border:1px solid var(--field-line);background:transparent;border-radius:var(--r-md);padding:8px 14px;min-height:var(--h-l);font-weight:500}
@@ -924,6 +929,11 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 /* a closed debt: its name and sum in grey; its buttons stay as readable as anywhere else */
 .debt.closed .head b,.debt.closed .head .left{color:var(--muted);font-weight:500}
 details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-weight:500;padding-block:12px;min-height:var(--h-l)}
+/* «Закрытые (N)»: the app's own turn-down mark, as «Почему столько», in place of the browser's triangle */
+#debtList details>summary,#oweList details>summary{display:flex;align-items:center;gap:6px;list-style:none}
+#debtList details>summary::-webkit-details-marker,#oweList details>summary::-webkit-details-marker{display:none}
+#debtList details>summary::before,#oweList details>summary::before{content:'›';content:'›'/'';font-size:16px;line-height:1;transition:transform .15s}
+#debtList details[open]>summary::before,#oweList details[open]>summary::before{transform:rotate(90deg)}
 
 .foot{font-size:var(--fs-xs);color:var(--muted);text-align:center;display:flex;flex-direction:column;gap:var(--sp-2);align-items:center}
 .toast .undo{background:none;border:0;color:var(--toast-link);font-weight:700;min-height:var(--h-l);padding:8px 12px;margin:-6px -8px -6px auto;flex:none}
@@ -1027,7 +1037,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
 .ptwo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-2)}
 .ptwo label{display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--fs-xs);color:var(--muted);min-width:0}
 .ptwo .phint{grid-column:1/-1;margin:0;font-size:var(--fs-xs);color:var(--muted)}
-.submit:disabled{opacity:.45}
+.submit:disabled{opacity:.4}
 .accs .tile .nm{font-weight:600}
 /* the message box: over every window (sheets 50, the zakat window 45), as wide as its text up to the screen less 16px each side;
    toast() moves it above an open sheet, or to the top while a window covers the screen or the keyboard is up */
