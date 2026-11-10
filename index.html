@@ -322,6 +322,10 @@ button{cursor:pointer}
 .hint{grid-column:1/-1;font-size:var(--fs-xs);color:var(--muted);margin:-4px 0 0}
 /* 16px at least, so iOS never zooms into a field; what is typed or chosen reads as data (--ink), the hint stays grey */
 input,select{width:100%;border:1px solid var(--field-line);background:var(--inset);border-radius:var(--r-md);padding:10px 12px;min-width:0;font-size:var(--fs-field);color:var(--ink)}
+/* every field is one height (L, 44px) whatever its kind — a text, a sum, a date, a list; a dense window sets M for its own; a tick box keeps its size */
+input:where(:not([type="checkbox"],[type="radio"])),select{min-height:var(--h-l);line-height:1.25}
+/* a field with a mistake in it: its edge in the colour of the message */
+input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--bad)}
 select,input[type="date"]{-webkit-text-fill-color:var(--ink)}
 input[type="date"]::-webkit-date-and-time-value{color:var(--ink);-webkit-text-fill-color:var(--ink)}
 .xfer{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px 4px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:12px}
@@ -329,8 +333,8 @@ input[type="date"]::-webkit-date-and-time-value{color:var(--ink);-webkit-text-fi
 .xfer label{display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--fs-xs);color:var(--muted);min-width:0}
 /* «Откуда» and «Куда»: M fields (36px; the type stays 16px — under it the iPhone zooms in), «⇄» between them swaps the two.
    «⇄» 32px wide, the columns 4px apart and the arrow's side 4px: «Брокерский счёт» still fits whole in a 440px window */
-.xfer select{min-height:var(--h-m);padding:4px 4px 4px 8px;line-height:1.2}
-.xfer .xswap{align-self:end;width:var(--h-s);min-height:var(--h-m);padding:0;font-size:18px;line-height:1}
+.xfer select{min-height:var(--h-l);padding:4px 4px 4px 8px;line-height:1.2}
+.xfer .xswap{align-self:end;width:var(--h-s);min-height:var(--h-l);padding:0;font-size:18px;line-height:1}
 .xfer .row{grid-column:1/-1;display:flex;gap:var(--sp-2);flex-wrap:wrap;align-items:center}
 /* narrower than 440px two names side by side are cut («Брокерский сч»): «Откуда» over «Куда», «⇄» on the right between them; the type stays 16px */
 @media (max-width:439px){.xfer{grid-template-columns:minmax(0,1fr) auto}.xfer .xswap{grid-row:span 2;align-self:center}}
@@ -885,6 +889,8 @@ details.more{background:var(--surface);border:1px solid var(--line);border-radiu
 /* buttons: L (44px) by default; in a card, an alert or a dense window M (36px) or S (32px) — see --h-* */
 .ghost{border:1px solid var(--field-line);background:transparent;border-radius:var(--r-md);padding:8px 14px;min-height:var(--h-l);font-weight:500}
 .primary{border:0;background:var(--accent-btn);color:var(--accent-ink);border-radius:var(--r-md);padding:8px 14px;min-height:var(--h-l);font-weight:600}
+/* «Сохранить» of a small form in a card (the limit, the broker's percent, the debt to oneself): the same filled button as any other save */
+.ghost[type="submit"]{border-color:transparent;background:var(--accent-btn);color:var(--accent-ink);font-weight:600}
 
 /* Debts */
 .debt{display:flex;flex-direction:column;gap:var(--sp-2);padding-block:12px;border-bottom:1px solid var(--line)}
@@ -1081,11 +1087,11 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     </div>
     <form class="form" id="form" novalidate>
       <label class="amount"><input id="amount" autocomplete="off" inputmode="decimal" placeholder="0" aria-label="Сумма" aria-describedby="formErr"><span>₽</span></label>
+      <p class="err" role="alert" id="formErr" hidden></p>
       <p class="hint" id="hint" hidden></p>
       <div class="extras"><button type="button" class="chipbtn" id="dateBtn" aria-label="Дата записи: Сегодня">Сегодня</button><button type="button" class="chipbtn" id="noteBtn">+ комментарий</button></div>
       <input id="date" type="date" aria-label="Дата" hidden>
       <input id="note" placeholder="Комментарий" maxlength="80" aria-label="Комментарий" hidden>
-      <p class="err" role="alert" id="formErr" hidden></p>
       <button class="submit" id="submitBtn" type="submit">Добавить расход</button>
     </form>
   </section>
