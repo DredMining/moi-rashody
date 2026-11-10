@@ -970,6 +970,14 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
 .tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-inline:-8px}
 /* «На что?»: narrower than 375px «Развлечение» no longer fits a quarter of the window at the least size of type, so three tiles to a row */
 @media (max-width:374px){.tiles:not(.accs){grid-template-columns:repeat(3,minmax(0,1fr))}}
+/* even rows: a tile with a one-line name is as tall as one with two (15px of padding, the 32px icon, a 4px gap, two lines of 1.2, the edge) */
+.tiles:not(.accs)>.tile{min-height:calc(53px + 2.4em)}
+/* no tile is left alone on a last row. Five tiles («Отдельно», a trip's categories) stand in one row of five where their words fit (430px and wider);
+   a last tile alone on its row («Другое») takes the whole row, its icon and word side by side */
+@media (min-width:430px){.tiles:not(.accs):has(>.tile:nth-child(5):last-child){grid-template-columns:repeat(5,minmax(0,1fr))}
+  .tiles:not(.accs)>.tile:last-child:nth-child(4n+1):nth-child(n+6){grid-column:1/-1;flex-direction:row;justify-content:center;gap:var(--sp-2);min-height:var(--h-l);padding-block:6px}}
+@media (min-width:375px) and (max-width:429px){.tiles:not(.accs)>.tile:last-child:nth-child(4n+1){grid-column:1/-1;flex-direction:row;justify-content:center;gap:var(--sp-2);min-height:var(--h-l);padding-block:6px}}
+@media (max-width:374px){.tiles:not(.accs)>.tile:last-child:nth-child(3n+1){grid-column:1/-1;flex-direction:row;justify-content:center;gap:var(--sp-2);min-height:var(--h-l);padding-block:6px}}
 /* the grid stands 8px past the window's content on each side: «Отдельно» starts where its tiles start */
 .tiles:not(.accs)+h3{margin-inline:-8px}
 .tile{background:var(--inset);border:1px solid var(--field-line);border-radius:var(--r-lg);padding:8px 2px 7px;display:flex;flex-direction:column;align-items:center;gap:var(--sp-1);color:var(--ink);font-size:clamp(var(--fs-2xs),2.9vw,12px);line-height:1.2;text-align:center;min-width:0;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto}
