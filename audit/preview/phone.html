@@ -489,10 +489,6 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5"/><path d="M19 12a7 7 0 1 1-2-4.9L20 12"/></svg>
         <span class="toolbar-label">Обновить</span>
       </button>
-      <button class="tool-button" id="orientationToggle" type="button" aria-pressed="false" title="Переключить ориентацию телефона">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.3"/><path d="M10 5h4M11 18.5h2"/></svg>
-        <span class="toolbar-label" id="orientationLabel">Портретная</span>
-      </button>
     </div>
   </div>
 
@@ -548,8 +544,6 @@
       const frame = document.querySelector(".app-frame");
       const screen = document.querySelector(".screen");
       const phone = document.getElementById("phone");
-      const orientationToggle = document.getElementById("orientationToggle");
-      const orientationLabel = document.getElementById("orientationLabel");
       const refreshButton = document.getElementById("refreshApp");
       const refreshMode = document.getElementById("refreshMode");
       const isLandscape = () => phone.classList.contains("is-landscape");
@@ -571,27 +565,12 @@
         frame.style.setProperty("--frame-scale", String(Math.max(0, scale)));
       };
 
-      const setOrientation = (landscape) => {
-        phone.classList.toggle("is-landscape", landscape);
-        phone.setAttribute(
-          "aria-label",
-          `Симулятор iPhone 18 Pro Max Burgundy, ${landscape ? "альбомная" : "портретная"} ориентация`
-        );
-        orientationToggle.setAttribute("aria-pressed", String(landscape));
-        orientationLabel.textContent = landscape ? "Альбомная" : "Портретная";
-        void screen.offsetWidth;
-        resizeFrame();
-        requestAnimationFrame(resizeFrame);
-      };
-
       if ("ResizeObserver" in window) {
         new ResizeObserver(resizeFrame).observe(screen);
       } else {
         window.addEventListener("resize", resizeFrame);
       }
       resizeFrame();
-
-      orientationToggle.addEventListener("click", () => setOrientation(!isLandscape()));
 
       const updateClock = () => {
         clock.textContent = new Intl.DateTimeFormat(undefined, {
@@ -672,13 +651,7 @@
         ["localhost", "127.0.0.1", "::1", "[::1]"].includes(location.hostname);
 
       refreshButton.title = defaultRefreshTitle;
-      refreshMode.textContent = supportsAutoRefresh
-        ? "Автообновление · localhost"
-        : location.protocol === "file:"
-          ? "file:// · обновляйте вручную"
-          : "Для автообновления откройте через localhost";
-      // what the frame stands for: the screen size and the insets are those of iphone.html (an assumption for the 18 Pro Max)
-      refreshMode.textContent += " · 18 Pro Max: экран 440×956, отступы 62 / 34 px (допущение)";
+      refreshMode.textContent = "18 Pro Max Burgundy";
       refreshButton.addEventListener("click", () => {
         reloadFrame();
         if (supportsAutoRefresh) getSourceSignature().then((signature) => {
