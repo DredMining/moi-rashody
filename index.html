@@ -4206,13 +4206,16 @@ function bindDebtEdit(list){
       const pre=d.mine?'Взял в долг: ':'Дал в долг: ', rec=loanRec(d);
       /* its record takes an account below zero (more lent, less borrowed): said first, a second «Сохранить» keeps it */
       if(rec&&overStop(f,overdraw({...rec,amount,date},rec),bad,f.querySelector('button[type=submit]'),'сохранить')) return;
-      /* a new name goes on its return records too */
+      /* a new name goes on its return records too, and on the садака the debt was forgiven into («прощён долг: …» kept the old
+         name in «Записи») — only a note still as the app wrote it: one he changed himself stays */
       const rets=name===d.name?[]:state.items.filter(i=>i.debt===d.id&&typeOf(i)==='debt'&&!isLoan(i));
+      const sads=name===d.name?[]:state.items.filter(i=>i.debt===d.id&&typeOf(i)==='out'&&i.note==='прощён долг: '+d.name);
       state.editing=null;fresh();
       try{
         await store.batch(o=>{o.updateDebt(d.id,patch);
           if(rec) o.update(rec.id,{amount,date,label:pre+name});
-          for(const r of rets) o.update(r.id,{label:(r.dir==='pay'?'Отдал долг: ':'Возврат долга: ')+name})});
+          for(const r of rets) o.update(r.id,{label:(r.dir==='pay'?'Отдал долг: ':'Возврат долга: ')+name});
+          for(const r of sads) o.update(r.id,{note:'прощён долг: '+name})});
         /* a new date may take its record into a typed balance or out of it: said, with what the account shows now */
         toast(`${name}: ${money(amount)}`+(Math.abs(amount-(+d.amount||0))>0.005?` (было ${money(+d.amount||0)})`:'')+(rec?heldNote({...rec,amount,date},rec):''));
       }catch(x){const v=Object.fromEntries(['who','amount','date','note'].map(k=>[k,f.elements[k].value]));reopen('de-'+d.id,'form[data-deform] input[name=amount]');
