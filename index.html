@@ -2057,10 +2057,13 @@ function tripClosed(i){
    at its own moment (no «Командировка закончилась» record has that) — not a trip's result, even saved seconds before one */
 const tripSync=x=>+x.created>0&&+x.tripPrev?.tripStart?.at===+x.created;
 /* a trip record saved after the last trip ended but dated before the day it ended (forgotten till then): it belongs to that trip —
-   the record that holds its result, or null (no trip ended, or a trip balance typed since already holds it) */
-function pastTripOf(i){
-  const end=+state.settings.tripEnd||0, st=tripAnc(state.settings.tripStart,end);
-  if(!isTrip(i)||!end||(i.created||0)<=end||(st&&inAnchor(i,st))||!(typeof i.date==='string'&&i.date<anchorDay({at:end}))) return null;
+   the record that holds its result, or null (no trip ended, or a trip balance typed since already holds it).
+   endDay: the day it ended counts too — only where he is asked (a personal record turned «Командировка» in «Изменить запись», owner's
+   choice 11.11.2026): a forgotten expense of that day went silently to the next trip. A new record of that day is not asked — a trip
+   begun the same day takes it */
+function pastTripOf(i,endDay){
+  const end=+state.settings.tripEnd||0, st=tripAnc(state.settings.tripStart,end), ed=anchorDay({at:end});
+  if(!isTrip(i)||!end||(i.created||0)<=end||(st&&inAnchor(i,st))||!(typeof i.date==='string'&&(i.date<ed||endDay&&i.date===ed))) return null;
   return state.items.find(x=>TRIP_END.includes(catOf(x.cat).id)&&!tripSync(x)&&Math.abs((x.created||0)-end)<=5000)||null;
 }
 /* trip money coming now may be for the last trip, ended with his own money put in («Докинул на командировку») — often closed before its money came.
@@ -3444,9 +3447,13 @@ function editRow(i){
     /* the trip this record belongs to has ended (or, for a personal record, the one it would go to as «Командировка»): its result is a record
        of its own — offered to follow the change, into that trip and out of it alike; for a personal record shown once «Командировка» is chosen.
        A personal record saved after the last trip ended but dated before that day goes to that trip as a new one dated back does (pastTripOf) */
-    const tc=tripClosed(i), it=!tc&&!lock&&!isTrip(i)?{...i,scope:'trip'}:null, px=it&&pastTripOf(it), tin=it?tripClosed(px?{...it,pastTrip:px.created||0}:it):null, x=tc||tin;
+    const tc=tripClosed(i), it=!tc&&!lock&&!isTrip(i)?{...i,scope:'trip'}:null, px=it&&pastTripOf(it,1), tin=it?tripClosed(px?{...it,pastTrip:px.created||0}:it):null, x=tc||tin;
     const th=tin?' data-tin hidden':'';
-    if(x) f+=`<p class="full ewarn"${th}>${tc?'Эта командировка уже закончилась':'Запись попадёт в командировку, которая уже закончилась'}: её итог — ${closeTxt(closeAfter(x,0))}.</p><label class="full echk"${th}><input type="checkbox" name="tadj" checked>Поправить итог на разницу</label>`;
+    /* dated the very day that trip ended: it may be that trip's or the next one's — the box decides which (ticked: into the ended one, its
+       result follows; not ticked: the next trip, as it always went) */
+    const sd=!!px&&!!tin&&i.date===anchorDay({at:+state.settings.tripEnd||0});
+    if(x) f+=sd?`<p class="full ewarn"${th}>Командировка закончилась в этот же день, её итог — ${closeTxt(closeAfter(x,0))}. С галочкой запись войдёт в неё, без галочки — в следующую командировку.</p><label class="full echk"${th}><input type="checkbox" name="tadj" checked>В закончившуюся командировку, поправить её итог</label>`
+      :`<p class="full ewarn"${th}>${tc?'Эта командировка уже закончилась':'Запись попадёт в командировку, которая уже закончилась'}: её итог — ${closeTxt(closeAfter(x,0))}.</p><label class="full echk"${th}><input type="checkbox" name="tadj" checked>Поправить итог на разницу</label>`;
   }
   return `<form class="item-edit" data-edit="${esc(i.id)}"${t==='in'||t==='out'?` data-et="${t}" data-es="${isTrip(i)?'trip':'own'}" data-c0="${catOf(i.cat).id}"`:''} novalidate>${f}<p class="err full" role="alert" hidden></p>
     <div class="row full"><button class="primary" type="submit">Сохранить</button><button class="linkbtn" type="button" data-ecancel>Отмена</button><button class="del" type="button" data-id="${esc(i.id)}">Удалить</button></div></form>`;
@@ -3531,8 +3538,10 @@ function bindEdits(root){
       /* a personal record turned «Командировка», saved after the last trip ended but dated before that day: it goes to that trip (pastTrip),
          as a new one dated back does — when the window said so (its box), or that trip's typed balance already holds it; else (the day changed
          right here) it is not taken out of the trip going on with no change to the ended one's result. Back to «Личное» — it leaves it */
-      const px=!isTrip(i)&&isTrip({...i,...p})?pastTripOf({...i,...p}):null, pv=px&&{...i,...p,pastTrip:px.created||0}, tb=E.tadj&&!E.tadj.closest('[hidden]');
-      if(pv&&(tb||!tripClosed(pv))) p.pastTrip=pv.pastTrip;else if(i.pastTrip&&!isTrip({...i,...p})) p.pastTrip=undefined;
+      const px=!isTrip(i)&&isTrip({...i,...p})?pastTripOf({...i,...p},1):null, pv=px&&{...i,...p,pastTrip:px.created||0}, tb=E.tadj&&!E.tadj.closest('[hidden]');
+      /* dated the day that trip ended: into it only when he was asked and left the box ticked — else it goes to the next trip, as before */
+      const sd=!!px&&p.date===anchorDay({at:+state.settings.tripEnd||0});
+      if(pv&&(sd?tb&&E.tadj.checked:tb||!tripClosed(pv))) p.pastTrip=pv.pastTrip;else if(i.pastTrip&&!isTrip({...i,...p})) p.pastTrip=undefined;
       const pn=p.pastTrip&&!i.pastTrip?` · вошла в прошлую командировку (закончилась ${dayText(anchorDay({at:+state.settings.tripEnd}))})`:'';
       /* a record of an ended trip, or one moved into it or out of it (Личное ↔ Командировка): that trip's result moves by what the trip money
          changed by (if he leaves the box ticked) — into the trip and back out again leaves the result as it was */
