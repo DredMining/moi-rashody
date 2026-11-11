@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- В экран телефона можно загрузить только локальный адрес: остальное браузер не пустит. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' http://localhost:* http://127.0.0.1:*; frame-src 'self' http://localhost:* http://127.0.0.1:* https://localhost:* https://127.0.0.1:*; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <!-- В экран телефона можно загрузить только локальный адрес: остальное браузер не пустит.
+       Скрипты и стили не ограничены: инструменты панели браузера (выбор элемента, пометки) добавляют на страницу свои. -->
+  <meta http-equiv="Content-Security-Policy" content="frame-src 'self' http://localhost:* http://127.0.0.1:* https://localhost:* https://127.0.0.1:*; object-src 'none'; base-uri 'none'">
   <meta name="color-scheme" content="dark">
   <title>iPhone 18 Pro Max — симулятор</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
@@ -74,7 +75,6 @@
                   </div>
                 </div>
               </div>
-              <div class="home-indicator" id="homeIndicator" data-tone="light" aria-hidden="true"></div>
             </div>
 
             <div class="hw hw-front">
@@ -128,6 +128,7 @@
           <div class="row">
             <input id="scale" type="range" min="25" max="150" step="5">
             <button class="btn" id="scaleAuto" type="button" aria-pressed="true" title="Вписать телефон в окно">Авто</button>
+            <button class="btn" id="scaleFull" type="button" aria-pressed="false" title="Точка в точку: самая чёткая картинка, сцена прокручивается">100%</button>
           </div>
         </div>
       </section>
