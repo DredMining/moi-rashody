@@ -220,13 +220,6 @@ button, input { font: inherit; color: inherit; }
 .sb-battery[data-low] .sb-battery-num { color: #fff; }
 .sb-nub { width: 1.5px; height: 4.5px; border-radius: 0 1px 1px 0; background: currentColor; opacity: .4; }
 
-.home-indicator {
-  position: absolute; z-index: 2; left: 50%; bottom: 8px; width: 144px; height: 5px; margin-left: -72px;
-  border-radius: 3px; background: #fff; pointer-events: none; transition: background-color .25s;
-}
-.home-indicator[data-tone="dark"] { background: #000; }
-.device[data-orientation="landscape"] .home-indicator { width: 236px; margin-left: -118px; bottom: 6px; }
-
 /* ---------- Dynamic Island ---------- */
 .island {
   position: absolute; top: 29px; left: 50%; width: 126px; height: 37px; margin: 0 0 0 -63px; padding: 0;

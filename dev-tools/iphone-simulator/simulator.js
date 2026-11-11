@@ -2,7 +2,7 @@
 //   settings       — настройки и их сохранение
 //   device         — корпус на сцене: вид, ориентация, цвет, масштаб
 //   app-frame      — экран с приложением: подключение, перезагрузка, имитация среды телефона
-//   system-ui      — строка состояния, Dynamic Island, полоска «Домой»
+//   system-ui      — строка состояния и Dynamic Island
 //   control-panel  — панель настроек
 import { createSettings } from './components/settings.js';
 import { DEVICE, createDevice } from './components/device.js';
@@ -59,7 +59,7 @@ function showConnection(info) {
   }
   byId('liveNote').textContent = LIVE_NOTES[info.live];
   for (const id of ['reloadBtn', 'quickReload']) byId(id).dataset.pending = String(info.pending);
-  if (info.state === 'ready' || info.state === 'offline') system.updateTones();
+  if (info.state === 'ready' || info.state === 'offline') system.updateStatusTone();
   showFacts();
 }
 
@@ -116,7 +116,7 @@ settings.subscribe((_state, changed) => {
   if (!settings.get('island')) system.toggleIsland(false);
   renderAll();
   // оформление и ориентация меняют страницу приложения не мгновенно — перечитываем чуть позже
-  if (changed.some(key => key === 'theme' || key === 'orientation' || key === 'density')) setTimeout(() => { system.updateTones(); showFacts(); }, 350);
+  if (changed.some(key => key === 'theme' || key === 'orientation' || key === 'density')) setTimeout(() => { system.updateStatusTone(); showFacts(); }, 350);
 });
 byId('island').addEventListener('islandchange', event => panel.showIsland(event.detail.expanded));
 
