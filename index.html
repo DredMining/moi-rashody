@@ -4602,8 +4602,10 @@ function nextMonth(){if(isCurrentMonth())return;state.m++;if(state.m>11){state.m
   if(b&&b.disabled&&/^[hs]Next$/.test(b.id))$(b.id[0]+'Prev').focus({preventScroll:true})}
 /* a tab opens at its top (the only redraw that doesn't keep the scroll) */
 /* the windows of the tab left behind close with it (a toast's «Показать» can switch tabs under one): an unseen window would stay on top and keep everything else inert.
-   «Изменить запись» too — as on «Назад» (hashchange) */
-function setTab(t){if(!$('sheet').hidden)closeSheet();if(!$('zakatSheet').hidden)closeZakat();if(t==='ledger'){state.y=now.getFullYear();state.m=now.getMonth()}state.tab=t;state.editing=null;state.editItem=null;toTop=true;
+   «Изменить запись» too — as on «Назад» (hashchange).
+   A message with «Отменить» stays on the tab it came on: on another one it would lie over that tab's rows and links, and a tap
+   meant for them («⇄ Перевод», a record's sum) would press «Отменить» and take the new record away. Other messages stay */
+function setTab(t){if(t!==state.tab&&$('toast').querySelector('[data-u]'))toastOff();if(!$('sheet').hidden)closeSheet();if(!$('zakatSheet').hidden)closeZakat();if(t==='ledger'){state.y=now.getFullYear();state.m=now.getMonth()}state.tab=t;state.editing=null;state.editItem=null;toTop=true;
   $('debtAddModal').hidden=true;$('oweAddModal').hidden=true;if(!$('bkModal').hidden){$('bkModal').hidden=true;wipeReset();restoreReset()}
   /* the transfer and the check of a sum are windows of «Деньги» (oPay opens the transfer and then goes there) */
   if(t!=='money'){state.xferOpen=false;state.recon=null}
