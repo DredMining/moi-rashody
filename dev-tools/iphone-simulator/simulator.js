@@ -72,7 +72,7 @@ function showFacts() {
     const width = win.innerWidth, height = win.innerHeight, dpr = win.devicePixelRatio;
     const themeName = settings.get('theme') === 'dark' ? 'тёмное' : 'светлое';
     rows.push(['Область просмотра', `${width} × ${height}`, width === wantW && height === wantH ? 'ok' : 'warn']);
-    rows.push(['Плотность (DPR)', String(Math.round(dpr * 100) / 100), Math.abs(dpr - DEVICE.screen.dpr) < 0.01 ? 'ok' : '']);
+    rows.push(['Плотность (DPR)', String(Math.round(dpr * 100) / 100) + (settings.get('density3x') ? '' : ' · как у монитора'), '']);
     rows.push(['Пиксели экрана', `${Math.round(width * dpr)} × ${Math.round(height * dpr)}`, '']);
     const safe = info.safeArea;
     rows.push(['Безопасная зона', safe ? `↑${safe.top} →${safe.right} ↓${safe.bottom} ←${safe.left}` : 'нет', safe ? 'ok' : 'warn']);
@@ -116,7 +116,7 @@ settings.subscribe((_state, changed) => {
   if (!settings.get('island')) system.toggleIsland(false);
   renderAll();
   // оформление и ориентация меняют страницу приложения не мгновенно — перечитываем чуть позже
-  if (changed.some(key => key === 'theme' || key === 'orientation' || key === 'density')) setTimeout(() => { system.updateStatusTone(); showFacts(); }, 350);
+  if (changed.some(key => key === 'theme' || key === 'orientation' || key === 'density3x')) setTimeout(() => { system.updateStatusTone(); showFacts(); }, 350);
 });
 byId('island').addEventListener('islandchange', event => panel.showIsland(event.detail.expanded));
 

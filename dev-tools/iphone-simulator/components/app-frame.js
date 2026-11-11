@@ -144,8 +144,11 @@ export function createAppFrame({ frame, settings, onChange }) {
   // ---- плотность пикселей и оформление ----
   // zoom увеличивает страницу в рамке до 3 физических пикселей на точку, обратный scale возвращает её
   // в размер экрана: внутри devicePixelRatio = 3 и ширина 440, как на телефоне.
+  // По умолчанию выключено. При CSS zoom отладочный протокол Chrome (DOM.getBoxModel, getContentQuads) сообщает
+  // место элемента внутри рамки делённым на zoom — ровно в 3 раза меньше и ближе к углу. Элемент находится
+  // верно, но подсветка стрелки «Выбрать элемент» в панели Claude ложится на другое место (измерено 11.11.2026).
   function applyDensity() {
-    const zoom = settings.get('density') ? DEVICE.screen.dpr / (window.devicePixelRatio || 1) : 1;
+    const zoom = settings.get('density3x') ? DEVICE.screen.dpr / (window.devicePixelRatio || 1) : 1;
     frame.style.zoom = String(zoom);
     frame.style.transform = zoom === 1 ? '' : `scale(${1 / zoom})`;
   }
@@ -271,7 +274,7 @@ export function createAppFrame({ frame, settings, onChange }) {
 
   settings.subscribe((_state, changed) => {
     if (changed.includes('theme')) emit({ theme: applyTheme(true) });
-    if (changed.includes('density')) applyDensity();
+    if (changed.includes('density3x')) applyDensity();
     if (changed.includes('orientation')) {
       const doc = pageDocument();
       if (doc) { emulateSafeArea(doc); emit({ safeArea: insets() }); }

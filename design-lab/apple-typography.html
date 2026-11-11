@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="ru" data-lab-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Design Lab · типографика Apple</title>
+<!-- Отдельная лаборатория. Основное приложение (index.html) эту страницу не подключает и от неё не зависит. -->
+<link rel="stylesheet" href="assets/fonts.css">
+<style>
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+:root{--lb:#0D0E11;--lp:#16181D;--lp2:#1F2229;--li:#ECEEF2;--li2:#9BA2AE;--ll:#2B2F38;--la:#8AB0FF;--lok:#5AD49B;--lwarn:#F2B950;--lbad:#FF7A7A;color-scheme:dark}
+html[data-lab-theme="light"]{--lb:#F2F3F5;--lp:#FFFFFF;--lp2:#EEF0F3;--li:#15171B;--li2:#5C6471;--ll:#D9DCE2;--la:#2456C8;--lok:#157A47;--lwarn:#8A5A00;--lbad:#B3261E;color-scheme:light}
+body{margin:0;background:var(--lb);color:var(--li);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,select,input{font:inherit;color:inherit}
+a{color:var(--la)}
+code,.mono{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:.92em}
+
+/* ---------- Оболочка лаборатории ---------- */
+.top{position:sticky;top:0;z-index:30;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:10px 16px;padding-top:max(10px,env(safe-area-inset-top));background:color-mix(in srgb,var(--lb) 88%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--ll)}
+.brand b{font-size:15px}.brand span{color:var(--li2);margin-left:8px;font-size:12px}
+.tabsnav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1 1 auto}
+.tabsnav button,.pill{border:1px solid var(--ll);background:var(--lp);border-radius:99px;padding:6px 12px;cursor:pointer;white-space:nowrap;min-height:34px}
+.tabsnav button[aria-selected="true"]{background:var(--la);border-color:var(--la);color:var(--lb);font-weight:600}
+.device{margin:12px 16px 0;padding:10px 12px;border:1px solid var(--ll);border-left:3px solid var(--lwarn);border-radius:10px;background:var(--lp);color:var(--li2);font-size:13px}
+.device b{color:var(--li)}
+main{padding:16px;max-width:1560px;margin:0 auto}
+.tab{display:none}.tab.on{display:block}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start}
+.panel{background:var(--lp);border:1px solid var(--ll);border-radius:14px;padding:14px;position:sticky;top:70px;max-height:calc(100vh - 86px);overflow:auto}
+.panel h3{margin:0 0 10px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--li2)}
+.ctl{display:grid;gap:4px;margin-bottom:12px}
+.ctl>span{font-size:12px;color:var(--li2);display:flex;justify-content:space-between;gap:8px}
+.ctl output{color:var(--li);font-variant-numeric:tabular-nums}
+.ctl select,.ctl input[type=range]{width:100%}
+.ctl select{background:var(--lp2);border:1px solid var(--ll);border-radius:8px;padding:7px 8px;min-height:36px}
+.chk{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:13px}
+.vbtns{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:6px}
+.vbtns button{border:1px solid var(--ll);background:var(--lp2);border-radius:9px;padding:8px 2px;cursor:pointer;font-weight:600;min-height:40px}
+.vbtns button.on{background:var(--la);border-color:var(--la);color:var(--lb)}
+.vdesc{font-size:12.5px;color:var(--li2);margin:0 0 12px;min-height:3.6em}
+.vdesc b{color:var(--li);display:block;font-size:13.5px;margin-bottom:2px}
+details.more{border-top:1px solid var(--ll);padding-top:10px;margin-top:4px}
+details.more summary{cursor:pointer;font-weight:600;margin-bottom:10px}
+.reset{width:100%;border:1px solid var(--ll);background:none;border-radius:9px;padding:8px;cursor:pointer}
+.h{margin:26px 0 6px;font-size:18px}.h:first-child{margin-top:0}
+.sub{margin:0 0 14px;color:var(--li2);max-width:78ch}
+.box{background:var(--lp);border:1px solid var(--ll);border-radius:14px;padding:14px}
+.tag{display:inline-block;border:1px solid var(--ll);border-radius:6px;padding:1px 6px;font-size:11.5px;color:var(--li2);margin:2px 3px 0 0;white-space:nowrap}
+.tag.ok{color:var(--lok);border-color:color-mix(in srgb,var(--lok) 45%,transparent)}
+.tag.no{color:var(--lbad);border-color:color-mix(in srgb,var(--lbad) 45%,transparent)}
+.tag.warn{color:var(--lwarn);border-color:color-mix(in srgb,var(--lwarn) 45%,transparent)}
+.scrollx{overflow-x:auto}
+table.grid{border-collapse:collapse;width:100%}
+table.grid th,table.grid td{border-bottom:1px solid var(--ll);padding:10px 12px;text-align:center;vertical-align:middle}
+table.grid th{font-size:12px;color:var(--li2);font-weight:600;position:sticky;top:0;background:var(--lp);vertical-align:bottom}
+table.grid th small{display:block;font-weight:400;margin-top:2px}
+table.grid th select{margin-top:4px;background:var(--lp2);border:1px solid var(--ll);border-radius:6px;padding:2px 4px;font-size:12px}
+table.grid td:first-child,table.grid th:first-child{text-align:left;white-space:nowrap}
+table.grid tr.divider td{background:var(--lp2);font-size:12px;color:var(--li2);text-transform:uppercase;letter-spacing:.06em;padding:6px 12px}
+.sfname{font-size:11.5px;color:var(--li2)}
+.gcell{display:inline-grid;place-items:center;color:var(--li)}
+.gcell svg{width:var(--isz,28px);height:var(--isz,28px);display:block}
+.gcell.tile{width:calc(var(--isz,28px)*1.7);height:calc(var(--isz,28px)*1.7);border-radius:28%;background:color-mix(in srgb,var(--c,#8AB0FF) 20%,transparent);color:var(--c,#8AB0FF)}
+.gcell.solid{width:calc(var(--isz,28px)*1.7);height:calc(var(--isz,28px)*1.7);border-radius:28%;background:var(--c,#8AB0FF);color:#fff}
+.isw svg{stroke-width:var(--isw,var(--isw-d,2))}
+.none{color:var(--li2);opacity:.6}
+.ecell{display:inline-grid;place-items:center;width:calc(var(--esz,36px)*1.5);height:calc(var(--esz,36px)*1.5);border-radius:28%}
+.ecell.tile{background:var(--lp2)}
+.ecell img{width:var(--esz,36px);height:var(--esz,36px);display:block}
+.ecell .emo{font-size:var(--esz,36px);line-height:1}
+.emo{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-style:normal;font-weight:400}
+
+/* ---------- Телефон ---------- */
+.phones{display:flex;gap:28px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+.pwrap{display:grid;gap:8px;justify-items:center}
+.pname{font-size:12px;color:var(--li2);text-transform:uppercase;letter-spacing:.06em}
+.phone{position:relative;width:440px;height:956px;box-sizing:content-box;border:11px solid #26262A;border-radius:68px;background:#000;overflow:hidden;zoom:var(--zoom,1);box-shadow:0 0 0 2px #3A3A40,0 30px 60px -30px rgba(0,0,0,.6)}
+.phone::before{content:"";position:absolute;top:14px;left:50%;width:126px;height:37px;margin-left:-63px;border-radius:20px;background:#000;z-index:9;pointer-events:none}
+.phone::after{content:"";position:absolute;bottom:8px;left:50%;width:144px;height:5px;margin-left:-72px;border-radius:9px;background:rgba(255,255,255,.55);z-index:9;pointer-events:none;mix-blend-mode:difference}
+.pscreen{width:440px;height:956px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;border-radius:57px}
+.pscreen::-webkit-scrollbar{display:none}
+.phones.noframe .phone{width:min(440px,100%);height:auto;border:0;border-radius:0;zoom:1;box-shadow:none;overflow:visible}
+.phones.noframe .phone::before,.phones.noframe .phone::after{display:none}
+.phones.noframe .pscreen{width:auto;height:auto;overflow:visible;border-radius:0}
+.phones.noframe .pwrap{width:min(440px,100%)}
+
+/* ---------- Экран-макет: общее ---------- */
+.scr{position:relative;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--f-text);font-size:var(--body);line-height:1.3;padding:0 16px;-webkit-font-smoothing:antialiased;font-optical-sizing:auto;font-synthesis:none;text-align:left;display:flex;flex-direction:column}
+.scr button{font-family:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.scr .num,.scr .amt,.scr .hero,.scr .big{font-family:var(--f-num);font-variant-numeric:var(--figs)}
+.scr.kop-small .kop,.scr.kop-muted .kop{font-size:.62em}
+.scr.kop-muted .kop{color:var(--ink2)}
+.scr.cur-light .cur{font-weight:400;color:var(--ink2)}
+.st{display:none;height:62px;flex:none;align-items:flex-end;justify-content:space-between;padding:0 24px 12px;font-weight:600;font-size:17px}
+.phone .st{display:flex}
+.phones.noframe .st{display:none}
+.st span{display:flex;gap:6px;align-items:center}
+.st svg{height:13px;width:auto;display:block}
+.hd{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:12px 4px 16px}
+.kick{font-size:var(--kick-size);font-weight:var(--kick-w);letter-spacing:var(--kick-track,0);text-transform:var(--kick-case,none);color:var(--kick-color,var(--ink2));margin-bottom:3px}
+.ttl{margin:0;font-family:var(--f-title,var(--f-text));font-size:var(--ttl-size);font-weight:var(--ttl-w);letter-spacing:var(--ttl-track,0);line-height:1.12}
+.rnd{flex:none;width:40px;height:40px;border-radius:50%;border:var(--rnd-bd,0);background:var(--rnd-bg,var(--card));color:var(--rnd-fg,var(--accent));display:grid;place-items:center;padding:0}
+.rnd svg{width:22px;height:22px}
+.card{background:var(--card);border-radius:var(--r-card);padding:var(--pad);border:var(--card-bd,0)}
+.lbl{font-size:var(--lbl-size);font-weight:var(--lbl-w);letter-spacing:var(--lbl-track,0);text-transform:var(--lbl-case,none);color:var(--ink2);display:flex;align-items:center;gap:6px}
+.lbl svg{width:16px;height:16px;flex:none}
+.hero{font-size:var(--hero-size);font-weight:var(--hero-w);letter-spacing:var(--hero-track,-.02em);word-spacing:var(--hero-gap,0);line-height:1.08;white-space:nowrap;margin:8px 0 6px}
+.cap{font-size:var(--cap-size);color:var(--ink2);line-height:1.3}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);margin-top:var(--gap)}
+.mini{padding:var(--pad-mini,14px);min-width:0}
+.mini .num{font-size:var(--mini-size);font-weight:var(--mini-w);letter-spacing:var(--mini-track,-.01em);white-space:nowrap;margin:6px 0 3px}
+.pos{color:var(--good)}.neg{color:var(--neg,var(--ink))}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;margin-top:var(--gap)}
+.seg button{min-width:0}
+.sec{margin:24px 4px 8px;font-size:var(--sec-size);font-weight:var(--sec-w);letter-spacing:var(--sec-track,0);text-transform:var(--sec-case,none);color:var(--sec-color,var(--ink2));line-height:1.2}
+.list{padding-top:2px;padding-bottom:2px}
+.row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;min-height:var(--row-h);position:relative}
+.row+.row::before,.trow+.trow::before{content:"";position:absolute;top:0;right:0;left:var(--sep-inset,0);border-top:var(--sep)}
+.trow+.trow::before{left:0}
+.what b{display:block;font-weight:var(--row-w);font-size:var(--row-size);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.what span{display:block;font-size:var(--cap-size);color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;font-variant-numeric:tabular-nums}
+.amt{font-size:var(--amt-size);font-weight:var(--amt-w);white-space:nowrap;letter-spacing:var(--amt-track,0)}
+.ic{flex:none;width:var(--ic);height:var(--ic);border-radius:var(--ic-r);display:grid;place-items:center;font-size:calc(var(--ic)*.5);line-height:1}
+.ic .g{display:contents}
+.ic svg{width:var(--ic-g,56%);height:var(--ic-g,56%);display:block}
+.ic img{width:var(--ic-img,58%);height:var(--ic-img,58%);display:block}
+.goal .big{font-size:var(--big-size);font-weight:var(--big-w);letter-spacing:var(--hero-track,-.02em);white-space:nowrap;margin:6px 0 12px;line-height:1.1}
+.bar{height:6px;border-radius:99px;background:var(--track,var(--card2));overflow:hidden;margin-bottom:8px}
+.bar i{display:block;height:100%;width:62.5%;border-radius:99px;background:var(--bar,var(--accent))}
+.cats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--cat-gap,10px)}
+.cat{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 2px 10px;background:var(--cat-bg,var(--card));border-radius:var(--r-ctl);border:var(--card-bd,0);font-size:var(--cat-size,12px);font-weight:var(--cat-w,500);text-align:center;min-width:0}
+.cat span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px}
+.cat .ic{--ic:var(--cat-ic,40px)}
+.trow{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:var(--trow-h,54px);position:relative;font-size:var(--row-size)}
+.sw{flex:none;width:51px;height:31px;border-radius:99px;border:0;padding:0;background:var(--sw-off,rgba(120,120,128,.32));position:relative;transition:background .2s}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.15),0 1px 1px rgba(0,0,0,.16);transition:transform .2s}
+.sw.on{background:var(--sw-on,var(--good))}.sw.on::after{transform:translateX(20px)}
+.btns{display:grid;grid-template-columns:1.5fr 1fr;gap:var(--gap);margin-top:var(--gap)}
+.btn{height:var(--btn-h);border-radius:var(--btn-r);border:0;font-size:var(--btn-size,17px);font-weight:var(--btn-w,600);display:flex;align-items:center;justify-content:center;gap:8px;padding:0 14px;white-space:nowrap}
+.btn svg{width:20px;height:20px;flex:none}
+.btn.pri{background:var(--btn-bg,var(--accent));color:var(--btn-fg,#fff)}
+.btn.sec2{background:var(--btn2-bg);color:var(--btn2-fg);border:var(--btn2-bd,0)}
+.tbwrap{position:sticky;bottom:0;margin:auto -16px 0;padding-top:24px;z-index:5;pointer-events:none}
+.tb{pointer-events:auto;display:flex;align-items:stretch}
+.tb button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:0;padding:6px 0;font-size:var(--tb-size,10px);font-weight:500;color:var(--tb-off,var(--ink2));border-radius:999px;line-height:1.1}
+.tb button.on{color:var(--tb-on,var(--accent))}
+.tb svg{width:24px;height:24px;display:block}
+@media (prefers-reduced-motion:reduce){.sw,.sw::after{transition:none}}
+
+/* ---------- A · Apple Native ---------- */
+.v-a{--body:17px;--bg:#000;--card:#1C1C1E;--card2:#2C2C2E;--ink:#fff;--ink2:rgba(235,235,245,.6);--line:rgba(84,84,88,.65);--accent:#0091FF;--good:#30D158;--bad:#FF4245;
+ --r-card:12px;--r-ctl:12px;--pad:16px;--gap:12px;
+ --ttl-size:34px;--ttl-w:700;--kick-size:13px;--kick-w:600;--kick-case:uppercase;
+ --lbl-size:15px;--lbl-w:400;--hero-track:0;--cap-size:13px;
+ --mini-size:22px;--mini-w:600;--mini-track:0;--sec-size:13px;--sec-w:400;--sec-case:uppercase;
+ --row-h:60px;--row-size:17px;--row-w:400;--amt-size:17px;--amt-w:400;--sep:.5px solid var(--line);--sep-inset:42px;
+ --ic:30px;--ic-r:7px;--ic-g:64%;--cat-ic:36px;
+ --big-size:28px;--big-w:700;--btn-h:50px;--btn-r:12px;--btn2-bg:color-mix(in srgb,var(--accent) 16%,transparent);--btn2-fg:var(--accent);
+ --tb-bg:rgba(22,22,24,.8);--tb-size:10px;--seg-bg:rgba(118,118,128,.24);--seg-on:#636366}
+.v-a[data-theme="light"]{--bg:#F2F2F7;--card:#fff;--card2:#E5E5EA;--ink:#000;--ink2:rgba(60,60,67,.6);--line:rgba(60,60,67,.29);--accent:#0088FF;--good:#248A3D;--bad:#FF383C;--sw-on:#34C759;--tb-bg:rgba(249,249,249,.84);--seg-bg:rgba(118,118,128,.12);--seg-on:#fff}
+.v-a .seg{background:var(--seg-bg);border-radius:9px;padding:2px;height:36px}
+.v-a .seg button{border:0;background:none;border-radius:7px;font-size:13px;font-weight:500}
+.v-a .seg button.on{background:var(--seg-on);font-weight:600;box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04)}
+.v-a .tb{background:var(--tb-bg);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border-top:.5px solid var(--line);padding:6px 8px 26px}
+
+/* ---------- B · Premium Finance ---------- */
+.v-b{--body:15px;--bg:#09090B;--card:#121215;--card2:#1C1C21;--ink:#F3EFE6;--ink2:#9A9488;--line:rgba(255,255,255,.09);--accent:#D8B66C;--good:#7BD3A2;--bad:#EE8A7C;
+ --f-title:var(--f-num);
+ --r-card:22px;--r-ctl:16px;--pad:20px;--gap:12px;--card-bd:1px solid var(--line);
+ --ttl-size:28px;--ttl-w:700;--ttl-track:-.02em;--kick-size:11px;--kick-w:600;--kick-case:uppercase;--kick-track:.14em;--kick-color:var(--accent);
+ --lbl-size:11px;--lbl-w:600;--lbl-case:uppercase;--lbl-track:.12em;--hero-track:-.035em;--hero-gap:.07em;--cap-size:12.5px;
+ --mini-size:21px;--mini-w:700;--mini-track:-.02em;--pad-mini:16px;--sec-size:11px;--sec-w:600;--sec-case:uppercase;--sec-track:.12em;
+ --row-h:66px;--row-size:15.5px;--row-w:500;--amt-size:16px;--amt-w:600;--amt-track:-.01em;--sep:1px solid var(--line);--sep-inset:54px;
+ --ic:42px;--ic-r:50%;--ic-g:50%;
+ --big-size:32px;--big-w:700;--btn-h:54px;--btn-r:16px;--btn-size:16px;--btn-fg:#17130A;--btn2-bg:transparent;--btn2-fg:var(--ink);--btn2-bd:1px solid var(--line);
+ --sw-on:var(--accent);--tb-bg:rgba(12,12,14,.86);--tb-on:var(--accent);--bar:linear-gradient(90deg,#B8944A,#E9CF8E);--rnd-bg:transparent;--rnd-bd:1px solid var(--line);--rnd-fg:var(--ink)}
+.v-b[data-theme="light"]{--bg:#F5F2EA;--card:#FFFFFF;--card2:#ECE7DB;--ink:#17150F;--ink2:#6E6A5E;--line:rgba(23,21,15,.12);--accent:#8C6B1E;--good:#1E7A49;--bad:#B4412F;--btn-fg:#fff;--tb-bg:rgba(250,248,242,.9);--bar:linear-gradient(90deg,#8C6B1E,#C9A24B)}
+.v-b .balance{background:radial-gradient(120% 150% at 0% 0%,color-mix(in srgb,var(--accent) 17%,var(--card)) 0%,var(--card) 58%);padding:24px 22px}
+.v-b .seg{border-bottom:1px solid var(--line);height:46px;margin-top:18px}
+.v-b .seg button{background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;font-size:14px;font-weight:500;color:var(--ink2);border-radius:0}
+.v-b .seg button.on{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+.v-b .tb{background:var(--tb-bg);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:8px 8px 26px}
+.v-b .cat{background:transparent}
+
+/* ---------- C · Modern iOS ---------- */
+.v-c{--body:17px;--bg:#000;--card:#1C1C1E;--card2:#2C2C2E;--ink:#fff;--ink2:rgba(235,235,245,.6);--line:rgba(84,84,88,.5);--accent:#0091FF;--good:#30D158;--bad:#FF4245;
+ --r-card:26px;--r-ctl:22px;--pad:20px;--gap:12px;
+ --ttl-size:34px;--ttl-w:800;--kick-size:13px;--kick-w:600;--kick-case:uppercase;
+ --lbl-size:15px;--lbl-w:500;--hero-track:-.01em;--cap-size:13px;
+ --mini-size:22px;--mini-w:700;--mini-track:0;--sec-size:20px;--sec-w:700;--sec-color:var(--ink);
+ --row-h:64px;--row-size:17px;--row-w:500;--amt-size:17px;--amt-w:600;--sep:.5px solid var(--line);--sep-inset:54px;
+ --ic:42px;--ic-r:50%;--ic-g:54%;--cat-ic:44px;
+ --big-size:30px;--big-w:700;--btn-h:52px;--btn-r:999px;--btn2-bg:rgba(120,120,128,.24);--btn2-fg:var(--ink);
+ --glass:rgba(44,44,48,.6);--glass-rim:rgba(255,255,255,.14);--tb-size:10px;--seg-bg:rgba(118,118,128,.24);--seg-on:rgba(255,255,255,.2)}
+.v-c[data-theme="light"]{--bg:#F2F2F7;--card:#fff;--card2:#E9E9EE;--ink:#000;--ink2:rgba(60,60,67,.6);--line:rgba(60,60,67,.2);--accent:#0088FF;--good:#248A3D;--bad:#FF383C;--sw-on:#34C759;--btn2-bg:rgba(120,120,128,.14);--glass:rgba(255,255,255,.7);--glass-rim:rgba(0,0,0,.07);--seg-bg:rgba(118,118,128,.12);--seg-on:#fff}
+.v-c{background:var(--bg) radial-gradient(90% 34% at 50% 0%,color-mix(in srgb,var(--accent) 26%,transparent),transparent 72%) no-repeat}
+.v-c .sw{width:64px;height:28px}
+.v-c .sw::after{width:38px;height:24px;border-radius:99px}
+.v-c .sw.on::after{transform:translateX(22px)}
+.v-c .balance{background:linear-gradient(135deg,#0091FF 0%,#5E5CE6 55%,#BF5AF2 100%);color:#fff;--ink2:rgba(255,255,255,.8);box-shadow:0 18px 40px -20px rgba(94,92,230,.75);padding:22px}
+.v-c .seg{background:var(--seg-bg);border-radius:999px;padding:3px;height:42px}
+.v-c .seg button{border:0;background:none;border-radius:999px;font-size:15px;font-weight:500}
+.v-c .seg button.on{background:var(--seg-on);font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.14)}
+.v-c .tbwrap,.v-d .tbwrap,.v-now .tbwrap{margin:auto 0 0;padding:24px 0 14px}
+.v-c .tb{background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);border:1px solid var(--glass-rim);border-radius:999px;padding:5px;box-shadow:0 10px 30px -12px rgba(0,0,0,.5)}
+.v-c .tb button.on{background:color-mix(in srgb,var(--ink) 12%,transparent)}
+
+/* ---------- D · Hybrid и «Сейчас» (цвета и размеры приложения) ---------- */
+.v-d,.v-now{--body:16px;--bg:#000;--card:#161215;--card2:#221C20;--raised:#3B3237;--field:#7A6E74;--ring:#958990;--ink:#F7F3F4;--ink2:#A79DA2;--line:#383035;--accent:#F08CA0;--accent-btn:#B23A55;--good:#5AD49B;--bad:#FF5252;
+ --r-card:20px;--r-ctl:14px;--pad:16px;--gap:16px;
+ --ttl-size:24px;--ttl-w:700;--kick-size:12px;--kick-w:600;--kick-case:uppercase;--kick-track:.06em;
+ --lbl-size:14px;--lbl-w:600;--lbl-case:uppercase;--lbl-track:.06em;--hero-track:-.01em;--cap-size:12px;
+ --mini-size:19px;--mini-w:700;--sec-size:14px;--sec-w:600;--sec-case:uppercase;--sec-track:.06em;
+ --row-h:58px;--row-size:15px;--row-w:500;--amt-size:15px;--amt-w:600;--sep:1px solid var(--line);--sep-inset:0px;
+ --ic:36px;--ic-r:50%;--ic-g:56%;--isw:1.9;
+ --big-size:28px;--big-w:700;--btn-h:52px;--btn-r:14px;--btn-size:16px;--btn-bg:var(--accent-btn);--btn2-bg:transparent;--btn2-fg:var(--ink);--btn2-bd:1px solid var(--field);
+ --sw-on:var(--accent-btn);--glass:rgb(48 38 43 / .6);--glass-rim:rgb(255 255 255 / .16);--cap-tint:rgb(240 140 160 / .3);--tb-on:#FFB4C2;--tb-size:12px;--neg:var(--ink);--rnd-fg:var(--ink)}
+.v-d[data-theme="light"],.v-now[data-theme="light"]{--bg:#0D1320;--card:#151E30;--card2:#0D1320;--raised:#22304D;--field:#606E8D;--ring:#606E8D;--ink:#E6ECF7;--ink2:#8E9AB3;--line:#2A3550;--accent:#5B8CFF;--accent-btn:#3B6BE0;--good:#5EDB94;--bad:#FF7A7A;--neg:#F07F86;
+ --r-card:14px;--r-ctl:10px;--pad:12px;--gap:12px;--card-bd:1px solid var(--line);--lbl-size:12px;--sec-size:13px;--glass:rgb(38 50 78 / .6);--cap-tint:rgb(91 140 255 / .32);--tb-on:#9DBBFF}
+.v-now{--amt-w:500;--mini-w:600;--ic:28px;--big-w:600;--ttl-w:600;--cat-ic:32px}
+.v-d .seg,.v-now .seg{background:var(--card2);border:1px solid var(--field);border-radius:var(--r-ctl);padding:3px;height:50px}
+.v-d .seg button,.v-now .seg button{border:0;background:none;border-radius:calc(var(--r-ctl) - 4px);font-size:15px;font-weight:500;color:var(--ink2)}
+.v-d .seg button.on,.v-now .seg button.on{background:var(--raised);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgb(0 0 0 / .12),inset 0 0 0 1.5px var(--ring)}
+.v-d .tb,.v-now .tb{background:var(--glass);-webkit-backdrop-filter:blur(22px) saturate(160%);backdrop-filter:blur(22px) saturate(160%);border:1px solid var(--glass-rim);border-radius:32px;padding:6px;height:64px}
+.v-d .tb button,.v-now .tb button{border-radius:26px}
+.v-d .tb button.on,.v-now .tb button.on{background:var(--cap-tint);color:var(--tb-on)}
+.v-d .tb svg,.v-now .tb svg{width:22px;height:22px}
+
+/* Цвета значков задаются на самом значке: там известен цвет категории --c */
+.v-a .ic{background:var(--c);color:#fff}
+.v-a .ic.em{background:color-mix(in srgb,var(--c) 24%,transparent)}
+.v-b .ic{color:var(--ink);border:1px solid var(--line)}
+.v-c .ic{background:color-mix(in srgb,var(--c) 20%,transparent);color:var(--c)}
+.v-d .ic{background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--c)}
+.v-now .ic{background:var(--card2);color:var(--ink)}
+
+/* ---------- Вкладка «Шрифты» ---------- */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cmpcard{background:var(--lp);border:1px solid var(--ll);border-radius:14px;padding:16px;min-width:0;overflow:hidden}
+.cmpcard select{width:100%;background:var(--lp2);border:1px solid var(--ll);border-radius:8px;padding:7px 8px;margin-bottom:12px;font:13px system-ui,sans-serif}
+.cmpcard .t{font-size:1.15em;font-weight:700;margin:0 0 .2em}
+.cmpcard .l{font-size:.5em;color:var(--li2);margin-top:.7em}
+.cmpcard .s{white-space:nowrap}
+.cmpcard .rowz{display:flex;justify-content:space-between;gap:10px;font-size:.6em;padding:.45em 0;border-top:1px solid var(--ll);white-space:nowrap}
+.cmpcard .rowz small{color:var(--li2);font-size:.8em}
+.frow{display:grid;grid-template-columns:230px minmax(0,1fr);gap:16px;padding:16px 0;border-bottom:1px solid var(--ll)}
+.frow:last-child{border-bottom:0}
+.fmeta b{font-size:15px;display:block}
+.fmeta small{color:var(--li2);display:block;margin:2px 0 4px}
+.fsample{min-width:0;overflow:hidden}
+.fsample .t{font-weight:700;font-size:22px;margin-bottom:2px}
+.fsample .w{font-size:14px;color:var(--li2);margin-bottom:8px}
+.fsample .s{white-space:nowrap;overflow-x:auto;scrollbar-width:thin;padding-bottom:4px}
+.fsample .s span{margin-right:1em}
+.fsample .d{font-size:13px;color:var(--li2);margin-top:6px}
+
+/* ---------- Вкладка «Суммы» ---------- */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,430px),1fr));gap:16px}
+.mphone{width:min(408px,100%);background:var(--lp2);border-radius:20px;padding:18px 16px;container-type:inline-size;overflow:hidden}
+.mline{white-space:nowrap;line-height:1.15;padding:6px 0;border-bottom:1px dashed var(--ll);position:relative}
+.mline:last-child{border-bottom:0}
+.mline small{display:block;font:11.5px system-ui,sans-serif;color:var(--li2);letter-spacing:0;font-weight:400}
+.mline .fit{position:absolute;right:0;top:6px;font:11px system-ui,sans-serif;letter-spacing:0;font-weight:500}
+.kop-small .kop,.kop-muted .kop{font-size:.62em}
+.kop-muted .kop{color:var(--li2)}
+.cur-light .cur{font-weight:400;color:var(--li2)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.col{background:var(--lp2);border-radius:14px;padding:12px 14px;min-width:0}
+.col h4{margin:0 0 8px;font:600 12px system-ui,sans-serif;color:var(--li2);text-transform:uppercase;letter-spacing:.06em}
+.col .r{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--ll);white-space:nowrap}
+.col .r:last-child{border-bottom:0}
+.col .r small{font:13px system-ui,sans-serif;color:var(--li2);overflow:hidden;text-overflow:ellipsis}
+.tick{white-space:nowrap;padding:4px 0}
+pre.css{margin:0;background:var(--lp2);border-radius:12px;padding:12px 14px;overflow:auto;font:12.5px/1.5 ui-monospace,"Cascadia Mono",Consolas,monospace;white-space:pre}
+
+/* ---------- Отчёт ---------- */
+.report{max-width:92ch}
+.report h2{margin:28px 0 8px;font-size:18px}
+.report h2:first-child{margin-top:0}
+.report li{margin:5px 0}
+.report table{border-collapse:collapse;width:100%;margin:8px 0}
+.report th,.report td{border:1px solid var(--ll);padding:7px 9px;text-align:left;vertical-align:top;font-size:13px}
+.report th{background:var(--lp2)}
+.verdict{border-left:3px solid var(--lok);background:var(--lp);padding:10px 14px;border-radius:0 10px 10px 0;margin:10px 0}
+.verdict.no{border-left-color:var(--lbad)}
+
+.vfloat{display:none}
+@media (max-width:900px){
+ .top{position:static}
+ .vfloat{display:grid;grid-template-columns:repeat(5,1fr) auto;gap:4px;position:sticky;top:0;z-index:25;padding:8px 12px;padding-top:max(8px,env(safe-area-inset-top));margin:-16px -16px 12px;background:color-mix(in srgb,var(--lb) 88%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--ll)}
+ .vfloat button{border:1px solid var(--ll);background:var(--lp2);border-radius:9px;padding:8px 6px;font-weight:600;min-height:40px;cursor:pointer}
+ .vfloat button.on{background:var(--la);border-color:var(--la);color:var(--lb)}
+ .panel .vbtns{display:none}
+ .tabsnav{flex-wrap:wrap}
+ .layout{grid-template-columns:1fr}
+ .panel{position:static;max-height:none}
+ .cmp,.cols{grid-template-columns:1fr}
+ .frow{grid-template-columns:1fr;gap:8px}
+ .brand span{display:none}
+}
+@media (max-width:560px){
+ main{padding:12px 0}
+ .vfloat{margin:-12px 0 12px}
+ .tab>.h,.tab>.sub,.tab>.box,.tab>.layout>.panel,.tab>.layout>div>.h,.tab>.layout>div>.sub,.tab>.layout>div>.box,.tab>.layout>div>.mgrid,.tab>.layout>div>.cmp,.report{margin-left:12px;margin-right:12px}
+ .device{margin:10px 12px 0}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><b>Design Lab</b><span>шрифты, цифры, иконки и эмодзи в стиле Apple</span></div>
+  <nav class="tabsnav" id="tabsnav" role="tablist" aria-label="Разделы">
+    <button role="tab" data-tab="variants">Варианты</button>
+    <button role="tab" data-tab="fonts">Шрифты</button>
+    <button role="tab" data-tab="money">Суммы</button>
+    <button role="tab" data-tab="icons">Иконки</button>
+    <button role="tab" data-tab="emoji">Эмодзи</button>
+    <button role="tab" data-tab="report">Отчёт</button>
+  </nav>
+  <button class="pill" id="themeBtn" type="button">Тема: тёмная</button>
+</header>
+<div class="device" id="deviceNote"></div>
+
+<main>
+<!-- ================= ВАРИАНТЫ ================= -->
+<section class="tab" id="tab-variants">
+  <div class="vfloat" id="vfloat"></div>
+  <div class="layout">
+    <aside class="panel">
+      <h3>Вариант</h3>
+      <div class="vbtns" id="vbtns"></div>
+      <p class="vdesc" id="vdesc"></p>
+      <label class="ctl"><span>Сравнить рядом с</span><select data-s="compare" id="cmpSel"></select></label>
+      <details class="more" id="moreDet">
+        <summary>Тонкая настройка</summary>
+        <label class="ctl"><span>Шрифт текста</span><select data-s="textFont" class="fontsel"></select></label>
+        <label class="ctl"><span>Шрифт цифр</span><select data-s="numFont" class="fontsel"></select></label>
+        <label class="ctl"><span>Насыщенность баланса</span><select data-s="heroW"><option value="">как в варианте</option><option>400</option><option>500</option><option>600</option><option>650</option><option>700</option><option>800</option><option>900</option></select></label>
+        <label class="ctl"><span>Размер баланса, px</span><select data-s="hero"><option value="">как в варианте</option><option>28</option><option>32</option><option>36</option><option>40</option><option>44</option><option>48</option><option>52</option><option>56</option><option>64</option><option>72</option></select></label>
+        <label class="ctl"><span>Цифры</span><select data-s="figs"><option value="">как в варианте</option><option value="tab">табличные (равной ширины)</option><option value="prop">пропорциональные</option></select></label>
+        <label class="ctl"><span>Копейки</span><select data-s="kop"><option value="">как в варианте</option><option value="same">как рубли</option><option value="small">мельче</option><option value="muted">мельче и приглушённые</option></select></label>
+        <label class="ctl"><span>Знак ₽</span><select data-s="cur"><option value="">как в варианте</option><option value="same">как цифры</option><option value="light">тоньше и приглушённый</option></select></label>
+        <label class="ctl"><span>Значки категорий</span><select data-s="icons" id="iconSel"></select></label>
+        <label class="chk"><input type="checkbox" data-s="frame"> Рамка iPhone 18 Pro Max (440 × 956)</label>
+        <button class="reset" type="button" id="resetBtn">Сбросить настройку</button>
+      </details>
+    </aside>
+    <div>
+      <div class="phones" id="phones"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ШРИФТЫ ================= -->
+<section class="tab" id="tab-fonts">
+  <div class="layout">
+    <aside class="panel">
+      <h3>Образец</h3>
+      <label class="ctl"><span>Размер сумм <output data-o="fSize"></output></span><input type="range" min="14" max="64" step="1" data-s="fSize"></label>
+      <label class="ctl"><span>Насыщенность <output data-o="fWeight"></output></span><input type="range" min="300" max="900" step="50" data-s="fWeight"></label>
+      <label class="ctl"><span>Цифры</span><select data-s="fFigs"><option value="tab">табличные</option><option value="prop">пропорциональные</option></select></label>
+      <p class="sub" style="font-size:12.5px;margin:0">Отметки «кириллица», «₽», «табличные цифры» получены разбором самих файлов шрифтов, а не из описаний. Для системных шрифтов файла нет — там проверка идёт прямо в этом браузере.</p>
+    </aside>
+    <div>
+      <h2 class="h">Сравнение двух шрифтов</h2>
+      <p class="sub">Одинаковый текст и одинаковые суммы. Слева и справа можно выбрать любой шрифт.</p>
+      <div class="cmp" id="cmp"></div>
+      <h2 class="h">Все шрифты</h2>
+      <p class="sub">Все шрифты, кроме системных, открытые (лицензия OFL 1.1): их можно хранить в приложении и раздавать с GitHub Pages. SF Pro в список файлов не входит: Apple запрещает встраивать его в сайты, он появляется только сам — на устройствах Apple.</p>
+      <div class="box" id="flist"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= СУММЫ ================= -->
+<section class="tab" id="tab-money">
+  <div class="layout">
+    <aside class="panel">
+      <h3>Денежная типографика</h3>
+      <label class="ctl"><span>Шрифт</span><select data-s="mFont" class="fontsel nodef"></select></label>
+      <label class="ctl"><span>Размер <output data-o="mSize"></output></span><input type="range" min="20" max="84" step="1" data-s="mSize"></label>
+      <label class="ctl"><span>Насыщенность <output data-o="mWeight"></output></span><input type="range" min="300" max="900" step="10" data-s="mWeight"></label>
+      <label class="ctl"><span>Цифры</span><select data-s="mFigs"><option value="tab">табличные (tabular-nums)</option><option value="prop">пропорциональные</option></select></label>
+      <label class="ctl"><span>Копейки</span><select data-s="mKop"><option value="same">как рубли</option><option value="small">мельче</option><option value="muted">мельче и приглушённые</option></select></label>
+      <label class="ctl"><span>Знак ₽</span><select data-s="mCur"><option value="same">как цифры</option><option value="light">тоньше и приглушённый</option></select></label>
+      <label class="ctl"><span>Межбуквенный интервал <output data-o="mTrack"></output></span><input type="range" min="-6" max="4" step="0.5" data-s="mTrack"></label>
+      <label class="ctl"><span>Пробел между тысячами <output data-o="mGap"></output></span><input type="range" min="-12" max="8" step="1" data-s="mGap"></label>
+      <label class="chk"><input type="checkbox" data-s="mOpsz"> Оптический размер (font-optical-sizing)</label>
+      <label class="chk"><input type="checkbox" data-s="mFit"> Уменьшать, если не помещается</label>
+    </aside>
+    <div>
+      <h2 class="h">Крупные суммы на ширине телефона</h2>
+      <p class="sub">Серая подложка — ширина карточки на iPhone 18 Pro Max (408 px). Если сумма шире, справа появится отметка.</p>
+      <div class="mgrid">
+        <div class="mphone" id="mBig"></div>
+        <div>
+          <pre class="css" id="mCss"></pre>
+        </div>
+      </div>
+      <h2 class="h">Табличные и пропорциональные цифры</h2>
+      <p class="sub"><span id="mLive"></span> В столбце табличные цифры стоят точно друг под другом. Пропорциональные плотнее и красивее в одиночной крупной сумме, но в списке «гуляют».</p>
+      <div class="cols" id="mCols"></div>
+      <h2 class="h">Меняющаяся сумма</h2>
+      <p class="sub">С пропорциональными цифрами знак ₽ дёргается при каждом изменении, с табличными стоит на месте. <button class="pill" type="button" id="tickBtn">Запустить</button></p>
+      <div class="cols" id="mTick"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ИКОНКИ ================= -->
+<section class="tab" id="tab-icons">
+  <div class="layout">
+    <aside class="panel">
+      <h3>Иконки</h3>
+      <label class="ctl"><span>Размер <output data-o="iSize"></output></span><input type="range" min="16" max="56" step="1" data-s="iSize"></label>
+      <label class="ctl"><span>Толщина линии</span><select data-s="iStroke"><option value="">как задумано в наборе</option><option>1</option><option>1.25</option><option>1.5</option><option>1.75</option><option>1.9</option><option>2</option><option>2.25</option><option>2.5</option></select></label>
+      <label class="ctl"><span>Подложка</span><select data-s="iTile"><option value="">без подложки</option><option value="tile">цветная прозрачная</option><option value="solid">сплошная, белый значок</option></select></label>
+      <p class="sub" style="font-size:12.5px;margin:0">Толщина меняется только у контурных наборов (Lucide, Iconoir, Tabler, Heroicons). У Phosphor шесть готовых начертаний — выбираются в шапке столбца.</p>
+    </aside>
+    <div>
+      <h2 class="h">Одни и те же категории в разных наборах</h2>
+      <p class="sub" id="iNote"></p>
+      <div class="box scrollx" id="iGrid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ЭМОДЗИ ================= -->
+<section class="tab" id="tab-emoji">
+  <div class="layout">
+    <aside class="panel">
+      <h3>Эмодзи</h3>
+      <label class="ctl"><span>Размер <output data-o="eSize"></output></span><input type="range" min="18" max="72" step="1" data-s="eSize"></label>
+      <label class="chk"><input type="checkbox" data-s="eTile"> На подложке</label>
+      <p class="sub" style="font-size:12.5px;margin:0" id="eSide"></p>
+    </aside>
+    <div>
+      <h2 class="h">Одни и те же эмодзи в разных наборах</h2>
+      <p class="sub" id="eNote"></p>
+      <div class="box scrollx" id="eGrid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ОТЧЁТ ================= -->
+<section class="tab" id="tab-report">
+  <div class="report" id="reportBody">
+    <h2>Коротко</h2>
+    <ul>
+      <li><b>Файлы Apple в приложение класть нельзя</b> — ни шрифт SF Pro, ни значки SF Symbols, ни эмодзи Apple. Лицензии разрешают их только для макетов и приложений под системы Apple.</li>
+      <li><b>Законный путь — попросить шрифт у самого iPhone.</b> Запись <code>-apple-system</code> / <code>system-ui</code> в CSS даёт на iPhone настоящий SF Pro, а обычные символы эмодзи — настоящие эмодзи Apple.</li>
+      <li><b>Находка: у Golos Text «табличные» цифры на деле разной ширины</b> (разброс около 6 % ширины цифры), поэтому суммы в столбцах сейчас стоят неровно. Проверено замером в Chrome. У Inter цифры ровные.</li>
+      <li><b>Моя рекомендация — вариант D (Hybrid):</b> дизайн остаётся прежним, меняются только цифры, копейки и значки категорий.</li>
+      <li><b>На настоящем iPhone эта страница ещё не открывалась.</b> Вид SF Pro, знак ₽ и ровность цифр в Safari нужно посмотреть на телефоне.</li>
+    </ul>
+    <p>Полный отчёт со всеми ссылками и таблицами: файл <code>design-lab/reports/Типографика и иконки в стиле Apple.md</code> (<a href="https://github.com/DredMining/moi-rashody/blob/main/design-lab/reports/%D0%A2%D0%B8%D0%BF%D0%BE%D0%B3%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0%20%D0%B8%20%D0%B8%D0%BA%D0%BE%D0%BD%D0%BA%D0%B8%20%D0%B2%20%D1%81%D1%82%D0%B8%D0%BB%D0%B5%20Apple.md" rel="noopener">открыть на GitHub</a>). Все данные — срез на 11.11.2026.</p>
+
+    <h2>1. Ресурсы Apple</h2>
+    <table>
+      <tr><th>Ресурс</th><th>Можно ли в веб-приложении</th><th>Законная замена</th></tr>
+      <tr><td><a href="https://developer.apple.com/fonts/" rel="noopener">Шрифты SF</a> (SF Pro, Rounded, Compact, Mono, New York)</td><td><b>Нельзя</b> подключать файлом, хранить на GitHub Pages, переводить в WOFF2. Лицензия — только для макетов программ под системы Apple.</td><td>Системный стек шрифтов: iPhone подставит SF Pro сам.</td></tr>
+      <tr><td><a href="https://developer.apple.com/sf-symbols/" rel="noopener">SF Symbols</a></td><td><b>Нельзя</b> — ни SVG, ни шрифтом (<a href="https://www.apple.com/legal/sla/docs/xcode.pdf" rel="noopener">соглашение Xcode и Apple SDK</a>, п. 2.10).</td><td>Открытые наборы значков (раздел 6).</td></tr>
+      <tr><td>Apple Color Emoji</td><td>Файлы и картинки — <b>нельзя</b> (<a href="https://developer.apple.com/app-store/review/guidelines/" rel="noopener">правила App Review</a>, п. 4.5.6). Писать обычные символы — можно.</td><td>Символ в тексте: iPhone нарисует его своим шрифтом.</td></tr>
+      <tr><td><a href="https://developer.apple.com/design/resources/" rel="noopener">Apple Design Resources</a></td><td>Графику и рамки устройств вставлять <b>нельзя</b>; изучать размеры и повторять своим кодом — можно.</td><td>Свои стили и своя рамка iPhone.</td></tr>
+      <tr><td><a href="https://developer.apple.com/design/human-interface-guidelines/typography" rel="noopener">Human Interface Guidelines</a></td><td><b>Можно</b> читать и следовать числам: основной текст 17, минимум 11, область нажатия 44 × 44.</td><td>—</td></tr>
+    </table>
+    <p>Системные цвета iOS Apple обновила 9 июня 2025 года (<a href="https://developer.apple.com/design/human-interface-guidelines/color" rel="noopener">HIG Color</a>): синий <code>#0091FF</code> в тёмной теме и <code>#0088FF</code> в светлой, красный <code>#FF4245</code> / <code>#FF383C</code>, зелёный <code>#30D158</code> / <code>#34C759</code>. Варианты A и C используют именно их.</p>
+
+    <h2>2. Проверенные репозитории GitHub</h2>
+    <table>
+      <tr><th>Репозиторий</th><th>Лицензия</th><th>Версия, релиз</th><th>Звёзды</th><th>Вывод</th></tr>
+      <tr><td><a href="https://github.com/lucide-icons/lucide" rel="noopener">Lucide</a></td><td>ISC</td><td>1.72.0, 11.11.2026</td><td>25 703</td><td>Рекомендую: значки</td></tr>
+      <tr><td><a href="https://github.com/tabler/tabler-icons" rel="noopener">Tabler Icons</a></td><td>MIT</td><td>3.51.0, 08.11.2026</td><td>22 601</td><td>Годится, запасной</td></tr>
+      <tr><td><a href="https://github.com/phosphor-icons/core" rel="noopener">Phosphor</a></td><td>MIT</td><td>2.1.1, 29.03.2024</td><td>7 794 (сайт)</td><td>Годится; шесть начертаний, развивается медленно</td></tr>
+      <tr><td><a href="https://github.com/iconoir-icons/iconoir" rel="noopener">Iconoir</a></td><td>MIT</td><td>7.12.2, 04.11.2026</td><td>4 632</td><td>Годится; нет такси</td></tr>
+      <tr><td><a href="https://github.com/ionic-team/ionicons" rel="noopener">Ionicons</a></td><td>MIT</td><td>8.1.0, 28.07.2026</td><td>18 245</td><td>Годится; вид ближе всего к iOS</td></tr>
+      <tr><td><a href="https://github.com/tailwindlabs/heroicons" rel="noopener">Heroicons</a></td><td>MIT</td><td>2.2.0, 18.11.2024</td><td>23 907</td><td>Мал: 324 значка, новые не принимаются</td></tr>
+      <tr><td><a href="https://github.com/framework7io/framework7-icons" rel="noopener">Framework7 Icons</a></td><td>MIT</td><td>5.0.5, 12.10.2021</td><td>231</td><td><b>Не брать</b>: по словам автора, набор основан на SF Symbols</td></tr>
+      <tr><td><a href="https://github.com/jdecked/twemoji" rel="noopener">Twemoji (форк jdecked)</a></td><td>CC-BY 4.0</td><td>17.0.3, 01.06.2026</td><td>1 918</td><td>Годится; нужна строка об авторстве</td></tr>
+      <tr><td><a href="https://github.com/twitter/twemoji" rel="noopener">Twemoji (оригинал)</a></td><td>CC-BY 4.0</td><td>14.0.2, 2022</td><td>17 814</td><td>Устарел, брать форк</td></tr>
+      <tr><td><a href="https://github.com/hfg-gmuend/openmoji" rel="noopener">OpenMoji</a></td><td>CC BY-SA 4.0</td><td>17.0.0, 23.04.2026</td><td>4 585</td><td>Годится; изменённые значки — под той же лицензией</td></tr>
+      <tr><td><a href="https://github.com/googlefonts/noto-emoji" rel="noopener">Noto Emoji</a></td><td>Apache 2.0</td><td>24.09.2026</td><td>5 126</td><td>Годится</td></tr>
+      <tr><td><a href="https://github.com/microsoft/fluentui-emoji" rel="noopener">Fluent Emoji</a></td><td>MIT</td><td>без релизов, рисунки с 30.01.2025</td><td>10 209</td><td>Годится</td></tr>
+      <tr><td><a href="https://github.com/framework7io/framework7" rel="noopener">Framework7</a></td><td>MIT</td><td>9.3.0, 30.10.2026</td><td>18 774</td><td>Не подключать: своя разметка и роутер</td></tr>
+      <tr><td><a href="https://github.com/ionic-team/ionic-framework" rel="noopener">Ionic</a></td><td>MIT</td><td>9.0.10, 28.10.2026</td><td>52 752</td><td>Не подключать: это переписывание приложения</td></tr>
+      <tr><td><a href="https://github.com/konstaui/konsta" rel="noopener">Konsta UI</a></td><td>MIT</td><td>5.5.0, 28.09.2026</td><td>4 289</td><td>Не подключать: нужны Tailwind и React/Vue</td></tr>
+      <tr><td><a href="https://github.com/OnsenUI/OnsenUI" rel="noopener">Onsen UI</a></td><td>Apache-2.0</td><td>2.12.9, 16.06.2026</td><td>8 852</td><td>Не подключать: устаревший «плоский» iOS</td></tr>
+      <tr><td><a href="https://github.com/codedgar/Puppertino" rel="noopener">Puppertino</a></td><td>MIT</td><td>2.0.0, 06.10.2026</td><td>1 211</td><td>Только как справочник чисел iOS 26</td></tr>
+      <tr><td><a href="https://github.com/rsms/inter" rel="noopener">Inter</a></td><td>OFL 1.1</td><td>4.1, 16.11.2024</td><td>20 056</td><td>Рекомендую: замена SF Pro на Windows</td></tr>
+      <tr><td><a href="https://github.com/vercel/geist-font" rel="noopener">Geist</a></td><td>OFL 1.1</td><td>1.9.2, 06.11.2026</td><td>3 750</td><td>Годится, запасной</td></tr>
+      <tr><td><a href="https://github.com/simpals/onest" rel="noopener">Onest</a>, <a href="https://github.com/googlefonts/manrope" rel="noopener">Manrope</a></td><td>OFL 1.1</td><td>2026</td><td>—</td><td>Годятся для сумм</td></tr>
+      <tr><td><a href="https://github.com/supernotes/sn-pro" rel="noopener">SN Pro</a></td><td>OFL 1.1</td><td>1.5.0, 29.05.2025</td><td>775</td><td>Похож на SF Rounded, но цифры неровные</td></tr>
+    </table>
+    <p>Репозитории, которые раздают сами файлы Apple (выгрузки SF Symbols, перепаковки шрифта эмодзи), существуют, но брать из них ничего нельзя: пометка MIT там относится к скриптам, а не к рисункам Apple.</p>
+
+    <h2>3. Какие библиотеки рекомендую</h2>
+    <ul>
+      <li><b>Lucide</b> — значки. Нужные 25–30 штук копируются прямо в <code>index.html</code> (это примерно 12–18 КБ), без CDN и без сборки.</li>
+      <li><b>Inter</b> — запасной шрифт цифр для Windows и Android. На iPhone он не используется: там цифры рисует SF Pro.</li>
+      <li><b>Больше ничего.</b> Суммы форматирует встроенный <code>Intl.NumberFormat</code> (как сейчас), эмодзи рисует система. Фреймворки не нужны.</li>
+    </ul>
+
+    <h2>4. Шрифты</h2>
+    <ul>
+      <li>Текст оставить на <b>Golos Text</b>: он уже в приложении, кириллица хорошая.</li>
+      <li>Цифры набирать стеком <code>-apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif</code>: на iPhone это SF Pro, на Windows и Android — Inter.</li>
+      <li>В Chrome на Windows SF Pro не появится никогда — здесь всегда виден Inter. Настоящий вид — только на iPhone.</li>
+      <li>Попутная находка: вес 700 у Golos Text в приложении не объявлен, поэтому «жирная» крупная сумма на деле рисуется весом 600.</li>
+      <li>Знак ₽ в готовых сборках шрифтов лежит в отдельном файле (<code>latin-ext</code>), а не вместе с кириллицей.</li>
+      <li><b>Не проверено:</b> есть ли знак ₽ в самом SF Pro. Если нет, iPhone возьмёт его из другого шрифта.</li>
+    </ul>
+
+    <h2>5. Денежные суммы</h2>
+    <ul>
+      <li>В списках и столбцах — табличные цифры: <code>font-variant-numeric: tabular-nums</code>. В приложении это уже задано, но Golos Text его не выполняет честно.</li>
+      <li><b>Замер (Chrome, 40 px, вес 600).</b> Golos Text: цифры 0, 1, 4, 7 — 25,56 px; 8 — 25,16; 6 и 9 — 24,96; 3 — 24,16; 2 и 5 — 23,96. Inter: все десять цифр — 25,78 px. Проверить любой шрифт можно на вкладке «Шрифты»: отметка «в этом браузере цифры ровные».</li>
+      <li>Копейки — мельче рублей (0,62 размера) и приглушённым цветом; знак ₽ — тоньше и приглушённый. Сейчас так только на «Деньгах», в остальных местах копейки как рубли.</li>
+      <li>Минус — знак «−» (U+2212), пробелы — неразрывные (U+00A0). Приложение уже делает это правильно. Узкого пробела U+202F в шрифтах нет — не использовать.</li>
+      <li>Сумма не переносится, высота строки не меньше 1,1, длинные суммы уменьшаются скриптом (в приложении это уже есть). «1 250 000,00 ₽» шрифтом Inter помещается на экране 440 px при размере до 53 px.</li>
+      <li>Готовый CSS под любые настройки — на вкладке «Суммы».</li>
+    </ul>
+
+    <h2>6. Иконки</h2>
+    <ul>
+      <li><b>Lucide</b> подходит лучше всего: сетка 24, скруглённые концы, толщина линии настраивается — её можно поставить 1,9, как у нынешних значков нижней панели. Все 12 категорий закрыты.</li>
+      <li>Слабое место Lucide — нет значков с заливкой; выбранное состояние показывается цветом или подложкой, как сейчас.</li>
+      <li>Если Lucide не понравится: <b>Phosphor</b> (шесть начертаний, есть заливка) или <b>Ionicons</b> (рисовался в том числе под iOS).</li>
+    </ul>
+
+    <h2>7. Эмодзи, доступные легально</h2>
+    <ul>
+      <li><b>Системные</b> (обычный символ в тексте): на iPhone это настоящие эмодзи Apple, бесплатно и законно. На Windows — эмодзи Microsoft, поэтому предпросмотр на компьютере не показывает вид на телефоне.</li>
+      <li><b>Привезённые картинки</b> (одинаковы на всех устройствах): Twemoji (CC-BY 4.0, 17 КБ на 18 значков), Fluent Flat (MIT, 31 КБ), OpenMoji (CC BY-SA 4.0, 51 КБ), Noto (Apache 2.0, 179 КБ), Fluent Color (MIT, 320 КБ).</li>
+      <li>Сумки 🛍️, тарелку 🍽️ и самолёт ✈️ нужно писать с добавочным знаком U+FE0F, иначе в Windows они чёрно-белые.</li>
+      <li>В варианте D эмодзи категорий заменены значками; системные эмодзи остаются только там, где они действительно нужны.</li>
+    </ul>
+
+    <h2>8. Что совпадёт на Windows и iPhone</h2>
+    <table>
+      <tr><th>Что</th><th>iPhone</th><th>Windows, Chrome</th></tr>
+      <tr><td>Цифры (системный стек с Inter)</td><td>SF Pro</td><td>Inter</td></tr>
+      <tr><td>Текст на Golos Text</td><td colspan="2">одинаково</td></tr>
+      <tr><td>Значки SVG в самом файле</td><td colspan="2">одинаково</td></tr>
+      <tr><td>Системные эмодзи</td><td>эмодзи Apple</td><td>эмодзи Microsoft</td></tr>
+      <tr><td>Округлый шрифт <code>ui-rounded</code> (вариант C)</td><td>SF Rounded</td><td>не поддерживается, показан SN Pro</td></tr>
+      <tr><td>Размытие «стекла», тактильный отклик</td><td>работает по-своему</td><td>приблизительно</td></tr>
+    </table>
+
+    <h2>9. Что лучше не использовать</h2>
+    <ul>
+      <li><b>Файлы Apple</b>: SF Pro, выгрузки SF Symbols, перепаковки Apple Color Emoji — запрещено лицензиями.</li>
+      <li><b>Framework7 Icons</b>: срисован с SF Symbols, не обновлялся с 2021 года. В лабораторию не включён.</li>
+      <li><b>Framework7, Ionic, Konsta UI, Onsen UI</b> целиком: требуют своей разметки или сборки, то есть переписывания приложения.</li>
+      <li><b>Remix Icon</b> (с января 2026 своя лицензия с ограничениями), <b>css.gg</b> (запрет коммерческого использования без разрешения), <b>Solar</b> (лицензия указана противоречиво).</li>
+      <li><b>JoyPixels</b> и <b>Tossface</b> — эмодзи с ограничивающими лицензиями. Оригинальный <b>twitter/twemoji</b> — устарел.</li>
+      <li>Для сумм: <b>Wix Madefor Display</b> и <b>Commissioner</b> (табличных цифр нет), <b>Sofia Sans</b> (нет ₽), <b>Golos Text</b> и <b>SN Pro</b> (табличные цифры неровные). Без кириллицы: Google Sans Flex, Mona Sans, DM Sans, Figtree.</li>
+    </ul>
+
+    <h2>10. Что я рекомендую</h2>
+    <div class="verdict">
+      <b>Вариант D — Hybrid.</b> Нынешний дизайн, цвета, Golos Text и заголовки капсом остаются. Меняется три вещи: цифры идут через системный стек (SF Pro на iPhone, Inter на Windows и Android) и наконец встают ровно; копейки и знак ₽ становятся мельче и спокойнее везде; вместо эмодзи категорий — единый набор значков Lucide в цветах приложения.
+    </div>
+    <p>Почему D: он решает найденную ошибку с цифрами, убирает смешение эмодзи и значков и при этом не требует переделывать экраны. Варианты A и C ближе к «чистому» iOS, но это уже смена облика приложения, а не шлифовка. Это моя рекомендация — выбор за тобой.</p>
+
+    <h2>Что осталось непроверенным</h2>
+    <ul>
+      <li>Как эта страница выглядит на настоящем iPhone: вид SF Pro, знак ₽ рядом с цифрами SF, ровность табличных цифр в Safari.</li>
+      <li>Есть ли знак ₽ в шрифтах SF; кириллица в SF Pro Rounded.</li>
+      <li>Тексты лицензий внутри установщиков шрифтов и SF Symbols (читались страницы Apple и соглашение, сами установщики не открывались).</li>
+      <li>Вывод <code>Intl.NumberFormat</code> именно в Safari (ожидается тот же, что в Chrome).</li>
+    </ul>
+
+    <h2>Что лежит в лаборатории и под какими лицензиями</h2>
+    <ul>
+      <li><b>Шрифты</b> — 20 открытых семейств из пакетов Fontsource, все под SIL OFL 1.1. Тексты лицензий: <code>assets/fonts/licenses/</code>.</li>
+      <li><b>Значки</b> — Lucide (ISC), Phosphor, Iconoir, Tabler, Ionicons, Heroicons (MIT). Тексты лицензий: <code>assets/licenses/</code>.</li>
+      <li><b>Эмодзи</b> — Twemoji © Twitter и участники проекта, CC-BY 4.0; OpenMoji — открытый проект эмодзи и значков, CC BY-SA 4.0; Noto Emoji © Google, Apache 2.0; Fluent Emoji © Microsoft, MIT.</li>
+      <li>Файлов Apple здесь нет. SF Pro и эмодзи Apple появляются сами, когда страница открыта на устройстве Apple.</li>
+    </ul>
+  </div>
+</section>
+</main>
+
+<script src="assets/lab-data.js"></script>
+<script>
+(function(){
+'use strict';
+var D=window.LAB_DATA;
+function $(s,r){return (r||document).querySelector(s)}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+/* ---------- Устройство ---------- */
+var UA=navigator.userAgent;
+var DEV={ios:/iPhone|iPad|iPod/.test(UA)||(/Macintosh/.test(UA)&&navigator.maxTouchPoints>1),mac:/Macintosh/.test(UA),win:/Windows/.test(UA),android:/Android/.test(UA)};
+DEV.apple=DEV.ios||DEV.mac;
+var SYS_EMOJI=DEV.apple?'Apple Color Emoji':DEV.win?'Segoe UI Emoji (Windows)':DEV.android?'Noto Color Emoji (Android)':'эмодзи системы';
+(function(){
+  var t;
+  if(DEV.apple)t='<b>Это устройство Apple.</b> Системный шрифт здесь — настоящий SF Pro, эмодзи — Apple Color Emoji. То, что ты видишь в вариантах A и C, и есть вид на iPhone.';
+  else if(DEV.win)t='<b>Это Windows.</b> SF Pro и эмодзи Apple здесь показать нельзя: Apple не разрешает раздавать их файлы. Вместо SF Pro показан Inter (самый близкий открытый шрифт), вместо эмодзи Apple — эмодзи Windows. Настоящий вид вариантов A и C — только на iPhone.';
+  else t='<b>Это не устройство Apple.</b> Вместо SF Pro показан Inter, эмодзи — системные. Настоящий вид вариантов A и C — только на iPhone.';
+  $('#deviceNote').innerHTML=t;
+})();
+
+/* ---------- Шрифты ---------- */
+var FONTS=[
+ {id:'apple',name:'SF Pro (на iPhone) → Inter',css:'-apple-system,BlinkMacSystemFont,"Inter",system-ui,sans-serif',sys:1,note:'iPhone и Mac: системный SF Pro. Windows и Android: Inter.'},
+ {id:'rounded',name:'SF Rounded (на iPhone) → SN Pro',css:'ui-rounded,"SN Pro","Nunito",system-ui,sans-serif',sys:1,note:'iPhone и Mac: SF Pro Rounded. Windows и Android: SN Pro.'},
+ {id:'system',name:'Системный шрифт устройства',css:'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif',sys:1,note:'iPhone: SF Pro. Windows: Segoe UI. Android: Roboto.'}
+].concat(D.fonts.map(function(f){return {id:f.id,name:f.family,css:'"'+f.family+'",'+(f.group==='mono'?'ui-monospace,monospace':'system-ui,sans-serif'),data:f}}));
+var FBY={};FONTS.forEach(function(f){FBY[f.id]=f});
+function fcss(id){return (FBY[id]||FBY.apple).css}
+
+/* ---------- Варианты ---------- */
+var VARIANTS={
+ now:{name:'Сейчас',full:'Как сейчас',desc:'Приложение сегодня: Golos Text, эмодзи системы, копейки одного размера с рублями. Точка отсчёта для сравнения.',text:'golos-text',num:'golos-text',heroW:600,hero:36,figs:'tab',kop:'same',cur:'same',ops:'emoji:system',cats:'emoji:system',ui:['lucide','regular','regular'],pal:'app'},
+ a:{name:'A',full:'Apple Native',desc:'Системный шрифт iOS, размеры и цвета из руководства Apple, цветные плитки значков как в «Настройках», сдержанные суммы.',text:'apple',num:'apple',heroW:700,hero:34,figs:'tab',kop:'same',cur:'same',ops:'svg:ionicons:filled',cats:'svg:ionicons:filled',ui:['ionicons','outline','filled'],pal:'ios'},
+ b:{name:'B',full:'Premium Finance',desc:'Крупный выразительный баланс, отдельный шрифт для цифр, тонкие контурные значки, золотой акцент, копейки и ₽ приглушены.',text:'inter',num:'manrope',heroW:700,hero:52,figs:'tab',kop:'muted',cur:'light',ops:'svg:phosphor:light',cats:'svg:phosphor:light',ui:['phosphor','light','bold'],pal:'mono'},
+ c:{name:'C',full:'Modern iOS',desc:'Современный iOS: крупные скругления, «стеклянная» панель вкладок, округлые цифры как в Wallet, значки в духе SF Symbols и аккуратные эмодзи в категориях.',text:'apple',num:'rounded',heroW:700,hero:46,figs:'tab',kop:'small',cur:'same',ops:'svg:phosphor:fill',cats:'emoji:system',ui:['phosphor','regular','fill'],pal:'ios'},
+ d:{name:'D',full:'Hybrid',desc:'Нынешний дизайн приложения без перестройки: те же цвета, Golos Text и заголовки капсом. Меняются только цифры (как в iOS: SF Pro на iPhone, Inter на Windows — у них ровные табличные цифры), копейки становятся мельче, а вместо эмодзи — единый набор значков.',text:'golos-text',num:'apple',heroW:700,hero:40,figs:'tab',kop:'muted',cur:'light',ops:'svg:lucide:regular',cats:'svg:lucide:regular',ui:['lucide','regular','regular'],pal:'app'}
+};
+var VORDER=['now','a','b','c','d'];
+var PAL={
+ ios:{shopping:'#BF5AF2',grocery:'#30D158',transport:'#0A84FF',taxi:'#F2A900',cafe:'#AC8E68',restaurant:'#FF453A',home:'#FF9F0A',health:'#FF375F',fun:'#40C8E0',education:'#5E5CE6',travel:'#32ADE6',subs:'#8E8E93',wallet:'#30D158'},
+ app:{shopping:'#B79CFF',grocery:'#5EDB94',transport:'#5B8CFF',taxi:'#5CD6E6',cafe:'#C2DE5E',restaurant:'#FF9F6B',home:'#B79CFF',health:'#FFD166',fun:'#F48FD8',education:'#5B8CFF',travel:'#5CD6E6',subs:'#9AA6BF',wallet:'#5EDB94'},
+ mono:{}
+};
+var CATS=[['shopping','Покупки'],['grocery','Продукты'],['transport','Транспорт'],['taxi','Такси'],['cafe','Кафе'],['restaurant','Рестораны'],['home','Дом'],['health','Здоровье'],['fun','Развлечения'],['education','Образование'],['travel','Путешествия'],['subs','Подписки']];
+var UIKEYS=[['wallet','Кошелёк'],['plus','Добавить'],['chart','Итоги'],['list','Записи'],['swap','Перевод'],['settings','Настройки'],['search','Поиск'],['chevron','Стрелка'],['up_right','Расход'],['down_left','Доход'],['calendar','Календарь'],['bell','Напоминание'],['card','Карта']];
+var SF={shopping:'bag.fill',grocery:'cart.fill',transport:'bus.fill',taxi:'car.fill',cafe:'cup.and.saucer.fill',restaurant:'fork.knife',home:'house.fill',health:'heart.fill',fun:'gamecontroller.fill',education:'graduationcap.fill',travel:'airplane',subs:'repeat',wallet:'wallet.bifold.fill',plus:'plus',chart:'chart.bar.fill',list:'list.bullet',swap:'arrow.left.arrow.right',settings:'gearshape.fill',search:'magnifyingglass',chevron:'chevron.right',up_right:'arrow.up.right',down_left:'arrow.down.left',calendar:'calendar',bell:'bell.fill',card:'creditcard.fill'};
+var OPS=[
+ {k:'grocery',t:'Продукты',s:'Пятёрочка · сегодня, 14:32',a:-128450},
+ {k:'taxi',t:'Такси',s:'Сегодня, 12:05',a:-43000},
+ {k:'cafe',t:'Кафе',s:'Кофе с собой · сегодня, 09:15',a:-35000},
+ {k:'wallet',t:'Зарплата',s:'Вчера, 18:00',a:8523700},
+ {k:'subs',t:'Подписки',s:'Связь · 9 нояб., 08:00',a:-29900},
+ {k:'travel',t:'Путешествия',s:'Авиабилеты · 8 нояб., 21:40',a:-1864000}
+];
+var EMO={};D.emojiList.forEach(function(e){EMO[e.key]=e});
+EMO.wallet=EMO.salary;
+
+/* ---------- Состояние ---------- */
+var DEF={tab:'variants',theme:'dark',variant:'a',compare:'',textFont:'',numFont:'',heroW:'',hero:'',figs:'',kop:'',cur:'',icons:'',frame:true,
+ fSize:28,fWeight:600,fFigs:'tab',cmpA:'apple',cmpB:'golos-text',
+ mFont:'inter',mSize:48,mWeight:650,mFigs:'tab',mKop:'muted',mCur:'light',mTrack:-2,mGap:0,mOpsz:true,mFit:false,
+ iSize:28,iStroke:'',iTile:'',eSize:36,eTile:false,
+ st_phosphor:'regular',st_iconoir:'regular',st_tabler:'outline',st_ionicons:'outline',st_f7:'regular',st_heroicons:'outline',st_lucide:'regular'};
+var S={};Object.keys(DEF).forEach(function(k){S[k]=DEF[k]});
+(function(){
+  try{new URLSearchParams(location.hash.slice(1)).forEach(function(v,k){
+    if(!(k in DEF))return;
+    var d=DEF[k];S[k]=typeof d==='boolean'?v==='1':typeof d==='number'?(isFinite(+v)?+v:d):v;
+  })}catch(e){}
+  if(!VARIANTS[S.variant])S.variant='a';
+})();
+function save(){
+  var p=new URLSearchParams();
+  Object.keys(DEF).forEach(function(k){if(S[k]!==DEF[k])p.set(k,typeof S[k]==='boolean'?(S[k]?'1':'0'):S[k])});
+  var h=p.toString();
+  try{history.replaceState(null,'',h?'#'+h:location.pathname+location.search)}catch(e){}
+}
+
+/* ---------- Деньги ---------- */
+var NF=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0});
+function money(k,o){
+  o=o||{};
+  var a=Math.abs(k),rub=Math.floor(a/100),kop=a%100;
+  var sign=k<0?'−':(o.plus?'+':'');
+  var kp=(kop||o.always)?'<span class="kop">,'+(kop<10?'0':'')+kop+'</span>':'';
+  return sign+NF.format(rub)+kp+' <span class="cur">₽</span>';
+}
+
+/* ---------- Значки ---------- */
+function svgOf(set,style,key){
+  var s=D.icons[set];if(!s)return null;
+  var ic=s.icons[key]||{};
+  if(ic[style])return {svg:ic[style],style:style};
+  for(var i=0;i<s.styles.length;i++)if(ic[s.styles[i]])return {svg:ic[s.styles[i]],style:s.styles[i]};
+  return null;
+}
+function strokeAttr(set,style){
+  var s=D.icons[set];
+  return (s.kind==='stroke'&&!/solid|filled/.test(style))?' class="g isw" style="--isw-d:'+(s.strokeDefault||2)+'"':' class="g"';
+}
+function glyph(mode,key){
+  var p=mode.split(':');
+  if(p[0]==='emoji'){
+    var e=EMO[key];if(!e)return {html:'',em:false};
+    return {em:true,html:p[1]==='system'?'<i class="emo">'+e.char+'</i>':'<img alt="" src="assets/emoji/'+p[1]+'/'+e.code+'.svg">'};
+  }
+  var r=svgOf(p[1],p[2],key)||svgOf('lucide','regular',key);
+  if(!r)return {html:'',em:false};
+  var set=svgOf(p[1],p[2],key)?p[1]:'lucide';
+  return {em:false,html:'<span'+strokeAttr(set,r.style)+'>'+r.svg+'</span>'};
+}
+function ui(cfg,key,on){
+  var u=cfg.v.ui,r=svgOf(u[0],on?u[2]:u[1],key);
+  return r?'<span'+strokeAttr(u[0],r.style)+'>'+r.svg+'</span>':'';
+}
+function icTile(cfg,mode,key){
+  var g=glyph(mode,key),c=PAL[cfg.v.pal][key];
+  return '<span class="ic'+(g.em?' em':'')+'"'+(c?' style="--c:'+c+'"':' style="--c:var(--ink2)"')+'>'+g.html+'</span>';
+}
+
+/* ---------- Экран ---------- */
+var ST_ICONS='<svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="10" y="3" width="3" height="9" rx=".7"/><rect x="15" y="0" width="3" height="12" rx=".7"/></svg><svg viewBox="0 0 17 12" fill="currentColor"><path d="M8.5 2.6c2.3 0 4.4.9 6 2.4l1.1-1.2A10.3 10.3 0 0 0 8.5 1 10.3 10.3 0 0 0 1.4 3.8l1.1 1.2a8.7 8.7 0 0 1 6-2.4Zm0 3.6c1.4 0 2.6.5 3.6 1.4l1.1-1.2a7 7 0 0 0-9.4 0l1.1 1.2c1-.9 2.2-1.4 3.6-1.4Zm0 3.4c-.7 0-1.3.3-1.8.7l1.8 1.9 1.8-1.9c-.5-.4-1.1-.7-1.8-.7Z"/></svg><svg viewBox="0 0 27 13" fill="none"><rect x=".5" y=".5" width="23" height="12" rx="3.6" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2.3" fill="currentColor"/><path d="M25 4.5v4c.8-.3 1.5-1.1 1.5-2s-.7-1.7-1.5-2Z" fill="currentColor" opacity=".45"/></svg>';
+function cfgOf(vid){
+  var v=VARIANTS[vid];
+  return {id:vid,v:v,text:S.textFont||v.text,num:S.numFont||v.num,heroW:S.heroW||v.heroW,hero:+S.hero||v.hero,figs:S.figs||v.figs,kop:S.kop||v.kop,cur:S.cur||v.cur,ops:S.icons||v.ops,cats:S.icons||v.cats};
+}
+function screenHTML(vid){
+  var c=cfgOf(vid);
+  var style='--f-text:'+fcss(c.text)+';--f-num:'+fcss(c.num)+';--hero-w:'+c.heroW+';--hero-size:'+c.hero+'px;--figs:'+(c.figs==='prop'?'proportional-nums':'tabular-nums');
+  var cls='scr v-'+vid+(c.kop==='small'?' kop-small':c.kop==='muted'?' kop-muted':'')+(c.cur==='light'?' cur-light':'');
+  var h='<div class="'+cls+'" data-theme="'+S.theme+'" style=\''+style+'\'>';
+  h+='<div class="st"><b>9:41</b><span>'+ST_ICONS+'</span></div>';
+  h+='<header class="hd"><div><div class="kick">Ноябрь 2026</div><h1 class="ttl">Мои финансы</h1></div><button class="rnd" type="button" aria-label="Настройки">'+ui(c,'settings')+'</button></header>';
+  h+='<section class="card balance"><div class="lbl">Текущий баланс</div><div class="hero fitme">'+money(11066350)+'</div><div class="cap">на 11 ноября, 14:32 · 3 счёта</div></section>';
+  h+='<div class="duo"><div class="card mini"><div class="lbl">'+ui(c,'down_left')+'Доход</div><div class="num pos fitme">'+money(8523700,{plus:1})+'</div><div class="cap">за ноябрь</div></div>'+
+     '<div class="card mini"><div class="lbl">'+ui(c,'up_right')+'Расход</div><div class="num neg fitme">'+money(-2542650)+'</div><div class="cap">лимит 30 000 ₽</div></div></div>';
+  h+='<div class="seg" role="group"><button type="button" class="on">Расходы</button><button type="button">Доходы</button><button type="button">Все</button></div>';
+  h+='<h2 class="sec">Последние операции</h2><div class="card list">';
+  OPS.forEach(function(o){
+    h+='<div class="row">'+icTile(c,c.ops,o.k)+'<div class="what"><b>'+o.t+'</b><span>'+o.s+'</span></div><div class="amt '+(o.a>0?'pos':'neg')+'">'+money(o.a,{plus:1})+'</div></div>';
+  });
+  h+='</div>';
+  h+='<h2 class="sec">Накопления</h2><section class="card goal"><div class="lbl">Цель «Квартира»</div><div class="big fitme">'+money(125000000,{always:1})+'</div><div class="bar"><i></i></div><div class="cap">62,5 % от 2 000 000 ₽ · осталось 750 000 ₽</div></section>';
+  h+='<h2 class="sec">Категории</h2><div class="cats">';
+  CATS.forEach(function(k){h+='<div class="cat">'+icTile(c,c.cats,k[0])+'<span>'+k[1]+'</span></div>'});
+  h+='</div>';
+  h+='<h2 class="sec">Настройки</h2><div class="card list"><div class="trow"><span>Напоминать о лимите</span><button type="button" class="sw on" role="switch" aria-checked="true" aria-label="Напоминать о лимите"></button></div><div class="trow"><span>Скрывать копейки</span><button type="button" class="sw" role="switch" aria-checked="false" aria-label="Скрывать копейки"></button></div></div>';
+  h+='<div class="btns"><button type="button" class="btn pri">'+ui(c,'plus')+'Добавить расход</button><button type="button" class="btn sec2">Перевод</button></div>';
+  h+='<div class="tbwrap"><nav class="tb">'+[['chart','Итоги'],['wallet','Деньги'],['plus','Учёт'],['list','Записи'],['swap','Долги']].map(function(t,i){
+    return '<button type="button"'+(i===2?' class="on"':'')+' data-k="'+t[0]+'">'+ui(c,t[0],i===2)+'<span>'+t[1]+'</span></button>'}).join('')+'</nav></div>';
+  return h+'</div>';
+}
+function fitAll(root){
+  $$('.fitme',root).forEach(function(el){
+    el.style.fontSize='';
+    var guard=0,fs=parseFloat(getComputedStyle(el).fontSize);
+    while(el.scrollWidth>el.clientWidth+0.5&&fs>12&&guard++<80){fs-=1;el.style.fontSize=fs+'px'}
+  });
+}
+function renderVariants(){
+  var ids=[S.variant];if(S.compare&&S.compare!==S.variant)ids.push(S.compare);
+  var box=$('#phones');
+  var noframe=!S.frame||window.innerWidth<=560;
+  box.className='phones'+(noframe?' noframe':'');
+  box.innerHTML=ids.map(function(id){var v=VARIANTS[id];
+    return '<div class="pwrap"><div class="pname">'+(id==='now'?v.full:v.name+' · '+v.full)+'</div><div class="phone"><div class="pscreen">'+screenHTML(id)+'</div></div></div>'}).join('');
+  $$('#vbtns button,#vfloat button[data-v]').forEach(function(b){b.classList.toggle('on',b.dataset.v===S.variant)});
+  var v=VARIANTS[S.variant];
+  $('#vdesc').innerHTML='<b>'+(S.variant==='now'?'':v.name+' — ')+v.full+'</b>'+v.desc+(S.variant==='d'||S.variant==='now'?' Кнопка «Тема» переключает «Чёрный и бордо» и тёмно-синий вид.':'');
+  zoomPhones();
+  var run=function(){fitAll(box)};
+  run();
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(run);
+  setTimeout(run,400);
+}
+function zoomPhones(){
+  var box=$('#phones');if(!box)return;
+  var top=box.getBoundingClientRect().top+window.scrollY;
+  var avail=window.innerHeight-Math.min(top,170)-56;
+  var z=Math.max(.5,Math.min(1,avail/978));
+  box.style.setProperty('--zoom',z.toFixed(3));
+}
+
+/* ---------- Шрифты ---------- */
+var SUMS=[[11066350,0],[8523700,1],[-2542650,0],[125000000,2]];
+function sumsHTML(sep){return SUMS.map(function(s){return '<span>'+money(s[0],{plus:s[1]===1,always:s[1]===2})+'</span>'}).join(sep||'')}
+function liveTnum(css){
+  // Проверка в этом браузере: насколько одинакова ширина десяти цифр при tabular-nums
+  var sp=document.createElement('span');
+  sp.style.cssText='position:absolute;visibility:hidden;white-space:nowrap;font-variant-numeric:tabular-nums;font:600 40px '+css;
+  sp.style.fontVariantNumeric='tabular-nums';
+  document.body.appendChild(sp);
+  var a=[];for(var d=0;d<10;d++){sp.textContent=new Array(11).join(String(d));a.push(sp.getBoundingClientRect().width/10)}
+  sp.remove();
+  var so=a.slice().sort(function(x,y){return x-y}),med=so[5]||1;
+  return {spread:(so[9]-so[0])/med*100};
+}
+function liveTag(css){
+  var p=liveTnum(css).spread,t=p.toFixed(1).replace('.',',');
+  if(p<.5)return '<span class="tag ok">в этом браузере цифры ровные</span>';
+  if(p<6)return '<span class="tag warn">в этом браузере почти ровные: разброс ширины до '+t+' %</span>';
+  return '<span class="tag no">в этом браузере цифры разной ширины (разброс '+Math.round(p)+' %)</span>';
+}
+function fontTags(f){
+  var t='';
+  if(f.data){
+    var p=f.data.probe;
+    t+='<span class="tag '+(p.cyr?'ok':'no')+'">кириллица '+(p.cyr?'есть':'нет')+'</span>';
+    t+='<span class="tag '+(p.rub?'ok':'no')+'">₽ '+(p.rub?'есть':'нет')+'</span>';
+    var tn=p.defaultTabular?'табличные по умолчанию':(p.feats.indexOf('tnum')>=0?'табличные включаются':'табличных нет');
+    t+='<span class="tag '+(p.defaultTabular||p.feats.indexOf('tnum')>=0?'ok':'no')+'">'+tn+'</span>';
+    if(p.defaultTabular&&p.feats.indexOf('pnum')<0)t+='<span class="tag warn">пропорциональных нет</span>';
+    var ax=p.axes.wght?'вес '+p.axes.wght[0]+'–'+p.axes.wght[1]:'вес '+f.data.weight;
+    if(p.axes.opsz)ax+=', оптический размер '+p.axes.opsz[0]+'–'+p.axes.opsz[1];
+    t+='<span class="tag">'+ax+'</span><span class="tag">'+Math.round(f.data.bytes/1024)+' КБ</span><span class="tag">'+esc(f.data.license)+'</span>';
+  }else{
+    t+='<span class="tag warn">зависит от устройства</span>';
+  }
+  return t;
+}
+function fopts(sel){return FONTS.map(function(f){return '<option value="'+f.id+'"'+(f.id===sel?' selected':'')+'>'+esc(f.name)+'</option>'}).join('')}
+function cmpCard(key){
+  var id=S[key],css=fcss(id),fv=S.fFigs==='prop'?'proportional-nums':'tabular-nums';
+  return '<div class="cmpcard"><select data-s="'+key+'">'+fopts(id)+'</select>'+
+   '<div style=\'font-family:'+css+';font-size:'+S.fSize+'px;font-variant-numeric:'+fv+';font-optical-sizing:auto\'>'+
+   '<div class="t">Мои финансы</div><div class="l">ТЕКУЩИЙ БАЛАНС</div><div class="s" style="font-weight:'+S.fWeight+';font-size:1.5em;letter-spacing:-.02em">'+money(11066350)+'</div>'+
+   '<div class="l" style="margin-bottom:.5em">Доход '+money(8523700,{plus:1})+' · Расход '+money(-2542650)+'</div>'+
+   OPS.slice(0,4).map(function(o){return '<div class="rowz"><span>'+o.t+' <small>'+o.s+'</small></span><b style="font-weight:'+S.fWeight+'">'+money(o.a,{plus:1})+'</b></div>'}).join('')+
+   '<div class="rowz"><span>Накопления</span><b style="font-weight:'+S.fWeight+'">'+money(125000000,{always:1})+'</b></div>'+
+   '</div></div>';
+}
+function renderFonts(){
+  $('#cmp').innerHTML=cmpCard('cmpA')+cmpCard('cmpB');
+  var fv=S.fFigs==='prop'?'proportional-nums':'tabular-nums';
+  $('#flist').innerHTML=FONTS.map(function(f){
+    return '<div class="frow"><div class="fmeta"><b>'+esc(f.name)+'</b><small>'+(f.data?esc(f.data.pkg)+' '+esc(f.data.version):esc(f.note))+'</small>'+fontTags(f)+'<span class="live" data-live="'+f.id+'"></span></div>'+
+     '<div class="fsample" style=\'font-family:'+f.css+';font-optical-sizing:auto\'><div class="t">Мои финансы</div><div class="w">Продукты · Такси · Здоровье · Жильё · Ещё объём: щЩ фФ жЖ ёЁ</div>'+
+     '<div class="s" style="font-size:'+S.fSize+'px;font-weight:'+S.fWeight+';font-variant-numeric:'+fv+'">'+sumsHTML()+'</div>'+
+     '<div class="d" style="font-variant-numeric:'+fv+'">11 нояб., 14:32 · 0123456789 · лимит 30 000 ₽ · 62,5 %</div></div></div>';
+  }).join('');
+  FONTS.forEach(function(f){
+    var done=function(){var el=$('[data-live="'+f.id+'"]');if(el)el.innerHTML=liveTag(f.css)};
+    if(document.fonts&&document.fonts.load)document.fonts.load('600 40px '+f.css,'0123456789').then(done,done);else done();
+  });
+}
+
+/* ---------- Суммы ---------- */
+var tickTimer=null,tickVal=11066350;
+function mStyle(extra){
+  return 'font-family:'+fcss(S.mFont)+';font-weight:'+S.mWeight+';letter-spacing:'+(S.mTrack/100)+'em;word-spacing:'+(S.mGap/100)+'em;font-optical-sizing:'+(S.mOpsz?'auto':'none')+';'+(extra||'');
+}
+function mCls(){return (S.mKop==='small'?'kop-small ':S.mKop==='muted'?'kop-muted ':'')+(S.mCur==='light'?'cur-light':'')}
+function renderMoney(){
+  var fv=S.mFigs==='prop'?'proportional-nums':'tabular-nums';
+  var names=['Баланс','Доход','Расход','Накопления'];
+  $('#mBig').className='mphone '+mCls();
+  $('#mBig').innerHTML=SUMS.map(function(s,i){
+    return '<div class="mline" style=\''+mStyle('font-size:'+S.mSize+'px;font-variant-numeric:'+fv)+'\'><small>'+names[i]+'</small><span class="amount">'+money(s[0],{plus:s[1]===1,always:s[1]===2})+'</span><span class="fit"></span></div>';
+  }).join('');
+  $$('#mBig .mline').forEach(function(l){
+    var a=$('.amount',l),fit=$('.fit',l),w=l.clientWidth;
+    if(S.mFit){var fs=S.mSize,g=0;while(a.getBoundingClientRect().width>w&&fs>14&&g++<90){fs-=1;l.style.fontSize=fs+'px'}
+      fit.textContent=fs<S.mSize?'уменьшено до '+fs+' px':'';fit.style.color='var(--lwarn)'}
+    else{var over=a.getBoundingClientRect().width>w+.5;fit.textContent=over?'не помещается':'';fit.style.color='var(--lbad)'}
+  });
+  var rows=[['Продукты',-128450],['Такси',-43000],['Зарплата',8523700],['Авиабилеты',-1864000],['Подписки',-29900],['Квартира',-11111111]];
+  function col(title,v){return '<div class="col '+mCls()+'"><h4>'+title+'</h4>'+rows.map(function(r){
+    return '<div class="r"><small>'+r[0]+'</small><span style=\''+mStyle('font-size:17px;font-weight:'+Math.min(S.mWeight,600)+';font-variant-numeric:'+v)+'\'>'+money(r[1],{plus:1,always:1})+'</span></div>'}).join('')+'</div>'}
+  $('#mCols').innerHTML=col('Табличные','tabular-nums')+col('Пропорциональные','proportional-nums');
+  $('#mTick').innerHTML='<div class="col '+mCls()+'"><h4>Табличные</h4><div class="tick" id="tk1" style=\''+mStyle('font-size:34px;font-variant-numeric:tabular-nums')+'\'></div></div>'+
+                        '<div class="col '+mCls()+'"><h4>Пропорциональные</h4><div class="tick" id="tk2" style=\''+mStyle('font-size:34px;font-variant-numeric:proportional-nums')+'\'></div></div>';
+  paintTick();
+  var f=FBY[S.mFont];
+  var css='.amount {\n  font-family: '+f.css.replace(/,/g,', ')+';\n  font-size: '+S.mSize+'px;\n  font-weight: '+S.mWeight+';\n  letter-spacing: '+(S.mTrack/100)+'em;\n'+(S.mGap?'  word-spacing: '+(S.mGap/100)+'em;      /* сужает пробел между тысячами */\n':'')+
+    '  font-variant-numeric: '+fv+';\n  font-optical-sizing: '+(S.mOpsz?'auto':'none')+';\n  white-space: nowrap;\n  line-height: 1.1;\n}\n'+
+    (S.mKop!=='same'?'.amount .kop { font-size: .62em;'+(S.mKop==='muted'?' color: var(--muted);':'')+' }\n':'')+
+    (S.mCur==='light'?'.amount .cur { font-weight: 400; color: var(--muted); }\n':'')+
+    '\n/* 110 663,50 ₽ → 110&nbsp;663<span class="kop">,50</span>&nbsp;<span class="cur">₽</span>\n   минус — знак «−» (U+2212), пробелы — неразрывные (U+00A0) */';
+  $('#mCss').textContent=css;
+  var lf=function(){var el=$('#mLive');if(el)el.innerHTML=liveTag(f.css)};
+  if(document.fonts&&document.fonts.load)document.fonts.load('600 40px '+f.css,'0123456789').then(lf,lf);else lf();
+}
+function paintTick(){var a=$('#tk1'),b=$('#tk2');if(!a)return;var h=money(tickVal,{always:1});a.innerHTML=h;b.innerHTML=h}
+
+/* ---------- Иконки ---------- */
+var ISETS=['lucide','phosphor','iconoir','tabler','ionicons','heroicons'];
+var STYLE_RU={regular:'обычные',thin:'тончайшие',light:'тонкие',bold:'жирные',fill:'заливка',duotone:'двухтонные',solid:'заливка',outline:'контур',filled:'заливка',sharp:'острые'};
+function renderIcons(){
+  var head='<tr><th>Категория</th><th>SF Symbols<small>только имена</small></th>'+ISETS.map(function(id){var s=D.icons[id];
+    return '<th>'+esc(s.name)+'<small>'+esc(s.version)+' · '+esc(s.license)+'</small>'+(s.styles.length>1?'<select data-s="st_'+id+'">'+s.styles.map(function(x){return '<option value="'+x+'"'+(S['st_'+id]===x?' selected':'')+'>'+(STYLE_RU[x]||x)+'</option>'}).join('')+'</select>':'')+'</th>'}).join('')+'</tr>';
+  function row(k,label){
+    var c=PAL.ios[k]||'#8AB0FF';
+    return '<tr><td>'+label+'</td><td><span class="sfname mono">'+SF[k]+'</span></td>'+ISETS.map(function(id){
+      var st=S['st_'+id],s=D.icons[id],svg=(s.icons[k]||{})[st];
+      if(!svg)return '<td><span class="none" title="В наборе нет такого значка в этом начертании">—</span></td>';
+      var stroke=s.kind==='stroke'&&!/solid|filled/.test(st);
+      return '<td><span class="gcell'+(S.iTile?' '+S.iTile:'')+(stroke?' isw':'')+'" style="--c:'+c+';--isw-d:'+(s.strokeDefault||2)+'" title="'+esc(s.names[k])+'">'+svg+'</span></td>'}).join('')+'</tr>';
+  }
+  var g=$('#iGrid');
+  g.style.setProperty('--isz',S.iSize+'px');
+  if(S.iStroke)g.style.setProperty('--isw',S.iStroke);else g.style.removeProperty('--isw');
+  g.innerHTML='<table class="grid">'+head+CATS.map(function(k){return row(k[0],k[1])}).join('')+'<tr class="divider"><td colspan="'+(ISETS.length+2)+'">Интерфейс</td></tr>'+UIKEYS.map(function(k){return row(k[0],k[1])}).join('')+'</table>';
+  $('#iNote').innerHTML='SF Symbols показать нельзя: Apple разрешает использовать их только в приложениях для своих систем, а не на сайтах. Поэтому в первом столбце — только имена символов, для ориентира. Остальные наборы открытые (MIT или ISC), значки лежат прямо в этой странице. Прочерк означает, что в наборе такого значка нет. Наведи курсор на значок, чтобы увидеть его имя.';
+}
+
+/* ---------- Эмодзи ---------- */
+var ESETS=['twemoji','openmoji','noto','fluent','fluentflat'];
+function renderEmoji(){
+  var g=$('#eGrid');g.style.setProperty('--esz',S.eSize+'px');
+  var tile=S.eTile?' tile':'';
+  var head='<tr><th>Категория</th><th>Системные<small>здесь: '+esc(SYS_EMOJI)+'</small></th>'+ESETS.map(function(id){var s=D.emojiSets[id];return '<th>'+esc(s.name)+'<small>'+esc(s.license)+'</small></th>'}).join('')+'</tr>';
+  g.innerHTML='<table class="grid">'+head+D.emojiList.map(function(e){
+    return '<tr><td>'+esc(e.label)+'</td><td><span class="ecell'+tile+'"><i class="emo">'+e.char+'</i></span></td>'+ESETS.map(function(id){
+      return '<td><span class="ecell'+tile+'"><img alt="'+esc(e.label)+'" loading="lazy" src="assets/emoji/'+id+'/'+e.code+'.svg"></span></td>'}).join('')+'</tr>'}).join('')+'</table>';
+  $('#eNote').innerHTML='Столбец «Системные» — это обычные символы: каждое устройство рисует их своим шрифтом. На iPhone это будут эмодзи Apple, сейчас здесь — '+esc(SYS_EMOJI)+'. Остальные столбцы — картинки из открытых наборов: они выглядят одинаково на любом устройстве.';
+  $('#eSide').innerHTML='Файлы эмодзи Apple класть в приложение нельзя (правила Apple, п. 4.5.6 и 5.2.5). Законный способ увидеть их на iPhone — ничего не привозить и писать обычные символы.';
+}
+
+/* ---------- Общее ---------- */
+var RENDER={variants:renderVariants,fonts:renderFonts,money:renderMoney,icons:renderIcons,emoji:renderEmoji,report:function(){}};
+function applyTheme(){
+  document.documentElement.setAttribute('data-lab-theme',S.theme);
+  $('#themeBtn').textContent='Тема: '+(S.theme==='dark'?'тёмная':'светлая');
+}
+function showTab(){
+  $$('.tab').forEach(function(t){t.classList.toggle('on',t.id==='tab-'+S.tab)});
+  $$('#tabsnav button').forEach(function(b){b.setAttribute('aria-selected',b.dataset.tab===S.tab?'true':'false')});
+  RENDER[S.tab]();
+}
+function syncControls(){
+  $$('[data-s]').forEach(function(el){var k=el.dataset.s;if(!(k in S))return;if(el.type==='checkbox')el.checked=!!S[k];else el.value=S[k]});
+  var fmt={mTrack:function(v){return (v/100).toFixed(3).replace(/0$/,'')+' em'},mGap:function(v){return v?(v/100).toFixed(2)+' em':'обычный'}};
+  $$('[data-o]').forEach(function(o){var k=o.dataset.o;o.textContent=fmt[k]?fmt[k](S[k]):S[k]});
+}
+function init(){
+  $('#vbtns').innerHTML=VORDER.map(function(id){return '<button type="button" data-v="'+id+'" title="'+esc(VARIANTS[id].full)+'">'+VARIANTS[id].name+'</button>'}).join('');
+  $('#vfloat').innerHTML=$('#vbtns').innerHTML+'<button type="button" data-th="1" aria-label="Сменить тему">Тема</button>';
+  $('#cmpSel').innerHTML='<option value="">не сравнивать</option>'+VORDER.map(function(id){var v=VARIANTS[id];return '<option value="'+id+'">'+(id==='now'?v.full:v.name+' — '+v.full)+'</option>'}).join('');
+  $$('select.fontsel').forEach(function(s){s.innerHTML=(s.classList.contains('nodef')?'':'<option value="">как в варианте</option>')+fopts('')});
+  var io='<option value="">как в варианте</option><optgroup label="Значки (SVG)">';
+  [['lucide','regular','Lucide'],['phosphor','light','Phosphor тонкие'],['phosphor','regular','Phosphor обычные'],['phosphor','fill','Phosphor с заливкой'],['phosphor','duotone','Phosphor двухтонные'],['iconoir','regular','Iconoir'],['tabler','outline','Tabler'],['ionicons','outline','Ionicons контур'],['ionicons','filled','Ionicons с заливкой'],['heroicons','outline','Heroicons']].forEach(function(o){io+='<option value="svg:'+o[0]+':'+o[1]+'">'+o[2]+'</option>'});
+  io+='</optgroup><optgroup label="Эмодзи"><option value="emoji:system">Системные ('+esc(SYS_EMOJI)+')</option>';
+  ESETS.forEach(function(id){io+='<option value="emoji:'+id+'">'+esc(D.emojiSets[id].name)+'</option>'});
+  $('#iconSel').innerHTML=io+'</optgroup>';
+  if(window.innerWidth>900)$('#moreDet').open=true;
+  applyTheme();syncControls();showTab();
+
+  document.addEventListener('input',onInput);
+  document.addEventListener('change',onInput);
+  $('#tabsnav').addEventListener('click',function(e){var b=e.target.closest('button[data-tab]');if(!b)return;S.tab=b.dataset.tab;save();showTab();window.scrollTo(0,0)});
+  $('#vbtns').addEventListener('click',function(e){var b=e.target.closest('button[data-v]');if(!b)return;S.variant=b.dataset.v;save();renderVariants()});
+  function flipTheme(){S.theme=S.theme==='dark'?'light':'dark';save();applyTheme();RENDER[S.tab]()}
+  $('#themeBtn').addEventListener('click',flipTheme);
+  $('#vfloat').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;if(b.dataset.th){flipTheme();return}S.variant=b.dataset.v;save();renderVariants()});
+  $('#resetBtn').addEventListener('click',function(){['textFont','numFont','heroW','hero','figs','kop','cur','icons'].forEach(function(k){S[k]=DEF[k]});save();syncControls();renderVariants()});
+  $('#phones').addEventListener('click',function(e){
+    var sw=e.target.closest('.sw');if(sw){var on=sw.classList.toggle('on');sw.setAttribute('aria-checked',on?'true':'false');return}
+    var sg=e.target.closest('.seg button');if(sg){$$('button',sg.parentNode).forEach(function(b){b.classList.toggle('on',b===sg)});return}
+    var tb=e.target.closest('.tb button');if(tb){var scr=tb.closest('.scr'),vid=(scr.className.match(/v-(\w+)/)||[])[1],c=cfgOf(vid);
+      $$('button',tb.parentNode).forEach(function(b){var on=b===tb;b.classList.toggle('on',on);b.innerHTML=ui(c,b.dataset.k,on)+'<span>'+b.textContent+'</span>'})}
+  });
+  $('#tickBtn').addEventListener('click',function(){
+    if(tickTimer){clearInterval(tickTimer);tickTimer=null;this.textContent='Запустить';return}
+    this.textContent='Остановить';
+    tickTimer=setInterval(function(){tickVal+=Math.round(Math.random()*190000)+1111;if(tickVal>199999999)tickVal=11066350;paintTick()},140);
+  });
+  var rz;window.addEventListener('resize',function(){clearTimeout(rz);rz=setTimeout(function(){if(S.tab==='variants')renderVariants()},150)});
+}
+function onInput(e){
+  var el=e.target,k=el.dataset&&el.dataset.s;if(!k||!(k in DEF))return;
+  var d=DEF[k];
+  S[k]=el.type==='checkbox'?el.checked:typeof d==='number'?+el.value:el.value;
+  save();syncControls();RENDER[S.tab]();
+}
+init();
+})();
+</script>
+</body>
+</html>
