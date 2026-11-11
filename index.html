@@ -1453,8 +1453,10 @@ const money=n=>{const a=Math.abs(r2(n))||0;return (n<0&&a?'−':'')+(Number.isIn
 const moneyR=money;
 /* a big sum in a narrow window (a page zoomed to 200 %) may go on a second line between its digit groups (<wbr>) — never inside one */
 const moneyW=n=>money(n).replace(/[\u00a0\u202f](?=\d)/g,'$&<wbr>');
-/* a date that doesn't read (damaged saved data) is shown as nothing instead of stopping the whole screen */
-const DF=o=>{const f=new Intl.DateTimeFormat('ru-RU',o);return {format:d=>isNaN(d)?'':f.format(d)}};
+/* a date that doesn't read (damaged saved data) is shown as nothing instead of stopping the whole screen.
+   Only the day is ever shown, never the time — so it is formatted as that calendar day in UTC: a formatter is made once and would
+   keep the time zone the app was opened in (after a flight the app left open showed every day one earlier than it is) */
+const DF=o=>{const f=new Intl.DateTimeFormat('ru-RU',{...o,timeZone:'UTC'});return {format:d=>isNaN(d)?'':f.format(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()))}};
 const monthName=DF({month:'long',year:'numeric'});
 const dayName=DF({weekday:'short',day:'numeric',month:'long'});
 const shortDate=DF({day:'numeric',month:'long'});
@@ -4306,11 +4308,15 @@ $('noteBtn').onclick=()=>{$('noteBtn').hidden=true;$('note').hidden=false;$('not
 $('date').value=iso(now);
 $('date').max=iso(now);
 $('date').addEventListener('input',()=>dateTouched=true);
+/* the day the screen was last drawn for. «now» itself is not asked: after a change of time zone its day reads differently — the new
+   day looked as if it had come already, and the date field, «Сегодня» and the month stayed on the old one (east: a record went to
+   yesterday; west: a record with no date picked was turned down as tomorrow's) */
+let shownDay=iso(now);
 function refreshToday(){
   const t=new Date();
-  if(iso(t)===iso(now)) return;
-  const wasCurrent=isCurrentMonth();
-  now=t;
+  if(iso(t)===shownDay) return;
+  const wasCurrent=state.y===+shownDay.slice(0,4)&&state.m===+shownDay.slice(5,7)-1;
+  now=t;shownDay=iso(t);
   /* a debt window open over midnight keeps the day picked in it */
   $('date').max=iso(now);$('dDate').max=iso(now);$('oDate').max=iso(now);if($('oweAddModal').hidden)$('oDate').value=iso(now);
   if(!dateTouched) $('date').value=iso(now);
