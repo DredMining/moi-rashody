@@ -2413,17 +2413,20 @@ function brokerOwed(raw){
 }
 function renderBroker(inc,out){
   const box=$('brokerBox'), pct=brokerPctOf();
+  /* a form here closed («Отмена», Enter, «Сохранить»): the focus goes back to the button that opened it, as with the limit —
+     not to the page's start, from where the keyboard and a screen reader began again (the rest of D-24) */
+  const back=id=>$(id)?.focus({preventScroll:true});
   if(state.editing==='pct'){
     box.innerHTML=`<form class="inline-edit" id="pForm" novalidate><input id="pInput" class="num" inputmode="decimal" placeholder="Например, 10" value="${vIn(pct)}" aria-label="Процент с дохода на брокер"><span>%</span><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="pCancel">Отмена</button><p class="err" role="alert" id="pErr" hidden></p></form><div class="row"><span>Новый процент — для доходов, записанных с этой минуты; прошлые месяцы не пересчитываются. 0 — ничего не откладывать.</span></div>`;
     $('pForm').onsubmit=async e=>{e.preventDefault();const raw=$('pInput').value, v=parseNum(raw.replace('%','')), er=$('pErr');
       if(!(v>=0&&v<=100)){er.textContent=v>100?'Процент — не больше 100.':'Введите процент числом, например 10 (0 — не откладывать).';er.hidden=false;fieldErr($('pInput'),er);$('pInput').focus({preventScroll:true});return}
       state.editing=null;
-      if(v===pct){render();return}
+      if(v===pct){render();back('pSet');return}
       const h0=state.settings.brokerPctHist, h=[...(Array.isArray(h0)&&h0.length?h0:[{pct,from:0}]),{pct:v,from:Date.now()}];
       /* the whole history is kept: dropping an old change would recount the incomes saved under it (past months). One entry per change made by hand */
       if(!await saveSettings({brokerPct:v,brokerPctHist:h})){reopen('pct','#pInput',raw);const x=$('pErr');if(x){x.textContent=saveErr(saveSettings.err);x.hidden=false}return}
-      toast(v?`На брокер ${fmt.format(v)}% — с новых доходов`:'Процент на брокер — 0: с новых доходов ничего не откладывается')};
-    $('pCancel').onclick=()=>{state.editing=null;render()};
+      toast(v?`На брокер ${fmt.format(v)}% — с новых доходов`:'Процент на брокер — 0: с новых доходов ничего не откладывается');back('pSet')};
+    $('pCancel').onclick=()=>{state.editing=null;render();back('pSet')};
     $('pInput').oninput=()=>$('pErr').hidden=true;
     return '';
   }
@@ -2433,10 +2436,10 @@ function renderBroker(inc,out){
     box.innerHTML=`<form class="inline-edit" id="oForm" novalidate><input id="oInput" class="num" inputmode="decimal" placeholder="${over?'0':'Например, 8000'}" value="${cur===null||over?'':vIn(Math.max(0,cur))}" aria-label="Долг себе на брокер сейчас"><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="oCancel">Отмена</button><p class="err" role="alert" id="oErr" hidden></p></form><div class="row"><span>${over?`Сейчас переплата ${moneyR(-cur)}: она уменьшит то, что положено с новых доходов. Оставьте поле пустым, чтобы её сохранить. `:''}Сколько вы сейчас должны себе на брокер. Дальше приложение само прибавит % с новых доходов, вычтет переводы на брокер и прибавит снова то, что выведено с брокерского счёта.</span></div>`;
     $('oForm').onsubmit=async e=>{e.preventDefault();const s=$('oInput').value.trim(), v=parseNum(s), er=$('oErr');
       /* nothing typed (an overpayment stays as it is): nothing changes; the same sum is still saved — it dates the check, so records saved before it count as included */
-      if(!s){state.editing=null;render();return}
+      if(!s){state.editing=null;render();back('oSet');return}
       if(!(v>=0)||v>MAX_ENTRY){er.textContent=v>MAX_ENTRY?BIG_ERR():NUM_ERR+'.';er.hidden=false;fieldErr($('oInput'),er);$('oInput').focus({preventScroll:true});return}
-      state.editing=null;if(!await saveSettings({brokerOwed:{amount:v,at:Date.now()}})){reopen('owed','#oInput',s);const x=$('oErr');if(x){x.textContent=saveErr(saveSettings.err);x.hidden=false}return}toast('Долг себе на брокер: '+money(v))};
-    $('oCancel').onclick=()=>{state.editing=null;render()};
+      state.editing=null;if(!await saveSettings({brokerOwed:{amount:v,at:Date.now()}})){reopen('owed','#oInput',s);const x=$('oErr');if(x){x.textContent=saveErr(saveSettings.err);x.hidden=false}return}toast('Долг себе на брокер: '+money(v));back('oSet')};
+    $('oCancel').onclick=()=>{state.editing=null;render();back('oSet')};
     $('oInput').oninput=()=>$('oErr').hidden=true;
     return '';
   }
