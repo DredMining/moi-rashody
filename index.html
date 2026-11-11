@@ -664,7 +664,7 @@ input.num::placeholder{font-family:var(--f-body)}
 .ghost.danger{color:var(--bad);border-color:var(--bad)}
 .bkgrid>button{min-width:0}
 /* «Очистить всё» asking: its long question takes a whole line of its own (in half of one it made the window taller than a small screen); «Загрузить копию» stays where it was — a second quick tap on the old place finds nothing */
-#wipeBk,#brokenDlBtn,#wipeBtn[data-armed]{grid-column:1/-1}
+#wipeBk,#prevBtn,#brokenDlBtn,#wipeBtn[data-armed]{grid-column:1/-1}
 /* «Очистить всё» asks: the warning and «Сначала скачать копию» are scrolled into view with the card's edge under them */
 #wipeBk{scroll-margin-bottom:16px}
 .extras{grid-column:1/-1;display:flex;gap:var(--sp-2);flex-wrap:wrap}
@@ -1244,6 +1244,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
           <button class="ghost" id="restoreBtn" aria-label="Загрузить резервную копию">Загрузить копию</button>
           <button class="ghost danger" id="wipeBtn">Очистить всё</button>
           <button class="primary" id="wipeBk" hidden>Сначала скачать копию</button>
+          <button class="ghost" id="prevBtn" hidden>Вернуть прежние данные</button>
           <button class="ghost" id="brokenDlBtn" hidden>Скачать повреждённые данные</button>
           <input type="file" id="restoreFile" accept=".json,application/json" hidden>
         </div>
@@ -1515,6 +1516,8 @@ let store=null;
 /* status: '' — fine; 'full' — the browser refused to keep the last change (memory full or blocked); 'broken' — the saved text didn't read */
 function localStore(){
   const KEY='expenses-v1', BK=KEY+'-broken';
+  /* the step-back copy (see prev) and the moment it was put aside; they go together */
+  const PV=KEY+'-prev', PA=PV+'-at', dropPrev=()=>{localStorage.removeItem(PV);localStorage.removeItem(PA)};
   let data={items:[],budget:0,debts:[],settings:{}}, raw=null, status='', kept=true, healed=0, healedSum=0, healedZ=0, healedT=0, cb=()=>{};
   const okDay=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&iso(isoToDate(s))===s, obj=x=>x&&typeof x==='object'&&!Array.isArray(x);
   const parse=s=>{const d=JSON.parse(s);if(!d||typeof d!=='object'||Array.isArray(d)||(d.items&&!Array.isArray(d.items))||(d.debts&&!Array.isArray(d.debts))||(d.settings&&typeof d.settings!=='object'))throw 0;
@@ -1552,7 +1555,7 @@ function localStore(){
     keepBrokenRaw(raw)}
   /* can this browser keep anything at all (blocked storage, private mode, full memory)? Full: the step-back copy (see prev) makes room first */
   const probe=()=>{localStorage.setItem(KEY+'-probe','1');localStorage.removeItem(KEY+'-probe')};
-  if(!status) try{probe()}catch(e){try{if(localStorage.getItem(KEY+'-prev')===null)throw e;localStorage.removeItem(KEY+'-prev');probe()}catch(x){status='full'}}
+  if(!status) try{probe()}catch(e){try{if(localStorage.getItem(PV)===null)throw e;dropPrev();probe()}catch(x){status='full'}}
   let last=raw;
   /* this copy's writes another open copy may not have seen yet. Each write names itself in the data: rev — the ids of the last 16 writes
      (old versions keep the field as it is). Two copies writing the same moment: the one written over doesn't find its ids in what the
@@ -1592,19 +1595,19 @@ function localStore(){
     if(gen!=null&&(data.gen||'')!==gen){tell(outer);const x=new Error('gen');x.code='gen';throw x}
     const b0=data, lost=own()?[]:mine, b=lost.length?fold(data,lost):data, d={...b,items:[...b.items],debts:[...b.debts]}, r=f(d);
     /* the damaged text had no room to be put aside: room may have come since (another tab freed it) — it is tried again first, the step-back copy giving up its place if need be */
-    if(status==='broken'&&!kept&&!all){kept=true;keepBrokenRaw(last);if(!kept){try{localStorage.removeItem(KEY+'-prev')}catch(e){}kept=true;keepBrokenRaw(last)}if(!kept){tell(outer);throw fail()}}
+    if(status==='broken'&&!kept&&!all){kept=true;keepBrokenRaw(last);if(!kept){try{dropPrev()}catch(e){}kept=true;keepBrokenRaw(last)}if(!kept){tell(outer);throw fail()}}
     const id=nid(), whole=(d.gen||'')!==(b0.gen||'');d.rev=[...revs(b).slice(-15),id];
     const s=JSON.stringify(d);
-    /* no room: the step-back copy (see prev) gives up its place first — nothing reads it, and what is saved now matters more */
-    try{localStorage.setItem(KEY,s)}catch(e){try{if(localStorage.getItem(KEY+'-prev')===null)throw e;localStorage.removeItem(KEY+'-prev');localStorage.setItem(KEY,s)}catch(x){status='full';tell(outer);throw fail()}}
+    /* no room: the step-back copy (see prev) gives up its place first — what is saved now matters more */
+    try{localStorage.setItem(KEY,s)}catch(e){try{if(localStorage.getItem(PV)===null)throw e;dropPrev();localStorage.setItem(KEY,s)}catch(x){status='full';tell(outer);throw fail()}}
     mine=[...(lost.length||whole?[]:mine),{id,at:Date.now(),b:whole?null:b0,d,whole}].slice(-16);
     data=d;last=s;status='';tell(outer);return r};
   /* another copy wrote over a write of this one: it goes back on top at once, drawn as another copy's save. The write stays synchronous
      (no Web Locks): a save waiting for its turn would let the page move the focus off a button it disabled meanwhile */
   const heal=()=>{if(!mine.length||own()||status)return false;try{mut(()=>{},{outer:true})}catch(e){if(e?.code!=='quota_exceeded'){console.error(e);tell(true)}}return true};
   /* the data being replaced stays one step back under its own key; no room for it — an older step-back copy goes, it would pass for this one */
-  const prev=f=>{let k=false;try{const r=localStorage.getItem(KEY);if(r){localStorage.setItem(KEY+'-prev',r);k=true}}catch(e){try{localStorage.removeItem(KEY+'-prev')}catch(x){}}
-    try{return f()}catch(e){if(k)try{localStorage.removeItem(KEY+'-prev')}catch(x){}throw e}};
+  const prev=f=>{let k=false;try{const r=localStorage.getItem(KEY);if(r){localStorage.setItem(PV,r);k=true;try{localStorage.setItem(PA,String(Date.now()))}catch(e){}}}catch(e){try{dropPrev()}catch(x){}}
+    try{return f()}catch(e){if(k)try{dropPrev()}catch(x){}throw e}};
   addEventListener('storage',e=>{if(e.key===KEY){fresh();if(!heal())tell(true)}});
   const nid=()=>'l'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
   /* the changes, made on one copy of the data. batch(): several of them in one write — a debt and its record are kept both, or neither */
@@ -1650,7 +1653,22 @@ function localStore(){
       catch(e){if(status==='full'&&was!=='full'){status=was;tell();e.big=true}throw e}},
     /* a fresh start: the step-back copy, the damaged text and its «Скрыть» go too — nothing of the old data stays in this browser */
     async clearAll(settings){mut(d=>{d.items=[];d.debts=[];d.settings=settings;d.gen=nid()},{all:true});kept=true;
-      try{[KEY+'-prev',KEY+'-hide-broken',...broken()].forEach(k=>localStorage.removeItem(k))}catch(e){}tell()}
+      try{[PV,PA,KEY+'-hide-broken',...broken()].forEach(k=>localStorage.removeItem(k))}catch(e){}tell()},
+    /* the data «Загрузить копию» replaced stay one step back — and can come back («Вернуть прежние данные», owner's choice 11.11.2026).
+       prevInfo: what is there — records, debts, when it was put aside (0: put aside before that moment was kept); null — nothing, or it doesn't read */
+    prevInfo(){try{const r=localStorage.getItem(PV), d=r&&JSON.parse(r);if(!obj(d)||!Array.isArray(d.items))return null;
+      return {items:d.items.filter(obj).length,debts:Array.isArray(d.debts)?d.debts.filter(obj).length:0,at:+localStorage.getItem(PA)||0}}catch(e){return null}},
+    /* they come back as a whole new set of data (gen), read as on start (parse — its counts of mended records are for the start only);
+       what was on screen goes one step back in their place, so the same button undoes it. No room to write them: nothing changes and
+       the step-back copy stays (mut may have dropped it to make room — it is put back) */
+    async prevBack(){
+      let r=null, cur=null, at=null;try{r=localStorage.getItem(PV);cur=localStorage.getItem(KEY);at=localStorage.getItem(PA)}catch(e){}
+      const h=[healed,healedSum,healedZ,healedT];let n;
+      try{if(!r)throw 0;n=parse(r)}catch(e){throw Object.assign(new Error('prev'),{code:'no_prev'})}finally{[healed,healedSum,healedZ,healedT]=h}
+      try{mut(d=>{d.items=n.items;d.debts=n.debts;d.settings=n.settings;d.gen=nid()})}
+      catch(e){try{if(localStorage.getItem(PV)===null){localStorage.setItem(PV,r);if(at)localStorage.setItem(PA,at)}}catch(x){}throw e}
+      try{if(cur){localStorage.setItem(PV,cur);localStorage.setItem(PA,String(Date.now()))}else dropPrev()}catch(e){try{dropPrev()}catch(x){}}
+      tell()}
   };
 }
 function initStore(){
@@ -4709,7 +4727,7 @@ function nextMonth(){if(isCurrentMonth())return;state.m++;if(state.m>11){state.m
    A message with «Отменить» stays on the tab it came on: on another one it would lie over that tab's rows and links, and a tap
    meant for them («⇄ Перевод», a record's sum) would press «Отменить» and take the new record away. Other messages stay */
 function setTab(t){if(t!==state.tab&&$('toast').querySelector('[data-u]'))toastOff();if(!$('sheet').hidden)closeSheet();if(!$('zakatSheet').hidden)closeZakat();if(t==='ledger'){state.y=now.getFullYear();state.m=now.getMonth()}state.tab=t;state.editing=null;state.editItem=null;toTop=true;
-  $('debtAddModal').hidden=true;$('oweAddModal').hidden=true;if(!$('bkModal').hidden){$('bkModal').hidden=true;wipeReset();restoreReset()}
+  $('debtAddModal').hidden=true;$('oweAddModal').hidden=true;if(!$('bkModal').hidden){$('bkModal').hidden=true;wipeReset();restoreReset();prevReset()}
   /* the transfer and the check of a sum are windows of «Деньги» (oPay opens the transfer and then goes there) */
   if(t!=='money'){state.xferOpen=false;state.recon=null}
   render();$('scroller').scrollTo(0,0);try{history.replaceState(null,'',t==='ledger'?'#':'#'+t)}catch(e){}}
@@ -4805,7 +4823,7 @@ function renderDataBox(){
   $('exportBtn').textContent='CSV за '+monthLbl().split(' ')[0];$('exportBtn').setAttribute('aria-label','Скачать CSV за '+monthLbl());
   if(!state.ready||!store) return '';
   const lb=+state.settings.lastBackup||0;
-  $('brokenDlBtn').hidden=!store.broken().length&&store.status!=='broken';
+  $('brokenDlBtn').hidden=!store.broken().length&&store.status!=='broken';prevLabel();
   /* three lines: where the records are, what to do once a week, when the last copy was */
   $('bkLast').textContent=lb?' · '+dShort.format(new Date(lb)).replace('.',''):' · копии нет';$('bkLast').className=!lb||Date.now()-lb>7*864e5?'old':'';
   $('storeNote').innerHTML=`<span>Записи хранятся только на этом телефоне.</span><span>Раз в неделю скачивайте копию: ${BK_SAFE} — так она уцелеет, даже если потерять телефон.</span><span>${lb?'Последняя копия: '+esc(dayText(iso(new Date(lb)))):'Копию вы ещё не скачивали'}</span>`;
@@ -4831,7 +4849,7 @@ const wipeReset=()=>{const b=$('wipeBtn');clearTimeout(wipeT);delete b.dataset.a
 $('wipeBk').onclick=()=>{if(Date.now()-$('wipeBtn').dataset.armed<600)return;wipeReset();$('backupBtn').onclick()};
 $('brokenDlBtn').onclick=brokenDl;
 /* a closed window drops both questions: «Очистить всё» and a picked copy waiting for its second tap */
-const closeBk=()=>{$('bkModal').hidden=true;wipeReset();restoreReset();dlgSync()};
+const closeBk=()=>{$('bkModal').hidden=true;wipeReset();restoreReset();prevReset();dlgSync()};
 $('bkOpen').onclick=()=>{$('bkModal').hidden=false;dlgSync()};
 $('bkModal').querySelectorAll('[data-bkclose]').forEach(b=>b.onclick=closeBk);
 $('wipeBtn').onclick=async()=>{
@@ -4926,6 +4944,23 @@ function normBackup(d){
 let restorePend=null, restoreT;
 const restoreReset=()=>{const b=$('restoreBtn');clearTimeout(restoreT);restorePend=null;b.textContent='Загрузить копию';b.style.color='';b.setAttribute('aria-label','Загрузить резервную копию')};
 const nRec=d=>`${d.items.length} ${plural(d.items.length,'запись','записи','записей')}, ${d.debts.length} ${plural(d.debts.length,'долг','долга','долгов')}`;
+/* «Вернуть прежние данные» (owner's choice, 11.11.2026): there while the data «Загрузить копию» replaced are kept one step back
+   (store.prevInfo) — with the day they were replaced. The first tap says what comes back, the second does it; what is on screen
+   goes one step back in their place, so the button stays and undoes it */
+let prevPend=0, prevT;
+const prevN=p=>`${p.items} ${plural(p.items,'запись','записи','записей')}, ${p.debts} ${plural(p.debts,'долг','долга','долгов')}`;
+const prevLabel=()=>{const b=$('prevBtn'), p=store?.prevInfo();b.hidden=!p;if(p&&!prevPend)b.textContent='Вернуть прежние данные'+(p.at?' · заменены '+dShort.format(new Date(p.at)).replace('.',''):'')};
+const prevReset=()=>{clearTimeout(prevT);prevPend=0;$('prevBtn').style.color='';prevLabel()};
+$('prevBtn').onclick=async()=>{
+  const b=$('prevBtn'), p=store.prevInfo();if(!p){prevReset();return}
+  if(!prevPend){restoreReset();wipeReset();prevPend=Date.now();b.style.color='var(--bad)';b.textContent=`Прежние данные: ${prevN(p)}. Нынешние заменятся — нажмите ещё раз`;
+    say(b.textContent);b.scrollIntoView?.({block:'center'});prevT=setTimeout(prevReset,15000);return}
+  /* a quick double tap is not a confirmation */
+  if(Date.now()-prevPend<600) return;
+  prevReset();state.editing=null;state.recon=null;state.xferOpen=false;
+  try{await store.prevBack()}catch(x){toast(x?.code==='no_prev'?'Прежние данные не читаются — вернуть их нельзя. Текущие данные не изменились.':saveErr(x));prevLabel();return}
+  toast('Прежние данные возвращены: '+prevN(p));
+};
 /* the store redraws the screen itself; a drawing error after a good save is not a failed restore */
 async function applyRestore(d){
   state.editing=null;state.recon=null;state.xferOpen=false;
