@@ -4675,29 +4675,43 @@ $('toHistory').onclick=()=>{state.accFilter=null;state.scopeFilter='';setTab('hi
    under the finger and follows it (the same spring, a stiff one), the tab under it lights up; letting go opens that tab. A quick tap is the
    plain press it was. The press that the browser sends after the finger is lifted is dropped: the tab is already chosen. */
 var tabCapGo=null;
-(()=>{const nav=document.querySelector('.tabs'),cap=nav.querySelector('.tab-cap'),tabs=[...nav.querySelectorAll('[role="tab"]')],N=tabs.length,calm=matchMedia('(prefers-reduced-motion: reduce)');
+/* How it is played: a tap's whole flight is worked out at once (the spring, 120 steps a second) and handed to the browser as one animation —
+   it runs off the page's own thread, at the screen's full rate (an iPhone gives a script 60 frames a second, an animation — all 120), and it
+   starts at the tap itself, before the tab's page is drawn, so drawing the page neither delays nor jolts it. A tap in mid-flight reads where
+   the capsule is and how fast, and flies on from there. Under a finger the spring is stepped frame by frame instead (it follows the finger). */
+(()=>{const nav=document.querySelector('.tabs'),cap=nav.querySelector('.tab-cap'),tabs=[...nav.querySelectorAll('[role="tab"]')],N=tabs.length,calm=matchMedia('(prefers-reduced-motion: reduce)'),H=1/120;
   const chosen=()=>Math.max(0,tabs.findIndex(b=>b.getAttribute('aria-selected')==='true'));
-  let p=chosen(),T=p,v=0,raf=0,last=0,d=null,eat=0;
-  const draw=()=>{const c=p+.5,s=Math.max(.92,Math.min(1+.42*(1-Math.exp(-Math.abs(v)/16)),2*(c+.04),2*(N+.04-c)));
-    cap.style.transform='translate3d('+((c-s/2)*100).toFixed(2)+'%,0,0) scale('+s.toFixed(4)+','+(1-.16*(s-1)).toFixed(4)+')'};
-  const tick=t=>{const held=!!(d&&d.on),K=held?2200:330,D=held?94:28;let dt=Math.min((t-last)/1000,.034);last=t;
-    for(;dt>0;dt-=.004){const h=Math.min(dt,.004);v+=(-K*(p-T)-D*v)*h;p+=v*h}
+  let p=chosen(),T=p,v=0,raf=0,last=0,d=null,eat=0,fly=null;
+  const shape=(p,v)=>{const c=p+.5,s=Math.max(.92,Math.min(1+.42*(1-Math.exp(-Math.abs(v)/16)),2*(c+.04),2*(N+.04-c)));
+    return 'translate3d('+((c-s/2)*100).toFixed(2)+'%,0,0) scale('+s.toFixed(4)+','+(1-.16*(s-1)).toFixed(4)+')'};
+  const draw=()=>{cap.style.transform=shape(p,v)};
+  const step=(K,D,dt)=>{for(;dt>1e-6;dt-=.002){const h=Math.min(dt,.002);v+=(-K*(p-T)-D*v)*h;p+=v*h}};
+  /* a flight under way is stopped where it is: p and v are taken from its table by the time it has run */
+  const land=()=>{if(!fly)return;const f=fly;fly=null;let t=0;try{t=+f.a.currentTime||0}catch(e){}const q=f.q[Math.min(f.q.length-1,Math.max(0,Math.round(t/1000/H)))];
+    p=q[0];v=q[1];f.a.onfinish=null;try{f.a.cancel()}catch(e){}};
+  const flow=()=>{land();if(calm.matches||!cap.animate){p=T;v=0;draw();return}
+    const q=[[p,v]];for(let n=0;n<180&&(Math.abs(p-T)>.002||Math.abs(v)>.02);n++){step(330,28,H);q.push([p,v])}
+    const p0=q[0];p=T;v=0;draw();if(q.length<2)return;q.push([T,0]);
+    const a=cap.animate(q.map(x=>({transform:shape(x[0],x[1])})),{duration:(q.length-1)*H*1000,easing:'linear'});fly={a,q};p=p0[0];v=p0[1];
+    a.onfinish=()=>{if(fly&&fly.a===a){fly=null;p=T;v=0}}};
+  tabCapGo=i=>{if(d&&d.on)return;if(i!==T){T=i;flow()}};
+  draw();
+  const tick=t=>{if(!d||!d.on){raf=0;return}step(2200,94,Math.min((t-last)/1000,.034));last=t;
     if(Math.abs(p-T)<.002&&Math.abs(v)<.02){p=T;v=0;raf=0}else raf=requestAnimationFrame(tick);draw()};
   const run=()=>{if(calm.matches){p=T;v=0;draw();return}if(!raf){last=performance.now();raf=requestAnimationFrame(tick)}};
-  tabCapGo=i=>{if(d&&d.on)return;if(i!==T){T=i;run()}};
-  draw();
   const aim=()=>{const g=d.g,i=Math.max(0,Math.min(N-1,Math.floor((d.lx-g.l)/g.w)));T=Math.max(0,Math.min(N-1,(d.lx-g.l)/g.w-.5));
     if(i!==d.i){d.i=i;tabs.forEach((b,n)=>b.classList.toggle('hot',n===i))}run()};
-  const lift=()=>{if(!d||d.on)return;const r=nav.getBoundingClientRect(),pad=nav.clientLeft+6;d.on=true;d.g={l:r.left+pad,w:(r.width-2*pad)/N};
+  const lift=()=>{if(!d||d.on)return;const r=nav.getBoundingClientRect(),pad=nav.clientLeft+6;land();d.on=true;d.g={l:r.left+pad,w:(r.width-2*pad)/N};
     nav.classList.add('drag');try{nav.setPointerCapture(d.id)}catch(e){}aim()};
   const drop=go=>{if(!d)return;clearTimeout(d.t);const on=d.on,i=d.i;d=null;if(!on)return;
-    nav.classList.remove('drag');tabs.forEach(b=>b.classList.remove('hot'));
-    eat=0;if(go&&tabs[i]&&tabs[i].getAttribute('aria-selected')!=='true')tabs[i].click();eat=Date.now()+400;T=chosen();run()};
+    nav.classList.remove('drag');tabs.forEach(b=>b.classList.remove('hot'));T=-1;
+    eat=0;if(go&&tabs[i]&&tabs[i].getAttribute('aria-selected')!=='true')tabs[i].click();eat=Date.now()+400;if(T<0){T=chosen();flow()}};
   nav.addEventListener('pointerdown',e=>{if(d||e.button>0||e.isPrimary===false)return;d={id:e.pointerId,x:e.clientX,lx:e.clientX,i:-1,on:false,t:setTimeout(lift,200)}});
   nav.addEventListener('pointermove',e=>{if(!d||e.pointerId!==d.id)return;d.lx=e.clientX;if(d.on)aim();else if(Math.abs(e.clientX-d.x)>8)lift()},{passive:true});
   addEventListener('pointerup',e=>{if(d&&e.pointerId===d.id)drop(true)});
   addEventListener('pointercancel',e=>{if(d&&e.pointerId===d.id)drop(false)});
-  nav.addEventListener('click',e=>{if(Date.now()<eat){e.stopPropagation();e.preventDefault()}},true)})();
+  /* a press on a tab: the dropped one after a carry; any other sends the capsule off at once, ahead of the page's drawing */
+  nav.addEventListener('click',e=>{if(Date.now()<eat){e.stopPropagation();e.preventDefault();return}const i=tabs.indexOf(e.target.closest('[role="tab"]'));if(i>=0)tabCapGo(i)},true)})();
 /* the tab bar from the keyboard: ← → Home End go along it (as it is drawn) and open that tab */
 document.querySelector('.tabs').addEventListener('keydown',e=>{const b=[...document.querySelectorAll('.tabs [role="tab"]')], i=b.indexOf(document.activeElement), j={ArrowLeft:i-1,ArrowRight:i+1,Home:0,End:b.length-1}[e.key];
   if(i<0||j===undefined)return;e.preventDefault();const n=b[(j+b.length)%b.length];n.click();n.focus()});
