@@ -2203,7 +2203,9 @@ function repClean(r){
   /* hand: what he changed the result by himself in «Записи» (repHand) — a number, or not there */
   if(Math.abs(n(r.hand))>=0.005)o.hand=n(r.hand);else delete o.hand;
   if(p&&typeof p==='object'&&!Array.isArray(p)) o.partner={ids:Array.isArray(p.ids)?p.ids.filter(i=>typeof i==='string'):[],
-    names:Array.isArray(p.names)?p.names.filter(x=>typeof x==='string'&&x.trim()):[],amount:n(p.amount),ret:n(p.ret),left:n(p.left)};
+    names:Array.isArray(p.names)?p.names.filter(x=>typeof x==='string'&&x.trim()):[],amount:n(p.amount),ret:n(p.ret),left:n(p.left),
+    /* gone: his debts deleted on «Долги» since, as they were then (repGone) */
+    ...(Array.isArray(p.gone)&&p.gone.some(g=>g&&typeof g==='object')?{gone:p.gone.filter(g=>g&&typeof g==='object'&&!Array.isArray(g)).map(g=>({amount:n(g.amount),ret:n(g.ret),left:n(g.left)}))}:{})};
   return o;
 }
 const repList=()=>Array.isArray(state.settings.tripReports)?state.settings.tripReports.map(repClean).filter(Boolean):[];
@@ -2261,8 +2263,9 @@ const repTopUp=r=>{const x=state.items.find(i=>TRIP_END.includes(catOf(i.cat).id
   return x&&e?r2(sum(state.items.filter(i=>tripSync(i)&&catOf(i.cat).id==='trip_extra'&&(i.created||0)>e&&(i.created||0)<(x.created||0)))):0};
 function repLines(r){
   const p=r.partner, ds=p?(p.ids||[]).map(id=>state.debts.find(d=>d.id===id)):[];
-  /* the partner's debts as they are now; one of them deleted since — as they were that day */
-  const pr=p&&(ds.length&&ds.every(Boolean)?{ret:r2(ds.reduce((s,d)=>s+(+d.returned||0),0)),left:r2(ds.reduce((s,d)=>s+debtLeft(d),0))}:{ret:+p.ret||0,left:+p.left||0});
+  /* the partner's debts as they are now. One deleted on «Долги» since is kept as it was when it went (gone, see repGone) — the others
+     still show what came back; it used to freeze the line for all of them. A report whose debt went before that was kept: as that day */
+  const gn=p?.gone||[], pr=p&&((ds.length||gn.length)&&ds.every(Boolean)?{ret:r2(ds.reduce((s,d)=>s+(+d.returned||0),0)+gn.reduce((s,g)=>s+g.ret,0)),left:r2(ds.reduce((s,d)=>s+debtLeft(d),0)+gn.reduce((s,g)=>s+g.left,0))}:{ret:+p.ret||0,left:+p.left||0});
   const cats=[...r.cats.map(([c,v])=>[catOf(c).name,+v||0]),...(+r.over>0?[['Перерасход на начало',+r.over]]:[])], spent=r2(cats.reduce((s,x)=>s+x[1],0)), L=+r.left||0;
   /* what a balance typed in the trip corrected: the result less what came in and went out (0 in a report of a trip without one);
      of it, his own money put in for an overspend then («Докинул на командировку» saved with that balance) is a line of its own */
@@ -4009,14 +4012,22 @@ const recsShift=recs=>{const ws=state.settings.wallets||{};
 /* the «закят с долга» its returns and its садака brought: with them gone it goes too (as delItem does for one return) */
 const debtZx=d=>(zset().extra||[]).filter(x=>x.debt===d.id);
 const debtZxAsk=d=>{const v=r2(sum(debtZx(d)));return v>=0.01?` Закят с долга (${money(v)}) тоже снимется.`:''};
+/* a partner's debt deleted on «Долги» (the trip expense it came with stays): in its trip's report it is kept as it was at that moment —
+   out of the debts read live (ids), into gone. The line «Напарники должны» used to freeze for all of them once one debt was gone:
+   «ещё не вернул 5 000 ₽», whatever the other partner returned since. True when a report was changed (the «Отменить» puts it back) */
+function repGone(o,d){
+  const rs=o.settings().tripReports;if(!Array.isArray(rs)||!d.trip||d.mine) return false;
+  let ch=false;const n=rs.map(y=>{const r=repClean(y), p=r?.partner;if(!p||!p.ids.includes(d.id)) return y;ch=true;
+    return {...r,partner:{...p,ids:p.ids.filter(i=>i!==d.id),gone:[...(p.gone||[]),{amount:r2(+d.amount||0),ret:r2(+d.returned||0),left:debtLeft(d)}]}}});
+  if(ch) o.patchSettings({tripReports:n});return ch}
 /* keep: only the debt goes, its records stay on the accounts (pinned to it by id, so they don't join another debt of the same name) */
 async function delDebt(id,keep){
   const d=state.debts.find(x=>x.id===id), recs=d&&!keep?debtRecs(d):[], sh=recsShift(recs), old=d&&keep?debtRecs(d).filter(i=>!i.debt):[];state.editing=null;
-  const xs=recs.length?debtZx(d):[], zk0=zLedger(zset()).owed, js=x=>JSON.stringify(x);
-  if(old.length) await store.batch(o=>{o.removeDebt(id);old.forEach(i=>o.update(i.id,{debt:id}))});
-  else await store.batch(o=>{o.removeDebt(id,recs.map(i=>i.id));if(xs.length){const z=zset();o.patchSettings({zakat:{...z,extra:(z.extra||[]).filter(x=>x.debt!==id)}})}});
+  const xs=recs.length?debtZx(d):[], zk0=zLedger(zset()).owed, js=x=>JSON.stringify(x), rp0=state.settings.tripReports;let rg=false;
+  if(old.length) await store.batch(o=>{o.removeDebt(id);old.forEach(i=>o.update(i.id,{debt:id}));rg=repGone(o,d)});
+  else await store.batch(o=>{o.removeDebt(id,recs.map(i=>i.id));if(xs.length){const z=zset();o.patchSettings({zakat:{...z,extra:(z.extra||[]).filter(x=>x.debt!==id)}})}if(d)rg=repGone(o,d)});
   const zn=xs.length?` · закят с долга (${money(r2(sum(xs)))}) снят`+zkMoved(zk0):'';
-  return d?[()=>store.batch(o=>{o.restoreDebt(d,recs);if(xs.length){const z=zset(), e=z.extra||[];o.patchSettings({zakat:{...z,extra:[...e,...xs.filter(x=>!e.some(y=>js(y)===js(x)))]}})}}),
+  return d?[()=>store.batch(o=>{o.restoreDebt(d,recs);if(rg)o.patchSettings({tripReports:rp0});if(xs.length){const z=zset(), e=z.extra||[];o.patchSettings({zakat:{...z,extra:[...e,...xs.filter(x=>!e.some(y=>js(y)===js(x)))]}})}}),
     (recs.length?'Долг удалён вместе с записями: ':'Долг удалён: ')+d.name+(keep?' · записи на счетах остались':sh?' · '+sh.replace(/станет/g,'теперь'):'')+zn]:null;
 }
 const debtAsk=id=>{const d=state.debts.find(x=>x.id===id), r=d?debtRecs(d):[], sh=recsShift(r), zq=r.length?debtZxAsk(d):'';
