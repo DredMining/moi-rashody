@@ -15,7 +15,7 @@ export const DEFAULTS = Object.freeze({
   battery: 100,
   cell: 4,                 // деления сотовой сети, 0…4
   wifi: true,
-  density: true,           // плотность пикселей 3x внутри экрана
+  density3x: false,        // плотность пикселей 3x внутри экрана; выключена: с ней промахивается стрелка «Выбрать элемент»
   appUrl: '',              // пусто — адрес приложения ищется автоматически
   panel: true,
 });
@@ -31,7 +31,7 @@ const VALID = {
   battery: v => Number.isInteger(v) && v >= 0 && v <= 100,
   cell: v => Number.isInteger(v) && v >= 0 && v <= 4,
   wifi: v => typeof v === 'boolean',
-  density: v => typeof v === 'boolean',
+  density3x: v => typeof v === 'boolean',
   appUrl: v => typeof v === 'string' && v.length <= 300,
   panel: v => typeof v === 'boolean',
 };
