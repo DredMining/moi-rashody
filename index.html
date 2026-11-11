@@ -4968,7 +4968,10 @@ $('exportBtn').onclick=async()=>{
   const applyTheme=t=>{document.documentElement.setAttribute('data-theme',t);const b=$('themeToggle');if(b){b.textContent=t==='dark'?'☀️':'🌙'}};
   applyTheme(document.documentElement.getAttribute('data-theme')||(mq.matches?'dark':'light'));
   mq.addEventListener('change',e=>{try{if(!localStorage.getItem(KEY))applyTheme(e.matches?'dark':'light')}catch(x){}});
-  $('themeToggle').onclick=()=>{const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';try{localStorage.setItem(KEY,next)}catch(e){}applyTheme(next)};
+  /* the view picked is the one the phone's look gives: the choice is not kept, the app follows the phone again (owner's choice, 11.11.2026) —
+     any press used to fix the view for good, with no way back to «как на телефоне». A different view is kept till he switches back */
+  $('themeToggle').onclick=()=>{const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+    try{if(next===(mq.matches?'dark':'light'))localStorage.removeItem(KEY);else localStorage.setItem(KEY,next)}catch(e){}applyTheme(next)};
 })();
 renderChips();
 render();
