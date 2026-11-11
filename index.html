@@ -1780,6 +1780,10 @@ const monthLbl=(y=state.y,m=state.m)=>monthName.format(new Date(y,m,1)).replace(
 const inMonth=(y,m)=>state.items.filter(i=>typeof i.date==='string'&&i.date.startsWith(monthKey(y,m)));
 const daysInMonth=()=>new Date(state.y,state.m+1,0).getDate();
 const isCurrentMonth=()=>state.y===now.getFullYear()&&state.m===now.getMonth();
+/* «›» on Записи and Итоги: a later month opens while it is not ahead of today — or holds a record. One dated tomorrow in the next month
+   (a copy made further east, the time zone moved west on the last day of a month) moved the accounts, but could not be seen
+   till that month came */
+const canNext=()=>{const k=monthKey();return state.y*12+state.m<now.getFullYear()*12+now.getMonth()||state.items.some(i=>typeof i.date==='string'&&i.date.slice(0,7)>k)};
 /* a typed balance (an account, trip money) already holds every record saved before it and every record
    dated before the day it was typed — a record added later «задним числом» doesn't move it. «Очистить всё» zeros were never typed: saved-before only.
    The broker debt goes by the moment of saving only (brokerOwed) */
@@ -3707,7 +3711,7 @@ function renderList(items){
   renderRecent();
   renderCompare();
   $('hTitle').textContent=$('sTitle').textContent=monthLbl();
-  $('hNext').disabled=$('sNext').disabled=isCurrentMonth();
+  $('hNext').disabled=$('sNext').disabled=!canNext();
   const list=$('list'), af=state.accFilter||null, sf=state.scopeFilter||'';histItems=items;
   $('scopeFilter').innerHTML=SF.map(([v,n])=>`<button type="button" data-sf="${v}" aria-pressed="${(histTo??sf)===v}">${n}</button>`).join('');
   $('scopeFilter').querySelectorAll('[data-sf]').forEach(b=>b.onclick=()=>histGo(SF.findIndex(([v])=>v===b.dataset.sf)));
@@ -4728,10 +4732,10 @@ $('form').onsubmit=e=>{
   toastOff();
   if(hit){state.pend.cat=hit.id;afterCat()} else stepCat();
 };
-/* ‹ › on Записи and Итоги: one month back or on (never past this month) */
+/* ‹ › on Записи and Итоги: one month back or on (past this month only into one that holds a record — canNext) */
 function prevMonth(){state.m--;if(state.m<0){state.m=11;state.y--}render()}
 /* back on this month «›» turns off under the keyboard's focus: it goes to «‹» of the same bar, not to the page's start */
-function nextMonth(){if(isCurrentMonth())return;state.m++;if(state.m>11){state.m=0;state.y++}const b=document.activeElement;render();
+function nextMonth(){if(!canNext())return;state.m++;if(state.m>11){state.m=0;state.y++}const b=document.activeElement;render();
   if(b&&b.disabled&&/^[hs]Next$/.test(b.id))$(b.id[0]+'Prev').focus({preventScroll:true})}
 /* a tab opens at its top (the only redraw that doesn't keep the scroll) */
 /* the windows of the tab left behind close with it (a toast's «Показать» can switch tabs under one): an unseen window would stay on top and keep everything else inert.
