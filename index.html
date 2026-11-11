@@ -103,7 +103,7 @@ img{max-width:100%}
   /* the glass tab bar: its tint over the blurred page (and the denser one where the browser can't blur), the light on its rim,
      the picked tab's capsule — its tint and the soft glow around it (the app's own wine, never a new colour) */
   --glass:rgb(48 38 43 / .56); --glass-solid:rgb(30 24 28 / .94); --glass-rim:rgb(255 255 255 / .16);
-  --cap-tint:rgb(240 140 160 / .2); --cap-glow:rgb(178 58 85 / .42); --ico-glow:rgb(240 140 160 / .5);
+  --cap-tint:rgb(240 140 160 / .2); --cap-glow:rgb(178 58 85 / .42);
   /* the bar's place: its height, its gap to the screen's edge (over the home indicator on an iPhone), the room the page keeps under itself for it */
   --tabbar-h:64px; --tabbar-gap:max(10px,calc(env(safe-area-inset-bottom,0px) - 14px),calc(var(--simulator-safe-bottom,0px) - 14px));
   --tabbar-room:calc(var(--tabbar-h) + var(--tabbar-gap) + 6px);
@@ -121,7 +121,7 @@ img{max-width:100%}
   --raised:var(--surface); --seg-ring:var(--field-line); --seg-id-ring:0 0 #0000; --track:var(--line);
   --toast-bg:var(--ink); --toast-ink:var(--bg); --toast-ring:0 0 #0000;
   --glass:rgb(38 50 78 / .56); --glass-solid:rgb(21 30 48 / .94);
-  --cap-tint:rgb(91 140 255 / .22); --cap-glow:rgb(59 107 224 / .42); --ico-glow:rgb(91 140 255 / .5);
+  --cap-tint:rgb(91 140 255 / .22); --cap-glow:rgb(59 107 224 / .42);
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:var(--fs-md);line-height:1.5;font-variant-numeric:tabular-nums}
@@ -154,37 +154,37 @@ button{cursor:pointer}
 
 /* Tabs — a bar of glass (Liquid Glass) floating over the page's end */
 /* The bar: a capsule of tinted glass. The page behind it is blurred and made a little richer; a thin light rim, a highlight along the
-   top edge and a faint one along the bottom give it thickness; the shadow lifts it off the page. Where the browser can't blur
-   what is behind (no backdrop-filter) the tint is nearly solid, so the labels stay readable. */
+   top edge, a reflection from the top-left corner and a faint one at the bottom-right give it thickness; the shadow lifts it off the page.
+   Where the browser can't blur what is behind (no backdrop-filter) the tint is nearly solid, so the labels stay readable.
+   Kept cheap for the phone: one blurred layer, nothing clipped, no filters on what is inside. */
 .tabs{position:absolute;left:max(12px,calc(env(safe-area-inset-left,0px) + 8px),calc(var(--simulator-safe-left,0px) + 8px));right:max(12px,calc(env(safe-area-inset-right,0px) + 8px),calc(var(--simulator-safe-right,0px) + 8px));bottom:var(--tabbar-gap);
   max-width:520px;margin-inline:auto;height:var(--tabbar-h);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;
-  border:1px solid var(--glass-rim);border-radius:calc(var(--tabbar-h) / 2);overflow:hidden;isolation:isolate;z-index:20;container-type:inline-size;
-  background:linear-gradient(180deg,rgb(255 255 255 / .07),rgb(255 255 255 / 0) 55%),var(--glass-solid);
+  border:1px solid var(--glass-rim);border-radius:calc(var(--tabbar-h) / 2);z-index:20;
+  --sheen:linear-gradient(112deg,rgb(255 255 255 / .1),rgb(255 255 255 / 0) 28%,rgb(255 255 255 / 0) 72%,rgb(255 255 255 / .05)),linear-gradient(180deg,rgb(255 255 255 / .08),rgb(255 255 255 / 0) 55%);
+  background:var(--sheen),var(--glass-solid);
   box-shadow:inset 0 1px 0 rgb(255 255 255 / .2),inset 0 -1px 0 rgb(255 255 255 / .05),0 12px 32px rgb(0 0 0 / .5),0 2px 8px rgb(0 0 0 / .35)}
 @supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
-  .tabs{background:linear-gradient(180deg,rgb(255 255 255 / .09),rgb(255 255 255 / 0) 55%),var(--glass);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%)}}
+  .tabs{background:var(--sheen),var(--glass);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%)}}
 /* 6px between the glass's rim and the tabs (said here over the phone frame's own padding for the old bar) */
 .app .tabs{padding:6px!important}
-/* the reflection lying on the glass: light from the top-left corner, a weaker answer at the bottom-right */
-.tabs::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;
-  background:linear-gradient(112deg,rgb(255 255 255 / .1),rgb(255 255 255 / 0) 28%,rgb(255 255 255 / 0) 72%,rgb(255 255 255 / .05))}
-/* The picked tab: a second, brighter piece of glass inside the bar — one capsule that slides from tab to tab (a fifth of the row wide;
-   --tab-i is the tab's place in the row, set by renderTabs). A bright top edge, a wine tint coming from above, a soft glow around. */
-.tabs::before{content:"";position:absolute;z-index:0;top:6px;bottom:6px;left:6px;width:calc((100% - 12px) / 5);border-radius:calc(var(--tabbar-h) / 2 - 6px);pointer-events:none;
+/* The picked tab: a second, brighter piece of glass inside the bar — one capsule (.tab-cap) that slides from tab to tab (a fifth of the
+   row wide; --tab-i is the tab's place in the row, set by renderTabs). A bright top edge, a wine tint coming from above, a soft glow around.
+   It is a layer of its own and only its transform ever changes: sliding it repaints nothing. */
+.tab-cap{position:absolute;z-index:0;top:6px;bottom:6px;left:6px;width:calc((100% - 12px) / 5);border-radius:calc(var(--tabbar-h) / 2 - 6px);pointer-events:none;
   background:radial-gradient(120% 100% at 50% 0%,var(--cap-tint),rgb(255 255 255 / 0) 72%),linear-gradient(180deg,rgb(255 255 255 / .17),rgb(255 255 255 / .05));
-  box-shadow:inset 0 1px 0 rgb(255 255 255 / .34),inset 0 0 0 1px rgb(255 255 255 / .09),inset 0 -6px 10px -8px rgb(255 255 255 / .22),0 0 20px var(--cap-glow),0 3px 10px rgb(0 0 0 / .28);
-  transform:translate3d(var(--tab-x,calc(var(--tab-i,2) * 100%)),0,0) scale(var(--cap-s,1));transition:transform .44s cubic-bezier(.3,1.07,.4,1);will-change:transform}
-/* held under a finger (.drag, set by the script below the tabs' handlers): the capsule lifts a little and goes with the finger (--tab-x),
-   the tab it is over lights up (.hot) in place of the chosen one; the bar itself takes the touch — no scroll, no text picking, no callout */
-.tabs.drag{--cap-s:1.07}
-.tabs.drag::before{transition:transform .12s ease-out}
+  box-shadow:inset 0 1px 0 rgb(255 255 255 / .34),inset 0 0 0 1px rgb(255 255 255 / .09),inset 0 -6px 10px -8px rgb(255 255 255 / .22),0 0 14px var(--cap-glow);
+  transform:translate3d(calc(var(--tab-i,2) * 100%),0,0);transition:transform .38s cubic-bezier(.3,1.07,.4,1);will-change:transform}
+/* held under a finger (the script below the tabs' handlers): .drag — the capsule comes to the finger (a short glide), the tab it is over
+   lights up (.hot) in place of the chosen one; .live — it then goes with the finger itself, frame by frame, with no glide to lag behind.
+   The bar itself takes the touch — no scroll, no text picking, no callout */
+.tabs.drag .tab-cap{transition:transform .16s ease-out}
+.tabs.live .tab-cap{transition:none}
 .tabs,.tabs *{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-.tabs button{position:relative;z-index:1;border:0;background:transparent;padding:2px 0 1px;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--muted);font-size:var(--fs-xs);font-size:clamp(9px,5cqi,12px);font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent;transition:color .25s ease;outline-offset:-3px;border-radius:26px}
-.tabs .ico{position:relative;width:min(56px,100%);height:32px;border-radius:16px;display:grid;place-items:center;transition:color .25s ease,transform .18s ease}
-.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;transition:filter .25s ease}
+.tabs button{position:relative;z-index:1;border:0;background:transparent;padding:2px 0 1px;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--muted);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent;transition:color .2s ease;outline-offset:-3px;border-radius:26px}
+.tabs .ico{position:relative;width:min(56px,100%);height:32px;border-radius:16px;display:grid;place-items:center;transition:color .2s ease,transform .18s ease}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .tabs:not(.drag) button[aria-selected="true"],.tabs button.hot{color:var(--ink);font-weight:600}
 .tabs:not(.drag) button[aria-selected="true"] .ico,.tabs button.hot .ico{color:var(--accent)}
-.tabs:not(.drag) button[aria-selected="true"] svg,.tabs button.hot svg{filter:drop-shadow(0 0 5px var(--ico-glow))}
 /* a press: the icon gives a little, as glass under a finger */
 .tabs button:active .ico{transform:scale(.88)}
 /* «Учёт» in the middle is a tab like the other four: the same plain «+» icon, no round button */
@@ -1374,6 +1374,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   <button role="tab" id="tabLedger" aria-selected="true" aria-controls="viewLedger"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Учёт</button>
   <button role="tab" id="tabHistory" aria-selected="false" aria-controls="viewHistory"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1" fill="currentColor" stroke="none"/></svg></span>Записи</button>
   <button role="tab" id="tabDebts" aria-selected="false" aria-controls="viewDebts"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg><span class="badge" id="debtBadge" aria-hidden="true"></span></span>Долги<span class="sr" id="debtBadgeSr"></span></button>
+  <span class="tab-cap" aria-hidden="true"></span>
 </nav>
 <div id="itemEditHost"></div>
 <!-- the trip windows of «Итоги» («Указать остаток», «+ Пришли командировочные»): out here, not in the card — the stats pages slide
@@ -4666,16 +4667,17 @@ $('toHistory').onclick=()=>{state.accFilter=null;state.scopeFilter='';setTab('hi
 /* The glass capsule can be held and carried, as in the phone's own tab bars: hold a finger on the bar (or start moving along it) — the capsule
    comes under the finger and follows it, the tab under it lights up; letting go opens that tab. A quick tap is the plain press it was.
    The press that the browser sends after the finger is lifted is dropped: the tab is already chosen (and the chosen one isn't opened anew). */
-(()=>{const nav=document.querySelector('.tabs'),tabs=[...nav.querySelectorAll('[role="tab"]')];let d=null,eat=0;
-  const at=x=>{const g=d.g,cx=Math.max(g.w/2,Math.min(x-g.l,g.w*tabs.length-g.w/2)),i=Math.min(tabs.length-1,Math.floor(cx/g.w));
-    nav.style.setProperty('--tab-x',(cx-g.w/2).toFixed(1)+'px');if(i!==d.i){d.i=i;tabs.forEach((b,n)=>b.classList.toggle('hot',n===i))}};
-  const lift=x=>{if(!d||d.on)return;const r=nav.getBoundingClientRect(),pad=nav.clientLeft+6;d.on=true;d.g={l:r.left+pad,w:(r.width-2*pad)/tabs.length};
-    nav.classList.add('drag');try{nav.setPointerCapture(d.id)}catch(e){}at(x)};
-  const drop=go=>{if(!d)return;clearTimeout(d.t);const on=d.on,i=d.i;d=null;if(!on)return;
-    nav.classList.remove('drag');nav.style.removeProperty('--tab-x');tabs.forEach(b=>b.classList.remove('hot'));
+(()=>{const nav=document.querySelector('.tabs'),cap=nav.querySelector('.tab-cap'),tabs=[...nav.querySelectorAll('[role="tab"]')];let d=null,eat=0,raf=0;
+  /* one move a frame: only the capsule's own transform is written (no style of the bar, so nothing else is worked out anew) */
+  const paint=()=>{raf=0;if(!d||!d.on)return;const g=d.g,cx=Math.max(g.w/2,Math.min(d.lx-g.l,g.w*tabs.length-g.w/2)),i=Math.min(tabs.length-1,Math.floor(cx/g.w));
+    cap.style.transform='translate3d('+(cx-g.w/2).toFixed(1)+'px,0,0)';if(i!==d.i){d.i=i;tabs.forEach((b,n)=>b.classList.toggle('hot',n===i))}};
+  const lift=()=>{if(!d||d.on)return;const r=nav.getBoundingClientRect(),pad=nav.clientLeft+6;d.on=true;d.g={l:r.left+pad,w:(r.width-2*pad)/tabs.length};
+    nav.classList.add('drag');d.t2=setTimeout(()=>nav.classList.add('live'),170);try{nav.setPointerCapture(d.id)}catch(e){}paint()};
+  const drop=go=>{if(!d)return;clearTimeout(d.t);clearTimeout(d.t2);if(raf){cancelAnimationFrame(raf);raf=0}const on=d.on,i=d.i;d=null;if(!on)return;
+    nav.classList.remove('drag','live');cap.style.transform='';tabs.forEach(b=>b.classList.remove('hot'));
     eat=0;if(go&&tabs[i]&&tabs[i].getAttribute('aria-selected')!=='true')tabs[i].click();eat=Date.now()+400};
-  nav.addEventListener('pointerdown',e=>{if(d||e.button>0||e.isPrimary===false)return;d={id:e.pointerId,x:e.clientX,lx:e.clientX,i:-1,on:false,t:setTimeout(()=>d&&lift(d.lx),220)}});
-  nav.addEventListener('pointermove',e=>{if(!d||e.pointerId!==d.id)return;d.lx=e.clientX;if(d.on)at(e.clientX);else if(Math.abs(e.clientX-d.x)>8)lift(e.clientX)});
+  nav.addEventListener('pointerdown',e=>{if(d||e.button>0||e.isPrimary===false)return;d={id:e.pointerId,x:e.clientX,lx:e.clientX,i:-1,on:false,t:setTimeout(lift,200)}});
+  nav.addEventListener('pointermove',e=>{if(!d||e.pointerId!==d.id)return;d.lx=e.clientX;if(!d.on){if(Math.abs(e.clientX-d.x)>8)lift()}else if(!raf)raf=requestAnimationFrame(paint)},{passive:true});
   addEventListener('pointerup',e=>{if(d&&e.pointerId===d.id)drop(true)});
   addEventListener('pointercancel',e=>{if(d&&e.pointerId===d.id)drop(false)});
   nav.addEventListener('click',e=>{if(Date.now()<eat){e.stopPropagation();e.preventDefault()}},true)})();
