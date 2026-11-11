@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- В экран телефона можно загрузить только локальный адрес: остальное браузер не пустит. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' http://localhost:* http://127.0.0.1:*; frame-src 'self' http://localhost:* http://127.0.0.1:* https://localhost:* https://127.0.0.1:*; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="color-scheme" content="dark">
+  <title>iPhone 18 Pro Max — симулятор</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="simulator.css">
+</head>
+<body>
+  <div class="sim" id="sim" data-panel="open">
+    <main class="stage">
+      <header class="topbar">
+        <div class="chip" id="chip" data-state="connecting" role="status" aria-live="polite"><span id="chipText">Подключение…</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" id="quickReload" type="button" title="Перезагрузить приложение" aria-label="Перезагрузить приложение">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 5v5h-5"/><path d="M19.4 10A8 8 0 1 0 20 13"/></svg>
+          </button>
+          <button class="icon-btn" id="panelToggle" type="button" title="Настройки симулятора" aria-label="Настройки симулятора" aria-controls="panel" aria-expanded="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="stage-scroll" id="stage">
+        <div class="scaler" id="scaler">
+          <div class="device" id="device" data-view="device" data-orientation="portrait" data-color="black" data-island="on">
+            <div class="shadow" aria-hidden="true"></div>
+
+            <!-- корпус: в альбомной ориентации поворачивается целиком, экран остаётся на месте -->
+            <div class="hw hw-back" aria-hidden="true">
+              <i class="key key-action"></i>
+              <i class="key key-vol-up"></i>
+              <i class="key key-vol-down"></i>
+              <i class="key key-side"></i>
+              <i class="key key-camera"></i>
+              <div class="chassis">
+                <i class="band band-left-top"></i><i class="band band-left-bottom"></i>
+                <i class="band band-right-top"></i><i class="band band-right-bottom"></i>
+                <i class="band band-top"></i><i class="band band-bottom"></i>
+                <div class="ports">
+                  <i class="holes holes-mic"></i><i class="screw"></i><i class="usb"></i><i class="screw"></i><i class="holes holes-speaker"></i>
+                </div>
+              </div>
+              <div class="bezel"></div>
+              <i class="earpiece"></i>
+            </div>
+
+            <div class="display" id="display">
+              <div class="app-viewport">
+                <iframe class="app-frame" id="appFrame" title="Приложение в симуляторе" referrerpolicy="no-referrer"></iframe>
+              </div>
+
+              <div class="cover" id="cover" data-state="connecting">
+                <div class="cover-wait" aria-hidden="true"><i class="spinner"></i></div>
+                <div class="cover-error">
+                  <p class="cover-title" id="coverTitle"></p>
+                  <p class="cover-text" id="coverText"></p>
+                  <button class="cover-btn" id="coverRetry" type="button">Повторить</button>
+                </div>
+              </div>
+
+              <div class="status-bar" id="statusBar" data-tone="light" aria-hidden="true">
+                <div class="sb-side sb-left"><time class="sb-time" id="sbTime">9:41</time></div>
+                <div class="sb-side sb-right">
+                  <svg class="sb-cell" id="sbCell" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+                  <span class="sb-net" id="sbNet" hidden>LTE</span>
+                  <svg class="sb-wifi" id="sbWifi" viewBox="0 0 17 12"><path d="M8.5 9.1a1.45 1.45 0 1 0 0 2.9 1.45 1.45 0 0 0 0-2.9ZM.6 3.9 2.1 5.4a9 9 0 0 1 12.8 0l1.5-1.5a11.1 11.1 0 0 0-15.8 0Zm3 3 1.5 1.5a4.8 4.8 0 0 1 6.8 0l1.5-1.5a6.9 6.9 0 0 0-9.8 0Z"/></svg>
+                  <div class="sb-battery-wrap">
+                    <div class="sb-battery" id="sbBattery"><span class="sb-battery-fill"></span><span class="sb-battery-num" id="sbBatteryNum">100</span></div><i class="sb-nub"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="home-indicator" id="homeIndicator" data-tone="light" aria-hidden="true"></div>
+            </div>
+
+            <div class="hw hw-front">
+              <button class="island" id="island" type="button" aria-expanded="false" aria-label="Dynamic Island: развернуть" title="Нажми, чтобы развернуть или свернуть">
+                <span class="island-lens" aria-hidden="true"></span>
+                <span class="island-live" aria-hidden="true">
+                  <i class="island-app">₽</i>
+                  <span class="island-text"><b>Мои расходы</b><small>Демонстрация Dynamic Island</small></span>
+                  <i class="island-ring"></i>
+                </span>
+              </button>
+              <div class="glass" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="boot-note" id="bootNote">Симулятор открывается через свой сервер. В терминале проекта запусти:<br><code>node dev-tools/iphone-simulator/server.js</code></p>
+    </main>
+
+    <aside class="panel" id="panel" aria-label="Настройки симулятора">
+      <header class="panel-head">
+        <h1>iPhone 18 Pro Max</h1>
+        <p>440 × 956 pt · 3x · 6,9″</p>
+      </header>
+
+      <section class="group">
+        <h2>Приложение</h2>
+        <form class="url-form" id="urlForm">
+          <input id="appUrl" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="адрес найдётся сам" aria-label="Адрес приложения">
+          <button class="btn" type="submit">Открыть</button>
+          <button class="btn" id="urlAuto" type="button" title="Найти приложение автоматически">Авто</button>
+        </form>
+        <p class="note note-bad" id="urlNote" hidden>Можно открыть только локальный адрес: localhost или 127.0.0.1.</p>
+        <button class="btn wide" id="reloadBtn" type="button">Перезагрузить приложение</button>
+        <p class="note" id="liveNote"></p>
+      </section>
+
+      <section class="group">
+        <h2>Вид</h2>
+        <div class="seg" data-setting="view" role="group" aria-label="Режим показа">
+          <button type="button" data-value="device">Телефон</button>
+          <button type="button" data-value="screen">Только экран</button>
+        </div>
+        <div class="seg" data-setting="orientation" role="group" aria-label="Ориентация">
+          <button type="button" data-value="portrait">Портретная</button>
+          <button type="button" data-value="landscape">Альбомная</button>
+        </div>
+        <div class="field">
+          <label for="scale">Масштаб <output id="scaleOut" for="scale"></output></label>
+          <div class="row">
+            <input id="scale" type="range" min="25" max="150" step="5">
+            <button class="btn" id="scaleAuto" type="button" aria-pressed="true" title="Вписать телефон в окно">Авто</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="group">
+        <h2>Корпус</h2>
+        <div class="swatches" data-setting="color" role="group" aria-label="Цвет корпуса">
+          <button type="button" data-value="black" title="Чёрный (Black)" aria-label="Чёрный"></button>
+          <button type="button" data-value="silver" title="Серебристый (Silver)" aria-label="Серебристый"></button>
+          <button type="button" data-value="glacier" title="Ледяной (Glacier)" aria-label="Ледяной"></button>
+          <button type="button" data-value="burgundy" title="Бордовый (Burgundy)" aria-label="Бордовый"></button>
+        </div>
+        <div class="row row-between">
+          <label class="switch"><input type="checkbox" data-setting="island"><i></i><span>Dynamic Island</span></label>
+          <button class="btn" id="islandDemo" type="button">Развернуть</button>
+        </div>
+      </section>
+
+      <section class="group">
+        <h2>Система</h2>
+        <div class="seg" data-setting="theme" role="group" aria-label="Оформление iPhone">
+          <button type="button" data-value="dark">Тёмное</button>
+          <button type="button" data-value="light">Светлое</button>
+        </div>
+        <div class="field">
+          <label for="timeInput">Время в строке состояния</label>
+          <div class="row">
+            <input id="timeInput" type="time">
+            <button class="btn" id="timeNow" type="button" aria-pressed="true" title="Показывать настоящее время">Сейчас</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="battery">Заряд <output id="batteryOut" for="battery"></output></label>
+          <input id="battery" type="range" min="0" max="100" step="1" data-setting="battery">
+        </div>
+        <div class="field">
+          <label for="cell">Сотовая сеть <output id="cellOut" for="cell"></output></label>
+          <input id="cell" type="range" min="0" max="4" step="1" data-setting="cell">
+        </div>
+        <label class="switch"><input type="checkbox" data-setting="wifi"><i></i><span>Wi‑Fi</span></label>
+        <p class="note">Время, заряд и сеть меняют только значки. Дата в приложении и его связь с сервером остаются настоящими.</p>
+      </section>
+
+      <section class="group">
+        <h2>Что получает приложение</h2>
+        <label class="switch"><input type="checkbox" data-setting="density"><i></i><span>Плотность пикселей 3x</span></label>
+        <dl class="facts" id="facts"></dl>
+        <p class="note">Что на Windows воспроизвести нельзя — в файле README.md рядом с симулятором.</p>
+      </section>
+
+      <button class="btn wide ghost" id="resetBtn" type="button">Сбросить настройки</button>
+    </aside>
+  </div>
+
+  <script type="module" src="simulator.js"></script>
+</body>
+</html>
