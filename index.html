@@ -3024,8 +3024,16 @@ function zHistory(z){
 }
 /* lunar years a debt was marked doubtful on the zakat date: its zakat for those years is paid when the money comes back */
 const zDoubtYears=(id,z=zset())=>(z.years||[]).filter(y=>(y.ids||[]).includes(id)).length;
+/* the zakat a return of v brings for n years, to the kopeck over all the returns of that debt: its lines add up to the debt's whole
+   zakat rounded once, not each part rounded by itself (100,10 ₽ back as 33,37 + 33,37 + 33,36 gave 3 × 0,83 = 2,49 ₽, not 2,50).
+   Counted in whole kopecks × years (zakat is a 40th of that, half a kopeck up): a line with its record — the record's sum × its
+   years; an older line without one — what it says. skip: the line counted anew (its record is being fixed) */
+const kopOf=v=>Math.round((+v||0)*100), ZQ=Math.round(1/ZAKAT_RATE);
+const zxPart=(id,v,n,z,skip)=>{let u=kopOf(v)*n, had=0;
+  for(const x of z.extra||[]){if(x===skip||!id||x.debt!==id)continue;const r=x.rec&&state.items.find(i=>i.id===x.rec);u+=r?kopOf(r.amount)*zxN(x):kopOf(x.amount)*ZQ;had+=kopOf(x.amount)}
+  return Math.max(0,Math.floor((u+ZQ/2)/ZQ)-had)/100};
 /* rec: the record that brought the money back (or the садака it was forgiven into) — the zakat follows it when it is fixed in Записи */
-const zDebtX=(d,v,rec,z=zset())=>{const n=zDoubtYears(d.id,z);return n>0&&v>0?{date:iso(now),amount:r2(v*ZAKAT_RATE*n),label:`Закят с долга: ${d.name.trim()} — за ${n} ${plural(n,'год','года','лет')}`,debt:d.id,rec,n}:null};
+const zDebtX=(d,v,rec,z=zset())=>{const n=zDoubtYears(d.id,z);return n>0&&v>0?{date:iso(now),amount:zxPart(d.id,v,n,z),label:`Закят с долга: ${d.name.trim()} — за ${n} ${plural(n,'год','года','лет')}`,debt:d.id,rec,n}:null};
 function zDebtBack(o,d,v,rec){
   const z=o.settings().zakat||{}, x=zDebtX(d,v,rec,z);if(!x) return null;
   o.patchSettings({zakat:{...z,extra:[...(z.extra||[]),x]}});
@@ -3040,7 +3048,7 @@ const zxOf=(i,z=zset())=>{const e=z.extra||[], k=e.findIndex(x=>x.rec&&x.rec===i
 /* a return fixed in Записи to sum v (0 — deleted): the zakat it brought goes or follows the new sum — never counted twice
    when the money comes back again. The new zakat settings, or null */
 const zxFix=(i,v,date)=>{const z=zset(), k=zxOf(i,z);if(k<0) return null;const e=[...z.extra], x=e[k];
-  if(v>0) e[k]={...x,amount:r2(v*ZAKAT_RATE*zxN(x)),date:date||x.date,rec:i.id};else e.splice(k,1);
+  if(v>0) e[k]={...x,amount:zxPart(x.debt,v,zxN(x),z,x),date:date||x.date,rec:i.id};else e.splice(k,1);
   return {z:{...z,extra:e},x,amount:v>0?e[k].amount:0}};
 /* what brought that zakat, for the toast: a return, or the садака the debt was forgiven into */
 const zxWhat=i=>typeOf(i)==='out'?'с прощённого долга':'с этого возврата';
