@@ -3871,6 +3871,10 @@ function armDeletes(root,fn,done,ask){
 
 /* ---------- debts ---------- */
 const debtLeft=d=>r2(Math.max(0,(+d.amount||0)-(+d.returned||0)-(+d.forgiven||0)));
+/* why a debt's sum can't go lower: what is already returned, forgiven, or both — each called what it is (a forgiven debt
+   said «Уже вернули», though nothing came back) */
+const backWhy=d=>{const r=+d.returned||0, f=+d.forgiven||0, w=d.mine?'отдано':'вернули', both=r>0.005&&f>0.005;
+  return `Уже ${both?`${w} ${money(r)} и прощено ${money(f)}`:f>0.005?`прощено ${money(f)}`:`${w} ${money(r)}`} — сумма не может быть меньше${both?' '+money(r+f):''}.`};
 const nk=n=>String(n||'').trim().toLowerCase();
 /* «Дал в долг» / «Взял в долг» — the loan itself; «Возврат долга» / «Отдал долг» — money back */
 const isLoan=i=>typeOf(i)==='debt'&&['out','in'].includes(i.dir||'out');
@@ -3886,7 +3890,7 @@ const recDebt=i=>{if(typeOf(i)!=='debt')return typeOf(i)==='out'&&i.debt?state.d
 /* what the debt becomes when its record changes to sum v (0 — deleted) and date; a text — why it can't */
 function debtPatch(d,i,v,date){
   const back=(+d.returned||0)+(+d.forgiven||0), closed=x=>x>0.005?0:(d.closedAt||Date.now());
-  if(isLoan(i)) return v<back-0.005?`Уже ${d.mine?'отдано':'вернули'} ${money(back)} — сумма не может быть меньше.`:{amount:v,date:date||d.date,closedAt:closed(v-back)};
+  if(isLoan(i)) return v<back-0.005?backWhy(d):{amount:v,date:date||d.date,closedAt:closed(v-back)};
   /* the садака it was forgiven into: how much is forgiven follows */
   if(typeOf(i)==='out'){const fg=r2(Math.max(0,(+d.forgiven||0)-(+i.amount||0)+v));
     return fg+(+d.returned||0)>(+d.amount||0)+0.005?`Это больше остатка долга: можно не больше ${money(r2(debtLeft(d)+(+i.amount||0)))}.`:{forgiven:fg,closedAt:closed((+d.amount||0)-(+d.returned||0)-fg)}}
@@ -4165,7 +4169,7 @@ function bindDebtEdit(list){
       /* the same cap as a new debt; a sum already over it (saved before the cap) may stay as it is. bad() marks only an empty or unread sum */
       if(amount>MAX_ENTRY&&Math.abs(amount-(+d.amount||0))>=0.005){fieldErr(f.elements.amount,err);return bad(BIG_ERR())}
       if(date>iso(now)&&date!==d.date) return bad(FUTURE_ERR);
-      if(amount<back-0.005) return bad(`Уже ${d.mine?'отдано':'вернули'} ${money(back)} — сумма не может быть меньше.`);
+      if(amount<back-0.005) return bad(backWhy(d));
       const patch={name,amount,date,note,closedAt:amount-back>0.005?0:(d.closedAt||Date.now())};
       const pre=d.mine?'Взял в долг: ':'Дал в долг: ', rec=loanRec(d);
       /* its record takes an account below zero (more lent, less borrowed): said first, a second «Сохранить» keeps it */
