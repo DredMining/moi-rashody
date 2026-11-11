@@ -4896,7 +4896,13 @@ function normBackup(d){
   const N=(v,w,what,min=0)=>{const s=typeof v==='string'?v.trim():null, n=typeof v==='number'?v:s===null?NaN:/^-?\d+(?:[.,]\d+)?$/.test(s)?+s.replace(',','.'):parseNum(s,9);return Number.isFinite(n)&&n>=min?n:no(w,what,v)};
   /* a missing (null) field stays missing; a present one must pass */
   const set=(o,k,f)=>{if(o[k]==null)delete o[k];else o[k]=f(o[k])};
-  const T=(o,ks,w)=>ks.forEach(k=>set(o,k,v=>typeof v==='string'?v:typeof v==='number'?String(v):no(w,'неверный текст',v)));
+  /* a text longer than the app could ever save (its forms hold 40–80 characters, its own labels a little more) is cut: a name or comment
+     of 50–100 thousand characters with no spaces (a copy made by hand) hung «Учёт», «Записи» and «Долги» for seconds */
+  const cut=s=>s.length>300?s.slice(0,300):s;
+  const T=(o,ks,w)=>ks.forEach(k=>set(o,k,v=>typeof v==='string'?cut(v):typeof v==='number'?String(v):no(w,'неверный текст',v)));
+  /* a sum the app can't keep to the kopeck (from ~1,8e306 it turned into «∞ ₽» on screen and null when saved; far below that the
+     kopecks are already lost): the copy is turned down with the reason, as one with «1e400» is */
+  const big=(n,w,v)=>Math.abs(n)<=1e13?n:no(w,'слишком большая сумма',v);
   /* how far ahead a copy may reach — one rule for days and moments. A record's day, as in every form: not later than today, with a day of
      slack (a phone in another time zone) and at least today at the far east (UTC+14 — for UTC−11 the day after tomorrow); a later one isn't
      seen in «Записи» but moves the account. A moment the app saved (Date.now() then): not on a later day — one ahead would freeze an
@@ -4905,15 +4911,15 @@ function normBackup(d){
   const fut=(n,w)=>n<+soonEnd?n:no(w,'время в будущем',n<=8.64e15?iso(new Date(n)):n);
   const tm=(o,ks,w)=>ks.forEach(k=>set(o,k,v=>fut(N(v,w,'неверное время'),w)));
   const day=(v,w)=>isoOk(v)?v:no(w,'неверная дата',v);
-  const amt=(v,w)=>r2(N(v,w,'неверная сумма'));
+  const amt=(v,w)=>r2(big(N(v,w,'неверная сумма'),w,v));
   const items=d.items.map((x,n)=>{const w=`записи № ${n+1}`, i={...obj(x,w)};
     i.date=day(i.date,w);if(i.date>soon)no(w,'дата в будущем',i.date);i.amount=amt(i.amount,w);T(i,['type','cat','acc','from','to','label','note','dir','scope','debt'],w);tm(i,['created'],w);delete i.id;return i});
   const debts=(d.debts==null?[]:list(d.debts,'списка долгов')).map((x,n)=>{const w=`долга № ${n+1}`, o={...obj(x,w)};
-    if(typeof o.name!=='string'||!o.name.trim()) no(w,'нет имени');
+    if(typeof o.name!=='string'||!o.name.trim()) no(w,'нет имени');o.name=cut(o.name);
     o.amount=amt(o.amount,w);set(o,'returned',v=>amt(v,w));set(o,'forgiven',v=>amt(v,w));
     if(o.date==='') delete o.date;set(o,'date',v=>day(v,w));if(o.date>soon)no(w,'дата в будущем',o.date);T(o,['note','id'],w);tm(o,['created','closedAt'],w);return o});
   const sw='настроек', st={...(d.settings==null?{}:obj(d.settings,sw))};
-  set(st,'budget',v=>N(v,sw,'неверный лимит'));set(st,'brokerPct',v=>N(v,sw,'неверный процент на брокер'));tm(st,['tripEnd'],sw);
+  set(st,'budget',v=>big(N(v,sw,'неверный лимит'),sw,v));set(st,'brokerPct',v=>N(v,sw,'неверный процент на брокер'));tm(st,['tripEnd'],sw);
   /* a limit of his own in a copy without the mark that it was set (a copy made or changed by hand; the app's own always have it): marked
      here — else the next start takes these for data older than the mark and silently puts the default 30 000 in its place (migrate) */
   if(+st.budget>0&&!st.limitSet) st.limitSet=true;
@@ -4922,21 +4928,21 @@ function normBackup(d){
   /* the start mark: a moment (> 0) or none — as the app keeps it (localStore) */
   set(st,'tripBegun',v=>{const n=N(v,sw,'неверное время');return n>0&&n<=8.64e15?fut(n,sw):no(sw,'неверное время',v)});
   /* a typed balance: its sum (may be below zero), when it was typed, the earlier ones */
-  const anc=(v,w)=>{const a={...obj(v,w)};set(a,'amount',s=>r2(N(s,w,'неверная сумма',-Infinity)));tm(a,['at','checked','since'],w);
-    set(a,'hist',h=>list(h,w).map(x=>{const y={...obj(x,w)};y.amount=r2(N(y.amount,w,'неверная сумма',-Infinity));tm(y,['at','since'],w);return y}));return a};
+  const anc=(v,w)=>{const a={...obj(v,w)};set(a,'amount',s=>r2(big(N(s,w,'неверная сумма',-Infinity),w,s)));tm(a,['at','checked','since'],w);
+    set(a,'hist',h=>list(h,w).map(x=>{const y={...obj(x,w)};y.amount=r2(big(N(y.amount,w,'неверная сумма',-Infinity),w,y.amount));tm(y,['at','since'],w);return y}));return a};
   set(st,'wallets',v=>Object.fromEntries(Object.entries(obj(v,'счетов')).filter(([,a])=>a!=null).map(([k,a])=>[k,anc(a,`счёта «${wName(k)||k}»`)])));
   set(st,'tripStart',v=>anc(v,'остатка командировочных'));set(st,'brokerOwed',v=>anc(v,'долга себе на брокер'));
   set(st,'brokerPctHist',v=>list(v,sw).map(x=>{const h={...obj(x,sw)};h.pct=N(h.pct,sw,'неверный процент на брокер');tm(h,['from'],sw);return h}));
   set(st,'zakat',v=>{const w='настроек закята', z={...obj(v,w)};
     if(z.metal!=null&&z.metal!=='silver'&&z.metal!=='gold') no(w,'неверный металл',z.metal);
-    set(z,'price',p=>N(p,w,'неверная цена'));
+    set(z,'price',p=>big(N(p,w,'неверная цена'),w,p));
     for(const k of ['start','wait','paidFrom']){if(z[k]==='')delete z[k];set(z,k,s=>day(s,w))}
     tm(z,['paidCut','priceAt'],w);
     set(z,'dipOk',o=>typeof o==='string'?day(o,w):{...obj(o,w),start:day(o.start,w),upTo:day(o.upTo,w)});
     set(z,'broker',b=>anc(b,w));
     set(z,'years',ys=>list(ys,w).map((x,n)=>{const wy=`срока закята № ${n+1}`, y={...obj(x,wy)};y.due=day(y.due,wy);y.amount=amt(y.amount,wy);set(y,'start',s=>day(s,wy));
       set(y,'dipOk',o=>typeof o==='string'?day(o,wy):{...obj(o,wy),start:day(o.start,wy),upTo:day(o.upTo,wy)});
-      for(const k of ['base','price','nisab','cash','broker','rel','doubt','owedPrev','adv','forNisab']) set(y,k,q=>N(q,wy,'неверное число',-Infinity));
+      for(const k of ['base','price','nisab','cash','broker','rel','doubt','owedPrev','adv','forNisab']) set(y,k,q=>big(N(q,wy,'неверное число',-Infinity),wy,q));
       set(y,'ids',a=>list(a,wy).map(t=>typeof t==='string'||typeof t==='number'?String(t):no(wy,'неверный долг',t)));tm(y,['at'],wy);return y}));
     set(z,'extra',xs=>list(xs,w).map((x,n)=>{const wx=`закята с долга № ${n+1}`, e={...obj(x,wx)};e.date=day(e.date,wx);e.amount=amt(e.amount,wx);T(e,['label','debt','rec'],wx);set(e,'n',q=>N(q,wx,'неверное число'));return e}));
     return z});
@@ -4949,7 +4955,7 @@ function normBackup(d){
   const zk=st.zakat;if(zk) st.zakat={...zk,years:(zk.years||[]).map(y=>({...y,ids:(y.ids||[]).map(i=>dmap[i]||i)})),extra:(zk.extra||[]).map(x=>({...x,...(x.debt?{debt:dmap[x.debt]||x.debt}:{}),...(x.rec?{rec:imap[x.rec]}:{})}))};
   /* the trip reports: one that doesn't read is left out (it is only a summary — the records stay); each reads the partner's returns
      from his debts, so it follows their new ids */
-  set(st,'tripReports',v=>(Array.isArray(v)?v:[]).map(repClean).filter(Boolean).slice(-10).map(r=>r.partner?{...r,partner:{...r.partner,ids:r.partner.ids.map(i=>dmap[i]||i)}}:r));
+  set(st,'tripReports',v=>(Array.isArray(v)?v:[]).map(repClean).filter(Boolean).slice(-10).map(r=>r.partner?{...r,partner:{...r.partner,ids:r.partner.ids.map(i=>dmap[i]||i),names:r.partner.names.map(cut)}}:r));
   /* a copy from an older version: its zakat broker value joins the account, as on start */
   Object.assign(st,brokerOne(st)||{});
   const ex=typeof d.exported==='string'?new Date(d.exported):null;
