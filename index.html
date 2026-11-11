@@ -4260,9 +4260,11 @@ $('oweForm').onsubmit=async e=>{
   }catch(x){err.textContent=saveErr(x);err.hidden=false}
 };
 $('dDate').value=iso(now);$('dDate').max=iso(now);
-$('debtAddOpen').onclick=()=>{fresh();$('debtAddModal').hidden=false;dlgSync()};
+/* opened in the first minute after midnight, before the minute timer ran: today moves first, so the window starts on the new day
+   and not on yesterday (it is still closed here — refreshToday sets its date). The same for «Взял в долг» below */
+$('debtAddOpen').onclick=()=>{refreshToday();fresh();$('debtAddModal').hidden=false;dlgSync()};
 $('debtAddModal').querySelectorAll('[data-debtaddclose]').forEach(b=>b.onclick=closeDebtAddModal);
-$('oweAddOpen').onclick=()=>{fresh();$('oweAddModal').hidden=false;dlgSync()};
+$('oweAddOpen').onclick=()=>{refreshToday();fresh();$('oweAddModal').hidden=false;dlgSync()};
 $('oweAddModal').querySelectorAll('[data-oweaddclose]').forEach(b=>b.onclick=closeOweAddModal);
 $('dAcc').innerHTML=[...ACCS.map(([v,n])=>`<option value="${v}" ${v==='cash'?'selected':''}>${n}</option>`),'<option value="">Не списывать — уже учтено</option>'].join('');
 $('debtForm').onsubmit=async e=>{
