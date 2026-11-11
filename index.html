@@ -2202,8 +2202,9 @@ function repFix(o,x,a,b,dl,dd){
     if(typeOf(i)==='in')r.allow=r2((+r.allow||0)+v);else if(typeOf(i)==='out'){const c=catOf(i.cat).id, e=r.cats.find(z=>z[0]===c);if(e)e[1]=r2(e[1]+v);else r.cats.push([c,r2(v)])}};
   mv(a,-1);mv(b,1);r.cats=r.cats.filter(c=>c[1]>=0.005).sort((p,q)=>q[1]-p[1]||byRank(p[0],q[0]));r.left=closeAfter(x,r2(tv(b)-tv(a)));
   if(typeof b?.date==='string'&&b.date<r.from&&!r.begun) r.from=b.date;
-  if(dl){const p=r.partner||{ids:[],names:[],amount:0,ret:0,left:0};
-    r.partner={...p,ids:[...(p.ids||[]),dl.id],names:[...new Set([...(p.names||[]),dl.name.trim()])],amount:r2((+p.amount||0)+dl.amount),left:r2((+p.left||0)+dl.amount)}}
+  /* dl: a new loan, or one that comes back with its record (moved out of the trip and in again — then with what is returned of it); never twice */
+  if(dl&&!(r.partner?.ids||[]).includes(dl.id)){const p=r.partner||{ids:[],names:[],amount:0,ret:0,left:0};
+    r.partner={...p,ids:[...(p.ids||[]),dl.id],names:[...new Set([...(p.names||[]),dl.name.trim()])],amount:r2((+p.amount||0)+dl.amount),ret:r2((+p.ret||0)+(+dl.returned||0)),left:r2((+p.left||0)+(dl.left??dl.amount))}}
   /* dd: the partner's loan deleted with a — it leaves the report (his name too, when no loan left there is his) */
   const q=r.partner;if(dd&&q&&(q.ids||[]).includes(dd.id)){const ids=q.ids.filter(i=>i!==dd.id), nm=ids.map(i=>state.debts.find(d=>d.id===i)?.name.trim());
     if(!ids.length) delete r.partner;else r.partner={...q,ids,names:nm.every(Boolean)?[...new Set(nm)]:q.names,amount:r2(Math.max(0,(+q.amount||0)-(+dd.amount||0))),ret:r2(Math.max(0,(+q.ret||0)-(+dd.returned||0))),left:r2(Math.max(0,(+q.left||0)-debtLeft(dd)))}}
@@ -3540,7 +3541,11 @@ function bindEdits(root){
       /* its report follows too (a new category with the same sum as well) */
       /* a trip result's own sum fixed here: its % moves the debt to the broker typed since («Сверить»), as tripCloseFix does — else deleting it
          and ending the trip again owes the difference twice */
-      try{const tn=await store.batch(o=>{o.update(i.id,p);if(TRIP_END.includes(catOf(i.cat).id))brokerFix(o,i,{...i,...p});if(dp)o.updateDebt(d.id,dp);if(zx)o.patchSettings({zakat:zx.z});tfx.forEach(([x,,a,b])=>repFix(o,x,a,b));
+      try{const tn=await store.batch(o=>{o.update(i.id,p);if(TRIP_END.includes(catOf(i.cat).id))brokerFix(o,i,{...i,...p});if(dp)o.updateDebt(d.id,dp);if(zx)o.patchSettings({zakat:zx.z});
+          /* «Заплатил и за напарника» moved out of an ended trip (to «Личное») or back into it: the partner's loan leaves that trip's report or
+             comes back with the record — it stayed there as «Напарник должен», though the expense was no longer the trip's */
+          tfx.forEach(([x,,a,b])=>{const da=a&&!b?ptDebt(a):null, db=b&&!a?ptDebt(b):null;
+            repFix(o,x,a,b,db&&{id:db.id,name:db.name,amount:+db.amount||0,returned:+db.returned||0,left:debtLeft(db)},da)});
         return tfx.filter(([,td])=>Math.abs(td)>=0.005).map(([x,td])=>' · итог командировки теперь '+tripCloseFix(o,x,td)).join('')});
         /* a zakat payment changed: what is owed now */
         const zn=(zx&&Math.abs(zx.amount-(+zx.x.amount||0))>=0.005?` · закят ${zxWhat(i)}: ${money(zx.amount)}`:'')+zkMoved(zk0);
