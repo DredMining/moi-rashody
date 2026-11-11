@@ -2564,7 +2564,8 @@ function limFormOn(p,budget,done,then){
     if(v>MAX_ENTRY&&v!==budget){delete bf.dataset.armed;er.textContent=BIG_ERR();er.hidden=false;fieldErr(inp,er);inp.focus({preventScroll:true});return}
     if(!v&&budget){if(!bf.dataset.armed){bf.dataset.armed=Date.now();er.textContent='Пусто — значит без лимита. Нажмите «Сохранить» ещё раз, чтобы убрать лимит.';er.hidden=false;return}
       if(Date.now()-bf.dataset.armed<600) return}
-    done();saveSettings({budget:v>0?v:0,limitDefault:false});then();if(!v&&budget)toast('Лимит убран')};
+    /* limitSet: a limit saved by hand is his own from now on — without the mark (data that came without it) the next start put the default back */
+    done();saveSettings({budget:v>0?v:0,limitDefault:false,limitSet:true});then();if(!v&&budget)toast('Лимит убран')};
   $(p+'Cancel').onclick=()=>{done();render();then()};
 }
 function renderBudget(spent,out){
@@ -4913,6 +4914,9 @@ function normBackup(d){
     if(o.date==='') delete o.date;set(o,'date',v=>day(v,w));if(o.date>soon)no(w,'дата в будущем',o.date);T(o,['note','id'],w);tm(o,['created','closedAt'],w);return o});
   const sw='настроек', st={...(d.settings==null?{}:obj(d.settings,sw))};
   set(st,'budget',v=>N(v,sw,'неверный лимит'));set(st,'brokerPct',v=>N(v,sw,'неверный процент на брокер'));tm(st,['tripEnd'],sw);
+  /* a limit of his own in a copy without the mark that it was set (a copy made or changed by hand; the app's own always have it): marked
+     here — else the next start takes these for data older than the mark and silently puts the default 30 000 in its place (migrate) */
+  if(+st.budget>0&&!st.limitSet) st.limitSet=true;
   /* the last backup's moment from a clock that ran ahead does no harm: applyRestore holds it to now */
   set(st,'lastBackup',v=>N(v,sw,'неверное время'));
   /* the start mark: a moment (> 0) or none — as the app keeps it (localStore) */
