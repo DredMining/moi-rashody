@@ -4599,6 +4599,9 @@ function stepAcc(){
 /* keepForm: paying from a reminder (zakat) leaves whatever is typed in the entry form alone */
 async function saveEntry(acc,opt={}){
   const p=state.pend;if(!p)return;
+  /* confirmed past midnight, before the minute timer ran: today moves first. The record keeps the day it was started on, and the
+     message says «· вчера» at once (it was silent for up to a minute); the next record starts on the new day */
+  refreshToday();
   const {type,scope,cat}=p, label=CAT[cat].custom?(p.label||'').slice(0,40):'';
   /* paid for the partner too (stepAcc): the record is his own part; the partner's part is a loan from the same account, in the same write */
   const pt=opt.partner, amount=pt?r2(p.amount-pt.part):p.amount, pn0=state.settings.partnerName, rp0=state.settings.tripReports;
