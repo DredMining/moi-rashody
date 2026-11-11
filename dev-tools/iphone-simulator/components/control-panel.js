@@ -32,6 +32,8 @@ export function createControlPanel({ settings, actions }) {
 
   scale.addEventListener('input', () => settings.set({ scale: Number(scale.value) }));
   scaleAuto.addEventListener('click', () => settings.set({ scale: 'auto' }));
+  // точка в точку: мелкие подписи чёткие, но телефон может не поместиться — сцена прокручивается
+  byId('scaleFull').addEventListener('click', () => settings.set({ scale: 100 }));
 
   timeInput.addEventListener('change', () => actions.setTime(timeInput.value));
   timeNow.addEventListener('click', () => settings.set({ timeOffset: null }));
@@ -74,6 +76,7 @@ export function createControlPanel({ settings, actions }) {
     byId('batteryOut').textContent = `${state.battery}%`;
     byId('cellOut').textContent = CELL_LABELS[state.cell];
     scaleAuto.setAttribute('aria-pressed', String(state.scale === 'auto'));
+    byId('scaleFull').setAttribute('aria-pressed', String(state.scale === 100));
     timeNow.setAttribute('aria-pressed', String(state.timeOffset === null));
     byId('islandDemo').disabled = !state.island;
     if (document.activeElement !== urlInput) urlInput.value = state.appUrl;

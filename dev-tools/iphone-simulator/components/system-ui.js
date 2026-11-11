@@ -1,12 +1,14 @@
-// Системные элементы поверх экрана: строка состояния, Dynamic Island, полоска «Домой».
+// Системные элементы поверх экрана: строка состояния и Dynamic Island.
 // Они только рисуются: время, заряд и сеть внутри приложения остаются настоящими.
+// Полоски «Домой» нет: Али убрал её 11.11.2026 — в симуляторе она не нужна. Место под неё (34 точки снизу)
+// приложение оставляет по-прежнему, как на телефоне.
 
 const byId = id => document.getElementById(id);
 const clockFormat = new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 
 export function createSystemUi({ settings, getDocument, onClock }) {
   const statusBar = byId('statusBar'), time = byId('sbTime'), cell = byId('sbCell'), net = byId('sbNet'), wifi = byId('sbWifi');
-  const battery = byId('sbBattery'), batteryNum = byId('sbBatteryNum'), home = byId('homeIndicator'), island = byId('island');
+  const battery = byId('sbBattery'), batteryNum = byId('sbBatteryNum'), island = byId('island');
   let clockTimer = 0;
 
   // ---- время: настоящее или сдвинутое на заданное число минут; дальше идёт само ----
@@ -50,7 +52,7 @@ export function createSystemUi({ settings, getDocument, onClock }) {
   }
   island.addEventListener('click', () => toggleIsland());
 
-  // ---- цвет значков под фон приложения ----
+  // ---- цвет значков строки состояния под фон приложения ----
   // белые значки на тёмном фоне, чёрные на светлом — по цвету того, что сейчас под ними
   function toneAt(doc, x, y) {
     for (let el = doc.elementFromPoint(x, y); el; el = el.parentElement) {
@@ -61,18 +63,16 @@ export function createSystemUi({ settings, getDocument, onClock }) {
     }
     return 'light';
   }
-  function updateTones() {
+  function updateStatusTone() {
     const doc = getDocument();
     if (!doc || document.hidden) return;
-    const view = doc.defaultView;
     try {
-      home.dataset.tone = toneAt(doc, view.innerWidth / 2, view.innerHeight - 10);
       // приложение с экрана «Домой» само выбирает вид строки состояния; black-translucent — белые значки поверх страницы
       const style = doc.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')?.content;
-      statusBar.dataset.tone = style === 'black-translucent' || style === 'black' ? 'light' : toneAt(doc, view.innerWidth / 2, 6);
+      statusBar.dataset.tone = style === 'black-translucent' || style === 'black' ? 'light' : toneAt(doc, doc.defaultView.innerWidth / 2, 6);
     } catch { /* страница сменилась во время проверки */ }
   }
-  setInterval(updateTones, 2000);
+  setInterval(updateStatusTone, 2000);
 
-  return { render, setTime, shownTime, toggleIsland, islandExpanded, updateTones };
+  return { render, setTime, shownTime, toggleIsland, islandExpanded, updateStatusTone };
 }
