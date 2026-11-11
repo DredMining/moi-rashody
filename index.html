@@ -4290,12 +4290,14 @@ function poolFor(type,scope){
   return CATS.filter(c=>g.includes(c.g));
 }
 /* a keyword matches a whole word or its form — «шаурмы», «маршрутку», «маме», «воды» — never the inside of another word
-   («кафедра», «носок», «победа»): the word starts with the keyword's stem and goes on with an ending only. Two-letter keys — exact word */
+   («кафедра», «носок», «победа»): the word starts with the keyword's stem and goes on with an ending only. Two-letter keys — exact word.
+   «семья», «жильё» — a ь before the ending: it is in every form of the word, and the bare «семь» is another word. The stem keeps
+   the ь and needs an ending after it («700 семь роллов», «семи», «Сема» went to «Семья», «жил 3 дня» — to «Квартира») */
 const ENDING=/^[аеёиоуыэюяьймхв]{0,3}$/;
 function kwHit(k,x){
   if(k.length<=2) return x===k;
-  const s=k.replace(/[аеёиоуыэюяьй]+$/,''), st=s.length>=3||(s.length>=2&&k.length>=3)?s:k;
-  return x.startsWith(st)&&ENDING.test(x.slice(st.length))&&(st.length>3||x.length-st.length<=2);
+  const soft=/ь[аеёиоуыэюя]+$/.test(k), s=k.replace(soft?/[аеёиоуыэюя]+$/:/[аеёиоуыэюяьй]+$/,''), st=s.length>=3||(s.length>=2&&k.length>=3)?s:k;
+  return x.startsWith(st)&&ENDING.test(x.slice(st.length))&&(st.length>3||x.length-st.length<=2)&&(!soft||x.length>st.length);
 }
 /* two category words in one entry («шаурма кофе», «продукты такси»): the categories are tried in the order they always were,
    not in the order of the tiles — moving a tile doesn't change what a typed word picks. The ones not named keep the order of CATS.
