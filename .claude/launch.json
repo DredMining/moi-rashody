@@ -6,6 +6,12 @@
       "runtimeExecutable": "node",
       "runtimeArgs": ["audit/tools/serve.js", ".", "8791"],
       "port": 8791
+    },
+    {
+      "name": "iphone-simulator",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["dev-tools/iphone-simulator/server.js", "--no-open"],
+      "port": 8800
     }
   ]
 }

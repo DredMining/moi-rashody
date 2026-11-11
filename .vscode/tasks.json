@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "iPhone Simulator: запустить (окно Chrome)",
+      "type": "shell",
+      "command": "node dev-tools/iphone-simulator/server.js",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "iPhone Simulator: запустить для вкладки в VS Code",
+      "type": "shell",
+      "command": "node dev-tools/iphone-simulator/server.js --no-open",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    }
+  ]
+}
