@@ -2087,15 +2087,21 @@ function tripCloseFix(o,x,d){
   o.update(x.id,p);brokerFix(o,x,{...x,...p});
   return closeTxt(L);
 }
-/* the result record a → b, moved by a record saved now: brokerOwed counts records saved after «Сверить», and this one keeps the moment
-   the trip ended — when the debt was typed since then, its % moves that typed debt (both ways, each side rounded: «Отменить» brings it back to the kopeck) */
-const brokerFix=(o,a,b)=>{const s=o.settings().brokerOwed, d=r2(brokerDue([b]))-r2(brokerDue([a]));
-  if(s&&(+s.at||0)>=(a.created||0)&&Math.abs(d)>=0.005) o.patchSettings({brokerOwed:{...s,amount:r2((+s.amount||0)+d)}})};
+/* what a record adds to the debt to the broker: the % of a personal income, less what it sent to the broker account (a transfer there,
+   «Брокер» as an expense), plus what it took back out of it; a trip record — nothing */
+const brokerVal=i=>i&&!isTrip(i)?brokerDue([i])-toBroker([i]):0;
+/* a record a → b (null: not there — deleted, or put back): brokerOwed counts records saved after «Сверить»; one saved before it is in
+   the debt typed then — when it changes, that typed debt moves by the difference (both ways, each side rounded: «Отменить» brings it back
+   to the kopeck). First for a trip result moved by a record saved later (it keeps the moment the trip ended); since 11.11.2026 for
+   every record (owner's choice): an old income fixed or deleted after «Сверить» left the debt as typed — 10 000 ₽ for an income of 10 000 */
+const brokerFix=(o,a,b)=>{const s=o.settings().brokerOwed, d=r2(brokerVal(b))-r2(brokerVal(a));
+  if(s&&(+s.at||0)>=((a||b)?.created||0)&&Math.abs(d)>=0.005) o.patchSettings({brokerOwed:{...s,amount:r2((+s.amount||0)+d)}})};
 /* «Отменить»: the result record back as it was (put back if it went), and the debt to the broker with it */
 const closeBack=(o,x)=>{brokerFix(o,state.items.find(i=>i.id===x.id)||x,x);o.update(x.id,x);o.restore(x)};
-/* a result record deleted (back: put back by «Отменить»): its % leaves the typed debt as a result of 0 would —
-   else a trip opened again and ended once more owes the % of the same leftover twice (an overspend owes none: nothing moves) */
-const endDel=(o,x,back)=>{if(x&&TRIP_END.includes(catOf(x.cat).id)){const z={...x,amount:0};brokerFix(o,back?z:x,back?x:z)}};
+/* a record deleted (back: put back by «Отменить»): what it added leaves the typed debt — a trip result's %, else a trip opened again
+   and ended once more owes the % of the same leftover twice (an overspend owes none: nothing moves); any other income or transfer
+   to the broker saved before «Сверить» alike (brokerFix) */
+const endDel=(o,x,back)=>{if(x)brokerFix(o,back?null:x,back?x:null)};
 /* the latest «Командировка закончилась» record: deleting it opens that trip again — as it was (tripPrev), or for an older record from its result.
    Not once a trip balance was typed after it («Сверить»): that typed balance stays */
 function tripEndPrev(it){
@@ -2449,7 +2455,7 @@ function renderBroker(inc,out){
   if(state.editing==='owed'){
     const cur=brokerOwed(), over=cur!==null&&cur<=-0.01;
     /* an overpayment isn't put into the field: empty — it stays as it is */
-    box.innerHTML=`<form class="inline-edit" id="oForm" novalidate><input id="oInput" class="num" inputmode="decimal" placeholder="${over?'0':'Например, 8000'}" value="${cur===null||over?'':vIn(Math.max(0,cur))}" aria-label="Долг себе на брокер сейчас"><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="oCancel">Отмена</button><p class="err" role="alert" id="oErr" hidden></p></form><div class="row"><span>${over?`Сейчас переплата ${moneyR(-cur)}: она уменьшит то, что положено с новых доходов. Оставьте поле пустым, чтобы её сохранить. `:''}Сколько вы сейчас должны себе на брокер. Дальше приложение само прибавит % с новых доходов, вычтет переводы на брокер и прибавит снова то, что выведено с брокерского счёта.</span></div>`;
+    box.innerHTML=`<form class="inline-edit" id="oForm" novalidate><input id="oInput" class="num" inputmode="decimal" placeholder="${over?'0':'Например, 8000'}" value="${cur===null||over?'':vIn(Math.max(0,cur))}" aria-label="Долг себе на брокер сейчас"><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="oCancel">Отмена</button><p class="err" role="alert" id="oErr" hidden></p></form><div class="row"><span>${over?`Сейчас переплата ${moneyR(-cur)}: она уменьшит то, что положено с новых доходов. Оставьте поле пустым, чтобы её сохранить. `:''}Сколько вы сейчас должны себе на брокер. Дальше приложение само прибавит % с новых доходов, вычтет переводы на брокер и прибавит снова то, что выведено с брокерского счёта. Исправите или удалите прежний доход или перевод — долг изменится на разницу.</span></div>`;
     $('oForm').onsubmit=async e=>{e.preventDefault();const s=$('oInput').value.trim(), v=parseNum(s), er=$('oErr');
       /* nothing typed (an overpayment stays as it is): nothing changes; the same sum is still saved — it dates the check, so records saved before it count as included */
       if(!s){state.editing=null;render();back('oSet');return}
@@ -3562,7 +3568,7 @@ function bindEdits(root){
       /* its report follows too (a new category with the same sum as well) */
       /* a trip result's own sum fixed here: its % moves the debt to the broker typed since («Сверить»), as tripCloseFix does — else deleting it
          and ending the trip again owes the difference twice */
-      try{const tn=await store.batch(o=>{o.update(i.id,p);if(TRIP_END.includes(catOf(i.cat).id)){brokerFix(o,i,{...i,...p});repHand(o,i,{...i,...p})}if(dp)o.updateDebt(d.id,dp);if(zx)o.patchSettings({zakat:zx.z});
+      try{const tn=await store.batch(o=>{o.update(i.id,p);brokerFix(o,i,{...i,...p});if(TRIP_END.includes(catOf(i.cat).id))repHand(o,i,{...i,...p});if(dp)o.updateDebt(d.id,dp);if(zx)o.patchSettings({zakat:zx.z});
           /* «Заплатил и за напарника» moved out of an ended trip (to «Личное») or back into it: the partner's loan leaves that trip's report or
              comes back with the record — it stayed there as «Напарник должен», though the expense was no longer the trip's */
           tfx.forEach(([x,,a,b])=>{const da=a&&!b?ptDebt(a):null, db=b&&!a?ptDebt(b):null;
