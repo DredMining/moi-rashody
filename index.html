@@ -1733,9 +1733,10 @@ function keepOuter(){
   $('zPayGo')?._owed?.();
 }
 /* only the changed keys are written, on top of what is stored now; if the browser refuses, the screen goes back by itself */
-async function saveSettings(patch){
+/* quiet: the caller's window stays open and says why in its own line (role=alert) — no second, same message under it */
+async function saveSettings(patch,quiet){
   state.settings={...state.settings,...patch};render();
-  try{await store.patchSettings(patch);return true}catch(e){if(e?.code==='gen')throw e;saveSettings.err=e;toast(saveErr(e));return false}
+  try{await store.patchSettings(patch);return true}catch(e){if(e?.code==='gen')throw e;saveSettings.err=e;if(!quiet)toast(saveErr(e));return false}
 }
 const saveErr=x=>x?.code==='quota_exceeded'?'Не сохранилось: память браузера заполнена или недоступна. Скачайте резервную копию.':'Не получилось сохранить. Попробуйте ещё раз.';
 /* a save that failed: its small form opens again with what was typed (v) — nothing to type twice */
@@ -2475,7 +2476,7 @@ function renderBroker(inc,out){
       if(v===pct){render();back('pSet');return}
       const h0=state.settings.brokerPctHist, h=[...(Array.isArray(h0)&&h0.length?h0:[{pct,from:0}]),{pct:v,from:Date.now()}];
       /* the whole history is kept: dropping an old change would recount the incomes saved under it (past months). One entry per change made by hand */
-      if(!await saveSettings({brokerPct:v,brokerPctHist:h})){reopen('pct','#pInput',raw);const x=$('pErr');if(x){x.textContent=saveErr(saveSettings.err);x.hidden=false}return}
+      if(!await saveSettings({brokerPct:v,brokerPctHist:h},true)){reopen('pct','#pInput',raw);const x=$('pErr');if(x){x.textContent=saveErr(saveSettings.err);x.hidden=false}else toast(saveErr(saveSettings.err));return}
       toast(v?`На брокер ${fmt.format(v)}% — с новых доходов`:'Процент на брокер — 0: с новых доходов ничего не откладывается');back('pSet')};
     $('pCancel').onclick=()=>{state.editing=null;render();back('pSet')};
     $('pInput').oninput=()=>$('pErr').hidden=true;
@@ -2489,7 +2490,7 @@ function renderBroker(inc,out){
       /* nothing typed (an overpayment stays as it is): nothing changes; the same sum is still saved — it dates the check, so records saved before it count as included */
       if(!s){state.editing=null;render();back('oSet');return}
       if(!(v>=0)||v>MAX_ENTRY){er.textContent=v>MAX_ENTRY?BIG_ERR():NUM_ERR+'.';er.hidden=false;fieldErr($('oInput'),er);$('oInput').focus({preventScroll:true});return}
-      state.editing=null;if(!await saveSettings({brokerOwed:{amount:v,at:Date.now()}})){reopen('owed','#oInput',s);const x=$('oErr');if(x){x.textContent=saveErr(saveSettings.err);x.hidden=false}return}toast('Долг себе на брокер: '+money(v));back('oSet')};
+      state.editing=null;if(!await saveSettings({brokerOwed:{amount:v,at:Date.now()}},true)){reopen('owed','#oInput',s);const x=$('oErr');if(x){x.textContent=saveErr(saveSettings.err);x.hidden=false}else toast(saveErr(saveSettings.err));return}toast('Долг себе на брокер: '+money(v));back('oSet')};
     $('oCancel').onclick=()=>{state.editing=null;render();back('oSet')};
     $('oInput').oninput=()=>$('oErr').hidden=true;
     return '';
@@ -2810,8 +2811,8 @@ function renderWallets(){
       if(!first&&Math.abs(r2(v-cur))>=1){state.recon={id:ed.id,from:cur,to:v};render();return}
       /* kopecks off: a new typed balance, it holds every record saved up to now; the same sum: only checked (reAnchor) */
       const same=!first&&r2(v)===cur;
-      if(await saveSettings({wallets:{...ws,[ed.id]:reAnchor(ws[ed.id],v,ed.id)}})) toast(`${ed.name}: ${money(v)}${same?' — сумма та же, сверено':''}`);
-      else{reopen('w-'+ed.id,'#wInput',raw);const er=$('wErr');if(er){er.textContent=saveErr(saveSettings.err);er.hidden=false}}};
+      if(await saveSettings({wallets:{...ws,[ed.id]:reAnchor(ws[ed.id],v,ed.id)}},true)) toast(`${ed.name}: ${money(v)}${same?' — сумма та же, сверено':''}`);
+      else{reopen('w-'+ed.id,'#wInput',raw);const er=$('wErr');if(er){er.textContent=saveErr(saveSettings.err);er.hidden=false}else toast(saveErr(saveSettings.err))}};
     $('wCancel').onclick=()=>{fresh();state.editing=null;render()};
     /* typing the sum again takes the old message away, as in the main form */
     $('wInput').oninput=()=>{$('wErr').hidden=true;$('wInput').setAttribute('aria-invalid',false)};
@@ -2858,7 +2859,7 @@ function bindXfer(){
     state.xfer={from,to};state.xferOpen=false;fresh();
     try{const id=await store.add({type:'transfer',from,to,amount:Math.round(v*100)/100,date:iso(now),...(note?{note}:{}),created:Date.now()});toast(`Перевод: ${WNAME[from]} → ${WNAME[to]}, ${money(v)}`,()=>store.remove(id))}
     /* the store already drew the screen back (the form is gone): it opens again with what was typed */
-    catch(x){state.xfer={from,to,amount:raw,note};state.xferOpen=true;render();$('xAmount')?.focus({preventScroll:true});const m=x?.code==='quota_exceeded'?saveErr(x):'Не получилось сохранить перевод. Попробуйте ещё раз.', er=$('xErr');if(er){er.textContent=m;er.hidden=false}toast(m)}
+    catch(x){state.xfer={from,to,amount:raw,note};state.xferOpen=true;render();$('xAmount')?.focus({preventScroll:true});const m=x?.code==='quota_exceeded'?saveErr(x):'Не получилось сохранить перевод. Попробуйте ещё раз.', er=$('xErr');if(er){er.textContent=m;er.hidden=false}else toast(m)}
   };
 }
 
