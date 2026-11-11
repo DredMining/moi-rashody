@@ -1899,11 +1899,14 @@ const showMonth=d=>{const [y,m]=d.split('-').map(Number);state.y=y;state.m=m-1;s
 const NUM_ERR='Введите сумму числом, например 15 000,50';
 /* every date field: max is today, and a later date (an iPhone wheel ignores max) is stopped with this */
 const FUTURE_ERR='Дата не может быть позже сегодняшней.';
+/* a year typed not in full from a keyboard (0026, 0203): such a day is in no month here, and at the next start it was replaced by the day of entry.
+   Stopped on saving, not while typing — the year passes 0002, 0020, 0202 on its way to 2026 */
+const MIN_DAY='1900-01-01', EARLY_ERR='Проверьте год: дата слишком ранняя.', early=v=>!!v&&v<MIN_DAY;
 /* a form's date: a later one is said as soon as it is picked, and the message goes once the date is fixed
    (listened on the form, after its other watchers, so they don't take it away) */
 /* defaultValue: the day the form opened with (a record's or a debt's own, written a time zone ahead — «tomorrow» here) is not said:
    only a later day picked in it */
-const futWatch=(f,d,er)=>['input','change'].forEach(t=>f.addEventListener(t,()=>{if(d.value>iso(now)&&d.value!==d.defaultValue){er.textContent=FUTURE_ERR;er.hidden=false}else if(er.textContent===FUTURE_ERR)er.hidden=true}));
+const futWatch=(f,d,er)=>['input','change'].forEach(t=>f.addEventListener(t,()=>{if(d.value>iso(now)&&d.value!==d.defaultValue){er.textContent=FUTURE_ERR;er.hidden=false}else if(er.textContent===FUTURE_ERR||er.textContent===EARLY_ERR&&!early(d.value))er.hidden=true}));
 /* a transfer from and to the same account: «Куда» is marked with the message (fieldErr), and both go once the accounts differ — one picked again
    or both swapped (⇄). Only this message marks «Куда» (neither field has a description of its own): its mark goes even when another message
    (the sum, the date) has taken that place since */
@@ -3356,7 +3359,7 @@ function bindZakat(z,M){
     if(!start&&!z.start&&!z.wait) return bad('Укажите дату, когда деньги дошли до нисаба.',$('zStart'));
     if(start&&start>iso(now)) return bad('Дата не может быть позже сегодняшней.',$('zStart'));
     /* a year typed wrong (0203): such a date isn't counted right — the years after it are written without leading zeros */
-    if(start&&start<'1900-01-01') return bad('Проверьте год: дата слишком ранняя.',$('zStart'));
+    if(early(start)) return bad(EARLY_ERR,$('zStart'));
     if(bv&&!(b>=0)) return bad('Брокерский счёт — числом, например 150000.',$('zBroker'));
     const nz={...z,metal,price:r2(price)};
     /* a new price or metal — or the same price saved once «обновите её» is shown (he checked it): the reminder starts over.
@@ -3548,6 +3551,7 @@ function bindEdits(root){
       const p={amount:Math.round(v*100)/100,date:E.date.value||i.date};
       /* its own day may be «tomorrow» here (written a time zone ahead): only a later day picked now is stopped */
       if(p.date>iso(now)&&p.date!==i.date) return fail(FUTURE_ERR);
+      if(early(p.date)&&p.date!==i.date) return fail(EARLY_ERR);
       if(E.from){if(E.from.value===E.to.value){fieldErr(E.to,err);return fail(SAME_ERR)}p.from=E.from.value;p.to=E.to.value}
       if(E.acc) p.acc=E.acc.value||'';
       /* the result of an ended trip lies on no account: its money is already counted where the trip money was */
@@ -4287,6 +4291,7 @@ function bindDebtEdit(list){
       /* the same cap as a new debt; a sum already over it (saved before the cap) may stay as it is. bad() marks only an empty or unread sum */
       if(amount>MAX_ENTRY&&Math.abs(amount-(+d.amount||0))>=0.005){fieldErr(f.elements.amount,err);return bad(BIG_ERR())}
       if(date>iso(now)&&date!==d.date) return bad(FUTURE_ERR);
+      if(early(date)&&date!==d.date) return bad(EARLY_ERR);
       if(amount<back-0.005) return bad(backWhy(d));
       const patch={name,amount,date,note,closedAt:amount-back>0.005?0:(d.closedAt||Date.now())};
       const pre=d.mine?'Взял в долг: ':'Дал в долг: ', rec=loanRec(d);
@@ -4317,7 +4322,7 @@ $('oweForm').onsubmit=async e=>{
   if(!name){err.textContent='Впишите, у кого взяли.';err.hidden=false;fieldErr($('oName'),err);$('oName').focus({preventScroll:true});return}
   if(!(amount>0)){err.textContent=$('oAmount').value.trim()&&isNaN(amount)?NUM_ERR+'.':'Введите сумму больше нуля.';err.hidden=false;fieldErr($('oAmount'),err);$('oAmount').focus({preventScroll:true});return}
   if(amount>MAX_ENTRY){err.textContent=BIG_ERR();err.hidden=false;fieldErr($('oAmount'),err);$('oAmount').focus({preventScroll:true});return}
-  if($('oDate').value>iso(now)){err.textContent=FUTURE_ERR;err.hidden=false;$('oDate').focus({preventScroll:true});return}
+  if($('oDate').value>iso(now)||early($('oDate').value)){err.textContent=early($('oDate').value)?EARLY_ERR:FUTURE_ERR;err.hidden=false;$('oDate').focus({preventScroll:true});return}
   err.hidden=true;
   try{
     const amt=Math.round(amount*100)/100, date=$('oDate').value||iso(now), acc=$('oAcc').value;
@@ -4343,7 +4348,7 @@ $('debtForm').onsubmit=async e=>{
   if(!name){err.textContent='Впишите, кто взял в долг.';err.hidden=false;fieldErr($('dName'),err);$('dName').focus({preventScroll:true});return}
   if(!(amount>0)){err.textContent=$('dAmount').value.trim()&&isNaN(amount)?NUM_ERR+'.':'Введите сумму больше нуля.';err.hidden=false;fieldErr($('dAmount'),err);$('dAmount').focus({preventScroll:true});return}
   if(amount>MAX_ENTRY){err.textContent=BIG_ERR();err.hidden=false;fieldErr($('dAmount'),err);$('dAmount').focus({preventScroll:true});return}
-  if($('dDate').value>iso(now)){err.textContent=FUTURE_ERR;err.hidden=false;$('dDate').focus({preventScroll:true});return}
+  if($('dDate').value>iso(now)||early($('dDate').value)){err.textContent=early($('dDate').value)?EARLY_ERR:FUTURE_ERR;err.hidden=false;$('dDate').focus({preventScroll:true});return}
   const amt=Math.round(amount*100)/100, date=$('dDate').value||iso(now), acc=$('dAcc').value, btn=$('debtForm').querySelector('.submit');
   const rec={type:'debt',dir:'out',amount:amt,acc,date,label:'Дал в долг: '+name,created:Date.now()};
   /* more than the account holds: said first, a second «Записать долг» goes ahead */
@@ -4417,7 +4422,7 @@ $('tIn').onclick=()=>{state.type='in';state.scope='own';renderChips()};
 $('sOwn').onclick=()=>{state.scope='own';renderChips()};
 $('sTrip').onclick=()=>{state.scope='trip';renderChips()};
 /* typing the sum takes its old error away — not «later than today» while the date is still later */
-$('amount').addEventListener('input',()=>{const er=$('formErr');if(!(er.textContent===FUTURE_ERR&&$('date').value>iso(now)))er.hidden=true});
+$('amount').addEventListener('input',()=>{const er=$('formErr');if(!(er.textContent===FUTURE_ERR&&$('date').value>iso(now)||er.textContent===EARLY_ERR&&early($('date').value)))er.hidden=true});
 let dateTouched=false;
 function dateLabel(){
   const v=$('date').value||iso(now), y=new Date(now);y.setDate(y.getDate()-1);
@@ -4430,7 +4435,7 @@ function dateLabel(){
 let dateKeys=false;
 $('dateBtn').onclick=()=>{const d=$('date');d.hidden=!d.hidden;dateKeys=false;if(!d.hidden){d.focus({preventScroll:true});try{d.showPicker()}catch(e){}}};
 /* a later date (an iPhone wheel lets it through) is said at once, and the field stays open to fix it */
-$('date').addEventListener('change',()=>{dateLabel();const fut=$('date').value>iso(now), er=$('formErr');if(fut||!dateKeys)$('date').hidden=!fut;if(fut){er.textContent=FUTURE_ERR;er.hidden=false}else if(er.textContent===FUTURE_ERR)er.hidden=true});
+$('date').addEventListener('change',()=>{dateLabel();const fut=$('date').value>iso(now), er=$('formErr');if(fut||!dateKeys)$('date').hidden=!fut;if(fut){er.textContent=FUTURE_ERR;er.hidden=false}else if(er.textContent===FUTURE_ERR||er.textContent===EARLY_ERR&&!early($('date').value))er.hidden=true});
 $('date').addEventListener('keydown',e=>{if(e.key!=='Tab')dateKeys=true});
 $('date').addEventListener('blur',()=>dateKeys=false);
 $('noteBtn').onclick=()=>{$('noteBtn').hidden=true;$('note').hidden=false;$('note').focus({preventScroll:true})};
@@ -4716,13 +4721,13 @@ async function saveEntry(acc,opt={}){
 }
 $('form').onsubmit=e=>{
   e.preventDefault();
-  const err=$('formErr'), bad=t=>{err.textContent=t;err.hidden=false;fieldErr(t===FUTURE_ERR?$('date'):$('amount'),err);return false};
+  const err=$('formErr'), bad=t=>{err.textContent=t;err.hidden=false;fieldErr(t===FUTURE_ERR||t===EARLY_ERR?$('date'):$('amount'),err);return false};
   const raw=$('amount').value.trim(), {amount,word}=parseEntry(raw);
   if(!(amount>0)){bad(raw&&isNaN(amount)?NUM_ERR+'.':'Введите сумму больше нуля.');$('amount').focus({preventScroll:true});return}
   if(amount>MAX_ENTRY){bad(BIG_ERR());$('amount').focus({preventScroll:true});return}
   refreshToday();
   const date=$('date').value||iso(now);
-  if(date>iso(now)){bad(FUTURE_ERR);$('date').hidden=false;return}
+  if(date>iso(now)||early(date)){bad(early(date)?EARLY_ERR:FUTURE_ERR);$('date').hidden=false;return}
   err.hidden=true;
   /* «28500 командировочные» on «Доход»: trip money, not his income (no % to the broker) — a trip record, saved as «+ Пришли командировочные» saves it (afterCat) */
   const type=state.type, ta=type==='in'?guessHit(word,'in','trip'):null, scope=ta?'trip':state.scope, hit=ta||guessHit(word,type,scope);
