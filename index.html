@@ -103,7 +103,7 @@ img{max-width:100%}
   /* the glass tab bar: its tint over the blurred page (and the denser one where the browser can't blur), the light on its rim,
      the picked tab's capsule — its tint and the soft glow around it (the app's own wine, never a new colour) */
   --glass:rgb(48 38 43 / .56); --glass-solid:rgb(30 24 28 / .94); --glass-rim:rgb(255 255 255 / .16);
-  --cap-tint:rgb(240 140 160 / .2); --cap-glow:rgb(178 58 85 / .42);
+  --cap-tint:rgb(240 140 160 / .3); --cap-glow:rgb(178 58 85 / .5); --cap-halo:rgb(178 58 85 / .2); --ico-on:#FFB4C2;
   /* the bar's place: its height, its gap to the screen's edge (over the home indicator on an iPhone), the room the page keeps under itself for it */
   --tabbar-h:64px; --tabbar-gap:max(10px,calc(env(safe-area-inset-bottom,0px) - 14px),calc(var(--simulator-safe-bottom,0px) - 14px));
   --tabbar-room:calc(var(--tabbar-h) + var(--tabbar-gap) + 6px);
@@ -121,7 +121,7 @@ img{max-width:100%}
   --raised:var(--surface); --seg-ring:var(--field-line); --seg-id-ring:0 0 #0000; --track:var(--line);
   --toast-bg:var(--ink); --toast-ink:var(--bg); --toast-ring:0 0 #0000;
   --glass:rgb(38 50 78 / .56); --glass-solid:rgb(21 30 48 / .94);
-  --cap-tint:rgb(91 140 255 / .22); --cap-glow:rgb(59 107 224 / .42);
+  --cap-tint:rgb(91 140 255 / .32); --cap-glow:rgb(59 107 224 / .5); --cap-halo:rgb(59 107 224 / .2); --ico-on:#9DBBFF;
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:var(--fs-md);line-height:1.5;font-variant-numeric:tabular-nums}
@@ -173,23 +173,28 @@ button{cursor:pointer}
    It flows, not slides: a spring (the script below the tabs' handlers) carries it, and the faster it goes the longer and thinner it is —
    it stretches on the way, gives a little past the new tab and settles into its shape. The rule here is its place before the script runs. */
 .tab-cap{position:absolute;z-index:0;top:6px;bottom:6px;left:6px;width:calc((100% - 12px) / 5);border-radius:calc(var(--tabbar-h) / 2 - 6px);pointer-events:none;
-  background:radial-gradient(120% 100% at 50% 0%,var(--cap-tint),rgb(255 255 255 / 0) 72%),linear-gradient(180deg,rgb(255 255 255 / .17),rgb(255 255 255 / .05));
-  box-shadow:inset 0 1px 0 rgb(255 255 255 / .34),inset 0 0 0 1px rgb(255 255 255 / .09),inset 0 -6px 10px -8px rgb(255 255 255 / .22),0 0 14px var(--cap-glow);
+  /* its light, in layers (all still: drawn once, moved as a picture): a bright streak on the top of the glass, the wine tint from above,
+     a soft light in the middle behind the icon, the glass itself; then the rim, the inner glow at the bottom, a near glow and a wide faint halo */
+  background:radial-gradient(64% 34% at 50% 0%,rgb(255 255 255 / .26),rgb(255 255 255 / 0) 100%),radial-gradient(120% 100% at 50% 0%,var(--cap-tint),rgb(255 255 255 / 0) 72%),radial-gradient(55% 60% at 50% 42%,rgb(255 255 255 / .1),rgb(255 255 255 / 0) 100%),linear-gradient(180deg,rgb(255 255 255 / .19),rgb(255 255 255 / .06));
+  box-shadow:inset 0 1px 0 rgb(255 255 255 / .42),inset 0 0 0 1px rgb(255 255 255 / .11),inset 0 -7px 12px -8px rgb(255 255 255 / .3),inset 0 0 14px var(--cap-halo),0 0 12px var(--cap-glow),0 0 26px var(--cap-halo);
   transform:translate3d(calc(var(--tab-i,2) * 100%),0,0);transform-origin:0 50%;will-change:transform}
 /* held under a finger: the capsule comes to the finger and goes with it (the same spring, a stiff one), the tab it is over lights up (.hot)
    in place of the chosen one (.drag). The bar itself takes the touch — no scroll, no text picking, no callout */
+/* the flash at the stop: a light inside the capsule that the script brightens for a moment as the capsule arrives (opacity only) */
+.tab-cap i{position:absolute;inset:0;border-radius:inherit;opacity:0;background:radial-gradient(75% 85% at 50% 30%,rgb(255 255 255 / .34),rgb(255 255 255 / 0) 100%)}
 .tabs,.tabs *{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-.tabs button{position:relative;z-index:1;border:0;background:transparent;padding:2px 0 1px;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--muted);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent;transition:color .28s ease;outline-offset:-3px;border-radius:26px}
-.tabs .ico{position:relative;width:min(56px,100%);height:32px;border-radius:16px;display:grid;place-items:center;transition:color .28s ease,transform .34s cubic-bezier(.34,1.45,.64,1)}
-.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tabs button{position:relative;z-index:1;border:0;background:transparent;padding:2px 0 1px;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--muted);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent;transition:color .13s ease-out;outline-offset:-3px;border-radius:26px}
+.tabs .ico{position:relative;width:min(56px,100%);height:32px;border-radius:16px;display:grid;place-items:center;transition:color .13s ease-out,transform .15s cubic-bezier(.3,1.3,.6,1)}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;opacity:.82;transition:opacity .13s ease-out}
 /* the chosen tab: brighter, its icon a touch bigger (a transform: the label's weight and width stay, nothing in the row moves) */
 .tabs:not(.drag) button[aria-selected="true"],.tabs button.hot{color:var(--ink)}
-.tabs:not(.drag) button[aria-selected="true"] .ico,.tabs button.hot .ico{color:var(--accent);transform:scale(1.08)}
+.tabs:not(.drag) button[aria-selected="true"] .ico,.tabs button.hot .ico{color:var(--ico-on);transform:scale(1.1)}
+.tabs:not(.drag) button[aria-selected="true"] svg,.tabs button.hot svg{opacity:1}
 /* a press: the icon gives a little, as glass under a finger */
-.tabs button:active .ico{transform:scale(.88);transition-duration:.28s,.12s}
+.tabs button:active .ico{transform:scale(.88);transition-duration:.13s,.08s}
 /* a tab's page comes in softly with the capsule's move (from the page's own dark, never from blank: opacity only — a transform here would misplace the windows inside) */
-#scroller [role="tabpanel"]{animation:viewIn .24s ease-out}
-@keyframes viewIn{from{opacity:.35}to{opacity:1}}
+#scroller [role="tabpanel"]{animation:viewIn .14s ease-out}
+@keyframes viewIn{from{opacity:.55}to{opacity:1}}
 /* «Учёт» in the middle is a tab like the other four: the same plain «+» icon, no round button */
 .tabs .badge{position:absolute;top:0;right:8px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--warn);color:var(--badge-ink);font-family:var(--f-num);font-size:var(--fs-2xs);font-weight:600;line-height:17px;text-align:center;box-shadow:0 0 0 2px var(--surface)}
 .tabs .badge:empty{display:none}
@@ -1377,7 +1382,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   <button role="tab" id="tabLedger" aria-selected="true" aria-controls="viewLedger"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Учёт</button>
   <button role="tab" id="tabHistory" aria-selected="false" aria-controls="viewHistory"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1" fill="currentColor" stroke="none"/></svg></span>Записи</button>
   <button role="tab" id="tabDebts" aria-selected="false" aria-controls="viewDebts"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg><span class="badge" id="debtBadge" aria-hidden="true"></span></span>Долги<span class="sr" id="debtBadgeSr"></span></button>
-  <span class="tab-cap" aria-hidden="true"></span>
+  <span class="tab-cap" aria-hidden="true"><i></i></span>
 </nav>
 <div id="itemEditHost"></div>
 <!-- the trip windows of «Итоги» («Указать остаток», «+ Пришли командировочные»): out here, not in the card — the stats pages slide
@@ -4677,42 +4682,51 @@ $('toHistory').onclick=()=>{state.accFilter=null;state.scopeFilter='';setTab('hi
    under the finger and follows it (the same spring, a stiff one), the tab under it lights up; letting go opens that tab. A quick tap is the
    plain press it was. The press that the browser sends after the finger is lifted is dropped: the tab is already chosen. */
 var tabCapGo=null;
-/* How it is played: a tap's whole flight is worked out at once (the spring, 120 steps a second) and handed to the browser as one animation —
-   it runs off the page's own thread, at the screen's full rate (an iPhone gives a script 60 frames a second, an animation — all 120), and it
-   starts at the tap itself, before the tab's page is drawn, so drawing the page neither delays nor jolts it. A tap in mid-flight reads where
-   the capsule is and how fast, and flies on from there. Under a finger the spring is stepped frame by frame instead (it follows the finger). */
-(()=>{const nav=document.querySelector('.tabs'),cap=nav.querySelector('.tab-cap'),tabs=[...nav.querySelectorAll('[role="tab"]')],N=tabs.length,calm=matchMedia('(prefers-reduced-motion: reduce)'),H=1/120;
+/* How it is played: a tap's whole flight is worked out at once (the spring, 240 steps a second) and handed to the browser as one animation —
+   it runs off the page's own thread, at whatever rate the screen has (60, 90, 120: an iPhone gives a script 60 frames a second, an animation —
+   all of them). It starts when the finger touches the tab, not when it is lifted and not after the tab's page is drawn: the capsule and the
+   light on the icon answer at once, the page follows. A tap in mid-flight reads where the capsule is and how fast, and flies on from there
+   (the flight before it is taken off, never two at once). As the capsule arrives the light inside it brightens for a moment. A touch on
+   the chosen tab makes the capsule give a little. Under a held finger the spring is stepped frame by frame instead (it follows the finger). */
+(()=>{const nav=document.querySelector('.tabs'),cap=nav.querySelector('.tab-cap'),glint=cap.firstElementChild,tabs=[...nav.querySelectorAll('[role="tab"]')],N=tabs.length,calm=matchMedia('(prefers-reduced-motion: reduce)'),H=1/240;
   const chosen=()=>Math.max(0,tabs.findIndex(b=>b.getAttribute('aria-selected')==='true'));
-  let p=chosen(),T=p,v=0,raf=0,last=0,d=null,eat=0,fly=null;
-  const shape=(p,v)=>{const c=p+.5,s=Math.max(.92,Math.min(1+.42*(1-Math.exp(-Math.abs(v)/16)),2*(c+.04),2*(N+.04-c)));
-    return 'translate3d('+((c-s/2)*100).toFixed(2)+'%,0,0) scale('+s.toFixed(4)+','+(1-.16*(s-1)).toFixed(4)+')'};
+  let p=chosen(),T=p,v=0,raf=0,last=0,d=null,eat=0,fly=null,pre=0,flash=null,pulse=null;
+  const form=(p,s,y)=>'translate3d('+((p+.5-s/2)*100).toFixed(2)+'%,0,0) scale('+s.toFixed(4)+','+y.toFixed(4)+')';
+  const shape=(p,v)=>{const c=p+.5,s=Math.max(.92,Math.min(1+.4*(1-Math.exp(-Math.abs(v)/26)),2*(c+.04),2*(N+.04-c)));return form(p,s,1-.16*(s-1))};
   const draw=()=>{cap.style.transform=shape(p,v)};
   const step=(K,D,dt)=>{for(;dt>1e-6;dt-=.002){const h=Math.min(dt,.002);v+=(-K*(p-T)-D*v)*h;p+=v*h}};
+  const off=a=>{if(a){a.onfinish=null;try{a.cancel()}catch(e){}}};
   /* a flight under way is stopped where it is: p and v are taken from its table by the time it has run */
-  const land=()=>{if(!fly)return;const f=fly;fly=null;let t=0;try{t=+f.a.currentTime||0}catch(e){}const q=f.q[Math.min(f.q.length-1,Math.max(0,Math.round(t/1000/H)))];
-    p=q[0];v=q[1];f.a.onfinish=null;try{f.a.cancel()}catch(e){}};
+  const land=()=>{off(flash);flash=null;off(pulse);pulse=null;if(!fly)return;const f=fly;fly=null;let t=0;try{t=+f.a.currentTime||0}catch(e){}
+    const q=f.q[Math.min(f.q.length-1,Math.max(0,Math.round(t/1000/H)))];p=q[0];v=q[1];off(f.a)};
   const flow=()=>{land();if(calm.matches||!cap.animate){p=T;v=0;draw();return}
-    const q=[[p,v]];for(let n=0;n<180&&(Math.abs(p-T)>.002||Math.abs(v)>.02);n++){step(330,28,H);q.push([p,v])}
+    const q=[[p,v]];let near=0;for(let n=0;n<300&&(Math.abs(p-T)>.01||Math.abs(v)>.18);n++){step(760,44,H);q.push([p,v]);if(!near&&Math.abs(p-T)<.12)near=n}
     const p0=q[0];p=T;v=0;draw();if(q.length<2)return;q.push([T,0]);
     const a=cap.animate(q.map(x=>({transform:shape(x[0],x[1])})),{duration:(q.length-1)*H*1000,easing:'linear'});fly={a,q};p=p0[0];v=p0[1];
-    a.onfinish=()=>{if(fly&&fly.a===a){fly=null;p=T;v=0}}};
+    a.onfinish=()=>{if(fly&&fly.a===a){fly=null;p=T;v=0}};
+    flash=glint.animate([{opacity:0},{opacity:1,offset:.3},{opacity:0}],{duration:300,delay:near*H*1000,easing:'ease-out'})};
   tabCapGo=i=>{if(d&&d.on)return;if(i!==T){T=i;flow()}};
   draw();
   const tick=t=>{if(!d||!d.on){raf=0;return}step(2200,94,Math.min((t-last)/1000,.034));last=t;
     if(Math.abs(p-T)<.002&&Math.abs(v)<.02){p=T;v=0;raf=0}else raf=requestAnimationFrame(tick);draw()};
   const run=()=>{if(calm.matches){p=T;v=0;draw();return}if(!raf){last=performance.now();raf=requestAnimationFrame(tick)}};
+  const light=i=>{nav.classList.toggle('drag',i>=0);tabs.forEach((b,n)=>b.classList.toggle('hot',n===i))};
   const aim=()=>{const g=d.g,i=Math.max(0,Math.min(N-1,Math.floor((d.lx-g.l)/g.w)));T=Math.max(0,Math.min(N-1,(d.lx-g.l)/g.w-.5));
-    if(i!==d.i){d.i=i;tabs.forEach((b,n)=>b.classList.toggle('hot',n===i))}run()};
+    if(i!==d.i){d.i=i;light(i)}run()};
   const lift=()=>{if(!d||d.on)return;const r=nav.getBoundingClientRect(),pad=nav.clientLeft+6;land();d.on=true;d.g={l:r.left+pad,w:(r.width-2*pad)/N};
-    nav.classList.add('drag');try{nav.setPointerCapture(d.id)}catch(e){}aim()};
-  const drop=go=>{if(!d)return;clearTimeout(d.t);const on=d.on,i=d.i;d=null;if(!on)return;
-    nav.classList.remove('drag');tabs.forEach(b=>b.classList.remove('hot'));T=-1;
-    eat=0;if(go&&tabs[i]&&tabs[i].getAttribute('aria-selected')!=='true')tabs[i].click();eat=Date.now()+400;if(T<0){T=chosen();flow()}};
-  nav.addEventListener('pointerdown',e=>{if(d||e.button>0||e.isPrimary===false)return;d={id:e.pointerId,x:e.clientX,lx:e.clientX,i:-1,on:false,t:setTimeout(lift,200)}});
+    try{nav.setPointerCapture(d.id)}catch(e){}aim()};
+  /* the touch is over: what it lit is put out, and if no tab was opened by it the capsule goes back to the chosen one */
+  const settle=()=>{pre=0;if(d)return;light(-1);const c=chosen();if(T!==c||(!fly&&(p!==c||v))){T=c;flow()}};
+  const drop=go=>{if(!d)return;clearTimeout(d.t);const on=d.on,i=d.i;d=null;clearTimeout(pre);
+    if(!on){pre=setTimeout(settle,go?90:0);return}
+    T=-1;eat=0;if(go&&tabs[i]&&tabs[i].getAttribute('aria-selected')!=='true')tabs[i].click();eat=Date.now()+400;settle()};
+  nav.addEventListener('pointerdown',e=>{if(d||e.button>0||e.isPrimary===false)return;const i=tabs.indexOf(e.target.closest('[role="tab"]'));
+    d={id:e.pointerId,x:e.clientX,lx:e.clientX,i,on:false,t:setTimeout(lift,180)};clearTimeout(pre);pre=0;if(i<0)return;
+    light(i);if(i!==T){T=i;flow()}else if(!fly&&!calm.matches&&cap.animate){off(pulse);pulse=cap.animate([{transform:form(p,1,1)},{transform:form(p,.95,.95)},{transform:form(p,1,1)}],{duration:190,easing:'ease-out'})}});
   nav.addEventListener('pointermove',e=>{if(!d||e.pointerId!==d.id)return;d.lx=e.clientX;if(d.on)aim();else if(Math.abs(e.clientX-d.x)>8)lift()},{passive:true});
   addEventListener('pointerup',e=>{if(d&&e.pointerId===d.id)drop(true)});
   addEventListener('pointercancel',e=>{if(d&&e.pointerId===d.id)drop(false)});
-  /* a press on a tab: the dropped one after a carry; any other sends the capsule off at once, ahead of the page's drawing */
+  /* a press on a tab: the dropped one after a carry; any other (the keyboard's too) sends the capsule off ahead of the page's drawing */
   nav.addEventListener('click',e=>{if(Date.now()<eat){e.stopPropagation();e.preventDefault();return}const i=tabs.indexOf(e.target.closest('[role="tab"]'));if(i>=0)tabCapGo(i)},true)})();
 /* the tab bar from the keyboard: ← → Home End go along it (as it is drawn) and open that tab */
 document.querySelector('.tabs').addEventListener('keydown',e=>{const b=[...document.querySelectorAll('.tabs [role="tab"]')], i=b.indexOf(document.activeElement), j={ArrowLeft:i-1,ArrowRight:i+1,Home:0,End:b.length-1}[e.key];
