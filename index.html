@@ -2173,6 +2173,8 @@ function repClean(r){
   const o={...r,at:n(r.at),allow:n(r.allow),start:n(r.start),over:n(r.over),left:n(r.left),
     cats:r.cats.filter(c=>Array.isArray(c)&&typeof c[0]==='string'&&Number.isFinite(+c[1])).map(c=>[c[0],r2(+c[1])])}, p=r.partner;
   delete o.partner;if(!day(o.begun))delete o.begun;
+  /* hand: what he changed the result by himself in «Записи» (repHand) — a number, or not there */
+  if(Math.abs(n(r.hand))>=0.005)o.hand=n(r.hand);else delete o.hand;
   if(p&&typeof p==='object'&&!Array.isArray(p)) o.partner={ids:Array.isArray(p.ids)?p.ids.filter(i=>typeof i==='string'):[],
     names:Array.isArray(p.names)?p.names.filter(x=>typeof x==='string'&&x.trim()):[],amount:n(p.amount),ret:n(p.ret),left:n(p.left)};
   return o;
@@ -2210,6 +2212,15 @@ function repFix(o,x,a,b,dl,dd){
     if(!ids.length) delete r.partner;else r.partner={...q,ids,names:nm.every(Boolean)?[...new Set(nm)]:q.names,amount:r2(Math.max(0,(+q.amount||0)-(+dd.amount||0))),ret:r2(Math.max(0,(+q.ret||0)-(+dd.returned||0))),left:r2(Math.max(0,(+q.left||0)-debtLeft(dd)))}}
   o.patchSettings({tripReports:rs.map((y,j)=>j===k?r:y)});
 }
+/* a trip result's own sum fixed by hand in «Записи» (a → b): its report shows the new result, and what he changed it by is a line of
+   its own, «Итог исправлен вручную» — the report kept the old result, and the difference turned up later as «Поправка при сверке»,
+   though no balance was typed. Counted from what the report says, so a result fixed before this was kept is taken in too */
+function repHand(o,a,b){
+  const rs=o.settings().tripReports, k=Array.isArray(rs)?rs.findIndex(r=>repClean(r)&&Math.abs((+r.at||0)-(a.created||0))<=5000):-1;if(k<0) return;
+  const r=repClean(rs[k]), L=closeAfter(b,0), d=r2(L-(+r.left||0));if(Math.abs(d)<0.005) return;
+  r.left=L;r.hand=r2((+r.hand||0)+d);if(Math.abs(r.hand)<0.005)delete r.hand;
+  o.patchSettings({tripReports:rs.map((y,j)=>j===k?r:y)});
+}
 /* «Командировка: 3 окт. — 15 окт. 2026» (the year after the first day too when the trip went over the New Year); the dates stay on one line */
 function repTitle(r){
   const a=isoToDate(r.from), b=isoToDate(r.to), d=x=>dShort.format(x).replace(/ /g,' ');
@@ -2228,12 +2239,13 @@ function repLines(r){
   const cats=[...r.cats.map(([c,v])=>[catOf(c).name,+v||0]),...(+r.over>0?[['Перерасход на начало',+r.over]]:[])], spent=r2(cats.reduce((s,x)=>s+x[1],0)), L=+r.left||0;
   /* what a balance typed in the trip corrected: the result less what came in and went out (0 in a report of a trip without one);
      of it, his own money put in for an overspend then («Докинул на командировку» saved with that balance) is a line of its own */
-  const f0=r2(L-((+r.allow||0)+(+r.start||0)-spent)), tu=Math.abs(f0)>=0.005?repTopUp(r):0, fx=r2(f0-tu);
+  const f0=r2(L-((+r.allow||0)+(+r.start||0)-spent)), tu=Math.abs(f0)>=0.005?repTopUp(r):0, h=+r.hand||0, fx=r2(f0-tu-h);
   return [['Выдано',r2((+r.allow||0)+(+r.start||0)),+r.start>0?(+r.allow>0?`командировочные ${money(+r.allow)} + остаток на начало ${money(+r.start)}`:'остаток на начало'):''],
     ['Потрачено',spent,p?'только ваша часть':''],...cats.map(([n,v])=>[n,v,'','cat']),
     ...(p?[[(p.names||[]).length>1?'Напарники должны':'Напарник должен',+p.amount||0,[(p.names||[]).join(', '),pr.left<0.005?'вернул всё ✓':pr.ret>=0.01?`вернул ${money(pr.ret)}, осталось ${money(pr.left)}`:'ещё не вернул'].filter(Boolean).join(' · ')]]:[]),
     ...(tu>=0.005?[['Докинул при сверке',tu,'перерасход, записанный вашим расходом']]:[]),
     ...(Math.abs(fx)>=0.005?[['Поправка при сверке',fx,fx>0?'вписанный остаток больше, чем по записям':'вписанный остаток меньше, чем по записям','fix']]:[]),
+    ...(Math.abs(h)>=0.005?[['Итог исправлен вручную',h,h>0?'итог больше, чем по записям':'итог меньше, чем по записям','fix']]:[]),
     L>=0.005?['Остаток — в доходы',L,'','sum good']:L<=-0.005?['Перерасход — докинул',-L,'','sum bad']:['Остаток',0,'командировочные потрачены ровно','sum']];
 }
 /* a line's sum: the correction at a typed balance has its sign (+ more money than by the records) */
@@ -3541,7 +3553,7 @@ function bindEdits(root){
       /* its report follows too (a new category with the same sum as well) */
       /* a trip result's own sum fixed here: its % moves the debt to the broker typed since («Сверить»), as tripCloseFix does — else deleting it
          and ending the trip again owes the difference twice */
-      try{const tn=await store.batch(o=>{o.update(i.id,p);if(TRIP_END.includes(catOf(i.cat).id))brokerFix(o,i,{...i,...p});if(dp)o.updateDebt(d.id,dp);if(zx)o.patchSettings({zakat:zx.z});
+      try{const tn=await store.batch(o=>{o.update(i.id,p);if(TRIP_END.includes(catOf(i.cat).id)){brokerFix(o,i,{...i,...p});repHand(o,i,{...i,...p})}if(dp)o.updateDebt(d.id,dp);if(zx)o.patchSettings({zakat:zx.z});
           /* «Заплатил и за напарника» moved out of an ended trip (to «Личное») or back into it: the partner's loan leaves that trip's report or
              comes back with the record — it stayed there as «Напарник должен», though the expense was no longer the trip's */
           tfx.forEach(([x,,a,b])=>{const da=a&&!b?ptDebt(a):null, db=b&&!a?ptDebt(b):null;
