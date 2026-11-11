@@ -2791,7 +2791,7 @@ function renderWallets(){
   if(ed){
     /* the window closes (or the check question opens) and the next account's row comes up under the finger (fresh) */
     $('wForm').onsubmit=async e=>{e.preventDefault();fresh();const raw=$('wInput').value, v=parseNum(raw);
-      if(!(v>=0)){const er=$('wErr');er.textContent=NUM_ERR;er.hidden=false;$('wInput').setAttribute('aria-invalid',true);$('wInput').focus({preventScroll:true});return}
+      if(!(v>=0)){const er=$('wErr');er.textContent=NUM_ERR+'.';er.hidden=false;$('wInput').setAttribute('aria-invalid',true);$('wInput').focus({preventScroll:true});return}
       const cur=walletValue(ed.id), w0=ws[ed.id];
       state.editing=null;
       /* zeros left by «Очистить всё» in older versions were never typed: the first real amount just becomes the balance */
@@ -3268,7 +3268,7 @@ function zPaySheet(amount){
      (a digit too many, as in every form), is said under the field and the button waits */
   const ok=v=>v>0&&v<=MAX_ENTRY;
   const rf=bindAccPicker('zPayGo',acc=>{const v=zv();return `Оплатить ${v>0?money(r2(v))+' ':''}· ${ACC_NAME[acc]}`},acc=>{
-    const v=zv();if(!ok(v)){say(v>MAX_ENTRY?BIG_ERR():isNaN(v)?NUM_ERR+'.':'Впишите сумму больше нуля.');$('zAmt').focus({preventScroll:true});return}
+    const v=zv();if(!ok(v)){say(v>MAX_ENTRY?BIG_ERR():isNaN(v)?NUM_ERR+'.':'Введите сумму больше нуля.');$('zAmt').focus({preventScroll:true});return}
     state.pend.amount=r2(v);saveEntry(acc,{keepForm:true});
   },()=>{const v=zv();return v>0?v:0},()=>ok(zv()));
   $('zAmt').oninput=()=>{rf();const s=$('zAmt').value.trim(), v=zv();say(s&&isNaN(v)?NUM_ERR+'.':v>MAX_ENTRY?BIG_ERR():'')};
@@ -4277,7 +4277,7 @@ function bindDebtEdit(list){
       const name=f.elements.who.value.trim(), amount=Math.round(parseNum(f.elements.amount.value)*100)/100, date=f.elements.date.value||d.date, note=f.elements.note.value.trim();
       const back=(+d.returned||0)+(+d.forgiven||0);
       if(!name) return bad('Впишите имя.');
-      if(!(amount>0)) return bad(f.elements.amount.value.trim()&&isNaN(amount)?NUM_ERR+'.':'Впишите сумму больше нуля.');
+      if(!(amount>0)) return bad(f.elements.amount.value.trim()&&isNaN(amount)?NUM_ERR+'.':'Введите сумму больше нуля.');
       /* the same cap as a new debt; a sum already over it (saved before the cap) may stay as it is. bad() marks only an empty or unread sum */
       if(amount>MAX_ENTRY&&Math.abs(amount-(+d.amount||0))>=0.005){fieldErr(f.elements.amount,err);return bad(BIG_ERR())}
       if(date>iso(now)&&date!==d.date) return bad(FUTURE_ERR);
@@ -4309,7 +4309,7 @@ $('oweForm').onsubmit=async e=>{
   e.preventDefault();
   const err=$('oweErr'), name=$('oName').value.trim(), amount=parseNum($('oAmount').value);
   if(!name){err.textContent='Впишите, у кого взяли.';err.hidden=false;fieldErr($('oName'),err);$('oName').focus({preventScroll:true});return}
-  if(!(amount>0)){err.textContent=$('oAmount').value.trim()&&isNaN(amount)?NUM_ERR+'.':'Впишите сумму больше нуля.';err.hidden=false;fieldErr($('oAmount'),err);$('oAmount').focus({preventScroll:true});return}
+  if(!(amount>0)){err.textContent=$('oAmount').value.trim()&&isNaN(amount)?NUM_ERR+'.':'Введите сумму больше нуля.';err.hidden=false;fieldErr($('oAmount'),err);$('oAmount').focus({preventScroll:true});return}
   if(amount>MAX_ENTRY){err.textContent=BIG_ERR();err.hidden=false;fieldErr($('oAmount'),err);$('oAmount').focus({preventScroll:true});return}
   if($('oDate').value>iso(now)){err.textContent=FUTURE_ERR;err.hidden=false;$('oDate').focus({preventScroll:true});return}
   err.hidden=true;
@@ -4335,7 +4335,7 @@ $('debtForm').onsubmit=async e=>{
   e.preventDefault();
   const err=$('debtErr'), name=$('dName').value.trim(), amount=parseNum($('dAmount').value);
   if(!name){err.textContent='Впишите, кто взял в долг.';err.hidden=false;fieldErr($('dName'),err);$('dName').focus({preventScroll:true});return}
-  if(!(amount>0)){err.textContent=$('dAmount').value.trim()&&isNaN(amount)?NUM_ERR+'.':'Впишите сумму больше нуля.';err.hidden=false;fieldErr($('dAmount'),err);$('dAmount').focus({preventScroll:true});return}
+  if(!(amount>0)){err.textContent=$('dAmount').value.trim()&&isNaN(amount)?NUM_ERR+'.':'Введите сумму больше нуля.';err.hidden=false;fieldErr($('dAmount'),err);$('dAmount').focus({preventScroll:true});return}
   if(amount>MAX_ENTRY){err.textContent=BIG_ERR();err.hidden=false;fieldErr($('dAmount'),err);$('dAmount').focus({preventScroll:true});return}
   if($('dDate').value>iso(now)){err.textContent=FUTURE_ERR;err.hidden=false;$('dDate').focus({preventScroll:true});return}
   const amt=Math.round(amount*100)/100, date=$('dDate').value||iso(now), acc=$('dAcc').value, btn=$('debtForm').querySelector('.submit');
