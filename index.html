@@ -1177,7 +1177,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
 
   <div id="viewLedger" role="tabpanel" aria-labelledby="tabLedger">
   <section class="sumcard" aria-label="Траты в лимит за месяц">
-    <button type="button" id="themeToggle" class="theme-toggle" aria-label="Переключить вид: тёмный или светлый">🌓</button>
+    <button type="button" id="themeToggle" class="theme-toggle" aria-label="Переключить вид">🌓</button>
     <div class="lhead">
       <div class="ring" id="limitMeter" role="progressbar" aria-label="Лимит на месяц" aria-valuemin="0" aria-valuemax="100"><div><b id="limitPct">—</b></div></div>
       <div class="lr"><span id="sumLabel">Траты в лимит за месяц</span><span class="big" id="total">0 ₽</span>
@@ -5030,7 +5030,9 @@ $('exportBtn').onclick=async()=>{
 (function(){
   const KEY='rashody-theme';
   const mq=matchMedia('(prefers-color-scheme: dark)');
-  const applyTheme=t=>{document.documentElement.setAttribute('data-theme',t);const b=$('themeToggle');if(b){b.textContent=t==='dark'?'☀️':'🌙'}};
+  /* the button's name says which view is on and which one it turns on: a screen reader heard «Переключить вид: тёмный или светлый»
+     in both — and both views are dark (the black one and the dark blue one) */
+  const applyTheme=t=>{document.documentElement.setAttribute('data-theme',t);const b=$('themeToggle');if(b){b.textContent=t==='dark'?'☀️':'🌙';b.setAttribute('aria-label',t==='dark'?'Вид: чёрный. Включить тёмно-синий':'Вид: тёмно-синий. Включить чёрный')}};
   applyTheme(document.documentElement.getAttribute('data-theme')||(mq.matches?'dark':'light'));
   mq.addEventListener('change',e=>{try{if(!localStorage.getItem(KEY))applyTheme(e.matches?'dark':'light')}catch(x){}});
   /* the view picked is the one the phone's look gives: the choice is not kept, the app follows the phone again (owner's choice, 11.11.2026) —
