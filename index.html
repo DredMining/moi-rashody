@@ -1525,9 +1525,10 @@ function localStore(){
     const o={...data,...d,items:d.items||[],debts:d.debts||[],settings:d.settings||{},rev:d.rev,gen:d.gen};if(o.budget&&!o.settings.budget) o.settings={...o.settings,budget:o.budget};
     /* saved by an older version with a date that doesn't read: the record gets the day it was made (else today), so it shows
        in «Записи» and can be fixed; a debt's such date goes, a debt with no name gets one. Kept with the next change (see initStore) */
-    /* a sum written as text («5000», «1 350,50») is a number, read as the forms read it; one that doesn't read or is below zero becomes 0, to be fixed in «Записи» — what it was is added to the record's comment, to be typed back */
+    /* a sum written as text («5000», «1 350,50») is a number, read as the forms read it; one that doesn't read or is below zero becomes 0, to be fixed in «Записи» — what it was is added to the record's comment, to be typed back.
+       A sum that is not there at all (null) becomes 0 too: it stayed null, and the notice «поставлено 0 ₽» came back at every start */
     const num=v=>{const n=typeof v==='number'?v:typeof v==='string'?parseNum(v,9):NaN;return Number.isFinite(n)&&n>=0?n:null};
-    healed=0;healedSum=0;o.items=o.items.filter(obj).map(i=>{const a=num(i.amount);if(a===null){healedSum++;const v=typeof i.amount==='string'||typeof i.amount==='number'?String(i.amount).trim().slice(0,24):'';if(v&&(i.note==null||typeof i.note==='string'))i={...i,note:(i.note?i.note+' · ':'')+`сумма была «${v}»`}}if(a!==i.amount)i={...i,amount:a??0};
+    healed=0;healedSum=0;o.items=o.items.filter(obj).map(i=>{const a=num(i.amount);if(a===null){healedSum++;const v=typeof i.amount==='string'||typeof i.amount==='number'?String(i.amount).trim().slice(0,24):'';if(v&&(i.note==null||typeof i.note==='string'))i={...i,note:(i.note?i.note+' · ':'')+`сумма была «${v}»`}}if(a!==i.amount||a===null)i={...i,amount:a??0};
       if(okDay(i.date))return i;healed++;const c=+i.created;return {...i,date:iso(c>0?new Date(c):new Date())}});
     o.debts=o.debts.filter(obj).map(x=>{const y=x.date==null||okDay(x.date)?{...x}:(({date,...r})=>r)(x);if(typeof y.name!=='string'||!y.name.trim())y.name='Без имени';return y});
     /* the zakat: a date or price that doesn't read goes; a year without its date goes whole (it can't be placed); a debt's zakat gets today */
