@@ -1198,8 +1198,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     --fs-2xs:12px;--fs-base:15px;--fs-md:16px;
     /* spending and minuses are red, not orange (owner, 11.11.2026) */
     --bad:#FF5252}
-  /* a reminder's colour is a strip along its whole left edge, bending round the corners, as in the night-blue look (owner, 12.11.2026;
-     a short straight bar inside the edge before) — the general rule of .alert and #sysAlerts .upd, nothing set here */
+  /* a reminder's colour: a straight strip at its very left edge, the whole height, its ends cut off by the round corners — no thin
+     tails running along the top and the bottom edge, as the inset shadow drew them (owner, 12.11.2026) */
+  [data-theme="dark"] .alert,[data-theme="dark"] #sysAlerts .upd{box-shadow:none;background-image:linear-gradient(var(--alert-c,var(--warn)),var(--alert-c,var(--warn)));background-repeat:no-repeat;background-position:0 0;background-size:3px 100%}
+  [data-theme="dark"] #sysAlerts .upd{--alert-c:var(--accent)}
   /* «К оплате» in the zakat window: its red is a short straight bar as well (a 3px edge would bend round the corner) */
   [data-theme="dark"] .zdue{border-left:1px solid var(--line);background-image:linear-gradient(var(--bad),var(--bad));background-repeat:no-repeat;background-position:6px 50%;background-size:3px calc(100% - 16px)}
   [data-theme="dark"] .zdue,[data-theme="dark"] #zakatSheet .zdue{padding-left:16px}
