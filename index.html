@@ -647,6 +647,8 @@ input.num::placeholder{font-family:var(--f-body)}
 .lparts .kop{font-size:max(var(--fs-2xs),.8em);color:var(--muted)}
 .alerts{display:flex;flex-direction:column;gap:var(--gap-stack)}
 .alerts:empty{display:none}
+/* the notes between the month card and «Новая запись» stand closer: 12px above, below and between them (owner, 12.11.2026) */
+#alerts{gap:12px;margin-block:calc(12px - var(--gap-stack))}
 .alert{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);box-shadow:inset 3px 0 0 var(--alert-c,var(--warn));padding:10px var(--pad-card);font-size:var(--fs-base)}
 .alert>span{flex:1 1 10em;min-width:0;overflow-wrap:anywhere}
 .alert b{font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
