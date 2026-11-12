@@ -693,6 +693,13 @@ input.num::placeholder{font-family:var(--f-body)}
 #wipeBk{scroll-margin-bottom:16px}
 .extras{grid-column:1/-1;display:flex;gap:var(--sp-2);flex-wrap:wrap}
 .chipbtn{border:1px solid var(--field-line);background:transparent;color:var(--muted);border-radius:var(--r-pill);padding:6px 14px;min-height:var(--h-l);font-size:var(--fs-sm)}
+/* «Сегодня»: the date's own field lies unseen over the button — a tap on it opens the phone's calendar at once, no field is ever shown;
+   the button only shows the day picked. 16px: a smaller field makes the iPhone zoom the page in */
+.datepick{position:relative;display:inline-flex}
+.datepick #date{position:absolute;inset:0;width:100%;height:100%;min-width:0;min-height:0;max-width:none;margin:0;padding:0;border:0;opacity:0;cursor:pointer;font-size:16px}
+.datepick:active>.chipbtn{transform:scale(.98);opacity:.82}
+.datepick:has(#date:focus-visible)>.chipbtn{outline:2px solid var(--accent);outline-offset:2px}
+.datepick:has(#date[aria-invalid="true"])>.chipbtn{border-color:var(--bad)}
 details.more{background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r)}
 .morebody{padding:0 var(--pad-card) var(--pad-card);display:flex;flex-direction:column;gap:var(--sp-3)}
 .bdwrap{display:flex;flex-direction:column;gap:var(--sp-3)}
@@ -1233,8 +1240,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     <form class="form" id="form" novalidate>
       <label class="amount"><input id="amount" autocomplete="off" inputmode="decimal" placeholder="0" aria-label="Сумма" aria-describedby="formErr"><span>₽</span></label>
       <p class="hint" id="hint" hidden></p>
-      <div class="extras"><button type="button" class="chipbtn" id="dateBtn" aria-label="Дата записи: Сегодня">Сегодня</button><button type="button" class="chipbtn" id="noteBtn">+ комментарий</button></div>
-      <input id="date" type="date" aria-label="Дата" hidden>
+      <div class="extras"><span class="datepick"><button type="button" class="chipbtn" id="dateBtn" tabindex="-1" aria-hidden="true">Сегодня</button><input id="date" type="date" aria-label="Дата записи: Сегодня"></span><button type="button" class="chipbtn" id="noteBtn">+ комментарий</button></div>
       <input id="note" placeholder="Комментарий" maxlength="80" aria-label="Комментарий" hidden>
       <p class="err" role="alert" id="formErr" hidden></p>
       <button class="submit" id="submitBtn" type="submit">Добавить расход</button>
@@ -4509,16 +4515,13 @@ function dateLabel(){
   const v=$('date').value||iso(now), y=new Date(now);y.setDate(y.getDate()-1);
   const t=v===iso(now)?'Сегодня':v===iso(y)?'Вчера':dayText(v);
   /* the screen reader hears the date that is shown, not only «Дата записи» */
-  $('dateBtn').textContent=t;$('dateBtn').setAttribute('aria-label','Дата записи: '+t);
+  $('dateBtn').textContent=t;$('date').setAttribute('aria-label','Дата записи: '+t);
 }
-/* typed from a keyboard (a computer, a hardware keyboard), every digit is a «change»: the field stays open (it goes on save, or with the date button) —
-   not hidden after the first digit, and not on leaving it either: the button under it would jump away from the click */
-let dateKeys=false;
-$('dateBtn').onclick=()=>{const d=$('date');d.hidden=!d.hidden;dateKeys=false;if(!d.hidden){d.focus({preventScroll:true});try{d.showPicker()}catch(e){}}};
-/* a later date (an iPhone wheel lets it through) is said at once, and the field stays open to fix it */
-$('date').addEventListener('change',()=>{dateLabel();const fut=$('date').value>iso(now), er=$('formErr');if(fut||!dateKeys)$('date').hidden=!fut;if(fut){er.textContent=FUTURE_ERR;er.hidden=false}else if(er.textContent===FUTURE_ERR||er.textContent===EARLY_ERR&&!early($('date').value))er.hidden=true});
-$('date').addEventListener('keydown',e=>{if(e.key!=='Tab')dateKeys=true});
-$('date').addEventListener('blur',()=>dateKeys=false);
+/* the unseen date field over «Сегодня» (.datepick): a finger's tap opens the phone's calendar by itself; a mouse's click on a computer
+   only picks a part of the date, so there the calendar is opened here */
+$('date').addEventListener('click',()=>{if(matchMedia('(hover:hover) and (pointer:fine)').matches)try{$('date').showPicker()}catch(e){}});
+/* a later date (an iPhone wheel lets it through) is said at once, and the button gets a red edge */
+$('date').addEventListener('change',()=>{dateLabel();const fut=$('date').value>iso(now), er=$('formErr');if(fut){er.textContent=FUTURE_ERR;er.hidden=false;fieldErr($('date'),er)}else if(er.textContent===FUTURE_ERR||er.textContent===EARLY_ERR&&!early($('date').value))er.hidden=true});
 $('noteBtn').onclick=()=>{$('noteBtn').hidden=true;$('note').hidden=false;$('note').focus({preventScroll:true})};
 $('date').value=iso(now);
 $('date').max=iso(now);
@@ -4784,7 +4787,7 @@ async function saveEntry(acc,opt={}){
     closeSheet();
     /* the next record starts from today again; the summary stays on this month — the toast says which day it went to */
     if(!opt.keepForm){$('amount').value='';$('note').value='';$('note').hidden=true;$('noteBtn').hidden=false;
-      $('date').value=iso(now);$('date').hidden=true;dateTouched=false;dateLabel();$('formErr').hidden=true}
+      $('date').value=iso(now);dateTouched=false;dateLabel();$('formErr').hidden=true}
     /* a trip marked as begun: the next expense starts on «Командировка» again — «Личное» was for that one record */
     if(!opt.keepForm&&state.scopeDef==='trip'&&state.type==='out')state.scope='trip';
     renderChips();render();
@@ -4808,7 +4811,7 @@ $('form').onsubmit=e=>{
   if(amount>MAX_ENTRY){bad(BIG_ERR());$('amount').focus({preventScroll:true});return}
   refreshToday();
   const date=$('date').value||iso(now);
-  if(date>iso(now)||early(date)){bad(early(date)?EARLY_ERR:FUTURE_ERR);$('date').hidden=false;return}
+  if(date>iso(now)||early(date)){bad(early(date)?EARLY_ERR:FUTURE_ERR);return}
   err.hidden=true;
   /* «28500 командировочные» on «Доход»: trip money, not his income (no % to the broker) — a trip record, saved as «+ Пришли командировочные» saves it (afterCat) */
   const type=state.type, ta=type==='in'?guessHit(word,'in','trip'):null, scope=ta?'trip':state.scope, hit=ta||guessHit(word,type,scope);
