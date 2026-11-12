@@ -99,6 +99,26 @@ form{display:grid;gap:8px}
 .key.go{grid-row:2 / span 3;grid-column:4;height:auto;background:var(--accent-btn);color:#fff;font-size:15px;font-weight:600;line-height:1.25;text-align:center;padding:0 4px}
 .key.go:active,.key.go.hit{background:#C9506B}
 .kb .grab{width:36px;height:5px;border-radius:3px;background:var(--track);margin:0 auto 10px}
+.seg.vars{display:grid;grid-template-columns:1fr 1fr}
+
+/* ---- «iPhone»: цифровая клавиатура iPhone, снятая с настоящего снимка экрана (iOS, 440pt): подложка 322pt со скруглением 30 сверху,
+   клавиши 138×50 через 6–6.5, скругление 8, отступ 5 по краям и 25 сверху, 80 под последним рядом; цифра ≈23pt, буквы ≈10pt полужирные.
+   Шрифт системный: на iPhone это SF Pro, как у клавиатуры. Тёмная — по памяти, цвета примерные ---- */
+.kb.ios{--ik:rgb(247 247 251);--ik-on:rgb(188 190 197);--ink-k:#000;padding:25px 5px calc(var(--safe-bottom) + 46px);border-radius:30px 30px 0 0;
+  background:rgb(198 197 202 / .94);box-shadow:none;font-family:-apple-system,"SF Pro Text",system-ui,"Segoe UI",sans-serif}
+.kb.ios.dark{--ik:rgb(100 100 105);--ik-on:rgb(142 142 148);--ink-k:#fff;background:rgb(44 44 48 / .94)}
+.kb.ios .grab{display:none}
+.kb.ios .keys{gap:6px 6.5px}
+.kb.ios .key{height:50px;border-radius:8px;background:var(--ik);color:var(--ink-k);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding-top:7px;transition:background .06s}
+.kb.ios .key:active,.kb.ios .key.hit{background:var(--ik-on);transform:none}
+.kb.ios .key .d{font-size:23px;font-weight:400;line-height:24px}
+.kb.ios .key .l{margin-top:1px;font-size:10px;font-weight:600;line-height:12px;letter-spacing:1.5px;padding-left:1.5px;min-height:12px}
+.kb.ios .key.fn{background:transparent}
+.kb.ios .key.fn:active,.kb.ios .key.fn.hit{background:var(--ik)}
+.kb.ios .key.fn .d{font-size:26px;line-height:28px}
+.kb.ios .key[data-k="del"]{justify-content:center;padding-top:0}
+.kb.ios .key svg{width:25px;height:21px;stroke-width:1.7}
 
 /* сообщение */
 .toast{position:fixed;left:16px;right:16px;bottom:calc(var(--kb-h) + 12px);z-index:30;padding:12px 14px;border-radius:14px;background:var(--raised);
@@ -111,11 +131,13 @@ form{display:grid;gap:8px}
 <main id="page">
   <div class="lab">
     <span class="tag">Макет · своя клавиатура</span>
-    <div class="seg" role="group" aria-label="Вариант клавиатуры">
-      <button type="button" id="vA" aria-pressed="true">А · как на iPhone</button>
-      <button type="button" id="vB" aria-pressed="false">Б · с «Добавить»</button>
+    <div class="seg vars" id="vars" role="group" aria-label="Вариант клавиатуры">
+      <button type="button" data-v="ios" aria-pressed="true">iPhone · светлая</button>
+      <button type="button" data-v="iosd" aria-pressed="false">iPhone · тёмная</button>
+      <button type="button" data-v="a" aria-pressed="false">А · цвета приложения</button>
+      <button type="button" data-v="b" aria-pressed="false">Б · с «Добавить»</button>
     </div>
-    <p class="why">Нажми на сумму — снизу выедет клавиатура приложения, без полоски со стрелками и галочкой. Закрыть — нажать мимо неё. Долгое нажатие на ⌫ стирает всё.</p>
+    <p class="why">Нажми на сумму — снизу выедет клавиатура приложения, без полоски со стрелками и галочкой. Варианты можно переключать при открытой клавиатуре. Закрыть — нажать мимо неё. Долгое нажатие на ⌫ стирает всё.</p>
   </div>
 
   <section class="card" aria-label="Заглушка карточки месяца">
@@ -175,7 +197,11 @@ const LAYOUT={
   a:['1','2','3','4','5','6','7','8','9',',','0','del'],
   b:['1','2','3','del','4','5','6','go','7','8','9',',','0','00'],
 };
-let variant='a', raw='', open=false, toastT=0;
+LAYOUT.ios=LAYOUT.iosd=LAYOUT.a;
+/* «iPhone»: буквы под цифрами — как на русской цифровой клавиатуре iPhone; стереть — значок iPhone (стрелка влево с крестиком), 24×20 */
+const LET={'2':'АБВГ','3':'ДЕЖЗ','4':'ИЙКЛ','5':'МНОП','6':'РСТУ','7':'ФХЦЧ','8':'ШЩЪЫ','9':'ЬЭЮЯ'};
+const ERASE_IOS='<svg viewBox="0 0 26 21" aria-hidden="true"><path d="M8.6 1.5h13.9a2.5 2.5 0 0 1 2.5 2.5v13a2.5 2.5 0 0 1-2.5 2.5H8.6L1.6 10.5z"/><path d="M12.6 6.6l7.4 7.8M20 6.6l-7.4 7.8"/></svg>';
+let variant='ios', raw='', open=false, toastT=0;
 
 /* сумма: до 9 цифр в рублях, одна запятая, до 2 цифр копеек; показ — с пробелами между тысячами, как в приложении */
 function press(k){
@@ -195,19 +221,22 @@ function draw(){
   $('val').textContent=show;$('ph').hidden=!!raw;
   $('amount').setAttribute('aria-label','Сумма: '+(show||'0')+' ₽');
 }
+const appKey=k=>k==='del'?`<button type="button" class="key fn" data-k="del" aria-label="Стереть">${ERASE}</button>`
+  :k==='go'?`<button type="button" class="key go" data-k="go">${$('submitBtn').textContent.replace(/^Добавить /,'Добавить<br>')}</button>`
+  :`<button type="button" class="key${k==='00'||k===','?' small':''}${k===','?' fn':''}" data-k="${k}">${k}</button>`;
+const iosKey=k=>k==='del'?`<button type="button" class="key fn" data-k="del" aria-label="Стереть">${ERASE_IOS}</button>`
+  :`<button type="button" class="key${k===','?' fn':''}" data-k="${k}"><span class="d">${k}</span><span class="l">${LET[k]||''}</span></button>`;
 function buildKeys(){
-  const box=$('keys');box.className='keys '+variant;
-  box.innerHTML=LAYOUT[variant].map(k=>k==='del'?`<button type="button" class="key fn" data-k="del" aria-label="Стереть">${ERASE}</button>`
-    :k==='go'?`<button type="button" class="key go" data-k="go">${$('submitBtn').textContent.replace(/^Добавить /,'Добавить<br>')}</button>`
-    :`<button type="button" class="key${k==='00'||k===','?' small':''}${k===','?' fn':''}" data-k="${k}">${k}</button>`).join('');
-  if(open)measure();
+  const ios=variant==='ios'||variant==='iosd', box=$('keys');
+  $('kb').classList.toggle('ios',ios);$('kb').classList.toggle('dark',variant==='iosd');
+  box.className='keys '+(ios?'a':variant);
+  box.innerHTML=LAYOUT[variant].map(ios?iosKey:appKey).join('');
+  if(open)place();
 }
 function measure(){const h=$('kb').offsetHeight;document.documentElement.style.setProperty('--kb-h',open?h+'px':'0px');return h}
-/* открыть: клавиатура выезжает, карточка «Новая запись» встаёт низом над ней с зазором 12px */
-function show(){
-  if(open)return;open=true;$('amount').classList.add('on');$('kb').classList.add('on');const h=measure();
-  requestAnimationFrame(()=>{const r=$('addBox').getBoundingClientRect(), d=r.bottom-(innerHeight-h-12);if(d>0)scrollBy({top:d,behavior:'smooth'})});
-}
+/* карточка «Новая запись» встаёт низом над клавиатурой с зазором 12px */
+function place(){const h=measure();requestAnimationFrame(()=>{const r=$('addBox').getBoundingClientRect(), d=r.bottom-(innerHeight-h-12);if(Math.abs(d)>1)scrollBy({top:d,behavior:'smooth'})})}
+function show(){if(open)return;open=true;$('amount').classList.add('on');$('kb').classList.add('on');place()}
 function hide(){if(!open)return;open=false;$('amount').classList.remove('on');$('kb').classList.remove('on');measure()}
 function say(t){const el=$('toast');el.textContent=t;el.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('on'),2600)}
 function submit(){
@@ -227,7 +256,7 @@ addEventListener('pointerup',up);addEventListener('pointercancel',up);
 $('amount').addEventListener('click',show);
 $('amount').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();show()}});
 /* мимо клавиатуры и поля — закрыть */
-document.addEventListener('pointerdown',e=>{if(open&&!e.target.closest('#kb,#amount,#submitBtn'))hide()});
+document.addEventListener('pointerdown',e=>{if(open&&!e.target.closest('#kb,#amount,#submitBtn,#vars'))hide()});
 $('form').addEventListener('submit',e=>{e.preventDefault();submit()});
 /* с клавиатуры компьютера — для проверки в симуляторе */
 addEventListener('keydown',e=>{
@@ -242,7 +271,9 @@ function label(){const inc=$('tIn').getAttribute('aria-pressed')==='true', trip=
   $('submitBtn').textContent=inc?'Добавить доход':trip?'Добавить расход в командировке':'Добавить расход';buildKeys()}
 $('tOut').onclick=()=>{pick('tOut','tIn');label()};$('tIn').onclick=()=>{pick('tIn','tOut');pick('sOwn','sTrip');label()};
 $('sOwn').onclick=()=>{pick('sOwn','sTrip');label()};$('sTrip').onclick=()=>{pick('sTrip','sOwn');label()};
-$('vA').onclick=()=>{variant='a';pick('vA','vB');buildKeys()};$('vB').onclick=()=>{variant='b';pick('vB','vA');buildKeys()};
+/* варианты переключаются и при открытой клавиатуре — чтобы сравнить */
+$('vars').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(!b)return;variant=b.dataset.v;
+  $('vars').querySelectorAll('[data-v]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));buildKeys()});
 addEventListener('resize',()=>{if(open)measure()});
 buildKeys();draw();
 </script>
