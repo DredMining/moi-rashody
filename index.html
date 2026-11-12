@@ -625,38 +625,31 @@ input.num::placeholder{font-family:var(--f-body)}
 #viewLedger .lparts>div{padding:3px 4px}
 #viewLedger .lparts b{font-size:clamp(var(--fs-2xs),3.4vw,13px)}
 #viewLedger .tripline{gap:5px;padding-top:6px}
-/* the month card: a ring of how much of the limit is spent, beside it the sum, «из 35 000 · осталось …»;
-   under them «Вне лимита» as a plain row, then the trip money in its own small plate */
-.lhead{display:flex;align-items:center;gap:14px}
-.ring{--p:0;--rc:var(--good);flex:none;width:103px;height:103px;border-radius:50%;background:conic-gradient(var(--rc) calc(var(--p) * 1%),var(--track) 0);display:grid;place-items:center}
-.ring.warn{--rc:var(--warn)}.ring.bad{--rc:var(--bad)}
-.ring>div{width:83px;height:83px;border-radius:50%;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
-.ring b{font-size:25px;font-weight:700;font-variant-numeric:tabular-nums}
-.ring.warn b{color:var(--warn-ink)}.ring.bad b{color:var(--bad)}
-/* «>999%» fits inside the ring only smaller (renderBudget) */
-.ring.over b{font-size:var(--fs-xl)}
-.lr{display:flex;flex-direction:column;gap:var(--sp-1);min-width:0;flex:1}
-/* the hero's label, as «Всего денег» and «Мне должны» */
-/* room on the right for the round view button in the card's corner (.theme-toggle): on a narrower phone the label wraps before it,
-   it used to run under the button (320–414px); at 430–440px it fits in one line as before */
-.lr #sumLabel{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;line-height:1.2;color:var(--muted);padding-right:calc(var(--h-s) + 2px)}
-/* the small blocks inside the month card (the limit's line, «Вне лимита», the trip money) are told apart by their fill alone, no frame */
-.lof{display:flex;align-items:center;justify-content:space-between;gap:4px 8px;flex-wrap:wrap;padding:4px 8px;border-radius:var(--r-md);background:var(--inset);font-size:var(--fs-xs);line-height:1.25;color:var(--muted);overflow-wrap:anywhere}
-/* «из 30 000 ₽» changes the limit: the line stays small, its tap area (::after) is 44px tall over the sum and «Вне лимита» around it,
-   the focus ring stays round the words. One line as long as it fits — up to the card's edge, over its padding as on a 320px phone;
-   wider (larger letter and word spacing, a zoomed page) it goes on a second line instead of past the screen's edge */
-#viewLedger .lof .linkbtn::after{content:'';position:absolute;inset:-15px 0}
-#viewLedger .lof .linkbtn{position:relative;font-size:var(--fs-xs);padding:0;margin:0;min-height:0;color:var(--muted);text-decoration:underline dotted;text-underline-offset:3px;white-space:normal;flex-shrink:0;max-width:calc(100% + 8px)}
-#limitLeft{display:block;min-width:0;font-weight:500;text-align:right}
-.lof .good{color:var(--good-ink)}.lof .warn{color:var(--warn-ink)}.lof .bad{color:var(--bad)}
-.lrows:empty{display:none}
-/* «Вне лимита» never breaks: on a narrow phone its sum goes under it */
-.lrows>div>span{white-space:nowrap}
-.lrows>div{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 8px;padding:4px 8px;border-radius:var(--r-md);background:var(--inset);font-size:var(--fs-2xs);line-height:1.2;color:var(--muted)}
-.lrows b{font-family:var(--f-num);font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}
-#viewLedger .lrows b{font-size:var(--fs-xs)}
 #viewLedger .tripline{margin:0;padding:7px 10px;gap:var(--sp-1);border:0;border-radius:var(--r-md);background:var(--inset)}
 #viewLedger .tripline .meter{height:4px}
+/* The month card (owner, 12.11.2026 — design-lab/sumcard.html, «Л»): big, what may still be spent this month; the label over it, the line
+   under it, the bar and a soft glow in the card's corner tell the month's state — the limit untouched, spending as usual, close to it
+   (from the «85%» the ring turned yellow at before), over it; no limit — what is spent, grey. Under the bar: what is spent «из 30 000 ₽»
+   (a tap changes the limit) and «вне лимита»; then the trip money left, with its own bar */
+.sumcard{--st:var(--good);--st-ink:var(--good-ink);background:radial-gradient(120% 120% at 100% 0%,color-mix(in srgb,var(--st) 22%,var(--surface)),var(--surface) 62%)}
+.sumcard[data-st="start"]{--st:var(--accent-btn);--st-ink:var(--accent)}
+.sumcard[data-st="near"]{--st:var(--accent);--st-ink:var(--accent)}
+.sumcard[data-st="over"]{--st:var(--bad);--st-ink:var(--bad)}
+.sumcard[data-st="none"]{--st:var(--muted);--st-ink:var(--muted)}
+.sumcard #sumLabel{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;line-height:1.2;color:var(--st-ink);padding-right:calc(var(--h-s) + 2px)}
+.sumcard #total{margin-top:-4px}
+.lmsg{margin-top:-6px;font-size:var(--fs-sm);line-height:1.3;color:var(--muted)}
+.lmsg:empty{display:none}
+.sumcard .meter.lim{height:4px}
+.sumcard .meter.lim i{background:var(--st)}
+.lfoot{display:flex;justify-content:space-between;align-items:baseline;gap:2px 10px;flex-wrap:wrap;font-size:var(--fs-xs);line-height:1.3;color:var(--muted)}
+.lfoot b{font-family:var(--f-num);font-weight:500;color:var(--ink);white-space:nowrap}
+.lfoot>span{min-width:0}
+.sumcard[data-st="none"] .lsp-t{display:none}
+/* «из 30 000 ₽» changes the limit: small, dotted, its tap area 44px tall */
+.lfoot #limitOf{position:relative;font-size:var(--fs-xs);padding:0;margin:0;min-height:0;color:var(--muted);text-decoration:underline dotted;text-underline-offset:3px;white-space:normal}
+.lfoot #limitOf::after{content:'';position:absolute;inset:-15px -4px}
+#tripOf b.good{color:var(--good-ink)}#tripOf b.neg{color:var(--bad)}
 /* «🧳 Командировочные» stays one piece: on a narrow phone «выдано …» goes under it */
 .thead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 8px;font-size:var(--fs-xs);line-height:1.2;color:var(--muted)}
 .thead b{color:var(--ink);font-weight:600;font-size:var(--fs-sm);line-height:1.2;white-space:nowrap}
@@ -1106,9 +1099,6 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
 .tripline{display:flex;flex-direction:column;gap:6px;padding-top:8px;margin-top:2px;border-top:1px solid var(--line)}
 .meter.trip i{background:var(--trip)}
 .meter.trip.bad i{background:var(--bad)}
-/* spent | left — or the overspend in red | spent; «не внесены» is a word, not a sum */
-#tripLeftLine b.neg{font-weight:600}
-#tripLeftLine b.none{font-family:var(--f-body);font-size:var(--fs-sm);color:var(--muted)}
 .sheet{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center}
 .sheet.centered{align-items:center;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
 /* a window in the middle comes up where it stands (as the zakat card), not from the bottom; the safe area is the backdrop's, not its own */
@@ -1264,7 +1254,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
    «Данные и копия» and «⇄ Перевод» on two lines: their tap areas (44px over a 20px line) don't lie over each other; the copy's buttons
    one to a line; a debt window's «Должен 1 239 567,89 ₽» — the sum on a line of its own, split between digit groups if it must;
    «Сравнение»: the two months' sums a half each, «Разница» on a line of its own under them */
-@media (max-width:319px){.lhead{flex-wrap:wrap;justify-content:center}.lr{flex-basis:100%}.panel.mcard,.bar{grid-template-columns:minmax(0,1fr)}#scopeFilter{height:auto}.whead{flex-wrap:wrap}
+@media (max-width:319px){.panel.mcard,.bar{grid-template-columns:minmax(0,1fr)}#scopeFilter{height:auto}.whead{flex-wrap:wrap}
   .mfoot{row-gap:24px}.bkgrid{grid-template-columns:minmax(0,1fr)}.dp-sum{flex-wrap:wrap;row-gap:0}.dp-sum b{flex-shrink:1}
   .cmp-head,.cmp-row{grid-template-columns:repeat(2,minmax(0,1fr))}.cmp-delta,.cmp-head>span:last-child{grid-column:1/-1}}
 @media (max-width:480px){.form{grid-template-columns:minmax(0,1fr)}.segs{grid-template-columns:1fr}}
@@ -1293,7 +1283,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
      both 13px in this look (owner, 12.11.2026; 14px before). One face in this look: the month's title of «Записи» and «Итоги» is set in the text face too */
   :root[data-theme="dark"]{--f-display:var(--f-body)}
   [data-theme="dark"] h2{font-size:13px;font-weight:600;line-height:1.2;letter-spacing:.06em;color:var(--muted)}
-  [data-theme="dark"] .lr #sumLabel{font-size:13px}
+  [data-theme="dark"] .sumcard #sumLabel{font-size:13px}
   /* the capitals over the big sums of «Деньги» and «Долги» («Всего денег», «Мне должны» / «Я должен») — 13px too (owner, 12.11.2026; 12px before) */
   [data-theme="dark"] .mtot .lbl,[data-theme="dark"] .debt-overview-head .lbl{font-size:13px}
   /* the month's three sums on Итоги are bold, as the big sum of a tab */
@@ -1351,18 +1341,15 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   <div class="alerts" id="sysAlerts" role="alert"></div>
 
   <div id="viewLedger" role="tabpanel" aria-labelledby="tabLedger">
-  <section class="sumcard" aria-label="Траты в лимит за месяц">
+  <section class="sumcard" id="sumCard" aria-label="Лимит на месяц">
     <button type="button" id="themeToggle" class="theme-toggle" aria-label="Переключить вид">🌓</button>
-    <div class="lhead">
-      <div class="ring" id="limitMeter" role="progressbar" aria-label="Лимит на месяц" aria-valuemin="0" aria-valuemax="100"><div><b id="limitPct">—</b></div></div>
-      <div class="lr"><span id="sumLabel">Траты в лимит за месяц</span><span class="big" id="total">0 ₽</span>
-        <span class="lof"><button type="button" class="linkbtn" id="limitOf" aria-haspopup="dialog"></button><span id="limitLeft"></span></span>
-        <div class="lrows" id="limitLine"></div></div>
-    </div>
+    <span id="sumLabel">Можно потратить</span><span class="big" id="total">0 ₽</span>
+    <span class="lmsg" id="limitMsg"></span>
+    <div class="meter lim" id="limitMeter" role="progressbar" aria-label="Лимит на месяц" aria-valuemin="0" aria-valuemax="100"><i></i></div>
+    <div class="lfoot"><span class="lsp"><span class="lsp-t">потрачено <b id="limitSpent"></b> </span><button type="button" class="linkbtn" id="limitOf" aria-haspopup="dialog"></button></span><span id="limitLine"></span></div>
     <div class="tripline" id="tripLine" hidden>
       <div class="thead"><b>🧳 Командировочные</b><span id="tripOf"></span></div>
       <div class="meter trip" id="tripMeter" role="progressbar" aria-label="Командировочные" aria-valuemin="0" aria-valuemax="100"><i></i></div>
-      <div class="tfoot" id="tripLeftLine"></div>
     </div>
   </section>
   <div class="alerts" id="alerts"></div>
@@ -2173,8 +2160,7 @@ function renderLedger(){
      spending it came of (tripOverBy), in the limit, the month's «Расходы» and its bars, Сравнение and the CSV alike; when the trip ends it
      becomes the «Докинул на командировку» record, which counts the same way. In the bars it is that category: a line with no record (tripOver) */
   const ov=tripOverRec(), over=ov?ov.amount:0, out=ov?[...out0,ov]:out0, spent=r2(spent0+over), bal=r2(earned-spent), inLimit=r2(inLimit0+over);
-  /* _full: the whole sum, kept for fitBig (on a narrow phone it may show it without kopecks) */
-  $('total').textContent=$('total')._full=moneyR(inLimit);
+  /* the big sum of the month card (#total, what may still be spent) is set by renderBudget */
   /* _full: the whole sum, kept for fitMonth (it may show it shorter) */
   $('incomeTotal').textContent=$('incomeTotal')._full=moneyR(earned);
   $('allOut').textContent=$('allOut')._full=moneyR(spent);
@@ -2382,23 +2368,21 @@ const overDay=day=>{const o=Object.values(tripOverBy());return o.length===1&&o[0
 /* the trip line in the summary card: a bar that fills as trip money is spent, and what is spent and left — or the overspend in red.
    Which account the money went from is not its business: the accounts show that */
 function renderTripLine(){
-  const box=$('tripLine'), {avail,spent,left,got}=tripNow(), m=$('tripMeter'), l=$('tripLeftLine');
+  const box=$('tripLine'), {avail,spent,left,got}=tripNow(), m=$('tripMeter'), l=$('tripOf');
   /* only while a trip is marked as begun (owner's choice, 24.10.2026): trip money that came early waits on Итоги; ended — gone */
   if(!tripOn()){box.hidden=true;return}
   box.hidden=false;
-  /* a label stays with its sum (no-break spaces): the line may wrap only after a «·» */
-  $('tripOf').textContent=avail>0?'выдано\u00a0'+moneyR(avail):'';
   /* spending with no trip money typed yet: nothing to measure it against — no bar, and no alarm */
   m.hidden=!got;
   /* nothing came since a balance typed at 0 (got: there was trip money before it): all of it is spent — a full bar, not 0/0 */
   const tw=!got?0:left<0||!(avail>0)?100:Math.min(100,spent/avail*100);m.firstElementChild.style.width=tw+'%';m.classList.toggle('bad',got&&left<0);
   m.setAttribute('aria-valuenow',Math.round(tw));m.setAttribute('aria-valuetext',avail>0?`потрачено ${moneyR(spent)} из ${moneyR(avail)}`:left<0?`перерасход ${moneyR(-left)}`:`осталось ${moneyR(left)}`);
-  /* under the bar: what is spent on the left, what is left on the right (or the overspend, in red) */
-  const col=(t,v,k)=>`<span>${t} <b${k?` class="${k}"`:''}>${v}</b></span>`;
-  if(!got) l.innerHTML=col('потрачено',kop(moneyR(spent)))+'<span>командировочные не внесены</span>';
-  /* «потрачено» after the overspend only with trip money to set it against: a trip opened again with only its overspend would repeat the same sum */
-  else if(left<0) l.innerHTML=(avail>0?col('потрачено',kop(moneyR(spent))):'')+col('перерасход',kop(moneyR(-left)),'neg');
-  else l.innerHTML=col('потрачено',kop(moneyR(spent)))+col('осталось',kop(moneyR(left)),'good');
+  /* beside the title what matters of trip money (owner, 12.11.2026 — «Л»): what is left of it, or the overspend in red; none typed yet —
+     what is spent so far */
+  const col=(t,v,k)=>`${t} <b${k?` class="${k}"`:''}>${v}</b>`;
+  if(!got) l.innerHTML='не внесены · '+col('потрачено',kop(moneyR(spent)));
+  else if(left<0) l.innerHTML=col('перерасход',kop(moneyR(-left)),'neg');
+  else l.innerHTML=col('осталось',kop(moneyR(left)),'good');
 }
 /* ---------- the trip report ----------
    «Командировка закончилась» shows it; Итоги opens the last one again. Kept in settings.tripReports (the last 10), as it was the day the trip
@@ -2760,8 +2744,6 @@ const DEFAULT_LIMIT=30000;
 const dayShort=DF({day:'numeric',month:'short'});
 /* a sum with its kopecks smaller and grey: the rubles are what is read first */
 const kop=t=>esc(t).replace(/,(\d\d)/,'<span class="kop">,$1</span>');
-/* under the ring: what was spent this month outside the limit, as a plain row */
-const limLines=out=>out>=0.01?`<div><span>Вне лимита</span><b>${moneyR(out)}</b></div>`:'';
 /* savings and charity don't count toward the monthly spending limit (Семья does, and so does a trip overspend paid from his own money) */
 const NOT_IN_LIMIT=['invest','broker','sadaqa','zakat'];
 /* out: this month's own spending left out of the limit — Учёт says it, so its sum and «Расходы» in Итоги don't seem to disagree */
@@ -2793,23 +2775,25 @@ function limFormOn(p,budget,done,then){
 function renderBudget(spent,out){
   const box=$('budgetBox'), budget=state.settings.budget===undefined?DEFAULT_LIMIT:(+state.settings.budget||0);
   const meter=$('limitMeter'), lo=$('limitOf'), def=state.settings.limitDefault&&budget===DEFAULT_LIMIT;
+  /* the month card («Л»): the state, its label, the big sum (_full: kept for fitBig), the line under it, the bar */
+  const card=$('sumCard'), big=$('total'), lbl=$('sumLabel'), msg=$('limitMsg');
+  $('limitSpent').textContent=moneyR(spent);
+  $('limitLine').innerHTML=out>=0.01?`вне лимита <b>${esc(moneyR(out))}</b>`:'';
   if(!budget){
-    /* the screen reader hears what is spent, not the limit of an earlier drawing */
-    lo.textContent='задать лимит';lo.removeAttribute('aria-label');meter.style.setProperty('--p',0);meter.className='ring';meter.removeAttribute('aria-valuenow');meter.setAttribute('aria-valuetext',`потрачено ${moneyR(spent)}, лимит не задан`);
-    $('limitPct').textContent='—';$('limitLeft').textContent='';$('limitLine').innerHTML=limLines(out);
+    /* no limit: what is spent, grey; the screen reader hears it, not the limit of an earlier drawing */
+    card.dataset.st='none';lbl.textContent='Траты за месяц';big.textContent=big._full=moneyR(spent);msg.textContent='Лимит не задан';
+    lo.textContent='задать лимит';lo.removeAttribute('aria-label');meter.hidden=true;meter.removeAttribute('aria-valuenow');meter.setAttribute('aria-valuetext',`потрачено ${moneyR(spent)}, лимит не задан`);
   }else{
     /* this month, while something is left: how much a day that is */
     const p=spent/budget, left=r2(budget-spent), pd=left>=0.01&&isCurrentMonth()?perDay(left):'';
-    /* «100%» only for the limit spent to the kopeck: 99,98 % reads 99%, over by a kopeck — 101%; from 1000 % the number would run onto
-       the ring: «>999%», smaller (.over) */
+    /* «100%» only for the limit spent to the kopeck: 99,98 % reads 99%, over by a kopeck — 101% */
     const pc=left>=0.01?Math.min(99,Math.round(p*100)):left<0?Math.max(101,Math.round(p*100)):100;
-    /* the ring: how much of the limit is spent — green, yellow from the «85%» shown, red when over */
-    meter.className='ring'+(left<0?' bad':pc>=85?' warn':'');meter.style.setProperty('--p',Math.min(100,p*100));meter.setAttribute('aria-valuenow',Math.round(Math.min(1,p)*100));meter.setAttribute('aria-valuetext',`потрачено ${moneyR(spent)} из ${moneyR(budget)}`);
-    $('limitPct').textContent=(pc>999?'>999':pc)+'%';meter.classList.toggle('over',pc>999);meter.setAttribute('aria-valuenow',Math.min(100,pc));
+    /* nothing spent in the limit yet, as usual, close to it from the «85%» (where the ring turned yellow before), over it */
+    const st=left<0?'over':spent<0.01?'start':pc>=85?'near':'norm';
+    card.dataset.st=st;lbl.textContent={start:'Бюджет доступен',norm:'Можно потратить',near:'Осталось до лимита',over:'Превышение лимита'}[st];
+    big.textContent=big._full=(left<0?'−':'')+moneyR(Math.abs(left));msg.textContent=st==='over'?'':pd;
+    meter.hidden=false;meter.firstElementChild.style.width=Math.min(100,p*100)+'%';meter.setAttribute('aria-valuenow',Math.min(100,pc));meter.setAttribute('aria-valuetext',`потрачено ${moneyR(spent)} из ${moneyR(budget)}`);
     lo.textContent='из '+moneyR(budget)+(def?' · изменить':'');if(def)lo.removeAttribute('aria-label');else lo.setAttribute('aria-label','Лимит '+moneyR(budget)+' — изменить');
-    /* what is left: yellow with the ring (one number, one color), red «превышен» when over */
-    $('limitLeft').innerHTML=left>=0?`<span class="${pc>=85?'warn':'good'}">осталось ${moneyR(left)}</span>`:`<span class="bad">превышен на ${moneyR(-left)}</span>`;
-    $('limitLine').innerHTML=limLines(out);
   }
   /* «лимит 30 000 ₽» on Учёт: the limit window over Учёт (no limit yet — it opens with its field) */
   lo.onclick=()=>limSheet(!budget);
