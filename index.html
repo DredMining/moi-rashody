@@ -493,7 +493,8 @@ input.num::placeholder{font-family:var(--f-body)}
 [data-theme="dark"] :is(#statSeg,#scopeFilter,#addBox .seg) .sv-cap{display:block;position:absolute;z-index:0;top:4px;bottom:4px;left:0;width:0;border-radius:999px;pointer-events:none;
   background:radial-gradient(120% 100% at 50% 0%,var(--cap-tint),rgb(255 255 255 / 0) 75%),linear-gradient(180deg,rgb(255 255 255 / .13),rgb(255 255 255 / .07));
   box-shadow:inset 0 1px 0 rgb(255 255 255 / .22),inset 0 0 0 1px rgb(255 255 255 / .07);
-  transition:transform .35s cubic-bezier(.2,.8,.2,1),width .35s cubic-bezier(.2,.8,.2,1);will-change:transform}
+  transition:transform .4s cubic-bezier(.38,.7,.125,1),width .4s cubic-bezier(.38,.7,.125,1);will-change:transform}
+/* (0.4s and the slowing curve of the tab bar's capsule — its ease() — so both move alike; owner, 12.11.2026) */
 [data-theme="dark"] :is(#statSeg,#scopeFilter,#addBox .seg).sv-drag .sv-cap{transition:width .15s ease-out}
 [data-theme="dark"] :is(#statSeg,#scopeFilter,#addBox .seg) button{position:relative;z-index:1;transition:color .15s}
 [data-theme="dark"] :is(#statSeg,#scopeFilter,#addBox .seg):has(.sv-cap) button[aria-pressed="true"]{background:transparent;box-shadow:none}
