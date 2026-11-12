@@ -1231,6 +1231,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   /* the main button of a form is 52px. «Новая запись» is the main screen's form, less tight here: its sum 56px with larger, bolder figures —
      the first thing typed; its switches 38px in a 3px groove, its chips 36px. The picked half of a switch follows the corner of its groove */
   [data-theme="dark"] .submit{min-height:52px}
+  /* «Новая запись» set its own sizes (owner, 12.11.2026): switches 44px, the sum 46px, its button 48px */
+  [data-theme="dark"] #addBox .submit{min-height:48px}
   [data-theme="dark"] #addBox .amount input{min-height:46px;font-size:24px;font-weight:600}
   [data-theme="dark"] #addBox .amount span{font-size:var(--fs-xl)}
   [data-theme="dark"] #addBox .seg{padding:3px;gap:3px}
