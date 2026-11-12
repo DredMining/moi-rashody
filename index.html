@@ -1212,14 +1212,14 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
 .numpad button.fn{background:transparent;color:var(--muted)}
 .numpad button.fn.hit{background:#2A2629;background:color-mix(in srgb,var(--ink) 9%,var(--surface))}
 .numpad button[data-k=","]{font-size:20px}
-/* «Готово» for the figures (owner, 12.11.2026): 1–9 in three rows as on the iPhone, and under them one row of four — the comma, 0, ⌫
-   and a wine ✓ in the corner where ⌫ was. ✓ only puts the keys down, nothing is sent (12 columns: a figure takes 4, a key of the last row 3) */
-.numpad-keys{grid-template-columns:repeat(12,minmax(0,1fr))}
-.numpad .numpad-keys>button{grid-column:span 4}
-.numpad .numpad-keys>button:nth-child(n+10){grid-column:span 3}
-.numpad .numpad-keys .go{background:var(--burgundy);color:#fff;height:46px;margin:4px 8px;align-self:center}
-.numpad .numpad-keys .go.hit{background:#8E3A4F;background:color-mix(in srgb,var(--burgundy) 82%,#fff)}
-.numpad .numpad-keys .go svg{width:26px;height:26px;stroke-width:2.2}
+/* «Готово» for the figures (owner, 12.11.2026): over the keys on the right, a word in the light wine as the iPhone's own; the keys stay as
+   the iPhone's (1–9, «, 0 ⌫»), the handle in the middle. It only puts the keys down, nothing is sent. The letters have their own «Готово» */
+.numpad-top{position:relative;display:flex;justify-content:flex-end;align-items:center;height:32px;margin:-6px 0 6px}
+.numpad-top .numpad-grab{position:absolute;left:50%;top:50%;margin:0;transform:translate(-50%,-50%)}
+.numpad .numpad-top .np-done{height:32px;padding:0 12px;border-radius:10px;background:transparent;color:var(--burgundy-light);font:600 15px/1 var(--f-body)}
+.numpad .numpad-top .np-done.hit{background:#2A2629;background:color-mix(in srgb,var(--ink) 9%,var(--surface));transform:none}
+.numpad.txt .np-done{display:none}
+.numpad.txt .numpad-top{height:5px;margin:0 0 10px}
 .numpad svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 /* the same panel with letters for a text field — a name, a comment, «Другое» (owner, 12.11.2026 — design-lab/keyboard-text.html, «А»):
    the iPhone's rows, each letter as wide as one of its set's longest row (11 Russian, 10 English or signs); the sets not in use are hidden */
@@ -4755,9 +4755,9 @@ const PAD=matchMedia('(hover:none) and (pointer:coarse)').matches;
     +[...r].map(c=>`<button type="button" tabindex="-1" class="l" data-k="${esc(c)}">${esc(c)}</button>`).join('')
     +(i<2?'':fnKey('del','Стереть',DEL))+'</div>').join('')+'</div>').join('');
   const pad=document.createElement('div');pad.id=pad.className='numpad';pad.setAttribute('role','group');pad.setAttribute('aria-label','Цифры');
-  pad.innerHTML='<i class="numpad-grab" aria-hidden="true"></i><div class="numpad-keys">'+['1','2','3','4','5','6','7','8','9',',','0','del','done'].map(k=>
+  pad.innerHTML='<div class="numpad-top"><i class="numpad-grab" aria-hidden="true"></i><button type="button" tabindex="-1" class="np-done" data-k="done">Готово</button></div>'
+    +'<div class="numpad-keys">'+['1','2','3','4','5','6','7','8','9',',','0','del'].map(k=>
     k==='del'?fnKey('del','Стереть',DEL)
-    :k==='done'?`<button type="button" tabindex="-1" class="go" data-k="done" aria-label="Готово">${ico('<path d="M5 12.5l4.5 4.5L19 7.5"/>')}</button>`
     :`<button type="button" tabindex="-1" data-k="${k}"${k===','?' class="fn" aria-label="Запятая"':''}>${k}</button>`).join('')+'</div>'
     +'<div class="tp">'+sets+'<div class="tp-row tp-bottom">'+fnKey('sym','Цифры и знаки','123').replace('class="fn"','class="fn tp-mode"')+fnKey('lang','Другой язык',GLOBE)
     +'<button type="button" tabindex="-1" class="tp-space" data-k=" " aria-label="Пробел">русский</button><button type="button" tabindex="-1" class="tp-go" data-k="go">Готово</button></div></div>'
