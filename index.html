@@ -1179,7 +1179,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     /* type a step larger: nothing under 12, lists and reminders 15, text and buttons 16 */
     --fs-2xs:12px;--fs-base:15px;--fs-md:16px;
     /* spending and minuses are red, not orange (owner, 11.11.2026) */
-    --bad:#FF5252}
+    --bad:#FF5252;
+    /* the app's wine for a sum: as the tab bar's icons (#B23A55 with a quarter of #FFB4C2) — the day's spending badge on «Записи» and
+       «Расходы» on «Итоги» (owner, 12.11.2026; red before). Errors stay red */
+    --wine:#C55970}
   /* a reminder's colour: a short straight bar inside its left edge (a strip along the edge would bend round the larger corner) */
   [data-theme="dark"] .alert,[data-theme="dark"] #sysAlerts .upd{box-shadow:none;background-image:linear-gradient(var(--alert-c,var(--warn)),var(--alert-c,var(--warn)));background-repeat:no-repeat;background-position:6px 50%;background-size:3px calc(100% - 20px)}
   [data-theme="dark"] #sysAlerts .upd{--alert-c:var(--accent);background-size:3px calc(100% - 12px)}
@@ -1199,8 +1202,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   [data-theme="dark"] .mtot .lbl,[data-theme="dark"] .debt-overview-head .lbl{font-size:13px}
   /* the month's three sums on Итоги are bold, as the big sum of a tab */
   [data-theme="dark"] .mcard .mcol>b{font-weight:700}
-  /* a day's spending badge on Записи is red, so the minus reads at a glance (the rows' sums stay plain) */
-  [data-theme="dark"] .recs .dayhead .num>.out{--c:var(--bad)}
+  /* a day's spending badge on Записи is wine, so the minus reads at a glance (the rows' sums stay plain); so is «Расходы» on Итоги, its dot too */
+  [data-theme="dark"] .recs .dayhead .num>.out{--c:var(--wine)}
+  [data-theme="dark"] .mcard .mout>b.neg{color:var(--wine)}
+  [data-theme="dark"] .mcard .mout>span::before{background:var(--wine)}
   [data-theme="dark"] .monthbar .title{font-size:var(--fs-lg);font-weight:600}
   /* the main button of a form is 52px. «Новая запись» is the main screen's form, less tight here: its sum 56px with larger, bolder figures —
      the first thing typed; its switches 38px in a 3px groove, its chips 36px. The picked half of a switch follows the corner of its groove */
