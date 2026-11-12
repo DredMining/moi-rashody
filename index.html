@@ -1240,8 +1240,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     <form class="form" id="form" novalidate>
       <label class="amount"><input id="amount" autocomplete="off" inputmode="decimal" placeholder="0" aria-label="Сумма" aria-describedby="formErr"><span>₽</span></label>
       <p class="hint" id="hint" hidden></p>
-      <div class="extras"><span class="datepick"><button type="button" class="chipbtn" id="dateBtn" tabindex="-1" aria-hidden="true">Сегодня</button><input id="date" type="date" aria-label="Дата записи: Сегодня"></span><button type="button" class="chipbtn" id="noteBtn">+ комментарий</button></div>
-      <input id="note" placeholder="Комментарий" maxlength="80" aria-label="Комментарий" hidden>
+      <div class="extras"><span class="datepick"><button type="button" class="chipbtn" id="dateBtn" tabindex="-1" aria-hidden="true">Сегодня</button><input id="date" type="date" aria-label="Дата записи: Сегодня"></span></div>
       <p class="err" role="alert" id="formErr" hidden></p>
       <button class="submit" id="submitBtn" type="submit">Добавить расход</button>
     </form>
@@ -4522,7 +4521,6 @@ function dateLabel(){
 $('date').addEventListener('click',()=>{if(matchMedia('(hover:hover) and (pointer:fine)').matches)try{$('date').showPicker()}catch(e){}});
 /* a later date (an iPhone wheel lets it through) is said at once, and the button gets a red edge */
 $('date').addEventListener('change',()=>{dateLabel();const fut=$('date').value>iso(now), er=$('formErr');if(fut){er.textContent=FUTURE_ERR;er.hidden=false;fieldErr($('date'),er)}else if(er.textContent===FUTURE_ERR||er.textContent===EARLY_ERR&&!early($('date').value))er.hidden=true});
-$('noteBtn').onclick=()=>{$('noteBtn').hidden=true;$('note').hidden=false;$('note').focus({preventScroll:true})};
 $('date').value=iso(now);
 $('date').max=iso(now);
 $('date').addEventListener('input',()=>dateTouched=true);
@@ -4709,7 +4707,7 @@ function stepAcc(){
   /* the name typed for «Другое» only while «Другое» is picked (‹ back to the tiles keeps it for its field) */
   $('sheetSub').textContent+=' · '+(CAT[p.cat].custom&&p.label||CAT[p.cat].name);
   const sign=p.type==='in'?'+':'−';
-  /* comment right here, before «Записать»: whatever was typed after the amount or under «+ комментарий» is already in it */
+  /* comment right here, before «Записать» (the form has no field of its own for it): whatever was typed after the amount is already in it */
   if(!p.noteTyped) p.sheetNote=entryNote(p);
   /* a trip expense paid for two (the flat 13 000, the partner owes 6 500): only his own part goes to the trip, the partner's part
      becomes a loan in «Мне должны» from the same account — the account loses the whole sum. pt lives on the entry: ‹ and back keeps it */
@@ -4786,7 +4784,7 @@ async function saveEntry(acc,opt={}){
       o.patchSettings({partnerName:pt.name});return [...r,did,rid]});
     closeSheet();
     /* the next record starts from today again; the summary stays on this month — the toast says which day it went to */
-    if(!opt.keepForm){$('amount').value='';$('note').value='';$('note').hidden=true;$('noteBtn').hidden=false;
+    if(!opt.keepForm){$('amount').value='';
       $('date').value=iso(now);dateTouched=false;dateLabel();$('formErr').hidden=true}
     /* a trip marked as begun: the next expense starts on «Командировка» again — «Личное» was for that one record */
     if(!opt.keepForm&&state.scopeDef==='trip'&&state.type==='out')state.scope='trip';
@@ -4815,7 +4813,7 @@ $('form').onsubmit=e=>{
   err.hidden=true;
   /* «28500 командировочные» on «Доход»: trip money, not his income (no % to the broker) — a trip record, saved as «+ Пришли командировочные» saves it (afterCat) */
   const type=state.type, ta=type==='in'?guessHit(word,'in','trip'):null, scope=ta?'trip':state.scope, hit=ta||guessHit(word,type,scope);
-  state.pend={type,scope,amount,word,hit,guessed:hit?.id||null,note:$('note').value.trim(),date};
+  state.pend={type,scope,amount,word,hit,guessed:hit?.id||null,date};
   $('amount').blur();
   /* a new record starts: the message of the last one goes (only hidden, nothing undone) — its «Отменить» would lie over this sheet's tiles;
      that record can still be deleted from «Последние записи» */

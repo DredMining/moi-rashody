@@ -51,8 +51,8 @@ const F = "const f=document.querySelector('iframe.app-frame'),w=f.contentWindow,
   await run([q('.item-editor-panel .dp-x')]); await ev(F + "d.getElementById('scroller').scrollTop=0; return 1");
   await run([q('#limitOf')]); await shot('limit_shtorka');
   await run([q('#limSet')]); await shot('limit_izmenit');
-  await run([q('#sheet [data-close].iconbtn'), q('#submitBtn'), q('#dateBtn'), q('#noteBtn')]); await shot('uchet_forma-oshibka');
-  await open(); // форма снова в исходном виде: поля даты и комментария закрыты
+  await run([q('#sheet [data-close].iconbtn'), q('#submitBtn')]); await shot('uchet_forma-oshibka');
+  await open(); // форма снова в исходном виде
   await run([['', '#amount', '1234567,89', 'fill'], q('#submitBtn')]); await shot('na-chto');
   await run([q('#sheet .tile', 12), q('#lblForm .submit')]); await shot('drugoe-oshibka');
   await run([q('#sheetBack'), q('#sheet .tile', 2)]); await shot('otkuda');
