@@ -654,6 +654,15 @@ input.num::placeholder{font-family:var(--f-body)}
 /* the reminders on «Учёт» («Долг себе на брокер», «Закят к оплате»): lower, with an M button */
 #viewLedger .alert{padding:6px var(--pad-card);font-size:var(--fs-sm);gap:6px 10px}
 #viewLedger .alert .primary,#viewLedger .alert .ghost{font-size:var(--fs-sm);min-height:var(--h-m);padding:4px 12px}
+/* «Долг себе на брокер» (owner, 12.11.2026 — design «А»): a round mark with a rising line in the reminder's colour on its left, the name
+   small and grey over the sum, the sum larger — no stripe at the edge */
+#viewLedger .alert.al-ic{flex-wrap:nowrap;gap:12px;padding:8px 12px;box-shadow:none;background-image:none}
+.alert>.al-mark{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--alert-c,var(--warn));
+  background:rgb(242 185 80 / .16);background:color-mix(in srgb,var(--alert-c,var(--warn)) 18%,transparent)}
+.al-mark svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.alert>.al-two{display:flex;flex-direction:column;line-height:1.25}
+.al-two>span{font-size:var(--fs-xs);color:var(--muted)}
+.al-two>b{font-size:16px;font-weight:600;color:var(--ink)}
 /* the limit's columns: as «Всего денег» on «Деньги» — split by thin lines, a small grey label over each value */
 .lparts{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px}
 /* each sum in its own small block, its label and value in the middle of it */
@@ -2675,7 +2684,7 @@ function renderBroker(inc,out){
   }
   $('pSet').onclick=()=>{fresh();state.editing='pct';render();$('pInput')?.focus({preventScroll:true})};
   if($('oSet')) $('oSet').onclick=()=>{fresh();state.editing='owed';render();$('oInput')?.focus({preventScroll:true})};
-  return o!==null&&o>=0.01?`<div class="alert"><span>Долг себе на брокер: <b>${moneyR(o)}</b></span><button class="primary" id="oPay" data-v="${Math.round(o*100)/100}">Перевести</button></div>`:'';
+  return o!==null&&o>=0.01?`<div class="alert al-ic"><span class="al-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span><span class="al-two"><span>Долг себе на брокер</span><b>${moneyR(o)}</b></span><button class="primary" id="oPay" data-v="${Math.round(o*100)/100}">Перевести</button></div>`:'';
 }
 
 const DEFAULT_LIMIT=30000;
