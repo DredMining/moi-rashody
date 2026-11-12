@@ -1167,6 +1167,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   :root[data-theme="dark"]{--f-display:var(--f-body)}
   [data-theme="dark"] h2{font-size:13px;font-weight:600;line-height:1.2;letter-spacing:.06em;color:var(--muted)}
   [data-theme="dark"] .lr #sumLabel{font-size:13px}
+  /* the capitals over the big sums of «Деньги» and «Долги» («Всего денег», «Мне должны» / «Я должен») — 13px too (owner, 12.11.2026; 12px before) */
+  [data-theme="dark"] .mtot .lbl,[data-theme="dark"] .debt-overview-head .lbl{font-size:13px}
   /* the month's three sums on Итоги are bold, as the big sum of a tab */
   [data-theme="dark"] .mcard .mcol>b{font-weight:700}
   /* a day's spending badge on Записи is red, so the minus reads at a glance (the rows' sums stay plain) */
