@@ -4509,6 +4509,32 @@ $('sOwn').onclick=()=>{state.scope='own';renderChips()};
 $('sTrip').onclick=()=>{state.scope='trip';renderChips()};
 /* typing the sum takes its old error away — not «later than today» while the date is still later */
 $('amount').addEventListener('input',()=>{const er=$('formErr');if(!(er.textContent===FUTURE_ERR&&$('date').value>iso(now)||er.textContent===EARLY_ERR&&early($('date').value)))er.hidden=true});
+/* «Новая запись» over the keyboard (a finger's tap on the sum): the phone is not left to push the page up till the field sits right on
+   the keyboard, the block's title gone off the top. The tap is taken here: the whole block is put in the middle of the room between the
+   status bar and where the keyboard will be, then the field gets the focus without being scrolled to. When the keyboard is up, its real
+   height sets the place once more (gliding), and a push the phone did all the same is taken back. The page gets room under the keyboard
+   to scroll that far (the list may be short); it goes with the focus. The keyboard's height is learnt the first time — a guess till then */
+(()=>{const a=$('amount'), box=$('addBox'), sc=$('scroller'), vv=window.visualViewport;if(!vv)return;
+  let kb=0, t0=null, wait=false, rt=0;
+  const place=(hid,smooth)=>{sc.style.paddingBottom=`calc(var(--tabbar-room) + ${Math.round(hid)}px)`;
+    const top=vv.offsetTop+(parseFloat(getComputedStyle(document.querySelector('.app')).paddingTop)||0)+12, bottom=vv.offsetTop+vv.height-(wait?hid:0)-12, r=box.getBoundingClientRect();
+    /* a block taller than the room: its title at the room's top */
+    const d=r.height>bottom-top?r.top-top:(r.top+r.bottom)/2-(top+bottom)/2;
+    if(Math.abs(d)>1)sc.scrollTo({top:sc.scrollTop+d,behavior:smooth?'smooth':'auto'})};
+  a.addEventListener('touchstart',e=>{const t=e.touches[0];t0=document.activeElement===a||e.touches.length>1?null:[t.clientX,t.clientY]},{passive:true});
+  a.addEventListener('touchend',e=>{if(!t0)return;const t=e.changedTouches[0], moved=Math.hypot(t.clientX-t0[0],t.clientY-t0[1])>10;t0=null;
+    if(moved||!e.cancelable)return;
+    e.preventDefault();wait=true;
+    const hid=kb||Math.round(vv.height*.4), r=a.getBoundingClientRect();
+    /* the field already clear of where the keyboard will be: the page glides; else it is put there at once (the phone would push it) */
+    place(hid,r.bottom<vv.height-hid-12);
+    a.focus({preventScroll:true})});
+  a.addEventListener('blur',()=>{wait=false;clearTimeout(rt);sc.style.paddingBottom=''});
+  /* the keyboard's own size, read when it has come up (a moment after its last change) */
+  vv.addEventListener('resize',()=>{if(!wait)return;clearTimeout(rt);rt=setTimeout(()=>{
+    const hid=innerHeight-vv.height;if(!wait||document.activeElement!==a||hid<120)return;
+    wait=false;kb=hid;if(scrollY||vv.offsetTop)scrollTo(0,0);place(hid,true)},80)});
+})();
 let dateTouched=false;
 function dateLabel(){
   const v=$('date').value||iso(now), y=new Date(now);y.setDate(y.getDate()-1);
