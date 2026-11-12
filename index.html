@@ -2222,14 +2222,24 @@ const repList=()=>Array.isArray(state.settings.tripReports)?state.settings.tripR
    The whole trip (owner's choice, 24.10.2026): a balance typed in it («Сверить», «Указать остаток») doesn't cut off what came before it —
    those records count too; what that typed balance corrected is the difference repLines shows («Поправка при сверке»). No trip money came
    before it: the typed balance is the money the trip had («остаток на начало»), not a correction */
+/* the first trip of the profile (none ended before it), marked «Командировка началась», with a balance typed in it: its report is the whole
+   trip as well — what was saved since the mark and the trip money that came right before it (no trip spending in between: that would be
+   an older trip, never closed). It used to start at the typed balance: «Выдано 0 · Потрачено 0». Only the report — the money is counted
+   as before (tripPre); such a report is marked (pre), so «Докинул при сверке» is found for it too (repTopUp) */
+function repPre(){
+  const pre=tripPre(), st=state.settings.tripStart, tb=tripOn();
+  if(pre.length||+state.settings.tripEnd||!st||!tb) return pre;
+  const all=state.items.filter(i=>isTrip(i)&&inAnchor(i,st)), cut=all.reduce((m,i)=>typeOf(i)==='out'&&(i.created||0)<tb?Math.max(m,i.created||0):m,0);
+  return all.filter(i=>(i.created||0)>cut);
+}
 function tripReport(at,left){
-  const st=state.settings.tripStart, pre=tripPre(), b0=pre.some(i=>typeOf(i)==='in')?0:+st?.amount||0, after=[...pre,...tripAfter()], outs=after.filter(i=>typeOf(i)==='out'), by={}, tb=tripOn(), bd=tb?anchorDay({at:tb}):'';
+  const st=state.settings.tripStart, pre=repPre(), first=pre.length&&!+state.settings.tripEnd, b0=pre.some(i=>typeOf(i)==='in')?0:+st?.amount||0, after=[...pre,...tripAfter()], outs=after.filter(i=>typeOf(i)==='out'), by={}, tb=tripOn(), bd=tb?anchorDay({at:tb}):'';
   for(const i of outs){const c=catOf(i.cat).id;by[c]=r2((by[c]||0)+(+i.amount||0))}
   /* from the day it began («Командировка началась» — kept as begun), else from the first record of this trip (or the trip money typed for it); to today */
   const ds=after.map(i=>i.date).filter(s=>typeof s==='string'&&s<=iso(now));if(b0>0&&st.at) ds.push(anchorDay(st));
   /* the partner's part of what he paid for both («Заплатил и за напарника»): the loans saved with this trip's records */
   const cs=new Set(outs.map(i=>i.created||0)), pd=state.debts.filter(d=>d.trip&&!d.mine&&cs.has(+d.created||0));
-  return {at,from:bd||ds.sort()[0]||iso(now),to:iso(now),...(bd?{begun:bd}:{}),allow:r2(sum(after.filter(i=>typeOf(i)==='in'))),start:r2(Math.max(0,b0)),over:r2(Math.max(0,-b0)),
+  return {at,from:bd||ds.sort()[0]||iso(now),to:iso(now),...(bd?{begun:bd}:{}),...(first?{pre:1}:{}),allow:r2(sum(after.filter(i=>typeOf(i)==='in'))),start:r2(Math.max(0,b0)),over:r2(Math.max(0,-b0)),
     cats:Object.entries(by).sort((a,b)=>b[1]-a[1]||byRank(a[0],b[0])),left:r2(left),
     ...(pd.length?{partner:{ids:pd.map(d=>d.id),names:[...new Set(pd.map(d=>d.name.trim()))],amount:r2(sum(pd)),ret:r2(pd.reduce((s,d)=>s+(+d.returned||0),0)),left:r2(pd.reduce((s,d)=>s+debtLeft(d),0))}}:{})};
 }
@@ -2267,9 +2277,9 @@ function repTitle(r){
 /* what the window and the shared text both say: [label, sum, note, kind] — kind: 'sum' the result, 'cat' a category under «Потрачено» */
 /* «Докинул на командировку» saved with a balance typed in a trip at an overspend (tripSync) — his own money put into that trip: found by the
    records, between the end before that trip (its result's tripPrev) and its end; none when its result record is gone, or no trip ended
-   before it (a report then starts at the balance typed — tripPre) */
+   before it and the report starts at the balance typed (tripPre; a first trip's whole report is marked pre — repPre) */
 const repTopUp=r=>{const x=state.items.find(i=>TRIP_END.includes(catOf(i.cat).id)&&!tripSync(i)&&Math.abs((i.created||0)-(+r.at||0))<=5000), e=+x?.tripPrev?.tripEnd||0;
-  return x&&e?r2(sum(state.items.filter(i=>tripSync(i)&&catOf(i.cat).id==='trip_extra'&&(i.created||0)>e&&(i.created||0)<(x.created||0)))):0};
+  return x&&(e||r.pre)?r2(sum(state.items.filter(i=>tripSync(i)&&catOf(i.cat).id==='trip_extra'&&(i.created||0)>e&&(i.created||0)<(x.created||0)))):0};
 function repLines(r){
   const p=r.partner, ds=p?(p.ids||[]).map(id=>state.debts.find(d=>d.id===id)):[];
   /* the partner's debts as they are now. One deleted on «Долги» since is kept as it was when it went (gone, see repGone) — the others
