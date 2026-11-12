@@ -105,7 +105,7 @@ img{max-width:100%}
   --glass:rgb(48 38 43 / .56); --glass-solid:rgb(30 24 28 / .94); --glass-rim:rgb(255 255 255 / .16);
   --cap-tint:rgb(240 140 160 / .16); --ico-on:#FFB4C2;
   /* the bar's place: its height, its gap to the screen's edge (over the home indicator on an iPhone), the room the page keeps under itself for it */
-  --tabbar-h:64px; --tabbar-gap:max(10px,calc(env(safe-area-inset-bottom,0px) - 14px),calc(var(--simulator-safe-bottom,0px) - 14px));
+  --tabbar-h:64px; --tabbar-gap:max(10px,calc(env(safe-area-inset-bottom,0px) - 16px),calc(var(--simulator-safe-bottom,0px) - 16px));
   --tabbar-room:calc(var(--tabbar-h) + var(--tabbar-gap) + 6px);
   color-scheme:dark;
 }
@@ -197,7 +197,7 @@ button{cursor:pointer}
 .cap-lens{overflow:hidden}
 /* the copy of the row: five cells laid as the tabs are (the same sizes, so at rest it lies exactly over them), in the chosen tab's colours */
 .cap-row{position:absolute;left:0;top:0;width:500%;height:100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;transform-origin:0 50%;will-change:transform}
-.cap-row b{padding:2px 0 1px;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--ink);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.cap-row b{padding:2px 0 1px;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:0;color:var(--ink);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
 .tabs.lift .cap-row b{transform:scale(1.15)}
 .tabs .cap-row .ico{color:var(--ico-on)}
 .tabs .cap-row svg{opacity:1}
@@ -206,7 +206,7 @@ button{cursor:pointer}
 .tabs.lift .cap-rim{opacity:1}
 /* The bar itself takes the touch — no scroll, no text picking, no callout */
 .tabs,.tabs *{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-.tabs button{position:relative;z-index:1;border:0;background:transparent;padding:2px 0 1px;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--muted);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent;outline-offset:-3px;border-radius:26px}
+.tabs button{position:relative;z-index:1;border:0;background:transparent;padding:2px 0 1px;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:0;color:var(--muted);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent;outline-offset:-3px;border-radius:26px}
 .tabs .ico{position:relative;width:min(56px,100%);height:32px;border-radius:16px;display:grid;place-items:center}
 .tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
 /* A tab's page comes in softly as the capsule moves: it fades in rising 8px; the page before it stays for a moment where it was, over the
