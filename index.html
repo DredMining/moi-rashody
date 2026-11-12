@@ -1128,6 +1128,28 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
 /* swiped left or right with a finger: it follows the finger and goes off the side (toastSwipe); scrolling up and down stays the page's */
 .toast{touch-action:pan-y;-webkit-user-select:none;user-select:none}
 .toast.out{transition:transform .18s ease-out,opacity .18s ease-out}
+/* The app's own keys for a sum (owner, 12.11.2026 — design-lab/keypad.html, «А»): on a phone a sum field asks the iPhone for no keyboard
+   (the bar with ↑ ↓ ✓ over it can't be taken off a site), and these come up from the bottom instead — 1–9, a comma, 0, ⌫, over everything.
+   While they are up (html.pad-open, --pad-h their height) the page, a sheet and a window get room above them, as over the phone's keyboard */
+.numpad{position:fixed;left:0;right:0;bottom:0;z-index:90;padding:10px 8px calc(max(env(safe-area-inset-bottom,0px),var(--simulator-safe-bottom,0px)) + 6px);
+  background:var(--glass-solid);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);border-radius:28px 28px 0 0;
+  box-shadow:inset 0 1px 0 var(--glass-rim),0 -8px 30px rgb(0 0 0 / .45);transform:translateY(105%);visibility:hidden;
+  transition:transform .25s cubic-bezier(.2,.8,.2,1),visibility 0s .25s;touch-action:none;-webkit-user-select:none;user-select:none}
+.numpad.on{transform:none;visibility:visible;transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.numpad-grab{display:block;width:36px;height:5px;border-radius:3px;background:var(--track);margin:0 auto 10px}
+.numpad-keys{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.numpad button{height:54px;border:0;border-radius:14px;padding:0;background:#2A2629;background:color-mix(in srgb,var(--ink) 9%,var(--surface));color:var(--ink);
+  font:500 26px/1 var(--f-num);display:grid;place-items:center;-webkit-tap-highlight-color:transparent;transition:background .08s,transform .08s}
+.numpad button.hit{background:#43393F;background:color-mix(in srgb,var(--ink) 20%,var(--surface));transform:scale(.96)}
+.numpad button.fn{background:transparent;color:var(--muted)}
+.numpad button.fn.hit{background:#2A2629;background:color-mix(in srgb,var(--ink) 9%,var(--surface))}
+.numpad button[data-k=","]{font-size:20px}
+.numpad svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+html.pad-open .scroller{padding-bottom:calc(var(--tabbar-room) + var(--pad-h,0px))}
+html.pad-open .sheet{padding-bottom:var(--pad-h,0px)}
+html.pad-open .sheet-panel{max-height:calc(100% - env(safe-area-inset-top,0px) - 16px);padding-bottom:16px}
+html.pad-open .sheet.centered,html.pad-open .zsheet,html.pad-open .wmodal{padding-bottom:calc(var(--pad-h,0px) + 16px)}
+@media (prefers-reduced-motion:reduce){.numpad,.numpad.on,.numpad button{transition:none}}
 /* hidden: empty and see-through, but still there — a screen reader hears each new message in it */
 .toast[hidden]{display:flex!important;opacity:0;pointer-events:none;padding:0;box-shadow:none}
 /* date fields: phone browsers give them a fixed native width that overflows the card */
@@ -1867,9 +1889,11 @@ function toastPlace(t){
   t.style.top=t.style.bottom='';zpFree();
   const vv=window.visualViewport, sat=parseFloat(getComputedStyle(document.querySelector('.app')).paddingTop)||0;
   const ps=[...document.querySelectorAll('#sheet:not([hidden]) .sheet-panel,#zakatSheet:not([hidden]) .zsheet-panel,.wmodal>form,.wmodal>.recon')].map(x=>[x,x.getBoundingClientRect()]).filter(p=>p[1].height);
-  const zo=ps.length===1&&ps[0][0].matches('.zsheet-panel'), kb=!zo&&!!vv&&vv.height<innerHeight-120;
+  /* the app's own keys for a sum (.numpad) count as the keyboard: the message never goes under them */
+  const pad=document.documentElement.classList.contains('pad-open')&&document.querySelector('.numpad')?.offsetHeight||0;
+  const zo=ps.length===1&&ps[0][0].matches('.zsheet-panel'), kb=!zo&&(!!vv&&vv.height<innerHeight-120||pad>0);
   if(!ps.length&&!kb) return;
-  const top=Math.min(...ps.map(p=>p[1].top),innerHeight), h=t.offsetHeight, vt=(vv?.offsetTop||0)+sat+12, vb=(vv?(vv.offsetTop+vv.height):innerHeight)-12;
+  const top=Math.min(...ps.map(p=>p[1].top),innerHeight), h=t.offsetHeight, vt=(vv?.offsetTop||0)+sat+12, vb=(vv?(vv.offsetTop+vv.height):innerHeight)-12-pad;
   if(!kb&&top-h-24>=sat){t.style.bottom=Math.round(innerHeight-top+12)+'px';return}
   const p=ps.find(p=>p[1].top===top), hd=p&&p[0].querySelector('.sheet-head,.zsheet-head,.dp-head,.debt-add-head'), hb=hd&&hd.getBoundingClientRect().bottom;
   /* the room is made first, then the window's bottom is read (a window that grew moved it): the message sits over its last lines */
@@ -4513,13 +4537,73 @@ $('sOwn').onclick=()=>{state.scope='own';renderChips()};
 $('sTrip').onclick=()=>{state.scope='trip';renderChips()};
 /* typing the sum takes its old error away — not «later than today» while the date is still later */
 $('amount').addEventListener('input',()=>{const er=$('formErr');if(!(er.textContent===FUTURE_ERR&&$('date').value>iso(now)||er.textContent===EARLY_ERR&&early($('date').value)))er.hidden=true});
+/* The app's own keys for a sum (CSS .numpad; owner, 12.11.2026). Only under a finger (a phone): every sum field there (inputmode decimal —
+   made now or later, in any window) is told to want no keyboard (inputmode none: WebKit then shows neither the keyboard nor the bar over
+   it, unless a hardware keyboard is on), and its focus brings these keys up instead. A key writes where the caret is and says «input», as
+   typing did — the field keeps its value, checks, errors and paste; nothing else knows of the keys. One comma, two digits after it; a lone
+   0 is replaced by the next digit; ⌫ held down empties the field. The keys never take the focus; a tap elsewhere (not a scroll) puts them
+   down. With them up the field's block is put just over them: «Новая запись» whole, its bottom 8px over them (as over the phone's
+   keyboard before), another field with its form or label when that fits */
+const PAD=matchMedia('(hover:none) and (pointer:coarse)').matches;
+(()=>{if(!PAD)return;
+  const root=document.documentElement, SEL='input[inputmode="decimal"]', isPad=x=>!!x?.matches?.('input[data-pad]');
+  const mark=x=>{x.dataset.pad='';x.setAttribute('inputmode','none')};
+  const markIn=n=>{if(n.nodeType!==1)return;if(n.matches(SEL))mark(n);n.querySelectorAll(SEL).forEach(mark)};
+  markIn(document.body);
+  new MutationObserver(ms=>{for(const m of ms)m.addedNodes.forEach(markIn)}).observe(document.body,{childList:true,subtree:true});
+  const pad=document.createElement('div');pad.id=pad.className='numpad';pad.setAttribute('role','group');pad.setAttribute('aria-label','Цифры');
+  pad.innerHTML='<i class="numpad-grab" aria-hidden="true"></i><div class="numpad-keys">'+['1','2','3','4','5','6','7','8','9',',','0','del'].map(k=>
+    k==='del'?'<button type="button" tabindex="-1" class="fn" data-k="del" aria-label="Стереть"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/></svg></button>'
+    :`<button type="button" tabindex="-1" data-k="${k}"${k===','?' class="fn" aria-label="Запятая"':''}>${k}</button>`).join('')+'</div>';
+  document.body.append(pad);
+  let field=null, pressing=false, holdT=0;
+  const scrollerOf=el=>{for(let p=el.parentElement;p&&p!==document.body;p=p.parentElement){const o=getComputedStyle(p).overflowY;if((o==='auto'||o==='scroll')&&p.scrollHeight>p.clientHeight)return p}return null};
+  const reveal=x=>{if(field!==x)return;
+    const sat=parseFloat(getComputedStyle(document.querySelector('.app')).paddingTop)||0, h=pad.offsetHeight, own=x.id==='amount';
+    const room=t=>{const sc=scrollerOf(t);if(!sc)return null;const sr=sc.getBoundingClientRect();return {sc,top:Math.max(sr.top,sat)+12,bottom:Math.min(sr.bottom,innerHeight-h)-8}};
+    let t=x, rm=room(x);if(!rm)return;
+    for(const c of [own&&$('addBox'),x.closest('form'),x.closest('label')].filter(Boolean)){const r=room(c);if(r&&c.getBoundingClientRect().height<=r.bottom-r.top){t=c;rm=r;break}}
+    const r=t.getBoundingClientRect(), {sc,top,bottom}=rm;
+    const d=r.height>bottom-top?r.top-top:own||r.bottom>bottom?r.bottom-bottom:r.top<top?r.top-top:0;
+    if(Math.abs(d)>1)sc.scrollBy({top:d,behavior:'smooth'})};
+  const open=x=>{field=x;pad.classList.add('on');root.classList.add('pad-open');root.style.setProperty('--pad-h',pad.offsetHeight+'px');
+    requestAnimationFrame(()=>requestAnimationFrame(()=>reveal(x)))};
+  const close=()=>{field=null;pad.classList.remove('on');root.classList.remove('pad-open');root.style.removeProperty('--pad-h')};
+  const put=k=>{const x=field;if(!x||x.readOnly||x.disabled)return;const v=x.value;let s=x.selectionStart??v.length, e=x.selectionEnd??v.length;
+    if(k==='del'){if(s===e){if(!s)return;s--}x.setRangeText('',s,e,'end')}
+    else{const nv=v.slice(0,s)+k+v.slice(e), parts=nv.split(/[.,]/);
+      if(parts.length>2||(parts[1]||'').replace(/\D/g,'').length>2)return;
+      if(v==='0'&&s===1&&e===1&&k!==','){x.value=k;x.setSelectionRange(1,1)}else x.setRangeText(k,s,e,'end')}
+    x.dispatchEvent(new Event('input',{bubbles:true}))};
+  pad.addEventListener('pointerdown',e=>{e.preventDefault();pressing=true;const b=e.target.closest('[data-k]');if(!b)return;
+    b.classList.add('hit');put(b.dataset.k);
+    if(b.dataset.k==='del'){clearTimeout(holdT);holdT=setTimeout(()=>{const x=field;if(x&&x.value){x.value='';x.dispatchEvent(new Event('input',{bubbles:true}))}},550)}});
+  const up=()=>{clearTimeout(holdT);setTimeout(()=>{pressing=false},0);pad.querySelectorAll('.hit').forEach(b=>b.classList.remove('hit'))};
+  addEventListener('pointerup',up);addEventListener('pointercancel',up);
+  /* a tap on the keys is never a click on what lies under them, nor a zoom */
+  pad.addEventListener('touchend',e=>{if(e.cancelable)e.preventDefault()},{passive:false});
+  pad.addEventListener('click',e=>{e.preventDefault();e.stopPropagation()});
+  document.addEventListener('focusin',e=>{const x=e.target;
+    /* a field made and focused in one go (before the watcher marked it): marked now and focused anew, so no keyboard comes */
+    if(x.matches?.(SEL)){mark(x);x.blur();x.focus({preventScroll:true});return}
+    if(isPad(x))open(x)});
+  document.addEventListener('focusout',e=>{if(e.target!==field)return;setTimeout(()=>{
+    if(isPad(document.activeElement))return;
+    /* lost under a press on the keys: taken back — unless the field is gone (its window closed) */
+    if(pressing&&field&&field.isConnected){field.focus({preventScroll:true});if(document.activeElement===field)return}
+    close()},0)});
+  /* a tap elsewhere puts the keys down (a scroll doesn't: no click comes after it); a tap on the field, its own label or what holds it
+     keeps them (the tap that focused a field in a window comes as a click on its form) */
+  document.addEventListener('click',e=>{const x=field;if(!x||pad.contains(e.target)||e.target.contains?.(x)||e.target.closest?.('label')?.contains(x))return;
+    if(!isPad(e.target))x.blur()},true);
+})();
 /* «Новая запись» over the keyboard (a finger's tap on the sum): the phone is not left to push the page up till the field sits right on
    the keyboard, the block's title gone off the top. The tap is taken here: the whole block is set down right on where the keyboard will
    be — its bottom edge just over it, as the sheets «На что?» and «Откуда?» stand (owner, 12.11.2026; in the middle of the room before),
    the page above it still seen — then the field gets the focus without being scrolled to. When the keyboard is up, its real height sets
    the place once more (gliding), and a push the phone did all the same is taken back. The page gets room under the keyboard to scroll
    that far (the list may be short); it goes with the focus. The keyboard's height is learnt the first time — a guess till then */
-(()=>{const a=$('amount'), box=$('addBox'), sc=$('scroller'), vv=window.visualViewport;if(!vv)return;
+(()=>{const a=$('amount'), box=$('addBox'), sc=$('scroller'), vv=window.visualViewport;if(!vv||PAD)return; /* on a phone the app's own keys do this (above) */
   let kb=0, t0=null, wait=false, rt=0;
   const place=(hid,smooth)=>{sc.style.paddingBottom=`calc(var(--tabbar-room) + ${Math.round(hid)}px)`;
     const top=vv.offsetTop+(parseFloat(getComputedStyle(document.querySelector('.app')).paddingTop)||0)+12, bottom=vv.offsetTop+vv.height-(wait?hid:0)-8, r=box.getBoundingClientRect();
@@ -4612,8 +4696,9 @@ function dlgSync(){
   dlgInert.forEach(x=>x.inert=false);dlgInert=[];
   const top=open[open.length-1], gl=gone[gone.length-1], seen=o=>o&&o.getClientRects().length, ba=top&&gl&&top.k===gl.atK?refind(gl.at):null, back=seen(ba)&&top.el.contains(ba)?ba:gl?refind(gl.opener):null;
   if(top){
-    /* #toast and #say (the screen reader's voice) stay live: a question asked in a window («Удалить?», a copy to load) is heard */
-    for(let el=top.el;el.parentElement&&el!==document.body;el=el.parentElement) for(const x of el.parentElement.children) if(x!==el&&x.id!=='toast'&&x.id!=='say'&&!x.inert&&x.tagName!=='SCRIPT'){x.inert=true;dlgInert.push(x)}
+    /* #toast and #say (the screen reader's voice) stay live: a question asked in a window («Удалить?», a copy to load) is heard;
+       #numpad too — the keys of a sum field in the window (an inert one let a tap through to the window's veil, which closed it) */
+    for(let el=top.el;el.parentElement&&el!==document.body;el=el.parentElement) for(const x of el.parentElement.children) if(x!==el&&x.id!=='toast'&&x.id!=='say'&&x.id!=='numpad'&&!x.inert&&x.tagName!=='SCRIPT'){x.inert=true;dlgInert.push(x)}
     if(!top.el.contains(document.activeElement)) (seen(back)&&top.el.contains(back)?back:top.k==='sheet'?$('sheetTitle'):top.k==='zakat'?$('zakatSheetT'):top.el.querySelector('[tabindex="-1"]'))?.focus({preventScroll:true});
   }else if(seen(back)) back.focus({preventScroll:true});
   /* a window of Долги gone by itself (the debt paid, forgiven, deleted, open again) and the line that opened it gone too:
