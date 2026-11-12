@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#000000">
+<title>Макет · карточка лимита</title>
+<!-- Макет для Али (12.11.2026): варианты верхней карточки «Учёта» (лимит месяца и командировочные). Основное приложение (index.html)
+     эту страницу не подключает и от неё не зависит. Тёмная тема «Чёрный и бордо». Все суммы — придуманные примеры, не данные Али;
+     день месяца берётся сегодняшний. Ничего не сохраняется. -->
+<style>
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:400;font-display:swap;src:url(../fonts/GolosText-cyrillic-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:400;font-display:swap;src:url(../fonts/GolosText-latin-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:500;font-display:swap;src:url(../fonts/GolosText-cyrillic-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:500;font-display:swap;src:url(../fonts/GolosText-latin-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:600;font-display:swap;src:url(../fonts/GolosText-cyrillic-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:600;font-display:swap;src:url(../fonts/GolosText-latin-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:400;font-display:swap;src:url(../fonts/GolosText-rub400-2626f3c1.woff2) format('woff2');unicode-range:U+20BD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:500;font-display:swap;src:url(../fonts/GolosText-rub500-1ffbb4e5.woff2) format('woff2');unicode-range:U+20BD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:600;font-display:swap;src:url(../fonts/GolosText-rub600-48126017.woff2) format('woff2');unicode-range:U+20BD}
+
+/* цвета и размеры — из приложения (тёмная тема) */
+:root{
+  --bg:#000; --surface:#161215; --inset:#221C20; --raised:#3B3237; --ink:#F7F3F4; --muted:#A79DA2; --field-line:#7A6E74; --track:#4A4046; --seg-ring:#958990; --line:#383035;
+  --burgundy:#752238; --burgundy-light:#C34E6C; --accent:var(--burgundy-light);
+  --good:#5AD49B; --warn:#F2B950; --bad:#FF7043; --trip:#7A5A1E; --gold:#E0B25A;
+  --safe-top:max(env(safe-area-inset-top,0px),var(--simulator-safe-top,0px));
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scrollbar-width:none}
+html::-webkit-scrollbar{display:none}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.5 "Golos Text",system-ui,-apple-system,sans-serif;font-variant-numeric:tabular-nums;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+main{padding:calc(var(--safe-top) + 8px) 16px 40px;display:flex;flex-direction:column;gap:16px}
+body::before{content:"";position:fixed;left:0;right:0;top:0;height:var(--safe-top);background:var(--bg);z-index:15}
+
+/* ---- полоска макета ---- */
+.lab{display:flex;flex-direction:column;gap:8px}
+.tag{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.seg{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:3px;background:var(--inset);border:1px solid var(--field-line);border-radius:14px}
+.seg button{min-height:38px;border-radius:11px;font-size:14px;font-weight:500;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--raised);color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1.5px var(--seg-ring)}
+.why{font-size:13px;line-height:1.45;color:var(--muted)}
+.why b{color:var(--ink);font-weight:600}
+
+/* ---- общее для карточек ---- */
+.card{position:relative;background:var(--surface);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.caps{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;line-height:1.2;color:var(--muted)}
+.tt{position:absolute;top:16px;right:16px;width:32px;height:32px;border:1px solid var(--field-line);border-radius:50%;background:var(--inset);font-size:15px;line-height:1;display:grid;place-items:center}
+.big{font-weight:700;font-size:32px;line-height:1.1;letter-spacing:-.01em}
+.kop{font-size:.8em;color:var(--muted)}
+.good{color:var(--good)}.warnc{color:var(--warn)}
+.dotted{text-decoration:underline dotted;text-underline-offset:3px}
+.meter{height:4px;border-radius:99px;background:var(--track);overflow:hidden}
+.meter i{display:block;height:100%;border-radius:99px;background:var(--good)}
+.meter.trip i{background:var(--trip)}
+.plate{border-radius:14px;background:var(--inset)}
+.muted{color:var(--muted)}
+
+/* ---- сейчас ---- */
+.now .lhead{display:flex;align-items:center;gap:14px}
+.ring{--p:0;--rc:var(--good);flex:none;width:103px;height:103px;border-radius:50%;background:conic-gradient(var(--rc) calc(var(--p) * 1%),var(--track) 0);display:grid;place-items:center}
+.ring>div{width:83px;height:83px;border-radius:50%;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+.ring b{font-size:25px;font-weight:700}
+.now .lr{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.now .lr .caps{padding-right:34px}
+.now .lof{display:flex;justify-content:space-between;gap:4px 8px;flex-wrap:wrap;padding:4px 8px;font-size:12px;line-height:1.25;color:var(--muted)}
+.now .lrow{display:flex;justify-content:space-between;align-items:baseline;padding:4px 8px;font-size:11px;line-height:1.2;color:var(--muted)}
+.now .lrow b{font-size:12px;font-weight:500;color:var(--ink)}
+.now .trip{display:flex;flex-direction:column;gap:4px;padding:7px 10px}
+.thead,.tfoot{display:flex;justify-content:space-between;align-items:baseline;gap:2px 8px;flex-wrap:wrap;font-size:12px;line-height:1.2;color:var(--muted)}
+.thead b{color:var(--ink);font-weight:600;font-size:13px}
+.tfoot b{font-weight:500;color:var(--ink)}
+.tfoot b.good{color:var(--good)}
+
+/* ---- А: остаток крупно ---- */
+.va .caps{padding-right:34px}
+.va .sub{font-size:14px;color:var(--muted);margin-top:-4px}
+.va .sub b{color:var(--ink);font-weight:600}
+.bar{position:relative;height:8px;border-radius:99px;background:var(--track)}
+.bar>i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:var(--good)}
+/* отметка «сегодня»: сколько по плану должно быть потрачено к этому дню */
+.bar>u{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;border-radius:1px;background:var(--ink)}
+.va .row{display:flex;justify-content:space-between;gap:4px 10px;flex-wrap:wrap;font-size:12px;line-height:1.3;color:var(--muted)}
+.va .row b{color:var(--ink);font-weight:500}
+.tripc{display:flex;flex-direction:column;gap:6px;padding:10px 12px}
+.tripc .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;line-height:1.2}
+.tripc .top b{font-weight:600}
+.tripc .top span{color:var(--muted);font-size:12px}
+.tripc .top span b{color:var(--good);font-size:14px}
+
+/* ---- Б: кольцо и столбик цифр ---- */
+.vb .lhead{display:flex;align-items:center;gap:16px}
+.vb .ring{width:116px;height:116px}
+.vb .ring>div{width:96px;height:96px}
+.vb .ring small{font-size:11px;color:var(--muted);letter-spacing:.02em}
+.vb .ring b{font-size:19px;color:var(--good);margin:2px 0 1px}
+.vb .ring em{font-style:normal;font-size:11px;color:var(--muted)}
+.vb .tbl{flex:1;min-width:0;display:grid;gap:7px;padding-top:4px}
+.vb .tbl div{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;color:var(--muted);line-height:1.2}
+.vb .tbl b{font-weight:600;color:var(--ink);font-size:15px}
+.vb .tbl div+div{padding-top:7px;border-top:1px solid var(--line)}
+.vb .caps{padding-right:34px}
+
+/* ---- В: две плитки ---- */
+.vc .head{display:flex;justify-content:space-between;align-items:center;min-height:32px}
+.vc .tt{position:static}
+.vc .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.vc .tile{display:flex;flex-direction:column;gap:6px;padding:12px}
+.vc .tile .caps{font-size:11px}
+.vc .tile .lft{font-size:11px;color:var(--muted);margin-bottom:-6px}
+.vc .tile .sum{font-weight:700;font-size:22px;line-height:1.15;letter-spacing:-.01em}
+.vc .tile .of{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.vc .foot{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:0 4px}
+.vc .foot b{color:var(--ink);font-weight:500}
+
+/* ---- Г: темп по дням ---- */
+.vd .caps{padding-right:34px}
+.vd .bigline{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.vd .bigline span{font-size:15px;color:var(--muted)}
+.vd .bar{height:10px;margin-top:4px}
+.vd .ticks{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:-4px;position:relative;height:14px}
+.vd .ticks u{position:absolute;transform:translateX(-50%);text-decoration:none;color:var(--ink)}
+.vd .pace{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:13px;line-height:1.3}
+.vd .pace i{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:15px;background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--good)}
+.vd .pace.slow i{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.vd .pace b{font-weight:600}
+.vd .row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:0 2px}
+.vd .row b{color:var(--ink);font-weight:500}
+</style>
+</head>
+<body>
+<main>
+  <div class="lab">
+    <span class="tag">Макет · карточка лимита</span>
+    <div class="seg" id="vars" role="group" aria-label="Вариант">
+      <button type="button" data-v="now" aria-pressed="true">Сейчас</button>
+      <button type="button" data-v="a" aria-pressed="false">А</button>
+      <button type="button" data-v="b" aria-pressed="false">Б</button>
+      <button type="button" data-v="c" aria-pressed="false">В</button>
+      <button type="button" data-v="d" aria-pressed="false">Г</button>
+    </div>
+  </div>
+  <div id="card"></div>
+  <p class="why" id="why"></p>
+  <p class="why">Суммы на макете — придуманные примеры, день месяца — сегодняшний. Кнопка ☀️ (смена вида) везде осталась на месте; её можно вообще убрать из этой карточки — это отдельный вопрос.</p>
+</main>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+/* придуманные числа: лимит 30 000, потрачено 11 350, вне лимита 1 250; командировочные 28 500, потрачено 12 340,50 */
+const LIMIT=3000000, SPENT=1135000, OUT=125000, TRIP=2850000, TSPENT=1234050; /* в копейках */
+const now=new Date(), day=now.getDate(), dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(), left=dim-day+1;
+const MONTHS=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+const sp=' ';
+const rub=(k,kop=true)=>{const neg=k<0;k=Math.abs(k);const r=Math.floor(k/100), c=k%100, s=String(r).replace(/\B(?=(\d{3})+(?!\d))/g,sp);
+  return (neg?'−':'')+s+(kop?','+String(c).padStart(2,'0'):'')+sp+'₽'};
+const rubK=k=>{const r=Math.floor(k/100), c=k%100;return String(r).replace(/\B(?=(\d{3})+(?!\d))/g,sp)+`<span class="kop">,${String(c).padStart(2,'0')}</span>${sp}₽`};
+const pct=Math.round(SPENT/LIMIT*100), tpct=Math.round(TSPENT/TRIP*100), rest=LIMIT-SPENT, trest=TRIP-TSPENT;
+const perDay=Math.floor(rest/left/100)*100, plan=Math.round(LIMIT*day/dim), ahead=plan-SPENT, planPct=day/dim*100;
+const days=n=>n%10===1&&n%100!==11?'день':[2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?'дня':'дней';
+const TT='<button type="button" class="tt" aria-label="Смена вида">☀️</button>';
+
+const V={
+  now:{why:'<b>Сейчас.</b> Кольцо с процентом, потраченная сумма крупно, «из … / осталось» и «Вне лимита» — две плашки, ниже командировочные со своей полоской.',
+    html:`<section class="card now">${TT}<div class="lhead"><div class="ring" style="--p:${pct}"><div><b>${pct}%</b></div></div>
+      <div class="lr"><span class="caps">Траты в лимит за месяц</span><span class="big">${rub(SPENT)}</span>
+      <span class="lof plate"><span class="dotted">из ${rub(LIMIT,false)}</span><span class="good">осталось ${rub(rest)}</span></span>
+      <div class="lrow plate"><span>Вне лимита</span><b>${rub(OUT,false)}</b></div></div></div>
+      <div class="trip plate"><div class="thead"><b>🧳 Командировочные</b><span>выдано ${rub(TRIP,false)}</span></div>
+      <div class="meter trip"><i style="width:${tpct}%"></i></div>
+      <div class="tfoot"><span>потрачено <b>${rubK(TSPENT)}</b></span><span>осталось <b class="good">${rubK(trest)}</b></span></div></div></section>`},
+  a:{why:'<b>А — главное число: сколько ещё можно.</b> Крупно — остаток лимита, под ним — сколько в день до конца месяца. Полоса вместо кольца, белая чёрточка на ней — где ты должен быть сегодня по плану. Потрачено и «вне лимита» — одной мелкой строкой. Командировочные — одна строка «осталось» и тонкая полоса.',
+    html:`<section class="card va">${TT}<span class="caps">Можно потратить до конца месяца</span><span class="big">${rub(rest)}</span>
+      <span class="sub">≈ <b>${rub(perDay,false)}</b> в день · ещё ${left} ${days(left)}</span>
+      <div class="bar"><i style="width:${pct}%"></i><u style="left:${planPct}%"></u></div>
+      <div class="row"><span>потрачено <b>${rub(SPENT)}</b> из <span class="dotted">${rub(LIMIT,false)}</span></span><span>вне лимита <b>${rub(OUT,false)}</b></span></div>
+      <div class="tripc plate"><div class="top"><b>🧳 Командировочные</b><span>осталось <b>${rubK(trest)}</b></span></div>
+      <div class="meter trip"><i style="width:${tpct}%"></i></div><div class="top"><span>потрачено ${rub(TSPENT)} из ${rub(TRIP,false)}</span></div></div></section>`},
+  b:{why:'<b>Б — кольцо, а цифры столбиком.</b> Кольцо крупнее, внутри — сколько осталось. Справа ровная таблица: потрачено, лимит, вне лимита — каждая цифра на своей строке, без плашек. Командировочные — такой же строкой с полосой.',
+    html:`<section class="card vb">${TT}<span class="caps">Лимит · ${MONTHS[now.getMonth()]}</span>
+      <div class="lhead"><div class="ring" style="--p:${pct}"><div><small>осталось</small><b>${rub(rest,false)}</b><em>${pct}% потрачено</em></div></div>
+      <div class="tbl"><div><span>Потрачено</span><b>${rub(SPENT)}</b></div><div><span class="dotted">Лимит</span><b>${rub(LIMIT,false)}</b></div><div><span>Вне лимита</span><b>${rub(OUT,false)}</b></div></div></div>
+      <div class="tripc plate"><div class="top"><b>🧳 Командировочные</b><span>осталось <b>${rubK(trest)}</b></span></div>
+      <div class="meter trip"><i style="width:${tpct}%"></i></div><div class="top"><span>потрачено ${rub(TSPENT)} из ${rub(TRIP,false)}</span></div></div></section>`},
+  c:{why:'<b>В — две равные плитки.</b> Слева личный лимит, справа командировочные — одинаково устроены: «осталось» крупно, полоса, «из …» и процент. Обе цифры видно сразу, без строк мелкого текста. «Вне лимита» — строкой снизу.',
+    html:`<section class="card vc"><div class="head"><span class="caps">${MONTHS[now.getMonth()]}</span>${TT}</div>
+      <div class="tiles"><div class="tile plate"><span class="caps">Личное</span><span class="lft">осталось</span><span class="sum">${rub(rest,false)}</span>
+        <div class="meter"><i style="width:${pct}%"></i></div><div class="of"><span class="dotted">из ${rub(LIMIT,false)}</span><span>${pct}%</span></div></div>
+      <div class="tile plate"><span class="caps">🧳 Командировка</span><span class="lft">осталось</span><span class="sum">${rub(trest,false)}</span>
+        <div class="meter trip"><i style="width:${tpct}%"></i></div><div class="of"><span>из ${rub(TRIP,false)}</span><span>${tpct}%</span></div></div></div>
+      <div class="foot"><span>Вне лимита</span><b>${rub(OUT,false)}</b></div></section>`},
+  d:{why:'<b>Г — как сейчас, но с темпом.</b> Потрачено крупно, под ним полоса месяца с отметкой «сегодня». Ниже подсказка: идёшь ли по плану и сколько можно в день. Это новый расчёт: остаток делится на оставшиеся дни, план — лимит, поделённый на дни месяца.',
+    html:`<section class="card vd">${TT}<span class="caps">Траты в лимит за месяц</span>
+      <div class="bigline"><span class="big">${rub(SPENT)}</span><span>из <span class="dotted">${rub(LIMIT,false)}</span></span></div>
+      <div class="bar"><i style="width:${pct}%"></i><u style="left:${planPct}%"></u></div>
+      <div class="ticks"><span>1</span><u style="left:${planPct}%">сегодня</u><span>${dim}</span></div>
+      <div class="pace plate${ahead<0?' slow':''}"><i>${ahead<0?'!':'✓'}</i><span>${ahead>=0?`Идёшь по плану, запас <b>${rub(ahead,false)}</b>.`:`Быстрее плана на <b>${rub(-ahead,false)}</b>.`} Можно ≈ <b>${rub(perDay,false)}</b> в день.</span></div>
+      <div class="row"><span>осталось <b class="good">${rub(rest)}</b></span><span>вне лимита <b>${rub(OUT,false)}</b></span></div>
+      <div class="tripc plate"><div class="top"><b>🧳 Командировочные</b><span>осталось <b>${rubK(trest)}</b></span></div>
+      <div class="meter trip"><i style="width:${tpct}%"></i></div><div class="top"><span>потрачено ${rub(TSPENT)} из ${rub(TRIP,false)}</span></div></div></section>`},
+};
+function show(v){$('card').innerHTML=V[v].html;$('why').innerHTML=V[v].why;
+  $('vars').querySelectorAll('[data-v]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)))}
+$('vars').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b)show(b.dataset.v)});
+show('now');
+</script>
+</body>
+</html>
