@@ -39,7 +39,7 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:var(--safe-to
 /* ---- полоска макета ---- */
 .lab{display:flex;flex-direction:column;gap:8px}
 .tag{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
-.seg{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:3px;background:var(--inset);border:1px solid var(--field-line);border-radius:14px}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;padding:3px;background:var(--inset);border:1px solid var(--field-line);border-radius:14px}
 .seg button{min-height:38px;border-radius:11px;font-size:14px;font-weight:500;color:var(--muted)}
 .seg button[aria-pressed="true"]{background:var(--raised);color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1.5px var(--seg-ring)}
 .why{font-size:13px;line-height:1.45;color:var(--muted)}
@@ -129,6 +129,38 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:var(--safe-to
 .vd .pace b{font-weight:600}
 .vd .row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:0 2px}
 .vd .row b{color:var(--ink);font-weight:500}
+
+/* ---- Д (ChatGPT «Финансовый поток»): одна составная полоса ---- */
+.ve .caps{padding-right:34px}
+.ve .flow{display:flex;gap:4px;height:14px;margin-top:4px}
+.ve .flow i{border-radius:99px}
+.ve .flow .sp{background:var(--burgundy-light)}
+.ve .flow .lf{background:var(--good)}
+.ve .flow .out{background:repeating-linear-gradient(135deg,var(--muted) 0 3px,transparent 3px 6px);opacity:.7}
+.ve .legend{display:grid;grid-template-columns:repeat(3,auto);justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);line-height:1.25}
+.ve .legend span{display:flex;flex-direction:column;gap:2px}
+.ve .legend b{font-size:15px;font-weight:600;color:var(--ink)}
+.ve .legend s{text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.ve .legend s::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}
+
+/* ---- Е (ChatGPT «Финансовый паспорт»): только типографика ---- */
+.vf .caps{padding-right:34px}
+.vf .of{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:-4px}
+.vf hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+.vf .ln{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.vf .ln span{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.vf .ln b{font-size:16px;font-weight:600}
+.vf .ln b small{font-size:12px;font-weight:400;color:var(--muted);margin-left:4px}
+
+/* ---- Ж (ChatGPT «Два источника»): два раздела разного веса ---- */
+.vg .caps{padding-right:34px}
+.vg .sub{font-size:13px;color:var(--muted);margin-top:-4px}
+.vg .sub b{color:var(--ink);font-weight:500}
+.vg .meter i{background:var(--burgundy-light)}
+.vg .small{font-size:12px;color:var(--muted)}
+.vg .tr{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:14px;background:color-mix(in srgb,var(--gold) 9%,var(--inset))}
+.vg .tr .caps{color:var(--gold);padding:0}
+.vg .tr .mid{font-weight:700;font-size:22px;line-height:1.15}
 </style>
 </head>
 <body>
@@ -141,6 +173,9 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:var(--safe-to
       <button type="button" data-v="b" aria-pressed="false">Б</button>
       <button type="button" data-v="c" aria-pressed="false">В</button>
       <button type="button" data-v="d" aria-pressed="false">Г</button>
+      <button type="button" data-v="e" aria-pressed="false">Д</button>
+      <button type="button" data-v="f" aria-pressed="false">Е</button>
+      <button type="button" data-v="g" aria-pressed="false">Ж</button>
     </div>
   </div>
   <div id="card"></div>
@@ -202,6 +237,22 @@ const V={
       <div class="row"><span>осталось <b class="good">${rub(rest)}</b></span><span>вне лимита <b>${rub(OUT,false)}</b></span></div>
       <div class="tripc plate"><div class="top"><b>🧳 Командировочные</b><span>осталось <b>${rubK(trest)}</b></span></div>
       <div class="meter trip"><i style="width:${tpct}%"></i></div><div class="top"><span>потрачено ${rub(TSPENT)} из ${rub(TRIP,false)}</span></div></div></section>`},
+  e:{why:'<b>Д — «Финансовый поток» (идея ChatGPT).</b> Крупно — весь лимит месяца. Под ним одна толстая полоса: бордовым — потрачено, зелёным — осталось, штриховкой отдельно — вне лимита. Под полосой три цифры с цветными точками. Кольца и плашек нет.',
+    html:`<section class="card ve">${TT}<span class="caps">Личный лимит · ${MONTHS[now.getMonth()]}</span><span class="big dotted">${rub(LIMIT,false)}</span>
+      <div class="flow"><i class="sp" style="flex:${SPENT}"></i><i class="lf" style="flex:${rest}"></i><i class="out" style="flex:0 0 ${Math.max(14,Math.round(OUT/LIMIT*340))}px"></i></div>
+      <div class="legend"><span><s style="--c:var(--burgundy-light)">потрачено</s><b>${rub(SPENT,false)}</b></span><span><s style="--c:var(--good)">осталось</s><b>${rub(rest,false)}</b></span><span><s style="--c:var(--muted)">вне лимита</s><b>${rub(OUT,false)}</b></span></div>
+      <div class="tripc plate"><div class="top"><b>🧳 Командировочные</b><span>осталось <b>${rubK(trest)}</b></span></div>
+      <div class="meter trip"><i style="width:${tpct}%"></i></div></div></section>`},
+  f:{why:'<b>Е — «Финансовый паспорт» (идея ChatGPT).</b> Одни цифры, без колец, полос и плашек. Крупно — доступный остаток, под ним «из 30 000 · ноябрь». Дальше ровные строки капсом через тонкие линии: потрачено, вне лимита, командировочные. Спокойно и строго.',
+    html:`<section class="card vf">${TT}<span class="caps">Доступно</span><span class="big">${rub(rest)}</span><span class="of"><span class="dotted">из ${rub(LIMIT,false)}</span> · ${MONTHS[now.getMonth()]}</span>
+      <hr><div class="ln"><span>Потрачено</span><b>${rub(SPENT)}</b></div><div class="ln"><span>Вне лимита</span><b>${rub(OUT,false)}</b></div>
+      <hr><div class="ln"><span>🧳 Командировочные</span><b class="good">${rubK(trest)}<small>из ${rub(TRIP,false)}</small></b></div></section>`},
+  g:{why:'<b>Ж — «Два источника» (идея ChatGPT).</b> Одна карточка, два раздела разного веса. Сверху главный — личные: остаток крупно, «потрачено из лимита», бордовая полоса. Снизу командировочные на золотистой подложке: остаток поменьше, «из 28 500». Сразу видно, где чьи деньги.',
+    html:`<section class="card vg">${TT}<span class="caps">Личные · ${MONTHS[now.getMonth()]}</span><span class="big">${rub(rest)}</span>
+      <span class="sub">потрачено <b>${rub(SPENT)}</b> из <span class="dotted">${rub(LIMIT,false)}</span></span>
+      <div class="meter"><i style="width:${pct}%"></i></div><span class="small">вне лимита ${rub(OUT,false)}</span>
+      <div class="tr"><span class="caps">🧳 Командировочные</span><span class="mid">${rubK(trest)}</span><span class="small">остаток из ${rub(TRIP,false)} · потрачено ${rub(TSPENT)}</span>
+      <div class="meter trip"><i style="width:${tpct}%"></i></div></div></section>`},
 };
 function show(v){$('card').innerHTML=V[v].html;$('why').innerHTML=V[v].why;
   $('vars').querySelectorAll('[data-v]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)))}
