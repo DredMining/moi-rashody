@@ -3372,8 +3372,21 @@ function bindZakat(z,M){
       return a>0?[{...x,amount:a,n:n-1,label:zxLabel(x).replace(/за \d+ \S+$/,`за ${n-1} ${plural(n-1,'год','года','лет')}`)}]:[]});
     /* the year once more, without them: a line dated before the due date stood in it as zakat still owed */
     if(dx>=0.005) y=mk(zCalc(d,{...zz,extra:ex},M));
-    const nz={...z,years:[...ys,y],...(dx>=0.005?{extra:ex}:{})};
-    const xn=dx>=0.005?` Закят с долга станет меньше на ${money(dx)}: ${y.below?'за этот год закята нет':'эти деньги теперь входят в сумму года'}.`:'';
+    /* and the other way round: a debt this year did not hold as doubtful and now does (marked doubtful after the due date, or the
+       year was below nisab) — what came back after the due date stood in the year as a sure debt and brought no «закят с долга»
+       for it. The year no longer charges that money itself, so each such return (or the садака the debt was forgiven into) gets
+       this year: its line a year longer, or a new line on the return's day, linked to its record. Only a line with no more years
+       than the debt's other doubtful years explain; the next recount finds the debt in the year and adds nothing */
+    let da=0, dn=0;
+    for(const id of y.ids||[]){const g=!inY(y0,id)&&state.debts.find(q=>q.id===id), m=ys.filter(q=>inY(q,id)).length;if(!g)continue;
+      for(const r of debtRecs(g)){const back=typeOf(r)==='debt'?r.dir==='back':typeOf(r)==='out'&&catOf(r.cat).id==='sadaqa'&&/^прощён долг: /.test(r.note||'');
+        if(!back||typeof r.date!=='string'||!(r.date>d)||!(+r.amount>0))continue;
+        const k=zxOf(r,{extra:ex}), x=k>=0?ex[k]:null, n=x?zxN(x):0;if(n>m)continue;
+        const a=zxPart(id,+r.amount,n+1,{extra:ex},x), lb=`за ${n+1} ${plural(n+1,'год','года','лет')}`, nm=`Закят с долга: ${g.name.trim()} — ${lb}`;da+=a-(x?+x.amount||0:0);dn++;
+        if(x)ex[k]={...x,amount:a,n:n+1,rec:r.id,label:n?zxLabel(x).replace(/за \d+ \S+$/,lb):nm};else ex.push({date:r.date,amount:a,label:nm,debt:id,rec:r.id,n:1})}}
+    da=r2(da);
+    const nz={...z,years:[...ys,y],...(dx>=0.005||dn?{extra:ex}:{})};
+    const xn=(dx>=0.005?` Закят с долга станет меньше на ${money(dx)}: ${y.below?'за этот год закята нет':'эти деньги теперь входят в сумму года'}.`:'')+(da>=0.005?` Закят с долга станет больше на ${money(da)}: с того, что вернули после этого срока.`:'');
     let nb;if(dip&&last){nb=null;for(let D=dip.d;D<=T;D=addDays(D,1)) if(atNisab(zPool(nz,M,D),zNisab(z))){nb=D;break}}
     const nx=nb?(nb!==z.start?`, новый год закята с ${gDate(nb)}${hawlEnd(nb)<=T?` (его срок ${gDate(hawlEnd(nb))} уже прошёл)`:''}`:''):nb===null?', новый год начнётся, когда сумма дойдёт до нисаба':dip?', следующие сроки не пересчитаны':'';
     const sv=x=>x.below?'— (ниже нисаба)':money(+x.amount||0)+(x.approx?' (примерно)':'')+(x.forced?' (начислен вручную)':'');
@@ -3383,7 +3396,7 @@ function bindZakat(z,M){
     if(Date.now()-b.dataset.armed<600) return;
     if(nb){if(nb!==z.start){nz.start=nb;delete nz.wait;delete nz.dipOk}}
     else if(nb===null||last&&!!y0?.below!==y.below){delete nz.dipOk;if(y.below){nz.wait=dip?dip.d:d;delete nz.start}else{nz.start=d;delete nz.wait}}
-    saveSettings({zakat:nz});toast(`Срок ${gDate(d)}: ${dip?`год прерван ${gDate(dip.d)}, закята нет`:y.below?'ниже нисаба, закята нет':'закят '+money(y.amount)}${nx}${dx>=0.005?` · закят с долга −${money(dx)}`:''}`,()=>saveSettings({zakat:z}))});
+    saveSettings({zakat:nz});toast(`Срок ${gDate(d)}: ${dip?`год прерван ${gDate(dip.d)}, закята нет`:y.below?'ниже нисаба, закята нет':'закят '+money(y.amount)}${nx}${dx>=0.005?` · закят с долга −${money(dx)}`:''}${da>=0.005?` · закят с долга +${money(da)}`:''}`,()=>saveSettings({zakat:z}))});
   document.querySelectorAll('#zakatForm [data-zclose]').forEach(b=>b.onclick=()=>{state.editing=null;render()});
   const f=$('zForm');if(!f) return;
   /* the preview is the nisab that will be saved: the price is kept in kopecks, so a longer one is rounded here too and said */
