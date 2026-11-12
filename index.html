@@ -3372,16 +3372,19 @@ function bindZakat(z,M){
       return a>0?[{...x,amount:a,n:n-1,label:zxLabel(x).replace(/за \d+ \S+$/,`за ${n-1} ${plural(n-1,'год','года','лет')}`)}]:[]});
     /* the year once more, without them: a line dated before the due date stood in it as zakat still owed */
     if(dx>=0.005) y=mk(zCalc(d,{...zz,extra:ex},M));
-    /* and the other way round: a debt this year did not hold as doubtful and now does (marked doubtful after the due date, or the
-       year was below nisab) — what came back after the due date stood in the year as a sure debt and brought no «закят с долга»
-       for it. The year no longer charges that money itself, so each such return (or the садака the debt was forgiven into) gets
-       this year: its line a year longer, or a new line on the return's day, linked to its record. Only a line with no more years
-       than the debt's other doubtful years explain; the next recount finds the debt in the year and adds nothing */
+    /* and the other way round: a debt this year now holds as doubtful, and a return after the due date has no «закят с долга» for
+       it. Either the year did not hold the debt as doubtful before (marked doubtful after the due date, or the year was below
+       nisab) — that money stood in it as a sure debt; or it did, and the return has no line at all (it was dated before the due
+       date and moved after it; an older version recounted the year without this step). The year does not charge that money itself,
+       so each such return (or the садака the debt was forgiven into) gets this year: its line a year longer, or a new line on
+       the return's day, linked to its record. Only a line with no more years than the debt's other doubtful years explain; a debt
+       the year already held is left alone when it has lines of older versions (no record link: which return they stand for is
+       not known). The next recount finds the line and adds nothing */
     let da=0, dn=0;
-    for(const id of y.ids||[]){const g=!inY(y0,id)&&state.debts.find(q=>q.id===id), m=ys.filter(q=>inY(q,id)).length;if(!g)continue;
+    for(const id of y.ids||[]){const g=state.debts.find(q=>q.id===id), m=ys.filter(q=>inY(q,id)).length, was=inY(y0,id);if(!g||was&&ex.some(q=>q.debt===id&&!q.rec))continue;
       for(const r of debtRecs(g)){const back=typeOf(r)==='debt'?r.dir==='back':typeOf(r)==='out'&&catOf(r.cat).id==='sadaqa'&&/^прощён долг: /.test(r.note||'');
         if(!back||typeof r.date!=='string'||!(r.date>d)||!(+r.amount>0))continue;
-        const k=zxOf(r,{extra:ex}), x=k>=0?ex[k]:null, n=x?zxN(x):0;if(n>m)continue;
+        const k=zxOf(r,{extra:ex}), x=k>=0?ex[k]:null, n=x?zxN(x):0;if(n>m||was&&x)continue;
         const a=zxPart(id,+r.amount,n+1,{extra:ex},x), lb=`за ${n+1} ${plural(n+1,'год','года','лет')}`, nm=`Закят с долга: ${g.name.trim()} — ${lb}`;da+=a-(x?+x.amount||0:0);dn++;
         if(x)ex[k]={...x,amount:a,n:n+1,rec:r.id,label:n?zxLabel(x).replace(/за \d+ \S+$/,lb):nm};else ex.push({date:r.date,amount:a,label:nm,debt:id,rec:r.id,n:1})}}
     da=r2(da);
