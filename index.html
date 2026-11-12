@@ -59,15 +59,19 @@ img{max-width:100%}
    The white theme is gone. Category and account colours are the same in both looks. */
 :root{
   --bg:#000000; --surface:#161215; --ink:#F7F3F4; --muted:#A79DA2; --line:#383035;
-  --accent:#F08CA0; --accent-ink:#FFFFFF; --accent-soft:#3A1C25;
+  /* the app's wine: two shades of one burgundy and no other (owner, 12.11.2026). The main one fills the buttons (white text on it) and
+     gives the sum plates their 14% ground and 40% edge; the light one is the wine of links, small accent text, sums, the picked tab's
+     icon and every accent line or mark. Errors and deleting keep their red (--bad). Every accent below is one of these two */
+  --burgundy:#752238; --burgundy-light:#96334D;
+  --accent:var(--burgundy-light); --accent-ink:#FFFFFF; --accent-soft:color-mix(in srgb,var(--burgundy) 40%,transparent);
   --good:#5AD49B; --warn:#F2B950; --bad:#FF7043;
   --p1:#5B8CFF; --p2:#FF9F6B; --p3:#5EDB94; --p4:#B79CFF; --p5:#F48FD8; --p6:#5CD6E6; --p7:#FFD166; --p8:#9AA6BF; --p9:#C2DE5E;
   /* an expense's sum is plain text here: the wine button and the orange «превышен» are the only reds on the screen */
   --sber:#3DBE79; --tbank:#E6BE55; --vtb:#5B9BFF; --pocket:#EEF1F6; --pillow:#C4A7FF; --spend:var(--ink);
   /* one accent for «Добавить расход» and «Добавить доход»: the kind of record is told by the switch above, not by the button's colour */
-  --out:#B23A55; --in:#B23A55; --own:#243F75; --trip:#7A5A1E;
+  --out:var(--burgundy); --in:var(--burgundy); --own:#243F75; --trip:#7A5A1E;
   /* buttons with white text on the accent, the edge of a field / chip / tile (3:1), the link in the light toast, account marks' rim, the strip under the status bar */
-  --accent-btn:#B23A55; --field-line:#7A6E74; --toast-link:var(--accent); --badge-ink:#1A1405; --good-ink:var(--good); --mark-edge:rgb(255 255 255 / .5); --sbar:var(--bg);
+  --accent-btn:var(--burgundy); --field-line:#7A6E74; --toast-link:var(--accent); --badge-ink:#1A1405; --good-ink:var(--good); --mark-edge:rgb(255 255 255 / .5); --sbar:var(--bg);
   /* yellow as text (a fill or a line keeps --warn) */
   --warn-ink:var(--warn);
   --f-display:"Unbounded", "Golos Text", system-ui, sans-serif;
@@ -103,7 +107,9 @@ img{max-width:100%}
   /* the glass tab bar: its tint over the blurred page (and the denser one where the browser can't blur), the light on its rim,
      the picked tab's capsule — its tint and the soft glow around it (the app's own wine, never a new colour) */
   --glass:rgb(48 38 43 / .56); --glass-solid:rgb(30 24 28 / .94); --glass-rim:rgb(255 255 255 / .16);
-  --cap-tint:rgb(240 140 160 / .16); --ico-on:#FFB4C2;
+  --cap-tint:color-mix(in srgb,var(--burgundy-light) 16%,transparent); --ico-on:var(--burgundy-light);
+  /* the icons of the tabs not picked: the interface's own grey here (owner, 12.11.2026) */
+  --tab-ico:var(--muted);
   /* the bar's place: its height, its gap to the screen's edge (over the home indicator on an iPhone), the room the page keeps under itself for it */
   --tabbar-h:64px; --tabbar-gap:max(10px,calc(env(safe-area-inset-bottom,0px) - 16px),calc(var(--simulator-safe-bottom,0px) - 16px));
   --tabbar-room:calc(var(--tabbar-h) + var(--tabbar-gap) + 6px);
@@ -122,6 +128,7 @@ img{max-width:100%}
   --toast-bg:var(--ink); --toast-ink:var(--bg); --toast-ring:0 0 #0000;
   --glass:rgb(38 50 78 / .56); --glass-solid:rgb(21 30 48 / .94);
   --cap-tint:rgb(91 140 255 / .18); --ico-on:#9DBBFF;
+  --tab-ico:color-mix(in srgb,var(--accent-btn) 75%,var(--ico-on));
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:var(--fs-md);line-height:1.5;font-variant-numeric:tabular-nums}
@@ -210,9 +217,9 @@ button{cursor:pointer}
 .tabs button{position:relative;z-index:1;border:0;background:transparent;padding:2px 0 1px;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:0;color:var(--muted);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent;outline-offset:-3px;border-radius:26px}
 .tabs .ico{position:relative;width:min(56px,100%);height:32px;border-radius:16px;display:grid;place-items:center}
 .tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
-/* the icons of the tabs not picked are in the app's wine, a little lighter — with a quarter of --ico-on (owner, 12.11.2026), at full
-   strength; the names stay grey */
-.tabs button .ico{color:#C55970;color:color-mix(in srgb,var(--accent-btn) 75%,var(--ico-on))}
+/* the icons of the tabs not picked (--tab-ico): grey in «Чёрный и бордо», a lighter accent in the night-blue look; at full strength,
+   the names stay grey */
+.tabs button .ico{color:var(--tab-ico)}
 .tabs button svg{opacity:1}
 /* A tab's page comes in softly as the capsule moves: it fades in rising 8px; the page before it stays for a moment where it was, over the
    new one, and fades out (.view-out, set by setTab). The rise is on for a fifth of a second only — no window of the page is open then */
@@ -1189,10 +1196,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
     /* type a step larger: nothing under 12, lists and reminders 15, text and buttons 16 */
     --fs-2xs:12px;--fs-base:15px;--fs-md:16px;
     /* spending and minuses are red, not orange (owner, 11.11.2026) */
-    --bad:#FF5252;
-    /* the app's wine for a sum: as the tab bar's icons (#B23A55 with a quarter of #FFB4C2) — the day's spending badge on «Записи» and
-       «Расходы» on «Итоги» (owner, 12.11.2026; red before). Errors stay red */
-    --wine:#C55970}
+    --bad:#FF5252}
   /* a reminder's colour: a short straight bar inside its left edge (a strip along the edge would bend round the larger corner) */
   [data-theme="dark"] .alert,[data-theme="dark"] #sysAlerts .upd{box-shadow:none;background-image:linear-gradient(var(--alert-c,var(--warn)),var(--alert-c,var(--warn)));background-repeat:no-repeat;background-position:6px 50%;background-size:3px calc(100% - 20px)}
   [data-theme="dark"] #sysAlerts .upd{--alert-c:var(--accent);background-size:3px calc(100% - 12px)}
@@ -1212,10 +1216,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   [data-theme="dark"] .mtot .lbl,[data-theme="dark"] .debt-overview-head .lbl{font-size:13px}
   /* the month's three sums on Итоги are bold, as the big sum of a tab */
   [data-theme="dark"] .mcard .mcol>b{font-weight:700}
-  /* a day's spending badge on Записи is wine, so the minus reads at a glance (the rows' sums stay plain); so is «Расходы» on Итоги, its dot too */
-  [data-theme="dark"] .recs .dayhead .num>.out{--c:var(--wine)}
-  [data-theme="dark"] .mcard .mout>b.neg{color:var(--wine)}
-  [data-theme="dark"] .mcard .mout>span::before{background:var(--wine)}
+  /* a day's spending badge on Записи is wine, so the minus reads at a glance (the rows' sums stay plain): its ground and edge from the
+     main burgundy, its sum in the light one; «Расходы» on Итоги is in the light one, its dot too */
+  [data-theme="dark"] .recs .dayhead .num>.out{--c:var(--burgundy);color:var(--burgundy-light)}
+  [data-theme="dark"] .mcard .mout>b.neg{color:var(--burgundy-light)}
+  [data-theme="dark"] .mcard .mout>span::before{background:var(--burgundy-light)}
+  /* the sum plates over each account's list on «Деньги»: 14% ground and 40% edge of the main burgundy, as every sum plate */
+  [data-theme="dark"] .whead b{background:color-mix(in srgb,var(--burgundy) 14%,transparent);border-color:color-mix(in srgb,var(--burgundy) 40%,transparent)}
   [data-theme="dark"] .monthbar .title{font-size:var(--fs-lg);font-weight:600}
   /* the main button of a form is 52px. «Новая запись» is the main screen's form, less tight here: its sum 56px with larger, bolder figures —
      the first thing typed; its switches 38px in a 3px groove, its chips 36px. The picked half of a switch follows the corner of its groove */
