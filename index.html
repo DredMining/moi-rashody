@@ -3759,13 +3759,14 @@ const relDay=s=>{const y=new Date(now);y.setDate(y.getDate()-1);return s===iso(y
 const rowDelta=(i,af)=>{const a=+i.amount||0, t=typeOf(i);if(af) return walletDelta(i,af);
   return t==='tr'?0:t==='debt'?(i.dir==='back'||i.dir==='in'?a:-a):t==='in'?a:-a};
 /* own: in a category's window — the category is already its title, so a row is named by its label or comment instead;
-   ttl: a debt row inside a return of several debts (rgRow) — named by its debt (HTML, made safe already), the account is said above it */
+   ttl: a debt row inside a return of several debts (rgRow) — [its name, its comment or ''] (HTML, made safe already): the day of its debt on
+   the first line, the debt's comment («командировка: Такси») always on a line of its own under it (owner, 12.11.2026); the account is said above */
 function itemRow(i,showDate,af,own,ttl){
   const t=typeOf(i), inc=t==='in', id=esc(i.id), open=state.actItem===i.id, dd=showDate&&typeof i.date==='string'&&i.date!==iso(now)?esc(relDay(i.date)):'', sj=(...a)=>a.filter(Boolean).join(' · '), sp=dd?'<span class="dd">':'<span>';
   let what, amt, cls='', acls='';
   /* a record at 0 ₽ (a sum that didn't read, set to 0 on the way in — to be fixed here) has no sign: «0 ₽», not «−0 ₽» */
   const sg=s=>Math.abs(+i.amount||0)<0.005?'':s;
-  if(t==='debt'){cls='tr';what=ttl?`<b>${ttl}</b>`:`<b>${esc(i.label||'Долг')}</b>${sp}${sj(dd,accTag(i.acc)||'—')}</span>`;amt=sg(i.dir==='back'||i.dir==='in'?'+':'−')+money(+i.amount||0);acls=i.dir==='back'||i.dir==='in'?'pos':'spend'}
+  if(t==='debt'){cls='tr';what=ttl?`<b>${ttl[0]}</b>${ttl[1]?`<span>${ttl[1]}</span>`:''}`:`<b>${esc(i.label||'Долг')}</b>${sp}${sj(dd,accTag(i.acc)||'—')}</span>`;amt=sg(i.dir==='back'||i.dir==='in'?'+':'−')+money(+i.amount||0);acls=i.dir==='back'||i.dir==='in'?'pos':'spend'}
   else if(t==='tr'){cls='tr';what=`<b>Перевод</b>${sp}${sj(dd,`${accTag(i.from)||'?'} → ${accTag(i.to)||'?'}`)}</span>${i.note?`<span>${esc(i.note)}</span>`:''}`;amt=money(+i.amount||0)}
   else{cls=inc?'in':'';acls=inc?'pos':'spend';const nt=own&&!i.label&&i.note, sub=sj(dd,af&&i.acc!==af?`${accTag(i.acc)} → ${accTag(af)}`:accTag(i.acc),i.note&&!nt?esc(i.note):'');
     what=`<b>${esc(own?(i.label||i.note||nameOf(i)):nameOf(i))}${isTrip(i)?'<span class="tag trip">командировка</span>':''}</b>${sub?`${sp}${sub}</span>`:''}`;amt=sg(inc?'+':'−')+money(+i.amount||0)}
@@ -3833,7 +3834,7 @@ function rgRow(g,showDate,af){
   const shut=g.filter(i=>{const d=recDebt(i);return d&&debtLeft(d)<0.005}).length, nd=`${n} ${plural(n,'долг','долга','долгов')}`;
   const dd=showDate&&typeof i0.date==='string'&&i0.date!==iso(now)?esc(relDay(i0.date)):'';
   const sub=[dd,accTag(i0.acc)||'—',nd+(shut===n?' закрыто':'')].filter(Boolean).join(' · ');
-  const kids=g.map(i=>{const d=recDebt(i);return itemRow(i,false,af,false,d?(d.date?'Долг от '+esc(dayText(d.date)):'Долг')+(d.note?' · '+esc(d.note):''):'Долг')}).join('');
+  const kids=g.map(i=>{const d=recDebt(i);return itemRow(i,false,af,false,[d&&d.date?'Долг от '+esc(dayText(d.date)):'Долг',d&&d.note?esc(d.note):''])}).join('');
   return `<div class="item tr rgrp" data-rg="${esc(k)}"><span class="ic" aria-hidden="true">🤝</span><div class="what"><b>${esc(i0.label||'Долг')}</b><span${dd?' class="dd"':''}>${sub}</span></div>
     <button type="button" class="amt ${acls}" aria-expanded="${open}" aria-label="${esc(i0.label||'Долг')}: ${nd}, ${esc(amt)}${dd?', '+dd:''}. ${open?'Свернуть':'Показать по долгам'}">${amt}<span class="rg-chev" aria-hidden="true">›</span></button></div>
     <div class="rgrp-in"${open?'':' hidden'}>${kids}</div>`;
