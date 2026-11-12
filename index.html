@@ -1576,12 +1576,24 @@ function localStore(){
   /* what is stored is this copy's own last write */
   const own=()=>{const r=revs(data);return !!r.length&&mine.some(w=>w.id===r[r.length-1])};
   /* another open copy of the app may have saved since: build every change on what is stored now, not on an old snapshot */
+  /* ext: how many saves of another open copy were read in here; extLog: what each of the last 20 changed (touched). An «Отменить» made
+     before one of them is refused when it would change the same record, debt or setting (mut, onGen): it puts a debt, a trip's result
+     or a record back as this copy last saw it, over what the other copy did since — a debt's rest went apart from its records, a trip's
+     result came back into a trip opened again. One that touches other things goes through as before (a record added here, another there) */
+  let ext=0, extLog=[];
+  /* what differs between two states of the data: 'i:'+a record's id, 'd:'+a debt's id, 's:'+a setting's key; '*' — a whole new set */
+  const touched=(a,b)=>{const t=new Set(), js=JSON.stringify, by=(x,y,p)=>{const A=new Map(x.map(o=>[o.id,o])), B=new Map(y.map(o=>[o.id,o]));
+      for(const [id,o] of A) if(!B.has(id)||(B.get(id)!==o&&js(B.get(id))!==js(o))) t.add(p+id);for(const id of B.keys()) if(!A.has(id)) t.add(p+id)};
+    by(a.items||[],b.items||[],'i:');by(a.debts||[],b.debts||[],'d:');const sa=a.settings||{}, sb=b.settings||{};
+    for(const k of new Set([...Object.keys(sa),...Object.keys(sb)])) if(sa[k]!==sb[k]&&js(sa[k])!==js(sb[k])) t.add('s:'+k);
+    if((a.gen||'')!==(b.gen||'')) t.add('*');return t};
   const fresh=()=>{
     const t=Date.now();mine=mine.filter(w=>t-w.at<3e4);
     let r=null;try{r=localStorage.getItem(KEY)}catch(e){return}
     if(!r||r===last)return;
-    try{data=parse(r);last=r;status='';kept=true}
-    catch(e){status='broken';keepBrokenRaw(r);last=r;return}
+    const was=data;ext++;
+    try{data=parse(r);last=r;status='';kept=true;extLog=[...extLog,[ext,touched(was,data)]].slice(-20)}
+    catch(e){status='broken';keepBrokenRaw(r);last=r;extLog=[...extLog,[ext,new Set(['*'])]].slice(-20);return}
     /* the writes of this copy the other one saw are in its data now; those it didn't see are left, to be put on top again */
     if(!own()){const R=revs(data);let k=mine.length;while(k--&&!R.includes(mine[k].id));mine=mine.slice(k+1)}
   };
@@ -1601,9 +1613,13 @@ function localStore(){
   /* a change is kept only if the browser stored it: otherwise the screen goes back to what is stored and the caller says so.
      all: «Очистить всё» — it may go over damaged data that couldn't be kept aside, he asked to delete everything.
      outer: a write of this copy put back (heal) — the screen is drawn as for another copy's save. gen: see onGen */
-  const mut=(f,{all,outer,gen}={})=>{fresh();
+  const mut=(f,{all,outer,gen,seen}={})=>{fresh();
     if(gen!=null&&(data.gen||'')!==gen){tell(outer);const x=new Error('gen');x.code='gen';throw x}
     const b0=data, lost=own()?[]:mine, b=lost.length?fold(data,lost):data, d={...b,items:[...b.items],debts:[...b.debts]}, r=f(d);
+    /* an «Отменить» (seen: the saves of other copies read in when its message came): refused if one read in since changed what it changes —
+       nothing is written; more of them than the log holds — refused too */
+    if(seen!=null&&ext>seen){const ex=extLog.filter(e=>e[0]>seen), u=touched(b,d);
+      if(ex.length<ext-seen||ex.some(e=>e[1].has('*')||[...u].some(k=>e[1].has(k)))){tell(outer);const x=new Error('outer');x.code='outer';throw x}}
     /* the damaged text had no room to be put aside: room may have come since (another tab freed it) — it is tried again first, the step-back copy giving up its place if need be */
     if(status==='broken'&&!kept&&!all){kept=true;keepBrokenRaw(last);if(!kept){try{dropPrev()}catch(e){}kept=true;keepBrokenRaw(last)}if(!kept){tell(outer);throw fail()}}
     const id=nid(), whole=(d.gen||'')!==(b0.gen||'');d.rev=[...revs(b).slice(-15),id];
@@ -1636,8 +1652,8 @@ function localStore(){
     removeDebt(id,ids=[]){d.debts=d.debts.filter(x=>x.id!==id);if(ids.length)d.items=d.items.filter(i=>!ids.includes(i.id))},
     restoreDebt(x,its=[]){if(!d.debts.some(y=>y.id===x.id))d.debts.push({...x});its.forEach(o.restore)}};return o};
   /* want: the data generation an «Отменить» was made on (onGen) */
-  let want=null;
-  const one=k=>async(...a)=>mut(d=>ops(d)[k](...a),{gen:want});
+  let want=null, wantE=null;
+  const one=k=>async(...a)=>mut(d=>ops(d)[k](...a),{gen:want,seen:wantE});
   /* saved damaged text (see above): it stays until he deals with it — the warning about it doesn't go with the first new record */
   const broken=()=>{try{return Object.keys(localStorage).filter(k=>k===BK||/^expenses-v1-broken-\d+$/.test(k)).sort((a,b)=>(+a.slice(BK.length+1)||0)-(+b.slice(BK.length+1)||0))}catch(e){return []}};
   return {
@@ -1654,11 +1670,13 @@ function localStore(){
     subscribe(fn){cb=fn;tell()},
     add:one('add'),update:one('update'),remove:one('remove'),restore:one('restore'),patchSettings:one('patchSettings'),
     addDebt:one('addDebt'),updateDebt:one('updateDebt'),removeDebt:one('removeDebt'),restoreDebt:one('restoreDebt'),
-    async batch(f){return mut(d=>f(ops(d)),{gen:want})},
+    async batch(f){return mut(d=>f(ops(d)),{gen:want,seen:wantE})},
     /* «Отменить»: what it undoes was made on data of generation g (gen: a new one with every whole new set of data — replaceAll, clearAll;
        none — data saved before it was kept). After «Загрузить копию» or «Очистить всё» (here or in another open copy) it would bring what
        went with the old data into the new ones — refused (code 'gen'), nothing is written */
-    onGen(g,f){want=g;try{return f()}finally{want=null}},
+    /* n: the saves of other open copies read in by the time its message came (outer). One more since — refused too (code 'outer') */
+    onGen(g,f,n){want=g;wantE=n??null;try{return f()}finally{want=null;wantE=null}},
+    get outer(){return ext},
     /* a copy too big for this browser: what is stored stays and still takes new records — no «память заполнена» banner; big: applyRestore says why */
     async replaceAll(n){const was=status;try{prev(()=>mut(d=>{d.items=n.items||[];d.debts=n.debts||[];d.settings=n.settings||{};d.gen=nid()}))}
       catch(e){if(status==='full'&&was!=='full'){status=was;tell();e.big=true}throw e}},
@@ -1746,7 +1764,7 @@ function keepOuter(){
 /* quiet: the caller's window stays open and says why in its own line (role=alert) — no second, same message under it */
 async function saveSettings(patch,quiet){
   state.settings={...state.settings,...patch};render();
-  try{await store.patchSettings(patch);return true}catch(e){if(e?.code==='gen')throw e;saveSettings.err=e;if(!quiet)toast(saveErr(e));return false}
+  try{await store.patchSettings(patch);return true}catch(e){if(e?.code==='gen'||e?.code==='outer')throw e;saveSettings.err=e;if(!quiet)toast(saveErr(e));return false}
 }
 const saveErr=x=>x?.code==='quota_exceeded'?'Не сохранилось: память браузера заполнена или недоступна. Скачайте резервную копию.':'Не получилось сохранить. Попробуйте ещё раз.';
 /* a save that failed: its small form opens again with what was typed (v) — nothing to type twice */
@@ -1833,12 +1851,14 @@ const say=t=>{const s=$('say');if(!s)return;s.textContent='';clearTimeout(s._c);
 const fvis=el=>{try{return el.matches(':focus-visible')}catch(e){return false}};
 /* all the data were replaced in another open copy of the app («Загрузить копию», «Очистить всё») */
 const REGEN='Данные заменены в другой вкладке';
+/* the same record, debt or setting was changed in another open copy after the action: its «Отменить» would go over that (store.onGen) */
+const OUTER='Это уже изменили в другой вкладке — отменить нельзя. Поправьте запись вручную.';
 /* act: [label, fn] — a second button, e.g. «Показать» the month a record went to. «Отменить» also brings back the month on screen,
    and only into the data it was made on (g: their generation, see store.onGen) */
 function toast(msg,undo,ms,act){const t=$('toast'), ym=[state.y,state.m];t.replaceChildren(Object.assign(document.createElement('span'),{textContent:msg}));
   /* «Отменить» pressed from the keyboard goes away with its message: the focus goes back where it was when the message came
      («Добавить расход» after a record), not to the page's start (a tap or a click: nothing changes) */
-  if(undo){const from=document.activeElement, g=state.gen, b=document.createElement('button');b.className='undo';b.dataset.u='';b.textContent='Отменить';b.onclick=async()=>{const kb=fvis(b);toastOff();try{await store.onGen(g,undo);if(state.y!==ym[0]||state.m!==ym[1]){state.y=ym[0];state.m=ym[1];render()}toast('Отменено')}catch(e){toast(e?.code==='gen'?REGEN+' — отменить уже нельзя':'Не получилось отменить')}
+  if(undo){const from=document.activeElement, g=state.gen, n=store.outer, b=document.createElement('button');b.className='undo';b.dataset.u='';b.textContent='Отменить';b.onclick=async()=>{const kb=fvis(b);toastOff();try{await store.onGen(g,undo,n);if(state.y!==ym[0]||state.m!==ym[1]){state.y=ym[0];state.m=ym[1];render()}toast('Отменено')}catch(e){toast(e?.code==='gen'?REGEN+' — отменить уже нельзя':e?.code==='outer'?OUTER:'Не получилось отменить',null,e?.code==='outer'?7000:0)}
     const o=kb&&document.activeElement===document.body?refind(from):null;if(o&&o!==document.body&&o.getClientRects().length)o.focus({preventScroll:true})};t.append(b)}
   if(act){const b=document.createElement('button');b.className='undo';b.textContent=act[0];b.onclick=()=>{toastOff();act[1]()};t.append(b)}
   t.classList.remove('out');t.style.transform=t.style.opacity='';t.hidden=false;toastPlace(t);clearTimeout(toastT);
