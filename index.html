@@ -1195,8 +1195,10 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
   transition:transform .25s cubic-bezier(.2,.8,.2,1),visibility 0s .25s;touch-action:none;-webkit-user-select:none;user-select:none}
 .numpad.on{transform:none;visibility:visible;transition:transform .25s cubic-bezier(.2,.8,.2,1)}
 .numpad-grab{display:block;width:36px;height:5px;border-radius:3px;background:var(--track);margin:0 auto 10px}
-.numpad-keys{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.numpad button{height:54px;border:0;border-radius:14px;padding:0;background:#2A2629;background:color-mix(in srgb,var(--ink) 9%,var(--surface));color:var(--ink);
+/* the figures' panel is as tall as the letters' (owner, 12.11.2026): its «Готово» row and four rows of 44px keys 7px apart make the
+   letters' handle and four rows of 46px keys 10px apart — going from a sum to a comment, the panel doesn't jump */
+.numpad-keys{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.numpad button{height:44px;border:0;border-radius:14px;padding:0;background:#2A2629;background:color-mix(in srgb,var(--ink) 9%,var(--surface));color:var(--ink);
   font:500 26px/1 var(--f-num);display:grid;place-items:center;-webkit-tap-highlight-color:transparent;transition:background .08s,transform .08s}
 .numpad button.hit{background:#43393F;background:color-mix(in srgb,var(--ink) 20%,var(--surface));transform:scale(.96)}
 .numpad button.fn{background:transparent;color:var(--muted)}
