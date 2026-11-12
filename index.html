@@ -483,6 +483,21 @@ input.num::placeholder{font-family:var(--f-body)}
 [data-theme="dark"] #statSeg button[aria-pressed="true"]{color:var(--ink);font-weight:600;
   background:radial-gradient(120% 100% at 50% 0%,var(--cap-tint),rgb(255 255 255 / 0) 75%),linear-gradient(180deg,rgb(255 255 255 / .13),rgb(255 255 255 / .07));
   box-shadow:inset 0 1px 0 rgb(255 255 255 / .22),inset 0 0 0 1px rgb(255 255 255 / .07)}
+/* …and that plate is one capsule (.sv-cap, made by the script) that goes from section to section, as the tab bar's does (owner, 12.11.2026):
+   it glides to the one picked; held and moved, it follows the finger and the section under it lights up; let go — that section opens.
+   Without the script the picked button keeps the plate itself */
+#statSeg{position:relative;touch-action:pan-y}
+.sv-cap{display:none}
+[data-theme="dark"] #statSeg .sv-cap{display:block;position:absolute;z-index:0;top:4px;bottom:4px;left:0;width:0;border-radius:999px;pointer-events:none;
+  background:radial-gradient(120% 100% at 50% 0%,var(--cap-tint),rgb(255 255 255 / 0) 75%),linear-gradient(180deg,rgb(255 255 255 / .13),rgb(255 255 255 / .07));
+  box-shadow:inset 0 1px 0 rgb(255 255 255 / .22),inset 0 0 0 1px rgb(255 255 255 / .07);
+  transition:transform .35s cubic-bezier(.2,.8,.2,1),width .35s cubic-bezier(.2,.8,.2,1);will-change:transform}
+[data-theme="dark"] #statSeg.sv-drag .sv-cap{transition:width .15s ease-out}
+[data-theme="dark"] #statSeg button{position:relative;z-index:1;transition:color .15s}
+[data-theme="dark"] #statSeg:has(.sv-cap) button[aria-pressed="true"]{background:transparent;box-shadow:none}
+[data-theme="dark"] #statSeg.sv-drag button[aria-pressed="true"]:not(.sv-hot){color:var(--muted)}
+[data-theme="dark"] #statSeg button.sv-hot{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){[data-theme="dark"] #statSeg .sv-cap,[data-theme="dark"] #statSeg button{transition:none}}
 .listhead{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-2);flex-wrap:wrap}
 .day{display:flex;flex-direction:column}
 .dayhead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--sp-2);font-size:var(--fs-sm);color:var(--muted);padding-block:10px 6px;border-bottom:1px solid var(--line)}
@@ -4034,17 +4049,25 @@ function syncStatsViewport(index=Math.max(0,SV.findIndex(([k])=>k===state.statVi
 function applyStatView(index){
   index=Math.max(0,Math.min(SV.length-1,index));const v=SV[index][0],box=$('viewStats');
   state.statView=v;box.dataset.view=v;$('cmpBox').open=true;
-  $('statSeg').querySelectorAll('[data-svb]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.svb===v)));
+  $('statSeg').querySelectorAll('[data-svb]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.svb===v)));svCap();
   const pages=[...$('statsTrack').children];
   pages.forEach((page,i)=>{page.inert=i!==index;page.setAttribute('aria-hidden',i===index?'false':'true')});
   const shown=[...box.querySelectorAll(`[data-sv="${v}"]`)].some(x=>!x.hidden);
   $('svEmpty').hidden=shown;$('svEmpty').textContent=v==='in'?'Доходов за этот месяц нет.':'Расходов за этот месяц нет.';
   syncStatsViewport(index);
 }
+/* the capsule of the five (.sv-cap) onto the picked section: gliding there, or put at once the first time it is seen or when the panel
+   changes its size (no glide from nowhere) */
+function svCap(now){
+  const seg=$('statSeg'), cap=seg.querySelector('.sv-cap'), b=seg.querySelector('[data-svb][aria-pressed="true"]');if(!cap||!b||!b.offsetWidth||seg.classList.contains('sv-drag'))return;
+  const jump=now||!cap.style.width;if(jump)cap.style.transition='none';
+  cap.style.width=b.offsetWidth+'px';cap.style.transform=`translate3d(${b.offsetLeft}px,0,0)`;
+  if(jump){void cap.offsetWidth;cap.style.transition=''}
+}
 function renderStatSeg(){
   const v=SV.some(([k])=>k===state.statView)?state.statView:'out';
   /* made once, then only marked (applyStatView): buttons made anew took the keyboard focus away with the one pressed */
-  if(!$('statSeg').children.length) $('statSeg').innerHTML=SV.map(([k,n])=>`<button type="button" data-svb="${k}" aria-pressed="${k===v}">${n}</button>`).join('');
+  if(!$('statSeg').children.length) $('statSeg').innerHTML='<span class="sv-cap" aria-hidden="true"></span>'+SV.map(([k,n])=>`<button type="button" data-svb="${k}" aria-pressed="${k===v}">${n}</button>`).join('');
   $('statSeg').querySelectorAll('[data-svb]').forEach(b=>b.onclick=()=>setStatView(b.dataset.svb));
   const index=SV.findIndex(([k])=>k===v),track=$('statsTrack');
   applyStatView(index);track.style.transform=`translate3d(calc(-${index*20}% - ${index*STAT_GAP}px),0,0)`;
@@ -4120,11 +4143,33 @@ function bindSwipe(o){
 }
 {const track=$('statsTrack'), at=()=>Math.max(0,SV.findIndex(([k])=>k===$('viewStats').dataset.view)),
     x=(i,d=0)=>`translate3d(calc(-${i*20}% - ${i*STAT_GAP}px + ${d}px),0,0)`;
-  bindSwipe({on:()=>state.tab==='stats',n:SV.length,at,width:()=>$('viewStats').clientWidth||$('scroller').clientWidth,
+  bindSwipe({on:()=>state.tab==='stats',skip:'#statSeg',n:SV.length,at,width:()=>$('viewStats').clientWidth||$('scroller').clientWidth,
     start:()=>track.classList.add('is-dragging'),drag:d=>{track.style.transform=x(at(),d)},
     go:i=>{track.classList.remove('is-dragging');setStatView(SV[i][0])},
     cancel:()=>{track.classList.remove('is-dragging');track.style.transform=x(at())}});
   window.addEventListener('resize',()=>syncStatsViewport(),{passive:true})}
+/* the five of «Итоги» held and moved (svCap): the capsule follows the finger, as wide as the section nearest to it, kept inside the panel;
+   that section lights up (.sv-hot); let go — it opens. A move under 6px is a tap (the button's own click). The page doesn't swipe from here
+   (skip above) and still scrolls up and down (touch-action: pan-y) */
+{const seg=$('statSeg');let drag=null, eat=false;
+  const btns=()=>[...seg.querySelectorAll('[data-svb]')];
+  const near=x=>btns().reduce((a,b)=>Math.abs(b.offsetLeft+b.offsetWidth/2-x)<Math.abs(a.offsetLeft+a.offsetWidth/2-x)?b:a);
+  const off=()=>{seg.classList.remove('sv-drag');btns().forEach(b=>b.classList.remove('sv-hot'))};
+  seg.addEventListener('pointerdown',e=>{if(!e.isPrimary||e.button>0||!e.target.closest('[data-svb]')||!seg.querySelector('.sv-cap')?.offsetWidth)return;
+    drag={id:e.pointerId,x0:e.clientX,left:seg.getBoundingClientRect().left+seg.clientLeft,moved:false}});
+  seg.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;
+    if(!drag.moved){if(Math.abs(e.clientX-drag.x0)<6)return;drag.moved=true;try{seg.setPointerCapture(e.pointerId)}catch(x){}seg.classList.add('sv-drag')}
+    const x=e.clientX-drag.left, cur=near(x), all=btns(), w=cur.offsetWidth, cap=seg.querySelector('.sv-cap');
+    const L=Math.max(all[0].offsetLeft,Math.min(all[all.length-1].offsetLeft+all[all.length-1].offsetWidth-w,x-w/2));
+    cap.style.width=w+'px';cap.style.transform=`translate3d(${L}px,0,0)`;all.forEach(b=>b.classList.toggle('sv-hot',b===cur));
+    if(e.cancelable)e.preventDefault()});
+  const end=e=>{if(!drag||e.pointerId!==drag.id)return;const d=drag;drag=null;
+    if(!d.moved)return;eat=true;setTimeout(()=>{eat=false},400);const b=near(e.clientX-d.left);off();fresh();setStatView(b.dataset.svb);svCap()};
+  seg.addEventListener('pointerup',end);
+  seg.addEventListener('pointercancel',e=>{if(!drag||e.pointerId!==drag.id)return;drag=null;off();svCap()});
+  /* the click that ends a move is no tap */
+  seg.addEventListener('click',e=>{if(!eat)return;eat=false;e.preventDefault();e.stopImmediatePropagation()},true);
+  if(window.ResizeObserver)new ResizeObserver(()=>svCap(true)).observe(seg)}
 bindSwipe({on:()=>state.tab==='history'&&state.ready,skip:'#accFilter',n:SF.length,at:histAt,width:()=>$('viewHistory').clientWidth||$('scroller').clientWidth,
   start:()=>{histEnd?.();histFull=$('scroller').scrollHeight;$('listTrack').classList.add('is-dragging');$('listViewport').classList.add('is-moving')},
   drag:(d,dx)=>{histPeek(histAt()+(dx<0?1:-1));$('listTrack').style.transform=`translate3d(${d}px,0,0)`},
