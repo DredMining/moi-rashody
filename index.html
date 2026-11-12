@@ -1026,6 +1026,16 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
 .item .what .tag{display:inline-block;vertical-align:middle;white-space:nowrap}
 .item .amt.spend{color:var(--spend)}
 .item .amt.pos{color:var(--good)}
+/* a return of several debts in one go (rgRow): one row with › — turned down while open; its returns under it, set in, named by their debt */
+.rgrp{cursor:pointer}
+.rgrp .amt{white-space:nowrap}
+.rg-chev{display:inline-block;margin-left:8px;color:var(--muted);font-weight:400;transition:transform .2s}
+.rgrp:has([aria-expanded="true"]) .rg-chev{transform:rotate(90deg)}
+.rgrp-in{padding-left:38px}
+.rgrp-in>.item{grid-template-columns:minmax(0,1fr) minmax(0,auto)}
+.rgrp-in>.item>.ic{display:none}
+.rgrp-in>.item .what b{font-weight:400;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.rg-chev{transition:none}}
 .item .what .acct{display:inline;font-weight:600}
 .itemacts{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:0 16px;align-items:center;justify-content:flex-end;padding-top:4px}
 #recent .item:has(.itemacts){row-gap:2px;padding-block:2px}
@@ -3748,13 +3758,14 @@ const relDay=s=>{const y=new Date(now);y.setDate(y.getDate()-1);return s===iso(y
    «Брокер ВТБ» paid from a card is + on «Брокер», a transfer is − or + */
 const rowDelta=(i,af)=>{const a=+i.amount||0, t=typeOf(i);if(af) return walletDelta(i,af);
   return t==='tr'?0:t==='debt'?(i.dir==='back'||i.dir==='in'?a:-a):t==='in'?a:-a};
-/* own: in a category's window — the category is already its title, so a row is named by its label or comment instead */
-function itemRow(i,showDate,af,own){
+/* own: in a category's window — the category is already its title, so a row is named by its label or comment instead;
+   ttl: a debt row inside a return of several debts (rgRow) — named by its debt (HTML, made safe already), the account is said above it */
+function itemRow(i,showDate,af,own,ttl){
   const t=typeOf(i), inc=t==='in', id=esc(i.id), open=state.actItem===i.id, dd=showDate&&typeof i.date==='string'&&i.date!==iso(now)?esc(relDay(i.date)):'', sj=(...a)=>a.filter(Boolean).join(' · '), sp=dd?'<span class="dd">':'<span>';
   let what, amt, cls='', acls='';
   /* a record at 0 ₽ (a sum that didn't read, set to 0 on the way in — to be fixed here) has no sign: «0 ₽», not «−0 ₽» */
   const sg=s=>Math.abs(+i.amount||0)<0.005?'':s;
-  if(t==='debt'){cls='tr';what=`<b>${esc(i.label||'Долг')}</b>${sp}${sj(dd,accTag(i.acc)||'—')}</span>`;amt=sg(i.dir==='back'||i.dir==='in'?'+':'−')+money(+i.amount||0);acls=i.dir==='back'||i.dir==='in'?'pos':'spend'}
+  if(t==='debt'){cls='tr';what=ttl?`<b>${ttl}</b>`:`<b>${esc(i.label||'Долг')}</b>${sp}${sj(dd,accTag(i.acc)||'—')}</span>`;amt=sg(i.dir==='back'||i.dir==='in'?'+':'−')+money(+i.amount||0);acls=i.dir==='back'||i.dir==='in'?'pos':'spend'}
   else if(t==='tr'){cls='tr';what=`<b>Перевод</b>${sp}${sj(dd,`${accTag(i.from)||'?'} → ${accTag(i.to)||'?'}`)}</span>${i.note?`<span>${esc(i.note)}</span>`:''}`;amt=money(+i.amount||0)}
   else{cls=inc?'in':'';acls=inc?'pos':'spend';const nt=own&&!i.label&&i.note, sub=sj(dd,af&&i.acc!==af?`${accTag(i.acc)} → ${accTag(af)}`:accTag(i.acc),i.note&&!nt?esc(i.note):'');
     what=`<b>${esc(own?(i.label||i.note||nameOf(i)):nameOf(i))}${isTrip(i)?'<span class="tag trip">командировка</span>':''}</b>${sub?`${sp}${sub}</span>`:''}`;amt=sg(inc?'+':'−')+money(+i.amount||0)}
@@ -3802,16 +3813,46 @@ const delAsk=id=>{const it=state.items.find(i=>i.id===id), d=it&&recDebt(it);if(
   const pd=it&&ptDebt(it), sh=pd?recsShift([it,...debtRecs(pd)]):'', pw=pd?[+pd.returned>0?`возвратами (${money(+pd.returned)})`:'',+pd.forgiven>0?`садакой (${money(+pd.forgiven)})`:''].filter(Boolean).join(' и '):'';
   return pd?[`Удалится и долг: ${pd.name} — ${money(+pd.amount||0)}${pw?', вместе с '+pw:''}.${sh?' '+sh+'.':''}${debtZxAsk(pd)} ${q||'Точно?'}`,['Только трату',x=>delItem(x,true),'долг напарника останется']]:q};
 const byNewest=(a,b)=>b.date.localeCompare(a.date)||(b.created||0)-(a.created||0);
+/* A return of several debts in one go («Вернул всё» / «Вернул часть» of a person with several loans) is written as one return per debt,
+   one after another a millisecond apart, with one day and one account (gBack). Shown as one row (owner, 12.11.2026): the person, the
+   account, how many debts, their sum and ›; a tap opens the returns under it, each named by the day of its debt, each with its own
+   «Изменить / Удалить». Only the showing changes: the records stay as they are. The day's sums count them as before.
+   rgRuns: the records in the order shown, such runs of two and more put together into an array */
+const RG=new Set();
+function rgRuns(arr){const out=[];
+  for(const i of arr){const p=out[out.length-1], last=Array.isArray(p)?p[p.length-1]:p;
+    const same=last&&typeOf(i)==='debt'&&typeOf(last)==='debt'&&(i.dir==='back'||i.dir==='pay')&&i.dir===last.dir&&i.label===last.label&&i.date===last.date
+      &&i.acc===last.acc&&+i.created>0&&+last.created>0&&Math.abs(+i.created-+last.created)<=100;
+    if(!same)out.push(i);else if(Array.isArray(p))p.push(i);else out[out.length-1]=[last,i]}
+  return out}
+/* the row of such a run, and its returns under it (hidden till it is opened; open while one of them is being changed) */
+function rgRow(g,showDate,af){
+  const i0=g[0], n=g.length, k='rg'+i0.id, open=RG.has(k)||g.some(i=>i.id===state.actItem||i.id===state.editItem), pos=i0.dir==='back';
+  let amt=(pos?'+':'−')+money(r2(g.reduce((s,i)=>s+(+i.amount||0),0))), acls=pos?'pos':'spend';
+  const dv=af?r2(g.reduce((s,i)=>s+walletDelta(i,af),0)):0;if(dv){amt=(dv>0?'+':'−')+money(Math.abs(dv));acls=dv>0?'pos':'spend'}
+  const shut=g.filter(i=>{const d=recDebt(i);return d&&debtLeft(d)<0.005}).length, nd=`${n} ${plural(n,'долг','долга','долгов')}`;
+  const dd=showDate&&typeof i0.date==='string'&&i0.date!==iso(now)?esc(relDay(i0.date)):'';
+  const sub=[dd,accTag(i0.acc)||'—',nd+(shut===n?' закрыто':'')].filter(Boolean).join(' · ');
+  const kids=g.map(i=>{const d=recDebt(i);return itemRow(i,false,af,false,d?(d.date?'Долг от '+esc(dayText(d.date)):'Долг')+(d.note?' · '+esc(d.note):''):'Долг')}).join('');
+  return `<div class="item tr rgrp" data-rg="${esc(k)}"><span class="ic" aria-hidden="true">🤝</span><div class="what"><b>${esc(i0.label||'Долг')}</b><span${dd?' class="dd"':''}>${sub}</span></div>
+    <button type="button" class="amt ${acls}" aria-expanded="${open}" aria-label="${esc(i0.label||'Долг')}: ${nd}, ${esc(amt)}${dd?', '+dd:''}. ${open?'Свернуть':'Показать по долгам'}">${amt}<span class="rg-chev" aria-hidden="true">›</span></button></div>
+    <div class="rgrp-in"${open?'':' hidden'}>${kids}</div>`;
+}
+/* a tap on such a row opens or closes it; closed, none of its returns stays picked */
+function rgBind(root){root.querySelectorAll('[data-rg]').forEach(r=>r.onclick=()=>{fresh();const k=r.dataset.rg, kids=r.nextElementSibling;
+  if(kids&&!kids.hidden){RG.delete(k);if(kids.querySelector(`[data-act="${CSS.escape(state.actItem||'')}"],[data-edit="${CSS.escape(state.editItem||'')}"]`)){state.actItem=null;state.editItem=null}}else RG.add(k);
+  render();inView(onScreen(`[data-rg="${CSS.escape(k)}"]`))})}
 /* last seven records under the entry form, to check and undo right away */
 function renderRecent(){
-  const box=$('recent'), last=state.items.filter(i=>!zeroEnd(i)).sort((a,b)=>(b.created||0)-(a.created||0)).slice(0,7);
+  /* a return of several debts in one go takes one of the seven places (rgRuns) */
+  const box=$('recent'), last=rgRuns(state.items.filter(i=>!zeroEnd(i)).sort((a,b)=>(b.created||0)-(a.created||0)).slice(0,300)).slice(0,7);
   if(!state.ready){box.innerHTML='<div class="empty"><p>Загружаю записи…</p></div>';return}
   if(!last.length){
     box.innerHTML=`<div class="empty"><p>Записей пока нет. Укажите сумму, выберите категорию и счёт, чтобы добавить первую запись.</p></div>`;
     return;
   }
-  box.innerHTML=last.map(i=>itemRow(i,true)).join('');
-  bindEdits(box);armDeletes(box,delItem,'Запись удалена',delAsk);
+  box.innerHTML=last.map(x=>Array.isArray(x)?rgRow(x,true):itemRow(x,true)).join('');
+  bindEdits(box);rgBind(box);armDeletes(box,delItem,'Запись удалена',delAsk);
 }
 /* Записи: personal money and trip money apart (sf), then by account (af) */
 const SF=[['','Все'],['own','Личное'],['trip','Командировка']];
@@ -3830,7 +3871,7 @@ function listHtml(shown,af){
     /* the day's sums are exactly the signed rows shown: personal ones, then trip ones in the trip colour */
     const tot=(p,tr)=>r2(arr.filter(i=>isTrip(i)===tr).reduce((a,i)=>{const v=rowDelta(i,af);return a+(p?Math.max(v,0):Math.max(-v,0))},0)),
       chip=(v,s,c,tr)=>v?`<span class="${c}"${tr?' title="командировка" aria-label="командировка '+s+money(v)+'"':''}>${s}${money(v)}</span>`:'';
-    return `<div class="day"><div class="dayhead"><h3>${dayName.format(isoToDate(d))}</h3><span class="num"${afT}>${chip(tot(1,false),'+','pos')}${chip(tot(0,false),'−','out')}${chip(tot(1,true),'+','trip',1)}${chip(tot(0,true),'−','trip',1)}</span></div>${arr.map(i=>itemRow(i,false,af)).join('')}</div>`;
+    return `<div class="day"><div class="dayhead"><h3>${dayName.format(isoToDate(d))}</h3><span class="num"${afT}>${chip(tot(1,false),'+','pos')}${chip(tot(0,false),'−','out')}${chip(tot(1,true),'+','trip',1)}${chip(tot(0,true),'−','trip',1)}</span></div>${rgRuns(arr).map(x=>Array.isArray(x)?rgRow(x,false,af):itemRow(x,false,af)).join('')}</div>`;
   }).join('');
 }
 /* the month's records the list was last drawn from: the one beside it (histPeek) is drawn from them too */
@@ -3849,7 +3890,7 @@ function renderList(items){
   if(!state.ready){list.innerHTML='<div class="empty"><p>Загружаю записи…</p></div>';return}
   if(!shown.length){list.innerHTML=listEmpty(af,sf);return}
   list.innerHTML=listHtml(shown,af);
-  bindEdits(list);armDeletes(list,delItem,'Запись удалена',delAsk);
+  bindEdits(list);rgBind(list);armDeletes(list,delItem,'Запись удалена',delAsk);
 }
 /* Все / Личное / Командировка one after another, as the pages of Итоги (owner's choice, 01.11.2026): swiped, or a button pressed, the list
    goes off to the side and the chosen one comes in from the other. That one is drawn for the time of the move only (hist-peek: nothing in it
