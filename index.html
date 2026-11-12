@@ -103,7 +103,7 @@ img{max-width:100%}
   /* the glass tab bar: its tint over the blurred page (and the denser one where the browser can't blur), the light on its rim,
      the picked tab's capsule — its tint and the soft glow around it (the app's own wine, never a new colour) */
   --glass:rgb(48 38 43 / .56); --glass-solid:rgb(30 24 28 / .94); --glass-rim:rgb(255 255 255 / .16);
-  --cap-tint:rgb(240 140 160 / .3); --cap-glow:rgb(178 58 85 / .5); --cap-halo:rgb(178 58 85 / .2); --ico-on:#FFB4C2;
+  --cap-tint:rgb(240 140 160 / .16); --ico-on:#FFB4C2;
   /* the bar's place: its height, its gap to the screen's edge (over the home indicator on an iPhone), the room the page keeps under itself for it */
   --tabbar-h:64px; --tabbar-gap:max(10px,calc(env(safe-area-inset-bottom,0px) - 14px),calc(var(--simulator-safe-bottom,0px) - 14px));
   --tabbar-room:calc(var(--tabbar-h) + var(--tabbar-gap) + 6px);
@@ -121,7 +121,7 @@ img{max-width:100%}
   --raised:var(--surface); --seg-ring:var(--field-line); --seg-id-ring:0 0 #0000; --track:var(--line);
   --toast-bg:var(--ink); --toast-ink:var(--bg); --toast-ring:0 0 #0000;
   --glass:rgb(38 50 78 / .56); --glass-solid:rgb(21 30 48 / .94);
-  --cap-tint:rgb(91 140 255 / .32); --cap-glow:rgb(59 107 224 / .5); --cap-halo:rgb(59 107 224 / .2); --ico-on:#9DBBFF;
+  --cap-tint:rgb(91 140 255 / .18); --ico-on:#9DBBFF;
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:var(--fs-md);line-height:1.5;font-variant-numeric:tabular-nums}
@@ -168,42 +168,47 @@ button{cursor:pointer}
 /* 6px between the glass's rim and the tabs (said here over the phone frame's own padding for the old bar) */
 .app .tabs{padding:6px!important}
 /* The picked tab: a second piece of glass inside the bar — one capsule (.tab-cap) that goes from tab to tab (a fifth of the row wide).
+   It behaves as the tab bar of Telegram on an iPhone does (its lens, read from its source):
+   · at rest it is a quiet plate with a touch of the accent — no glow; the chosen tab's icon and name are what is bright;
+   · the moment a finger touches the bar it lifts into a lens (.lift on the bar): 4px bigger on every side, the plate goes and clear glass
+     with a bright edge stays, the tabs under it are shown enlarged (each 1.15 times about its own middle); it stays lifted for at least
+     0.22s, so a quick tap shows it too; lifting and settling have no bounce;
+   · it goes to a tab in 0.4s, slowing down, without going past it; under a moving finger it goes exactly as far as the finger has gone.
    It lies over the tabs and is what shows a tab as chosen: inside it is a copy of the whole row in the bright colours (.cap-row, made by the
    script), cut to the capsule's shape and kept in step with the row under it — so the tab the capsule stands on is bright, and a tab it is
-   passing is half bright, half plain. Its parts: the capsule's own dark back (hides the plain row under it), .cap-fill — the lit glass and
-   the glow, .cap-lens — the cut-out with the copy and the flash, .cap-rim — the lens's edge.
-   On the move, and under a held finger, it turns into a lens: it grows, the lit fill goes and the edge with a pink-and-blue fringe stays,
-   the copy inside is enlarged — the tabs under it look magnified; at the stop it gathers back into the plain capsule.
-   A spring carries it (the script below the tabs' handlers): only transforms and opacities change, nothing is laid out or painted anew.
-   The rule here is its place before the script runs; till the script has filled it, it is not shown. */
+   passing is half bright, half plain. Its parts: .tab-cap — the place (moved by the script), .cap-body — the glass (grows when lifted;
+   its dark back hides the plain row under it), .cap-fill — the plate, .cap-lens — the cut-out, .cap-unlift — takes the growth back off
+   the copy, .cap-rim — the lens's edge. Only transforms and opacities change, nothing is laid out or painted anew.
+   The rule here is the capsule's place before the script runs; till the script has filled it, it is not shown. */
 .tab-cap{position:absolute;z-index:2;top:6px;bottom:6px;left:6px;width:calc((100% - 12px) / 5);border-radius:calc(var(--tabbar-h) / 2 - 6px);pointer-events:none;
-  background:var(--glass-solid);transform:translate3d(calc(var(--tab-i,2) * 100%),0,0);transform-origin:0 50%;will-change:transform}
+  transform:translate3d(calc(var(--tab-i,2) * 100%),0,0);transform-origin:0 50%;will-change:transform}
 .tab-cap:empty{visibility:hidden}
-.cap-fill,.cap-lens,.cap-rim,.cap-glint{position:absolute;inset:0;border-radius:inherit}
-/* the lit glass, in layers (all still: drawn once, moved as a picture): a bright streak on the top, the wine tint from above, a soft light
-   in the middle behind the icon, the glass itself; then the rim, the inner glow at the bottom, a near glow and a wide faint halo */
-.cap-fill{background:radial-gradient(64% 34% at 50% 0%,rgb(255 255 255 / .26),rgb(255 255 255 / 0) 100%),radial-gradient(120% 100% at 50% 0%,var(--cap-tint),rgb(255 255 255 / 0) 72%),radial-gradient(55% 60% at 50% 42%,rgb(255 255 255 / .1),rgb(255 255 255 / 0) 100%),linear-gradient(180deg,rgb(255 255 255 / .19),rgb(255 255 255 / .06));
-  box-shadow:inset 0 1px 0 rgb(255 255 255 / .42),inset 0 0 0 1px rgb(255 255 255 / .11),inset 0 -7px 12px -8px rgb(255 255 255 / .3),inset 0 0 14px var(--cap-halo),0 0 12px var(--cap-glow),0 0 26px var(--cap-halo);will-change:opacity}
+.cap-body,.cap-fill,.cap-lens,.cap-unlift,.cap-rim{position:absolute;inset:0;border-radius:inherit}
+.cap-body{background:var(--glass-solid);transition:transform .3s cubic-bezier(.2,.8,.2,1);will-change:transform}
+.cap-unlift{transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+/* --lift-x: how many times wider the capsule is with 4px more on each side (set by the script: it depends on the screen's width);
+   its height is 50px, 58 when lifted */
+.tabs.lift .cap-body{transform:scale(var(--lift-x,1.11),1.16)}
+.tabs.lift .cap-unlift{transform:scale(calc(1 / var(--lift-x,1.11)),calc(1 / 1.16))}
+/* the plate: the glass a little lighter than the bar, a touch of the accent from above, a thin light edge */
+.cap-fill{background:radial-gradient(120% 100% at 50% 0%,var(--cap-tint),rgb(255 255 255 / 0) 75%),linear-gradient(180deg,rgb(255 255 255 / .13),rgb(255 255 255 / .07));
+  box-shadow:inset 0 1px 0 rgb(255 255 255 / .22),inset 0 0 0 1px rgb(255 255 255 / .07);transition:opacity .25s ease-out}
+.tabs.lift .cap-fill{opacity:0}
 .cap-lens{overflow:hidden}
 /* the copy of the row: five cells laid as the tabs are (the same sizes, so at rest it lies exactly over them), in the chosen tab's colours */
-.cap-row{position:absolute;left:0;top:0;width:500%;height:100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;transform-origin:0 62%;will-change:transform}
-.cap-row b{padding:2px 0 1px;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--ink);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em}
+.cap-row{position:absolute;left:0;top:0;width:500%;height:100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;transform-origin:0 50%;will-change:transform}
+.cap-row b{padding:2px 0 1px;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--ink);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.tabs.lift .cap-row b{transform:scale(1.15)}
 .tabs .cap-row .ico{color:var(--ico-on)}
 .tabs .cap-row svg{opacity:1}
 /* the lens's edge: a clear bright line and a fringe of colour, as light splits at the edge of thick glass — the accent on one side, blue on the other */
-.cap-rim{opacity:0;box-shadow:inset 0 0 0 1px rgb(255 255 255 / .5),inset 0 1px 0 rgb(255 255 255 / .55),inset 3px 0 7px -3px var(--ico-on),inset -3px 0 7px -3px rgb(125 190 255 / .75),inset 0 -3px 8px -4px rgb(255 255 255 / .35),0 0 14px rgb(0 0 0 / .3);will-change:opacity}
-/* the flash at the stop: a light inside the capsule that the script brightens for a moment as the capsule arrives (opacity only) */
-.cap-glint{opacity:0;background:radial-gradient(75% 85% at 50% 30%,rgb(255 255 255 / .3),rgb(255 255 255 / 0) 100%)}
-/* The bar itself takes the touch — no scroll, no text picking, no callout. Under a finger it breathes: grows a little at the touch (.press)
-   and springs back when the finger is lifted */
+.cap-rim{opacity:0;box-shadow:inset 0 0 0 1px rgb(255 255 255 / .5),inset 0 1px 0 rgb(255 255 255 / .55),inset 3px 0 7px -3px var(--ico-on),inset -3px 0 7px -3px rgb(125 190 255 / .75),inset 0 -3px 8px -4px rgb(255 255 255 / .35),0 2px 14px rgb(0 0 0 / .35);transition:opacity .25s ease-out}
+.tabs.lift .cap-rim{opacity:1}
+/* The bar itself takes the touch — no scroll, no text picking, no callout */
 .tabs,.tabs *{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-.tabs{transition:transform .5s cubic-bezier(.3,1.9,.45,1)}
-.tabs.press{transform:scale(1.03);transition:transform .12s ease-out}
 .tabs button{position:relative;z-index:1;border:0;background:transparent;padding:2px 0 1px;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--muted);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent;outline-offset:-3px;border-radius:26px}
-.tabs .ico{position:relative;width:min(56px,100%);height:32px;border-radius:16px;display:grid;place-items:center;transition:transform .4s cubic-bezier(.3,1.9,.45,1)}
+.tabs .ico{position:relative;width:min(56px,100%);height:32px;border-radius:16px;display:grid;place-items:center}
 .tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
-/* a press: the tab's icon gives a little and springs back */
-.tabs button:active .ico{transform:scale(.92);transition:transform .08s ease-out}
 /* A tab's page comes in softly as the capsule moves: it fades in rising 8px; the page before it stays for a moment where it was, over the
    new one, and fades out (.view-out, set by setTab). The rise is on for a fifth of a second only — no window of the page is open then */
 #scroller [role="tabpanel"]{animation:viewIn .2s cubic-bezier(.2,.7,.3,1)}
@@ -4854,71 +4859,63 @@ $('tabStats').onclick=()=>tabTap('stats');
 $('tabHistory').onclick=()=>tabTap('history');
 /* «Все записи →»: all of them — no account or trip filter left from before (as «Показать» does) */
 $('toHistory').onclick=()=>{state.accFilter=null;state.scopeFilter='';setTab('history')};
-/* The glass capsule flows from tab to tab. Its place p (in tabs: 0 — the first, 4 — the last) is carried to the chosen tab T by a spring
-   (stiffness 300, damping 24: it goes a little past the tab and comes back); its speed v makes its shape — the faster, the longer and
-   thinner — and makes it a lens (see the styles): L, from 0 to 1, grows with the speed and is 1 under a held finger. Past the bar's ends
-   the capsule doesn't go: there it presses against the end and springs off. A new tap in mid-flight just moves T: the capsule turns
-   from where it is, with the speed it has. With «reduce motion» it is simply put in place.
-   How it is played: a tap's whole flight is worked out at once (120 steps a second) and handed to the browser as four animations in step
-   (the capsule, the copy inside it, the fill, the edge) — transforms and opacities only, so they run off the page's own thread, at whatever
-   rate the screen has. It starts when the finger touches the tab: the capsule answers at once, the page follows. A tap in mid-flight
-   reads where the capsule is and how fast, takes that flight off and flies on from there (never two at once). As the capsule arrives the
-   light inside it brightens for a moment.
-   It can also be held and carried: hold a finger on the bar (or start moving along it, 8px) — the capsule comes under the finger as a lens
-   and follows it (the same spring, a stiff one, stepped frame by frame: one loop, stopped when all is still); the page doesn't change
-   meanwhile; letting go sends the capsule to the tab under it and opens that tab. A quick tap is the plain press it was. The press that the
-   browser sends after the finger is lifted is dropped: the tab is already chosen. */
+/* The glass capsule, moved as Telegram's lens is (see the styles). Its place p is in tabs: 0 — the first, 4 — the last.
+   · A touch on the bar lifts it at once (.lift) and sends it to the touched tab; lifting the finger opens the tab under the finger and lets
+     the lens down — not sooner than 0.22s after it rose, so a quick tap shows it. The press the browser sends after that is dropped.
+   · To a tab it goes in 0.4s along a slowing curve (cubic-bezier(.38,.7,.125,1)), never past it; on the way it is a little longer and
+     thinner, the more the faster. The whole move is worked out at once (120 steps a second) and handed to the browser as two animations
+     in step (the capsule, the copy inside it) — transforms only, so they run off the page's own thread at the screen's rate. A new tap
+     in mid-move reads where the capsule is, takes that move off and goes on from there (never two at once).
+   · Under a moving finger it goes as far from the touched tab as the finger has gone from where it touched — not to the finger's own
+     place — stepped frame by frame (one loop, stopped when all is still). The page doesn't change meanwhile. Carried away and brought
+     back to the open tab, it opens nothing.
+   With «reduce motion» it is simply put on the tab: no lens, no move. */
 var tabCapGo=null;
-(()=>{const nav=document.querySelector('.tabs'),cap=nav.querySelector('.tab-cap'),tabs=[...nav.querySelectorAll('[role="tab"]')],N=tabs.length,calm=matchMedia('(prefers-reduced-motion: reduce)'),H=1/120;
-  const el=(t,c)=>{const e=document.createElement(t);e.className=c;return e},fill=el('i','cap-fill'),lens=el('span','cap-lens'),row=el('span','cap-row'),glint=el('i','cap-glint'),rim=el('i','cap-rim');
+(()=>{const nav=document.querySelector('.tabs'),cap=nav.querySelector('.tab-cap'),tabs=[...nav.querySelectorAll('[role="tab"]')],N=tabs.length,calm=matchMedia('(prefers-reduced-motion: reduce)'),H=1/120,DUR=.4;
+  const el=(t,c)=>{const e=document.createElement(t);e.className=c;return e},body=el('span','cap-body'),fill=el('i','cap-fill'),lens=el('span','cap-lens'),un=el('span','cap-unlift'),row=el('span','cap-row'),rim=el('i','cap-rim');
   /* the copy of the row for the lens: each tab's icon and name (not what is said for a screen reader only), with no ids of its own */
   tabs.forEach(b=>{const c=document.createElement('b');b.childNodes.forEach(n=>{if(!(n.nodeType===1&&n.classList.contains('sr')))c.appendChild(n.cloneNode(true))});
     c.querySelectorAll('[id]').forEach(x=>x.removeAttribute('id'));row.appendChild(c)});
-  lens.append(row,glint);cap.append(fill,lens,rim);
+  un.append(row);lens.append(un);body.append(fill,lens,rim);cap.append(body);
   { /* the count on «Долги» is shown by the copy too */
     const a=document.getElementById('debtBadge'),b=row.querySelector('.badge');if(a&&b){const same=()=>{b.textContent=a.textContent};same();new MutationObserver(same).observe(a,{childList:true,characterData:true,subtree:true})}}
+  const fit=()=>{const w=cap.offsetWidth;if(w)nav.style.setProperty('--lift-x',((w+8)/w).toFixed(4))};fit();addEventListener('resize',fit);
   const chosen=()=>Math.max(0,tabs.findIndex(b=>b.getAttribute('aria-selected')==='true'));
-  let p=chosen(),T=p,v=0,Lh=0,raf=0,last=0,d=null,eat=0,fly=null,pre=0,flash=null;
-  /* what is drawn for a place, a speed and a hold: the capsule's transform, the copy's (it undoes the capsule's stretch and is enlarged about
-     the capsule's middle, so it stays over the row), the fill's and the edge's opacity */
-  const soft=x=>.07*(1-Math.exp(-x/.07));
-  const look=(p,v,Lh)=>{const a=Math.abs(v),pd=p<0?-soft(-p):p>N-1?N-1+soft(p-N+1):p,c=pd+.5,st=1+.4*(1-Math.exp(-a/26)),L=Math.max(Lh,1-Math.exp(-a/5)),
-      sx=Math.max(.86,Math.min(st*(1+.14*L),2*(c+.04),2*(N+.04-c))),sy=(1-.16*(st-1))*(1+.1*L),m=1+.15*L;
-    return ['translate3d('+((c-sx/2)*100).toFixed(2)+'%,0,0) scale('+sx.toFixed(4)+','+sy.toFixed(4)+')',
-      'translate3d('+((sx/2-m*c)/sx/N*100).toFixed(3)+'%,0,0) scale('+(m/sx).toFixed(4)+','+(m/sy).toFixed(4)+')',(1-.85*L).toFixed(3),L.toFixed(3)]};
-  const draw=()=>{const k=look(p,v,Lh);cap.style.transform=k[0];row.style.transform=k[1];fill.style.opacity=k[2];rim.style.opacity=k[3]};
-  const step=(K,D,dt)=>{for(;dt>1e-6;dt-=.002){const h=Math.min(dt,.002);v+=(-K*(p-T)-D*v)*h;p+=v*h}};
+  let p=chosen(),T=p,v=0,raf=0,last=0,d=null,eat=0,fly=null,lifted=false,liftAt=0,unT=0;
+  /* the slowing curve: how much of the way is done at a part u of the time */
+  const ease=u=>{let t=u;for(let i=0;i<8;i++){const a=1-t,x=3*a*a*t*.38+3*a*t*t*.125+t*t*t-u,dx=3*a*a*.38+6*a*t*(.125-.38)+3*t*t*(1-.125);if(Math.abs(dx)<1e-6)break;t=Math.min(1,Math.max(0,t-x/dx))}
+    const a=1-t;return 3*a*a*t*.7+3*a*t*t+t*t*t};
+  /* what is drawn for a place and a speed: the capsule's transform and the copy's (it undoes the capsule's move and stretch, so it stays over the row) */
+  const look=(p,v)=>{const c=p+.5,st=1+.22*(1-Math.exp(-Math.abs(v)/18)),sx=Math.min(st,2*(c+.04),2*(N+.04-c)),sy=1-.12*(sx-1);
+    return ['translate3d('+((c-sx/2)*100).toFixed(2)+'%,0,0) scale('+sx.toFixed(4)+','+sy.toFixed(4)+')','translate3d('+((sx/2-c)/sx/N*100).toFixed(3)+'%,0,0) scale('+(1/sx).toFixed(4)+','+(1/sy).toFixed(4)+')']};
+  const draw=()=>{const k=look(p,v);cap.style.transform=k[0];row.style.transform=k[1]};
   const off=a=>{if(a){a.onfinish=null;try{a.cancel()}catch(e){}}};
-  /* a flight under way is stopped where it is: p, v and the hold are taken from its table by the time it has run */
-  const land=()=>{off(flash);flash=null;if(!fly)return;const f=fly;fly=null;let t=0;try{t=+f.a[0].currentTime||0}catch(e){}
-    const q=f.q[Math.min(f.q.length-1,Math.max(0,Math.round(t/1000/H)))];p=q[0];v=q[1];Lh=q[2];f.a.forEach(off)};
-  const flow=()=>{land();if(calm.matches||!cap.animate){const moved=p!==T;p=T;v=0;Lh=0;draw();if(moved&&cap.animate)cap.animate([{opacity:.35},{opacity:1}],{duration:120,easing:'ease-out'});return}
-    const q=[[p,v,Lh]];let near=0;for(let n=0;n<220&&(Math.abs(p-T)>.008||Math.abs(v)>.14||Lh>.03);n++){step(300,24,H);Lh*=Math.exp(-H*12);q.push([p,v,Lh]);if(!near&&Math.abs(p-T)<.12)near=n}
-    const q0=q[0];p=T;v=0;Lh=0;draw();if(q.length<2)return;q.push([T,0,0]);
-    const k=q.map(x=>look(x[0],x[1],x[2])),o={duration:(q.length-1)*H*1000,easing:'linear'};
-    const a=[cap.animate(k.map(x=>({transform:x[0]})),o),row.animate(k.map(x=>({transform:x[1]})),o),fill.animate(k.map(x=>({opacity:x[2]})),o),rim.animate(k.map(x=>({opacity:x[3]})),o)];
-    fly={a,q};p=q0[0];v=q0[1];Lh=q0[2];a[0].onfinish=()=>{if(fly&&fly.a===a){fly=null;p=T;v=0;Lh=0}};
-    flash=glint.animate([{opacity:0},{opacity:1,offset:.3},{opacity:0}],{duration:320,delay:near*H*1000,easing:'ease-out'})};
-  tabCapGo=i=>{if(d&&d.on)return;if(i!==T){T=i;flow()}};
+  /* a move under way is stopped where it is: p is taken from its table by the time it has run */
+  const land=()=>{if(!fly)return;const f=fly;fly=null;let t=0;try{t=+f.a[0].currentTime||0}catch(e){}p=f.q[Math.min(f.q.length-1,Math.max(0,Math.round(t/1000/H)))];v=0;f.a.forEach(off)};
+  const flow=()=>{land();const p0=p;p=T;v=0;draw();if(calm.matches||!cap.animate||Math.abs(p0-T)<.002)return;
+    const n=Math.round(DUR/H),q=[];for(let i=0;i<=n;i++)q.push(p0+(T-p0)*ease(i/n));
+    const k=q.map((x,i)=>{const a=Math.max(0,i-1),b=Math.min(n,i+1);return look(x,i===n?0:(q[b]-q[a])/((b-a)*H))}),o={duration:DUR*1000,easing:'linear'};
+    const a=[cap.animate(k.map(x=>({transform:x[0]})),o),row.animate(k.map(x=>({transform:x[1]})),o)];fly={a,q};p=p0;a[0].onfinish=()=>{if(fly&&fly.a===a){fly=null;p=T;v=0}}};
+  const lift=on=>{clearTimeout(unT);if(on){if(!lifted&&!calm.matches){lifted=true;liftAt=performance.now();nav.classList.add('lift')}}
+    else if(lifted)unT=setTimeout(()=>{lifted=false;nav.classList.remove('lift')},Math.max(0,liftAt+220-performance.now()))};
+  tabCapGo=i=>{if(d)return;if(i!==T){T=i;flow()}};
   draw();
-  const tick=t=>{if(!d||!d.on){raf=0;return}const dt=Math.min((t-last)/1000,.034);last=t;step(2200,94,dt);Lh+=(1-Lh)*(1-Math.exp(-dt*16));
-    if(Math.abs(p-T)<.002&&Math.abs(v)<.02&&Lh>.985){p=T;v=0;Lh=1;raf=0}else raf=requestAnimationFrame(tick);draw()};
-  const run=()=>{if(calm.matches){p=T;v=0;Lh=0;draw();return}if(!raf){last=performance.now();raf=requestAnimationFrame(tick)}};
-  const aim=()=>{const g=d.g;d.i=Math.max(0,Math.min(N-1,Math.floor((d.lx-g.l)/g.w)));T=Math.max(0,Math.min(N-1,(d.lx-g.l)/g.w-.5));run()};
-  const lift=()=>{if(!d||d.on)return;const r=nav.getBoundingClientRect(),pad=(nav.clientLeft+6)*r.width/nav.offsetWidth;land();draw();d.on=true;d.g={l:r.left+pad,w:(r.width-2*pad)/N};
-    try{nav.setPointerCapture(d.id)}catch(e){}aim()};
-  /* the touch is over: if no tab was opened by it the capsule goes back to the chosen one */
-  const settle=()=>{pre=0;if(d)return;const c=chosen();if(T!==c||(!fly&&(p!==c||v||Lh))){T=c;flow()}};
-  const drop=go=>{if(!d)return;clearTimeout(d.t);const on=d.on,i=d.i;d=null;clearTimeout(pre);nav.classList.remove('press');
-    if(!on){pre=setTimeout(settle,go?90:0);return}
-    T=-1;eat=0;if(go&&tabs[i]&&tabs[i].getAttribute('aria-selected')!=='true')tabs[i].click();eat=Date.now()+400;settle()};
-  nav.addEventListener('pointerdown',e=>{if(d||e.button>0||e.isPrimary===false)return;const i=tabs.indexOf(e.target.closest('[role="tab"]'));
-    d={id:e.pointerId,x:e.clientX,lx:e.clientX,i,on:false,t:setTimeout(lift,180)};clearTimeout(pre);pre=0;nav.classList.add('press');if(i>=0&&i!==T){T=i;flow()}});
-  nav.addEventListener('pointermove',e=>{if(!d||e.pointerId!==d.id)return;d.lx=e.clientX;if(d.on)aim();else if(Math.abs(e.clientX-d.x)>8)lift()},{passive:true});
+  const tick=t=>{if(!d||!d.moved){raf=0;return}const dt=Math.max(.001,Math.min((t-last)/1000,.034));last=t;const n=p+(d.to-p)*(1-Math.exp(-dt*60));v+=((n-p)/dt-v)*.4;p=n;
+    if(Math.abs(d.to-p)<.001&&Math.abs(v)<.05){p=d.to;v=0;raf=0}else raf=requestAnimationFrame(tick);draw()};
+  const at=x=>Math.max(0,Math.min(N-1,Math.floor((x-d.g.l)/d.g.w)));
+  const drop=go=>{if(!d)return;const o=d;d=null;lift(false);
+    if(go&&(o.i!==chosen()||!o.far)){eat=0;tabs[o.i].click()}eat=Date.now()+400;
+    const c=chosen();if(T!==c||(!fly&&p!==c)){T=c;flow()}};
+  nav.addEventListener('pointerdown',e=>{if(d||e.button>0||e.isPrimary===false)return;const r=nav.getBoundingClientRect(),pad=nav.clientLeft+6;
+    d={id:e.pointerId,x:e.clientX,g:{l:r.left+pad,w:(r.width-2*pad)/N},moved:false,far:false,to:0};d.i0=d.i=at(e.clientX);
+    try{nav.setPointerCapture(e.pointerId)}catch(x){}lift(true);if(d.i!==T){T=d.i;flow()}});
+  nav.addEventListener('pointermove',e=>{if(!d||e.pointerId!==d.id)return;const dx=e.clientX-d.x;d.i=at(e.clientX);if(Math.abs(dx)>8)d.far=true;
+    if(!d.moved){if(Math.abs(dx)<3||calm.matches)return;d.moved=true;land()}
+    d.to=Math.max(0,Math.min(N-1,d.i0+dx/d.g.w));if(!raf){last=performance.now();raf=requestAnimationFrame(tick)}},{passive:true});
   addEventListener('pointerup',e=>{if(d&&e.pointerId===d.id)drop(true)});
   addEventListener('pointercancel',e=>{if(d&&e.pointerId===d.id)drop(false)});
-  /* a press on a tab: the dropped one after a carry; any other (the keyboard's too) sends the capsule off ahead of the page's drawing,
-     with a tick of the phone where it can give one (an iPhone can't: nothing happens there) */
+  /* a press on a tab: the one the browser sends after a touch is dropped (the touch has opened the tab itself); any other (the keyboard's,
+     a screen reader's) sends the capsule off ahead of the page's drawing, with a tick of the phone where it can give one (an iPhone can't) */
   nav.addEventListener('click',e=>{if(Date.now()<eat){e.stopPropagation();e.preventDefault();return}const i=tabs.indexOf(e.target.closest('[role="tab"]'));
     if(i>=0){if(tabs[i].getAttribute('aria-selected')!=='true')try{if(navigator.vibrate)navigator.vibrate(8)}catch(x){}tabCapGo(i)}},true)})();
 /* the tab bar from the keyboard: ← → Home End go along it (as it is drawn) and open that tab */
