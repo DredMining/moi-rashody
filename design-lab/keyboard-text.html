@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#000000">
+<title>Макет · буквенная клавиатура</title>
+<!-- Макет для Али (12.11.2026): своя клавиатура для текстовых полей (комментарий, имя). Основное приложение (index.html) эту страницу
+     не подключает и от неё не зависит. Цвета — тёмная тема «Чёрный и бордо» (два бордовых: #752238 и #C34E6C); поля и карточки — заглушки,
+     ничего не сохраняется. Подсказки в варианте Б — примеры, в приложении они брались бы из прошлых комментариев и имён. -->
+<style>
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:400;font-display:swap;src:url(../fonts/GolosText-cyrillic-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:400;font-display:swap;src:url(../fonts/GolosText-latin-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:500;font-display:swap;src:url(../fonts/GolosText-cyrillic-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:500;font-display:swap;src:url(../fonts/GolosText-latin-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:600;font-display:swap;src:url(../fonts/GolosText-cyrillic-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:600;font-display:swap;src:url(../fonts/GolosText-latin-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:400;font-display:swap;src:url(../fonts/GolosText-rub400-2626f3c1.woff2) format('woff2');unicode-range:U+20BD}
+
+/* цвета и размеры — из приложения (тёмная тема); клавиши — как у своей цифровой клавиатуры сумм */
+:root{
+  --bg:#000; --surface:#161215; --inset:#221C20; --raised:#3B3237; --ink:#F7F3F4; --muted:#A79DA2; --field-line:#7A6E74; --track:#4A4046; --seg-ring:#958990;
+  --burgundy:#752238; --burgundy-light:#C34E6C; --accent:var(--burgundy-light); --accent-btn:var(--burgundy);
+  --glass-solid:rgb(30 24 28 / .94); --glass-rim:rgb(255 255 255 / .16);
+  --key:#2A2629; --key-on:#43393F;
+  --safe-top:max(env(safe-area-inset-top,0px),var(--simulator-safe-top,0px));
+  --safe-bottom:max(env(safe-area-inset-bottom,0px),var(--simulator-safe-bottom,0px));
+  --kb-h:0px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scrollbar-width:none}
+html::-webkit-scrollbar{display:none}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.5 "Golos Text",system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+main{padding:calc(var(--safe-top) + 8px) 16px 0;display:flex;flex-direction:column;gap:16px}
+body::before{content:"";position:fixed;left:0;right:0;top:0;height:var(--safe-top);background:var(--bg);z-index:15}
+/* место под клавиатурой: страница прокручивается так, чтобы карточка встала над ней */
+.room{height:calc(var(--kb-h) + 120px);transition:height .28s cubic-bezier(.2,.8,.2,1)}
+
+/* ---- полоска макета ---- */
+.lab{display:flex;flex-direction:column;gap:8px}
+.lab .tag{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.lab .why{font-size:13px;line-height:1.4;color:var(--muted)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px;background:var(--inset);border:1px solid var(--field-line);border-radius:14px}
+.seg button{min-height:38px;border-radius:11px;font-size:14px;font-weight:500;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--raised);color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1.5px var(--seg-ring),0 1px 2px rgb(0 0 0 / .12)}
+
+/* ---- карточки и поля ---- */
+.card{background:var(--surface);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px}
+h2{font-size:13px;font-weight:600;line-height:1.2;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tile{height:52px;border-radius:14px;background:var(--inset)}
+.lbl{font-size:12px;font-weight:500;color:var(--muted);margin-bottom:-4px}
+/* поле — не настоящее поле ввода: системная клавиатура не появляется */
+.f{display:flex;align-items:center;min-height:44px;padding:0 14px;background:var(--inset);border:1px solid var(--field-line);border-radius:14px;
+  font-size:16px;line-height:22px;white-space:pre;overflow:hidden;cursor:text;transition:border-color .15s,box-shadow .15s}
+.f.on{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+.f .ph{color:var(--muted)}
+.caret{display:none;flex:none;width:2px;height:22px;margin-left:1px;border-radius:1px;background:var(--accent);animation:blink 1s steps(1) infinite}
+.f.on .caret{display:inline-block}
+.f.on .ph{order:2;margin-left:2px}
+@keyframes blink{50%{opacity:0}}
+.submit{min-height:48px;border-radius:14px;background:var(--accent-btn);color:#fff;font-weight:600;font-size:16px}
+.submit:active{transform:scale(.98);opacity:.82}
+
+/* ---- своя клавиатура ---- */
+.kb{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 4px calc(var(--safe-bottom) + 6px);background:var(--glass-solid);
+  -webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);border-radius:28px 28px 0 0;
+  box-shadow:inset 0 1px 0 var(--glass-rim),0 -8px 30px rgb(0 0 0 / .45);transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);
+  touch-action:none;-webkit-user-select:none;user-select:none}
+.kb.on{transform:none}
+.kb .grab{width:36px;height:5px;border-radius:3px;background:var(--track);margin:0 auto 10px}
+/* ширина буквы — по самому длинному ряду раскладки (11 у русской, 10 у английской и у цифр), в остальных рядах буквы той же ширины */
+#keys{display:flex;flex-direction:column;gap:10px;--kw:calc((100% - (var(--cols) - 1) * 5px) / var(--cols))}
+.row{display:flex;gap:5px;justify-content:center}
+.key{flex:0 0 var(--kw);min-width:0;height:46px;border-radius:10px;background:var(--key);font-size:22px;font-weight:400;line-height:1;
+  display:grid;place-items:center;transition:background .08s}
+.key.hit{background:var(--key-on)}
+.key.fn{flex:1 1 0;background:transparent;color:var(--muted)}
+.key.fn.hit,.key.fn[aria-pressed="true"]{background:var(--key);color:var(--ink)}
+.key.gap{visibility:hidden}
+.key svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.key svg.full path:first-child{fill:currentColor}
+.row.bottom .key{flex:1 1 0;font-size:15px}
+.row.bottom .mode{flex-grow:1.3;font-weight:500}
+.row.bottom .space{flex-grow:4.6;color:var(--muted)}
+.row.bottom .go{flex-grow:2.2;background:var(--accent-btn);color:#fff;font-weight:600}
+.row.bottom .go.hit{opacity:.82}
+/* увеличенная буква над пальцем, как у iPhone */
+.pop{position:fixed;z-index:25;height:56px;border-radius:12px;background:var(--key-on);color:var(--ink);font-size:30px;line-height:1;display:grid;place-items:center;
+  pointer-events:none;box-shadow:0 6px 18px rgb(0 0 0 / .45);opacity:0}
+.pop.on{opacity:1}
+/* Б: строка подсказок над буквами */
+.sug{display:flex;gap:6px;min-height:34px}
+.sug button{flex:1 1 0;min-width:0;height:34px;border:1px solid var(--track);border-radius:99px;padding:0 8px;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sug button.hit{background:var(--key)}
+.sug .none{flex:1;display:grid;place-items:center;font-size:13px;color:var(--muted)}
+
+.toast{position:fixed;left:16px;right:16px;bottom:calc(var(--kb-h) + 12px);z-index:30;padding:12px 14px;border-radius:14px;background:var(--raised);
+  box-shadow:0 0 0 1px var(--seg-ring),0 8px 24px rgb(0 0 0 / .3);font-size:14px;line-height:1.35;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none}
+.toast.on{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.kb,.room,.toast,.f{transition:none}.caret{animation:none}}
+</style>
+</head>
+<body>
+<main id="page">
+  <div class="lab">
+    <span class="tag">Макет · буквенная клавиатура</span>
+    <div class="seg" id="vars" role="group" aria-label="Вариант клавиатуры">
+      <button type="button" data-v="a" aria-pressed="true">А · только буквы</button>
+      <button type="button" data-v="b" aria-pressed="false">Б · с подсказками</button>
+    </div>
+    <p class="why">Нажми на поле — снизу выедет клавиатура приложения вместо системной, без полоски сверху. Русская и английская раскладки (кнопка с глобусом), цифры и знаки — «123». Долгое нажатие на «е» даёт «ё», на «ь» — «ъ»; двойное на стрелку — все заглавные. Б — сверху подсказки (здесь примеры, в приложении — из твоих прошлых комментариев и имён). Чего не будет: автозамены, диктовки, смайлов и набора свайпом.</p>
+  </div>
+
+  <section class="card" aria-label="Откуда? (заглушка)">
+    <h2>Откуда?</h2>
+    <div class="tiles" aria-hidden="true"><span class="tile"></span><span class="tile"></span><span class="tile"></span><span class="tile"></span></div>
+    <span class="lbl">Комментарий</span>
+    <div class="f" role="textbox" tabindex="0" data-f="note1" data-kind="note" data-name="Комментарий"><span class="t"></span><i class="caret" aria-hidden="true"></i><span class="ph">Необязательно</span></div>
+    <button type="button" class="submit">Добавить расход</button>
+  </section>
+
+  <section class="card" aria-label="Дал в долг (заглушка)">
+    <h2>Дал в долг</h2>
+    <span class="lbl">Кто взял</span>
+    <div class="f" role="textbox" tabindex="0" data-f="name" data-kind="name" data-name="Кто взял"><span class="t"></span><i class="caret" aria-hidden="true"></i><span class="ph">Имя</span></div>
+    <span class="lbl">Комментарий</span>
+    <div class="f" role="textbox" tabindex="0" data-f="note2" data-kind="note" data-name="Комментарий"><span class="t"></span><i class="caret" aria-hidden="true"></i><span class="ph">Необязательно</span></div>
+    <button type="button" class="submit">Сохранить</button>
+  </section>
+  <div class="room" aria-hidden="true"></div>
+</main>
+
+<div class="kb" id="kb" aria-label="Клавиатура"><div class="grab" aria-hidden="true"></div><div id="keys"></div></div>
+<div class="pop" id="pop" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* раскладки — как у iPhone: русская ЙЦУКЕН (11 в ряду), английская QWERTY (10), цифры и знаки (10) */
+const RU=['йцукенгшщзх','фывапролджэ','ячсмитьбю'], EN=['qwertyuiop','asdfghjkl','zxcvbnm'], NUM=['1234567890','-/:;()₽&@"',".,?!'%+"];
+const ALT={'е':'ё','Е':'Ё','ь':'ъ','Ь':'Ъ'};
+/* примеры подсказок; в приложении — свои прошлые комментарии и имена должников, самые частые первыми */
+const WORDS={note:['такси','продукты','обед','кофе','бензин','аптека','связь','парковка','подарок','ремонт','за напарника'],name:['Иван','Илья','Ислам','Магомед','Марат','Сергей','Анна']};
+const SVG=(p,full)=>`<svg viewBox="0 0 24 24" aria-hidden="true"${full?' class="full"':''}>${p}</svg>`;
+const SHIFT='<path d="M12 4.5 4.5 12.5H9V18h6v-5.5h4.5z"/>', LOCK=SHIFT+'<path d="M9 21h6"/>';
+const DEL='<path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/>';
+const GLOBE='<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.3 2.4 3.4 5.2 3.4 8.5s-1.1 6.1-3.4 8.5c-2.3-2.4-3.4-5.2-3.4-8.5S9.7 5.9 12 3.5z"/>';
+const F={}; document.querySelectorAll('.f').forEach(f=>F[f.dataset.f]='');
+let variant='a', lang='ru', num=false, shift=0, lastShift=0, cur=null, open=false, held=null, holdT=0, rptT=0, toastT=0;
+const kind=()=>cur?cur.dataset.kind:'';
+const maxLen=()=>kind()==='name'?60:80;
+
+/* заглавная сама: в имени — в начале и после пробела; в комментарии — нет (там обычно «такси», «обед») */
+function autoShift(){if(num||shift===2||!cur)return;const v=F[cur.dataset.f];shift=kind()==='name'&&(!v||v.endsWith(' '))?1:0}
+function build(){
+  const rows=num?NUM:lang==='ru'?RU:EN, up=!num&&shift>0, box=$('keys');
+  box.style.setProperty('--cols',rows[0].length);
+  let h=variant==='b'?'<div class="sug" id="sug"></div>':'';
+  rows.forEach((r,i)=>{
+    h+='<div class="row">';
+    if(i===2)h+=num?'<span class="key fn gap"></span>':`<button type="button" class="key fn" data-k="shift" aria-label="Заглавная буква" aria-pressed="${shift>0}">${SVG(shift===2?LOCK:SHIFT,shift>0)}</button>`;
+    for(const c of r){const t=up?c.toUpperCase():c;h+=`<button type="button" class="key" data-k="${esc(t)}">${esc(t)}</button>`}
+    if(i===2)h+=`<button type="button" class="key fn" data-k="del" aria-label="Стереть">${SVG(DEL)}</button>`;
+    h+='</div>';
+  });
+  h+=`<div class="row bottom"><button type="button" class="key fn mode" data-k="num">${num?(lang==='ru'?'АБВ':'ABC'):'123'}</button>`
+    +`<button type="button" class="key fn" data-k="lang" aria-label="Сменить язык">${SVG(GLOBE)}</button>`
+    +`<button type="button" class="key space" data-k=" ">${lang==='ru'?'русский':'english'}</button>`
+    +`<button type="button" class="key go" data-k="go">Готово</button></div>`;
+  box.innerHTML=h;sug();
+}
+function sug(){
+  const box=$('sug');if(!box)return;
+  const v=cur?F[cur.dataset.f]:'', frag=v.split(' ').pop().toLowerCase();
+  const list=(WORDS[kind()]||[]).filter(w=>w.toLowerCase().startsWith(frag)&&w.toLowerCase()!==frag).slice(0,3);
+  box.innerHTML=list.map(w=>`<button type="button" data-w="${esc(w)}">${esc(w)}</button>`).join('')||'<span class="none">Подсказок нет</span>';
+}
+function draw(){
+  document.querySelectorAll('.f').forEach(f=>{const v=F[f.dataset.f];f.querySelector('.t').textContent=v;f.querySelector('.ph').hidden=!!v;f.setAttribute('aria-label',f.dataset.name+(v?': '+v:''))});
+  if(cur)cur.scrollLeft=cur.scrollWidth;
+}
+/* после каждой буквы: клавиши перерисовываются, только если сменилась заглавная, иначе — одни подсказки */
+function after(was){if(shift!==was)build();else sug();draw()}
+function type(c){
+  if(!cur)return;const id=cur.dataset.f,v=F[id],was=shift;
+  if(v.length>=maxLen())return;
+  if(c===' '&&(!v||v.endsWith(' ')))return;
+  F[id]=v+c;if(shift===1)shift=0;autoShift();after(was);
+}
+function del(){if(!cur)return;const id=cur.dataset.f,was=shift;F[id]=[...F[id]].slice(0,-1).join('');autoShift();after(was)}
+function pick(w){const id=cur.dataset.f,v=F[id],i=v.lastIndexOf(' ')+1,was=shift;F[id]=(v.slice(0,i)+w+' ').slice(0,maxLen());autoShift();after(was)}
+function act(k){
+  if(k==='del'){del();holdT=setTimeout(()=>{rptT=setInterval(del,75)},450);return}
+  if(k==='shift'){const now=Date.now();shift=shift===2?0:shift===1?(now-lastShift<320?2:0):1;lastShift=now;build();return}
+  if(k==='num'){num=!num;if(!num)autoShift();build();place();return}
+  if(k==='lang'){lang=lang==='ru'?'en':'ru';num=false;autoShift();build();return}
+  if(k==='go')hide();
+}
+
+/* место: карточка встаёт низом над клавиатурой с зазором 12px; если не помещается — встаёт само поле */
+function measure(){const h=open?$('kb').offsetHeight:0;document.documentElement.style.setProperty('--kb-h',h+'px');return h}
+function place(){
+  if(!cur)return;const h=measure();
+  requestAnimationFrame(()=>{if(!cur)return;const r=cur.closest('.card').getBoundingClientRect(),fr=cur.getBoundingClientRect(),avail=innerHeight-h-12;
+    let d=r.bottom-avail;if(r.height>avail-70)d=fr.bottom+12-avail;if(Math.abs(d)>1)scrollBy({top:d,behavior:'smooth'})});
+}
+function show(f){
+  if(cur&&cur!==f)cur.classList.remove('on');
+  cur=f;f.classList.add('on');num=false;shift=0;autoShift();build();open=true;$('kb').classList.add('on');draw();place();
+}
+function hide(){if(!open)return;open=false;release(false);if(cur)cur.classList.remove('on');cur=null;$('kb').classList.remove('on');measure()}
+function say(t){const el=$('toast');el.textContent=t;el.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('on'),2600)}
+
+/* нажатия: буква набирается, когда палец отпущен (как у iPhone — можно долгим нажатием взять «ё»); служебные клавиши — сразу */
+const pop=$('pop');
+function popAt(b,t){const r=b.getBoundingClientRect(),w=Math.max(r.width+14,46);pop.style.width=w+'px';
+  pop.style.left=Math.min(innerWidth-w-2,Math.max(2,r.left+r.width/2-w/2))+'px';pop.style.top=(r.top-62)+'px';pop.textContent=t;pop.classList.add('on')}
+function release(commit){
+  clearTimeout(holdT);clearInterval(rptT);if(!held)return;
+  const b=held,k=b.dataset.k,alt=b.dataset.alt;held=null;b.classList.remove('hit');pop.classList.remove('on');delete b.dataset.alt;
+  if(commit&&k&&k.length===1)type(alt?ALT[k]:k);
+}
+$('keys').addEventListener('pointerdown',e=>{
+  const s=e.target.closest('[data-w]');if(s){e.preventDefault();s.classList.add('hit');pick(s.dataset.w);return}
+  const b=e.target.closest('button[data-k]');if(!b)return;e.preventDefault();
+  release(true);held=b;b.classList.add('hit');const k=b.dataset.k;
+  if(k.length===1){if(k!==' ')popAt(b,k);if(ALT[k])holdT=setTimeout(()=>{if(held===b){b.dataset.alt='1';popAt(b,ALT[k])}},420);return}
+  act(k);
+});
+addEventListener('pointerup',()=>release(true));
+addEventListener('pointercancel',()=>release(false));
+document.querySelectorAll('.f').forEach(f=>{
+  f.addEventListener('click',()=>show(f));
+  f.addEventListener('keydown',e=>{if(!open&&(e.key==='Enter'||e.key===' ')){e.preventDefault();show(f)}});
+});
+/* мимо клавиатуры и полей — закрыть. Путь касания берётся на момент нажатия: клавиши к этому времени уже могли перерисоваться */
+document.addEventListener('pointerdown',e=>{if(open&&!e.composedPath().some(n=>n.id==='kb'||n.id==='vars'||(n.classList&&n.classList.contains('f'))))hide()});
+document.querySelectorAll('.submit').forEach(b=>b.addEventListener('click',()=>{hide();say('Макет: ничего не сохраняется.')}));
+/* с клавиатуры компьютера — для проверки в симуляторе */
+addEventListener('keydown',e=>{
+  if(!open||e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.key==='Backspace')del();else if(e.key==='Enter'||e.key==='Escape')hide();else if(e.key.length===1)type(e.key);else return;
+  e.preventDefault();
+});
+$('vars').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(!b)return;variant=b.dataset.v;
+  $('vars').querySelectorAll('[data-v]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));build();if(open)place()});
+addEventListener('resize',()=>{if(open)measure()});
+build();draw();
+</script>
+</body>
+</html>
