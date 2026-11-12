@@ -1518,7 +1518,7 @@ function localStore(){
   const KEY='expenses-v1', BK=KEY+'-broken';
   /* the step-back copy (see prev) and the moment it was put aside; they go together */
   const PV=KEY+'-prev', PA=PV+'-at', dropPrev=()=>{localStorage.removeItem(PV);localStorage.removeItem(PA)};
-  let data={items:[],budget:0,debts:[],settings:{}}, raw=null, status='', kept=true, healed=0, healedSum=0, healedZ=0, healedT=0, cb=()=>{};
+  let data={items:[],budget:0,debts:[],settings:{}}, raw=null, status='', kept=true, healed=0, healedSum=0, healedZ=0, healedT=0, healedB=0, cb=()=>{};
   const okDay=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&iso(isoToDate(s))===s, obj=x=>x&&typeof x==='object'&&!Array.isArray(x);
   const parse=s=>{const d=JSON.parse(s);if(!d||typeof d!=='object'||Array.isArray(d)||(d.items&&!Array.isArray(d.items))||(d.debts&&!Array.isArray(d.debts))||(d.settings&&typeof d.settings!=='object'))throw 0;
     /* rev, gen (see mut): only as these data have them — never left over from the data read before */
@@ -1545,6 +1545,13 @@ function localStore(){
       o.settings={...o.settings,zakat:y}}
     /* «Командировка началась» (tripBegun): a moment the app saved, or nothing — anything else goes (only a mark: no money moves with it), and he is told */
     healedT=0;const tb=o.settings.tripBegun;if(tb!=null&&!(typeof tb==='number'&&Number.isFinite(tb)&&tb>0&&tb<=8.64e15)){const {tripBegun,...rest}=o.settings;o.settings=rest;healedT=1}
+    /* the broker settings (only data damaged by hand — the app and a loaded copy never hold such): a % change that isn't {pct, from} goes —
+       the lists of records hung on it («Загружаю записи…»); a debt typed in «Сверить» that doesn't read goes too — the debt is counted
+       from the records again, it was shown as 0. He is told */
+    healedB=0;{const h=o.settings.brokerPctHist, bo=o.settings.brokerOwed, rd=v=>v!=null&&v!==''&&typeof v!=='boolean'&&Number.isFinite(+v);
+      if(h!=null){const g=Array.isArray(h)?h.filter(x=>obj(x)&&rd(x.pct)&&(x.from==null||rd(x.from))):[];
+        if(!Array.isArray(h)||g.length!==h.length){const {brokerPctHist,...rest}=o.settings;o.settings=g.length?{...rest,brokerPctHist:g}:rest;healedB=1}}
+      if(bo!=null&&!(obj(bo)&&rd(bo.amount)&&(bo.at==null||rd(bo.at)))){const {brokerOwed,...rest}=o.settings;o.settings=rest;healedB=1}}
     return o};
   try{raw=localStorage.getItem(KEY)}catch(e){status='full'}
   const keepBrokenRaw=s=>{try{
@@ -1637,6 +1644,7 @@ function localStore(){
     get healedSum(){return healedSum},
     get healedZakat(){return healedZ},
     get healedTrip(){return healedT},
+    get healedBroker(){return healedB},
     broken,
     brokenText(k){try{return localStorage.getItem(k)}catch(e){return null}},
     /* the damaged text that had no room to be put aside is in a file now (brokenDl): what is saved next may go over it */
@@ -1664,8 +1672,8 @@ function localStore(){
        the step-back copy stays (mut may have dropped it to make room — it is put back) */
     async prevBack(){
       let r=null, cur=null, at=null;try{r=localStorage.getItem(PV);cur=localStorage.getItem(KEY);at=localStorage.getItem(PA)}catch(e){}
-      const h=[healed,healedSum,healedZ,healedT];let n;
-      try{if(!r)throw 0;n=parse(r)}catch(e){throw Object.assign(new Error('prev'),{code:'no_prev'})}finally{[healed,healedSum,healedZ,healedT]=h}
+      const h=[healed,healedSum,healedZ,healedT,healedB];let n;
+      try{if(!r)throw 0;n=parse(r)}catch(e){throw Object.assign(new Error('prev'),{code:'no_prev'})}finally{[healed,healedSum,healedZ,healedT,healedB]=h}
       try{mut(d=>{d.items=n.items;d.debts=n.debts;d.settings=n.settings;d.gen=nid()})}
       catch(e){try{if(localStorage.getItem(PV)===null){localStorage.setItem(PV,r);if(at)localStorage.setItem(PA,at)}}catch(x){}throw e}
       try{if(cur){localStorage.setItem(PV,cur);localStorage.setItem(PA,String(Date.now()))}else dropPrev()}catch(e){try{dropPrev()}catch(x){}}
@@ -1703,7 +1711,7 @@ function initStore(){
     /* records (and zakat data) whose date or sum didn't read were fixed on the way in (see localStore): it is kept now, and he is asked to check them */
     const n=s.healed, m=s.healedSum, rw=k=>`у ${k} ${plural(k,'записи','записей','записей')}`;
     const r=[n?`${rw(n)} была неверная дата — поставлен день, когда ${n===1?'её':'их'} внесли`:'',m?`${rw(m)} была неверная сумма — поставлено ${money(0)}`:''].filter(Boolean).join('; ');
-    const msg=[r?r.replace(/^у/,'У')+'. Проверьте в «Записях».':'',s.healedZakat?'В закяте были неверные даты или суммы — проверьте его на вкладке «Деньги».':'',s.healedTrip?'Отметка «Командировка началась» не прочиталась и снята — если командировка идёт, отметьте начало снова на «Итогах».':''].filter(Boolean).join(' ');
+    const msg=[r?r.replace(/^у/,'У')+'. Проверьте в «Записях».':'',s.healedZakat?'В закяте были неверные даты или суммы — проверьте его на вкладке «Деньги».':'',s.healedTrip?'Отметка «Командировка началась» не прочиталась и снята — если командировка идёт, отметьте начало снова на «Итогах».':'',s.healedBroker?'В настройках брокера были неверные данные, они сброшены — проверьте процент и долг на «Итогах».':''].filter(Boolean).join(' ');
     if(msg) s.batch(()=>{}).then(()=>toast(msg,null,9000),x=>toast(saveErr(x)));
   }
 }
