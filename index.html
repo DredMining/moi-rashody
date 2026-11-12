@@ -434,9 +434,10 @@ input.num::placeholder{font-family:var(--f-body)}
 #sTrip[aria-pressed="true"]{background:var(--seg-trip);color:var(--seg-ink)}
 /* in the black look the four have no colour of their own: the same ring as any picked segment (in the night-blue look the ring is nothing) */
 #tOut[aria-pressed="true"],#tIn[aria-pressed="true"],#sOwn[aria-pressed="true"],#sTrip[aria-pressed="true"]{box-shadow:var(--seg-id-ring),var(--shadow-seg)}
-/* …but «Расход» picked has its ring in the light wine, «Доход» in green — the ring only, the fill stays (owner, 12.11.2026) */
-[data-theme="dark"] #tOut[aria-pressed="true"]{box-shadow:inset 0 0 0 1.5px var(--burgundy-light),var(--shadow-seg)}
-[data-theme="dark"] #tIn[aria-pressed="true"]{box-shadow:inset 0 0 0 1.5px var(--good),var(--shadow-seg)}
+/* …but «Расход» picked has its ring in the light wine, «Доход» in green — the ring only, the fill stays, and muted: the colour at 55%
+   (owner, 12.11.2026) */
+[data-theme="dark"] #tOut[aria-pressed="true"]{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--burgundy-light) 55%,transparent),var(--shadow-seg)}
+[data-theme="dark"] #tIn[aria-pressed="true"]{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--good) 55%,transparent),var(--shadow-seg)}
 .err{grid-column:1/-1;color:var(--bad);font-size:var(--fs-sm);margin:0}
 
 /* Breakdown */
