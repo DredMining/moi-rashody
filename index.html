@@ -568,7 +568,9 @@ input.num::placeholder{font-family:var(--f-body)}
 .ring.over b{font-size:var(--fs-xl)}
 .lr{display:flex;flex-direction:column;gap:var(--sp-1);min-width:0;flex:1}
 /* the hero's label, as «Всего денег» and «Мне должны» */
-.lr #sumLabel{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;line-height:1.2;color:var(--muted)}
+/* room on the right for the round view button in the card's corner (.theme-toggle): on a narrower phone the label wraps before it,
+   it used to run under the button (320–414px); at 440px it fits in one line as before */
+.lr #sumLabel{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;line-height:1.2;color:var(--muted);padding-right:calc(var(--h-s) + 6px)}
 /* the small blocks inside the month card (the limit's line, «Вне лимита», the trip money) are told apart by their fill alone, no frame */
 .lof{display:flex;align-items:center;justify-content:space-between;gap:4px 8px;flex-wrap:wrap;padding:4px 8px;border-radius:var(--r-md);background:var(--inset);font-size:var(--fs-xs);line-height:1.25;color:var(--muted);overflow-wrap:anywhere}
 /* «из 30 000 ₽» changes the limit: the line stays small, its tap area (::after) is 44px tall over the sum and «Вне лимита» around it,
