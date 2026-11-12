@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#000000">
+<title>Макет · своя клавиатура</title>
+<!-- Макет для Али (12.11.2026). Основное приложение (index.html) эту страницу не подключает и от неё не зависит.
+     Карточка «Новая запись» повторяет приложение (тёмная тема «Чёрный и бордо»); суммы и записи — пустые заглушки, ничего не сохраняется. -->
+<style>
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:400;font-display:swap;src:url(../fonts/GolosText-cyrillic-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:400;font-display:swap;src:url(../fonts/GolosText-latin-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:500;font-display:swap;src:url(../fonts/GolosText-cyrillic-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:500;font-display:swap;src:url(../fonts/GolosText-latin-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:600;font-display:swap;src:url(../fonts/GolosText-cyrillic-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:600;font-display:swap;src:url(../fonts/GolosText-latin-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:400;font-display:swap;src:url(../fonts/GolosText-rub400-2626f3c1.woff2) format('woff2');unicode-range:U+20BD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:500;font-display:swap;src:url(../fonts/GolosText-rub500-1ffbb4e5.woff2) format('woff2');unicode-range:U+20BD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:600;font-display:swap;src:url(../fonts/GolosText-rub600-48126017.woff2) format('woff2');unicode-range:U+20BD}
+
+/* цвета и размеры — из приложения (тёмная тема) */
+:root{
+  --bg:#000; --surface:#161215; --inset:#221C20; --raised:#3B3237; --ink:#F7F3F4; --muted:#A79DA2; --field-line:#7A6E74;
+  --accent:#F08CA0; --accent-btn:#B23A55; --seg-ring:#958990; --track:#4A4046;
+  --glass:rgb(48 38 43 / .56); --glass-solid:rgb(30 24 28 / .94); --glass-rim:rgb(255 255 255 / .16); --ico-on:#FFB4C2;
+  --key:#2A2327; --key-on:#463B41;
+  --safe-top:max(env(safe-area-inset-top,0px),var(--simulator-safe-top,0px));
+  --safe-bottom:max(env(safe-area-inset-bottom,0px),var(--simulator-safe-bottom,0px));
+  --kb-h:0px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.5 "Golos Text",system-ui,-apple-system,sans-serif;font-variant-numeric:tabular-nums;
+  -webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+main{padding:calc(var(--safe-top) + 8px) 16px 0;display:flex;flex-direction:column;gap:16px}
+/* полоса под строкой состояния, как в приложении: прокрученное не заезжает под часы */
+body::before{content:"";position:fixed;left:0;right:0;top:0;height:var(--safe-top);background:var(--bg);z-index:15}
+/* место под клавиатурой: страница прокручивается так, чтобы карточка встала над ней */
+.room{height:calc(var(--kb-h) + 120px);transition:height .28s cubic-bezier(.2,.8,.2,1)}
+
+/* ---- полоска макета ---- */
+.lab{display:flex;flex-direction:column;gap:8px}
+.lab .tag{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.lab .why{font-size:13px;line-height:1.4;color:var(--muted)}
+
+/* ---- карточки ---- */
+.card{background:var(--surface);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px}
+h2{font-size:13px;font-weight:600;line-height:1.2;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.seg{display:flex;gap:3px;padding:3px;background:var(--inset);border:1px solid var(--field-line);border-radius:14px}
+.seg button{flex:1;min-height:38px;border-radius:11px;font-size:15px;font-weight:500;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--raised);color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1.5px var(--seg-ring),0 1px 2px rgb(0 0 0 / .12)}
+.segs{display:grid;gap:6px}
+form{display:grid;gap:8px}
+/* поле суммы: не настоящее поле ввода — системная клавиатура не появляется */
+.amount{position:relative;display:flex;align-items:center;min-height:48px;padding:7px 44px 7px 14px;background:var(--inset);border:1px solid var(--field-line);
+  border-radius:14px;font-size:24px;font-weight:600;line-height:30px;cursor:text;transition:border-color .15s,box-shadow .15s}
+.amount.on{border-color:var(--accent);box-shadow:0 0 0 3px rgb(240 140 160 / .22)}
+.amount .ph{color:var(--muted)}
+.amount .cur{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:20px;font-weight:400;color:var(--muted)}
+.caret{display:none;width:2px;height:28px;margin-left:2px;border-radius:1px;background:var(--accent);animation:blink 1s steps(1) infinite}
+.amount.on .caret{display:inline-block}
+.amount.on .ph{order:2;margin-left:2px}
+@keyframes blink{50%{opacity:0}}
+.extras{display:flex;gap:8px}
+.chip{border:1px solid var(--field-line);border-radius:99px;min-height:36px;padding:4px 14px;font-size:13px;color:var(--muted)}
+.submit{min-height:52px;border-radius:14px;background:var(--accent-btn);color:#fff;font-weight:600}
+.submit:active,.chip:active{transform:scale(.98);opacity:.82}
+/* заглушки вместо сумм и записей */
+.sk{display:block;height:12px;border-radius:6px;background:#2A2327}
+.rows{display:grid;gap:14px;padding-top:4px}
+.row{display:grid;grid-template-columns:28px 1fr 64px;gap:10px;align-items:center}
+.row i{width:28px;height:28px;border-radius:50%;background:#2A2327}
+
+/* ---- нижняя панель (как в приложении, упрощённо) ---- */
+.tabs{position:fixed;left:12px;right:12px;bottom:max(10px,calc(var(--safe-bottom) - 16px));height:64px;padding:6px;display:grid;grid-template-columns:repeat(5,1fr);
+  align-items:center;border:1px solid var(--glass-rim);border-radius:32px;background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);z-index:10}
+.tabs span{display:flex;flex-direction:column;align-items:center;font-size:12px;font-weight:500;color:var(--muted);line-height:1.1}
+.tabs svg{width:22px;height:22px;margin:5px 0 4px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tabs span.on{color:var(--ink);background:linear-gradient(180deg,rgb(255 255 255 / .13),rgb(255 255 255 / .07));border-radius:27px;height:54px;justify-content:center}
+.tabs span.on svg{color:var(--ico-on);margin-top:0}
+
+/* ---- своя клавиатура ---- */
+.kb{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 8px calc(var(--safe-bottom) + 6px);background:var(--glass-solid);
+  -webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);border-radius:28px 28px 0 0;box-shadow:inset 0 1px 0 var(--glass-rim),0 -8px 30px rgb(0 0 0 / .45);
+  transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);touch-action:none}
+.kb.on{transform:none}
+.keys{display:grid;gap:8px}
+.keys.a{grid-template-columns:repeat(3,1fr)}
+.keys.b{grid-template-columns:repeat(4,1fr)}
+.key{height:54px;border-radius:14px;background:var(--key);font-size:26px;font-weight:500;line-height:1;display:grid;place-items:center;transition:background .08s,transform .08s}
+.key:active,.key.hit{background:var(--key-on);transform:scale(.96)}
+.key.fn{background:transparent;color:var(--muted)}
+.key.fn:active,.key.fn.hit{background:var(--key)}
+.key svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.key.small{font-size:20px}
+.key.go{grid-row:2 / span 3;grid-column:4;height:auto;background:var(--accent-btn);color:#fff;font-size:15px;font-weight:600;line-height:1.25;text-align:center;padding:0 4px}
+.key.go:active,.key.go.hit{background:#C9506B}
+.kb .grab{width:36px;height:5px;border-radius:3px;background:var(--track);margin:0 auto 10px}
+
+/* сообщение */
+.toast{position:fixed;left:16px;right:16px;bottom:calc(var(--kb-h) + 12px);z-index:30;padding:12px 14px;border-radius:14px;background:var(--raised);
+  box-shadow:0 0 0 1px var(--seg-ring),0 8px 24px rgb(0 0 0 / .3);font-size:14px;line-height:1.35;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none}
+.toast.on{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.kb,.room,.toast,.amount{transition:none}.caret{animation:none}}
+</style>
+</head>
+<body>
+<main id="page">
+  <div class="lab">
+    <span class="tag">Макет · своя клавиатура</span>
+    <div class="seg" role="group" aria-label="Вариант клавиатуры">
+      <button type="button" id="vA" aria-pressed="true">А · как на iPhone</button>
+      <button type="button" id="vB" aria-pressed="false">Б · с «Добавить»</button>
+    </div>
+    <p class="why">Нажми на сумму — снизу выедет клавиатура приложения, без полоски со стрелками и галочкой. Закрыть — нажать мимо неё. Долгое нажатие на ⌫ стирает всё.</p>
+  </div>
+
+  <section class="card" aria-label="Заглушка карточки месяца">
+    <h2>Траты в лимит за месяц</h2>
+    <span class="sk" style="width:55%;height:30px;border-radius:8px"></span>
+    <span class="sk" style="width:80%"></span>
+  </section>
+
+  <section class="card" id="addBox">
+    <h2>Новая запись</h2>
+    <div class="segs">
+      <div class="seg" role="group" aria-label="Тип записи">
+        <button type="button" id="tOut" aria-pressed="true">Расход</button>
+        <button type="button" id="tIn" aria-pressed="false">Доход</button>
+      </div>
+      <div class="seg" role="group" aria-label="Чьи деньги">
+        <button type="button" id="sOwn" aria-pressed="true">Личное</button>
+        <button type="button" id="sTrip" aria-pressed="false">Командировка</button>
+      </div>
+    </div>
+    <form id="form" novalidate>
+      <div class="amount" id="amount" role="textbox" aria-label="Сумма" tabindex="0"><span id="val"></span><i class="caret" aria-hidden="true"></i><span class="ph" id="ph">0</span><span class="cur">₽</span></div>
+      <div class="extras"><button type="button" class="chip">Сегодня</button></div>
+      <button class="submit" id="submitBtn" type="submit">Добавить расход</button>
+    </form>
+  </section>
+
+  <section class="card" aria-label="Заглушка последних записей">
+    <h2>Последние записи</h2>
+    <div class="rows">
+      <div class="row"><i></i><span class="sk" style="width:70%"></span><span class="sk"></span></div>
+      <div class="row"><i></i><span class="sk" style="width:55%"></span><span class="sk"></span></div>
+      <div class="row"><i></i><span class="sk" style="width:62%"></span><span class="sk"></span></div>
+      <div class="row"><i></i><span class="sk" style="width:48%"></span><span class="sk"></span></div>
+    </div>
+  </section>
+  <div class="room" aria-hidden="true"></div>
+</main>
+
+<nav class="tabs" aria-hidden="true">
+  <span><svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>Итоги</span>
+  <span><svg viewBox="0 0 24 24"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18v3"/><path d="M4 7.5V17a2 2 0 0 0 2 2h13a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H6.5A2.5 2.5 0 0 1 4 7.5"/></svg>Деньги</span>
+  <span class="on"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Учёт</span>
+  <span><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/></svg>Записи</span>
+  <span><svg viewBox="0 0 24 24"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg>Долги</span>
+</nav>
+
+<div class="kb" id="kb" aria-label="Клавиатура суммы"><div class="grab" aria-hidden="true"></div><div class="keys a" id="keys"></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const ERASE='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/></svg>';
+/* раскладки: А — как цифровая клавиатура iPhone; Б — справа стереть и большая «Добавить» */
+const LAYOUT={
+  a:['1','2','3','4','5','6','7','8','9',',','0','del'],
+  b:['1','2','3','del','4','5','6','go','7','8','9',',','0','00'],
+};
+let variant='a', raw='', open=false, toastT=0;
+
+/* сумма: до 9 цифр в рублях, одна запятая, до 2 цифр копеек; показ — с пробелами между тысячами, как в приложении */
+function press(k){
+  if(k==='del'){raw=raw.slice(0,-1)}
+  else if(k===','){if(!raw.includes(','))raw=(raw||'0')+','}
+  else if(k==='go'){submit();return}
+  else{
+    const [int,dec]=raw.split(',');
+    if(dec!==undefined){if(dec.length>=2)return;raw+=k.slice(0,2-dec.length)}
+    else{let n=(int==='0'?'':int)+k;n=n.replace(/^0+(?=\d)/,'');if(n.length>9)return;raw=n}
+  }
+  draw();
+}
+function draw(){
+  const [int,dec]=raw.split(',');
+  const show=raw?(int||'0').replace(/\B(?=(\d{3})+(?!\d))/g,' ')+(dec!==undefined?','+dec:''):'';
+  $('val').textContent=show;$('ph').hidden=!!raw;
+  $('amount').setAttribute('aria-label','Сумма: '+(show||'0')+' ₽');
+}
+function buildKeys(){
+  const box=$('keys');box.className='keys '+variant;
+  box.innerHTML=LAYOUT[variant].map(k=>k==='del'?`<button type="button" class="key fn" data-k="del" aria-label="Стереть">${ERASE}</button>`
+    :k==='go'?`<button type="button" class="key go" data-k="go">${$('submitBtn').textContent.replace(/^Добавить /,'Добавить<br>')}</button>`
+    :`<button type="button" class="key${k==='00'||k===','?' small':''}${k===','?' fn':''}" data-k="${k}">${k}</button>`).join('');
+  if(open)measure();
+}
+function measure(){const h=$('kb').offsetHeight;document.documentElement.style.setProperty('--kb-h',open?h+'px':'0px');return h}
+/* открыть: клавиатура выезжает, карточка «Новая запись» встаёт низом над ней с зазором 12px */
+function show(){
+  if(open)return;open=true;$('amount').classList.add('on');$('kb').classList.add('on');const h=measure();
+  requestAnimationFrame(()=>{const r=$('addBox').getBoundingClientRect(), d=r.bottom-(innerHeight-h-12);if(d>0)scrollBy({top:d,behavior:'smooth'})});
+}
+function hide(){if(!open)return;open=false;$('amount').classList.remove('on');$('kb').classList.remove('on');measure()}
+function say(t){const el=$('toast');el.textContent=t;el.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('on'),2600)}
+function submit(){
+  if(!raw||!/[1-9]/.test(raw)){say('Введите сумму больше нуля.');show();return}
+  hide();say('Макет: дальше, как сейчас, откроется выбор категории и счёта. Ничего не сохраняется.');
+}
+
+/* нажатия: срабатывают сразу при касании, как у клавиатуры iPhone */
+let holdT=0;
+$('keys').addEventListener('pointerdown',e=>{
+  const b=e.target.closest('[data-k]');if(!b)return;e.preventDefault();
+  b.classList.add('hit');press(b.dataset.k);
+  if(b.dataset.k==='del'){clearTimeout(holdT);holdT=setTimeout(()=>{raw='';draw()},550)}
+});
+const up=()=>{clearTimeout(holdT);document.querySelectorAll('.key.hit').forEach(b=>b.classList.remove('hit'))};
+addEventListener('pointerup',up);addEventListener('pointercancel',up);
+$('amount').addEventListener('click',show);
+$('amount').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();show()}});
+/* мимо клавиатуры и поля — закрыть */
+document.addEventListener('pointerdown',e=>{if(open&&!e.target.closest('#kb,#amount,#submitBtn'))hide()});
+$('form').addEventListener('submit',e=>{e.preventDefault();submit()});
+/* с клавиатуры компьютера — для проверки в симуляторе */
+addEventListener('keydown',e=>{
+  if(!open)return;
+  if(/^\d$/.test(e.key))press(e.key);else if(e.key===','||e.key==='.')press(',');else if(e.key==='Backspace')press('del');
+  else if(e.key==='Enter'){e.preventDefault();submit()}else if(e.key==='Escape')hide();else return;
+  e.preventDefault();
+});
+/* переключатели — как в приложении; текст кнопки «Добавить …» следует за ними */
+const pick=(on,off)=>{$(on).setAttribute('aria-pressed','true');$(off).setAttribute('aria-pressed','false')};
+function label(){const inc=$('tIn').getAttribute('aria-pressed')==='true', trip=$('sTrip').getAttribute('aria-pressed')==='true';
+  $('submitBtn').textContent=inc?'Добавить доход':trip?'Добавить расход в командировке':'Добавить расход';buildKeys()}
+$('tOut').onclick=()=>{pick('tOut','tIn');label()};$('tIn').onclick=()=>{pick('tIn','tOut');pick('sOwn','sTrip');label()};
+$('sOwn').onclick=()=>{pick('sOwn','sTrip');label()};$('sTrip').onclick=()=>{pick('sTrip','sOwn');label()};
+$('vA').onclick=()=>{variant='a';pick('vA','vB');buildKeys()};$('vB').onclick=()=>{variant='b';pick('vB','vA');buildKeys()};
+addEventListener('resize',()=>{if(open)measure()});
+buildKeys();draw();
+</script>
+</body>
+</html>
