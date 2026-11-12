@@ -39,7 +39,7 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:var(--safe-to
 /* ---- полоска макета ---- */
 .lab{display:flex;flex-direction:column;gap:8px}
 .tag{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
-.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;padding:3px;background:var(--inset);border:1px solid var(--field-line);border-radius:14px}
+.seg{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:3px;background:var(--inset);border:1px solid var(--field-line);border-radius:14px}
 .seg button{min-height:38px;border-radius:11px;font-size:14px;font-weight:500;color:var(--muted)}
 .seg button[aria-pressed="true"]{background:var(--raised);color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1.5px var(--seg-ring)}
 .why{font-size:13px;line-height:1.45;color:var(--muted)}
@@ -161,6 +161,82 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:var(--safe-to
 .vg .tr{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:14px;background:color-mix(in srgb,var(--gold) 9%,var(--inset))}
 .vg .tr .caps{color:var(--gold);padding:0}
 .vg .tr .mid{font-weight:700;font-size:22px;line-height:1.15}
+
+/* ---- З (ChatGPT «Циферблат»): дуга с делениями, как у прибора ---- */
+.vh .caps{padding-right:34px}
+.vh .dial{position:relative;width:100%;max-width:300px;margin:0 auto}
+.vh .dial svg{display:block;width:100%;height:auto;overflow:visible}
+.vh .dial .mid{position:absolute;left:0;right:0;bottom:2px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.vh .dial .mid .big{font-size:30px}
+.vh .dial .mid small{font-size:12px;color:var(--muted)}
+.vh .ends{display:flex;justify-content:space-between;max-width:300px;width:100%;margin:-4px auto 0;font-size:11px;color:var(--muted)}
+.vh .foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 12px;font-size:13px}
+.vh .foot .ti{display:flex;align-items:center;gap:8px}
+.vh .foot .ti svg{width:34px;height:20px;overflow:visible}
+.vh .foot b{font-weight:600;color:var(--gold)}
+.vh .out{font-size:12px;color:var(--muted);text-align:center}
+
+/* ---- И (ChatGPT «Билет»): билет с перфорацией и золотистый талон ---- */
+.vi{gap:0;padding:0;background:none}
+.vi .tk{position:relative;background:var(--surface);border-radius:20px;padding:16px}
+.vi .tk .caps{padding-right:34px}
+.vi .main{display:flex;justify-content:space-between;align-items:stretch;gap:12px;margin-top:10px}
+.vi .main .l{display:flex;flex-direction:column;gap:2px}
+.vi .main small{font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--muted)}
+.vi .main .r{display:flex;flex-direction:column;justify-content:center;gap:2px;padding-left:14px;border-left:1px dashed var(--track);text-align:right}
+.vi .main .r b{font-size:17px;font-weight:600}
+/* перфорация: пунктир и два полукруглых выреза по краям */
+.vi .perf{position:relative;height:22px;margin:12px -16px}
+.vi .perf::before{content:"";position:absolute;left:18px;right:18px;top:50%;border-top:2px dashed var(--track)}
+.vi .perf i{position:absolute;top:0;width:22px;height:22px;border-radius:50%;background:var(--bg)}
+.vi .perf i:first-child{left:-11px}.vi .perf i:last-child{right:-11px}
+.vi .low{display:flex;justify-content:space-between;font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--muted)}
+.vi .low b{color:var(--ink);letter-spacing:0;font-size:14px}
+.vi .stub{position:relative;margin-top:8px;padding:12px 16px;border-radius:16px;background:color-mix(in srgb,var(--gold) 14%,var(--surface));display:flex;justify-content:space-between;align-items:center}
+.vi .stub span{font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--gold)}
+.vi .stub b{font-size:18px;font-weight:700}
+.vi .stub small{display:block;font-size:11px;color:var(--muted);text-align:right;font-weight:400}
+.vi .tt{top:16px;right:16px;z-index:1}
+
+/* ---- К (ChatGPT «Переключатель»): свайп между личным и командировочными ---- */
+.vk{overflow:hidden}
+.vk .sw{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin:0 -16px}
+.vk .sw::-webkit-scrollbar{display:none}
+.vk .sl{flex:0 0 100%;scroll-snap-align:start;padding:0 16px;display:flex;flex-direction:column;gap:8px}
+.vk .sl .caps{padding-right:34px}
+.vk .sl .two{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.vk .sl .two b{display:block;font-size:15px;font-weight:600;color:var(--ink)}
+.vk .sl .two span:last-child{text-align:right}
+.vk .sl.trip .caps{color:var(--gold)}
+.vk .dots{display:flex;justify-content:center;gap:6px}
+.vk .dots button{width:7px;height:7px;border-radius:50%;background:var(--track)}
+.vk .dots button[aria-current="true"]{background:var(--ink);width:18px;border-radius:4px}
+
+/* ---- Л (ChatGPT «Живое состояние»): вид меняется по ходу месяца ---- */
+.vl{--st:var(--good);background:radial-gradient(120% 120% at 100% 0%,color-mix(in srgb,var(--st) 22%,var(--surface)),var(--surface) 62%)}
+.vl .caps{padding-right:34px;color:var(--st)}
+.vl .msg{font-size:13px;color:var(--muted);margin-top:-4px}
+.vl .meter i{background:var(--st)}
+.vl .row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.vl .row b{color:var(--ink);font-weight:500}
+.states{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:10px}
+.states button{min-height:34px;border-radius:10px;font-size:12px;color:var(--muted);background:var(--inset);line-height:1.15;padding:2px}
+.states button[aria-pressed="true"]{color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--seg-ring)}
+
+/* ---- М (ChatGPT «Компактный»): три строки, подробности по нажатию ---- */
+.vm{gap:4px;padding:14px 16px;cursor:pointer}
+.vm .caps{font-size:11px;padding-right:34px}
+.vm .tt{top:12px;right:12px;width:28px;height:28px;font-size:13px}
+.vm .ln1{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.vm .ln1 .big{font-size:28px}
+.vm .ln1 .rt{font-size:12px;color:var(--muted);text-align:right;line-height:1.3}
+.vm .ln1 .rt b{color:var(--ink);font-weight:500}
+.vm .ln2{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);padding-top:6px;border-top:1px solid var(--line);margin-top:4px}
+.vm .ln2 b{color:var(--gold);font-weight:600}
+.vm .more{display:none;justify-content:space-between;font-size:12px;color:var(--muted)}
+.vm .more b{color:var(--ink);font-weight:500}
+.vm.open .more{display:flex}
+.vm .hint{font-size:11px;color:var(--muted);text-align:center;opacity:.7}
 </style>
 </head>
 <body>
@@ -176,6 +252,11 @@ body::before{content:"";position:fixed;left:0;right:0;top:0;height:var(--safe-to
       <button type="button" data-v="e" aria-pressed="false">Д</button>
       <button type="button" data-v="f" aria-pressed="false">Е</button>
       <button type="button" data-v="g" aria-pressed="false">Ж</button>
+      <button type="button" data-v="h" aria-pressed="false">З</button>
+      <button type="button" data-v="i" aria-pressed="false">И</button>
+      <button type="button" data-v="k" aria-pressed="false">К</button>
+      <button type="button" data-v="l" aria-pressed="false">Л</button>
+      <button type="button" data-v="m" aria-pressed="false">М</button>
     </div>
   </div>
   <div id="card"></div>
@@ -253,10 +334,59 @@ const V={
       <div class="meter"><i style="width:${pct}%"></i></div><span class="small">вне лимита ${rub(OUT,false)}</span>
       <div class="tr"><span class="caps">🧳 Командировочные</span><span class="mid">${rubK(trest)}</span><span class="small">остаток из ${rub(TRIP,false)} · потрачено ${rub(TSPENT)}</span>
       <div class="meter trip"><i style="width:${tpct}%"></i></div></div></section>`},
+  h:{why:'<b>З — «Циферблат» (идея ChatGPT).</b> Вместо кольца — дуга с делениями, как у стрелочного прибора: бордовым — сколько уже потрачено, белая точка — где ты сейчас. Внутри дуги крупно остаток. Командировочные — строка с маленькой золотой дугой.',
+    html:()=>`<section class="card vh">${TT}<span class="caps">Доступно в ${MONTHS_IN[now.getMonth()]}</span>
+      <div class="dial">${dial(SPENT/LIMIT,'var(--burgundy-light)',true)}<div class="mid"><span class="big">${rub(rest,false)}</span><small>потрачено ${rub(SPENT)}</small></div></div>
+      <div class="ends"><span>0</span><span class="dotted">${rub(LIMIT,false)}</span></div>
+      <div class="foot plate"><span class="ti"><svg viewBox="0 0 240 132" aria-hidden="true">${dial(TSPENT/TRIP,'var(--gold)',false,true)}</svg>🧳 Командировочные</span><span>осталось <b>${rubK(trest)}</b></span></div>
+      <span class="out">вне лимита ${rub(OUT,false)}</span></section>`},
+  i:{why:'<b>И — «Билет» (идея ChatGPT).</b> Карточка как билет: сверху остаток крупно и лимит в отдельной колонке, ниже линия отрыва с вырезами, под ней потрачено и вне лимита. Командировочные — отдельный золотистый «талон».',
+    html:()=>`<section class="card vi">${TT}<div class="tk"><span class="caps">${MONTHS[now.getMonth()]} ${now.getFullYear()} · личный бюджет</span>
+      <div class="main"><div class="l"><small>ОСТАЛОСЬ</small><span class="big">${rub(rest,false)}</span></div><div class="r"><small>ЛИМИТ</small><b class="dotted">${rub(LIMIT,false)}</b></div></div>
+      <div class="perf"><i></i><i></i></div>
+      <div class="low"><span>ПОТРАЧЕНО <b>${rub(SPENT)}</b></span><span>ВНЕ ЛИМИТА <b>${rub(OUT,false)}</b></span></div></div>
+      <div class="stub"><div><span>🧳 КОМАНДИРОВОЧНЫЕ</span></div><div><b>${rubK(trest)}</b><small>доступно из ${rub(TRIP,false)}</small></div></div></section>`},
+  k:{why:'<b>К — «Переключатель» (идея ChatGPT).</b> В карточке одно из двух: личный остаток или командировочные — оба крупно. Листается свайпом вбок (или нажатием на точки снизу). Карточка ниже, чем сейчас, а обе суммы — главные на своём листе.',
+    html:()=>`<section class="card vk">${TT}<div class="sw" id="sw">
+      <div class="sl"><span class="caps">Личное · осталось</span><span class="big">${rub(rest)}</span><div class="meter"><i style="width:${pct}%"></i></div>
+        <div class="two"><span>потрачено<b>${rub(SPENT)}</b></span><span><span class="dotted">лимит</span><b>${rub(LIMIT,false)}</b></span></div></div>
+      <div class="sl trip"><span class="caps">🧳 Осталось на поездку</span><span class="big">${rubK(trest)}</span><div class="meter trip"><i style="width:${tpct}%"></i></div>
+        <div class="two"><span>выдано<b>${rub(TRIP,false)}</b></span><span>потрачено<b>${rub(TSPENT)}</b></span></div></div></div>
+      <div class="dots"><button type="button" data-go="0" aria-current="true" aria-label="Личное"></button><button type="button" data-go="1" aria-current="false" aria-label="Командировочные"></button></div></section>`,
+    after(){const sw=$('sw'), dots=[...document.querySelectorAll('.vk .dots button')];
+      sw.addEventListener('scroll',()=>{const i=Math.round(sw.scrollLeft/sw.clientWidth);dots.forEach((d,j)=>d.setAttribute('aria-current',String(i===j)))},{passive:true});
+      dots.forEach(d=>d.addEventListener('click',()=>sw.scrollTo({left:+d.dataset.go*sw.clientWidth,behavior:'smooth'})))}},
+  l:{why:'<b>Л — «Живое состояние» (идея ChatGPT).</b> Подпись, крупная цифра, фраза и цвет подсветки меняются по ходу месяца: в начале — «бюджет доступен», обычно — «можно потратить», под конец — «осталось до лимита», при перерасходе — «превышение» с минусом. Кнопки под карточкой переключают состояния.',
+    html:()=>{const s=ST[st], r=LIMIT-s.sp, p=Math.min(100,Math.round(s.sp/LIMIT*100));
+      return `<section class="card vl" style="--st:${s.c}">${TT}<span class="caps">${s.lbl}</span><span class="big">${rub(r)}</span><span class="msg">${s.msg}</span>
+      <div class="meter"><i style="width:${p}%"></i></div><div class="row"><span>потрачено <b>${rub(s.sp)}</b> из <span class="dotted">${rub(LIMIT,false)}</span></span><span>вне лимита <b>${rub(OUT,false)}</b></span></div>
+      <div class="tripc plate"><div class="top"><b>🧳 Командировочные</b><span>осталось <b>${rubK(trest)}</b></span></div><div class="meter trip"><i style="width:${tpct}%"></i></div></div></section>
+      <div class="states">${Object.keys(ST).map(k=>`<button type="button" data-st="${k}" aria-pressed="${k===st}">${ST[k].btn}</button>`).join('')}</div>`}},
+  m:{why:'<b>М — «Компактный» (идея ChatGPT).</b> Три строки: остаток крупно, справа мелко потрачено и лимит, ниже командировочные. Карточка почти вдвое ниже, освобождает место под «Новую запись». «Вне лимита» открывается нажатием на карточку.',
+    html:()=>`<section class="card vm" id="cm">${TT}<span class="caps">Личный остаток</span>
+      <div class="ln1"><span class="big">${rub(rest)}</span><span class="rt"><b>${rub(SPENT,false)}</b> потрачено<br><b class="dotted">${rub(LIMIT,false)}</b> лимит</span></div>
+      <div class="more"><span>вне лимита</span><b>${rub(OUT,false)}</b></div>
+      <div class="ln2"><span>🧳 командировочные</span><b>${rubK(trest)}</b></div></section>`,
+    after(){$('cm').addEventListener('click',e=>{if(!e.target.closest('.tt'))$('cm').classList.toggle('open')})}},
 };
-function show(v){$('card').innerHTML=V[v].html;$('why').innerHTML=V[v].why;
+/* дуга «Циферблата»: доля p пройденного пути слева направо; деления через каждые 10 % */
+function dial(p,color,ticks,bare){p=Math.max(0,Math.min(1,p));const pt=(q,r)=>{const a=Math.PI*(1-q);return [(120+r*Math.cos(a)).toFixed(1),(120-r*Math.sin(a)).toFixed(1)]};
+  const [x,y]=pt(p,100);let t='';if(ticks)for(let i=0;i<=10;i++){const [x1,y1]=pt(i/10,112),[x2,y2]=pt(i/10,i%5?117:122);t+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`}
+  const g=`<path d="M20 120 A100 100 0 0 1 220 120" style="fill:none;stroke:var(--track);stroke-width:${bare?22:12};stroke-linecap:round"/>`
+    +(p>0?`<path d="M20 120 A100 100 0 0 1 ${x} ${y}" style="fill:none;stroke:${color};stroke-width:${bare?22:12};stroke-linecap:round"/>`:'')
+    +(ticks?`<g style="stroke:var(--muted);stroke-width:1.5;stroke-linecap:round">${t}</g><circle cx="${x}" cy="${y}" r="6" style="fill:var(--ink)"/>`:'');
+  return bare?g:`<svg viewBox="-4 -6 248 132" aria-hidden="true">${g}</svg>`}
+const MONTHS_IN=['январе','феврале','марте','апреле','мае','июне','июле','августе','сентябре','октябре','ноябре','декабре'];
+/* состояния «Живого»: придуманные траты для каждого */
+const ST={start:{btn:'Начало месяца',lbl:'Бюджет доступен',sp:0,msg:'Месяц только начался — весь лимит впереди.',c:'var(--burgundy)'},
+  norm:{btn:'Обычно',lbl:'Можно потратить',sp:SPENT,msg:'Идёшь спокойно.',c:'var(--good)'},
+  near:{btn:'Близко к лимиту',lbl:'Осталось до лимита',sp:2680000,msg:'Лимит почти исчерпан — осторожнее.',c:'var(--burgundy-light)'},
+  over:{btn:'Перерасход',lbl:'Превышение лимита',sp:3125000,msg:'Лимит превышен.',c:'var(--bad)'}};
+let st='norm';
+function show(v){const x=V[v];$('card').innerHTML=typeof x.html==='function'?x.html():x.html;$('why').innerHTML=x.why;if(x.after)x.after();
   $('vars').querySelectorAll('[data-v]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)))}
 $('vars').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b)show(b.dataset.v)});
+$('card').addEventListener('click',e=>{const b=e.target.closest('[data-st]');if(b){st=b.dataset.st;show('l')}});
 show('now');
 </script>
 </body>
