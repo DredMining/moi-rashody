@@ -1195,6 +1195,32 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
 .numpad button.fn.hit{background:#2A2629;background:color-mix(in srgb,var(--ink) 9%,var(--surface))}
 .numpad button[data-k=","]{font-size:20px}
 .numpad svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+/* the same panel with letters for a text field — a name, a comment, «Другое» (owner, 12.11.2026 — design-lab/keyboard-text.html, «А»):
+   the iPhone's rows, each letter as wide as one of its set's longest row (11 Russian, 10 English or signs); the sets not in use are hidden */
+.numpad.txt{padding-left:4px;padding-right:4px}
+.numpad.txt .numpad-keys,.numpad:not(.txt) .tp,.numpad:not(.txt) .tp-pop{display:none}
+.tp,.tp-set{display:flex;flex-direction:column;gap:10px}
+.tp-set{--kw:calc((100% - (var(--cols) - 1) * 5px) / var(--cols))}
+.tp-set[hidden]{display:none}
+.tp-row{display:flex;gap:5px;justify-content:center}
+.numpad .tp button{flex:0 0 var(--kw);min-width:0;height:46px;border-radius:10px;font:400 22px/1 var(--f-body)}
+.numpad .tp button.hit{transform:none}
+.numpad .tp .fn,.tp-gap{flex:1 1 0}
+.numpad.up .tp .l{text-transform:uppercase}
+.numpad .tp svg{width:24px;height:24px}
+.numpad .tp [aria-pressed="true"]{background:#2A2629;background:color-mix(in srgb,var(--ink) 9%,var(--surface));color:var(--ink)}
+.numpad .tp [aria-pressed="true"] path:first-child{fill:currentColor}
+.numpad .tp .tp-lock{display:none}
+.numpad .tp .lock .tp-lock{display:inline}
+.numpad .tp-bottom button{flex:1 1 0;font:500 15px/1 var(--f-body)}
+.numpad .tp-bottom .tp-mode{flex-grow:1.3}
+.numpad .tp-bottom .tp-space{flex-grow:4.6;color:var(--muted)}
+.numpad .tp-bottom .tp-go{flex-grow:2.2;background:var(--accent-btn);color:var(--accent-ink);font-weight:600}
+.numpad .tp-bottom .tp-go.hit{opacity:.82}
+/* the pressed letter shown big over the finger, as the iPhone does */
+.tp-pop{position:absolute;left:0;top:0;height:56px;border-radius:12px;background:#43393F;background:color-mix(in srgb,var(--ink) 20%,var(--surface));color:var(--ink);
+  font:400 30px/1 var(--f-body);display:grid;place-items:center;pointer-events:none;box-shadow:0 6px 18px rgb(0 0 0 / .45);opacity:0}
+.tp-pop.on{opacity:1}
 html.pad-open .scroller{padding-bottom:calc(var(--tabbar-room) + var(--pad-h,0px))}
 html.pad-open .sheet{padding-bottom:var(--pad-h,0px)}
 html.pad-open .sheet-panel{max-height:calc(100% - env(safe-area-inset-top,0px) - 16px);padding-bottom:16px}
@@ -4633,20 +4659,65 @@ $('amount').addEventListener('input',()=>{const er=$('formErr');if(!(er.textCont
    typing did — the field keeps its value, checks, errors and paste; nothing else knows of the keys. One comma, two digits after it; a lone
    0 is replaced by the next digit; ⌫ held down empties the field. The keys never take the focus; a tap elsewhere (not a scroll) puts them
    down. With them up the field's block is put just over them: «Новая запись» whole, its bottom 8px over them (as over the phone's
-   keyboard before), another field with its form or label when that fits */
+   keyboard before), another field with its form or label when that fits.
+   A text field (a name, a comment, «Другое») gets the same panel with letters (owner, 12.11.2026 — design-lab/keyboard-text.html, «А»):
+   the iPhone's Russian and English rows, «123» for figures and signs. A letter is set when the finger is lifted (held on «е» / «ь» it is
+   «ё» / «ъ»); ⌫ held down goes on wiping; a name starts each word with a capital, a comment stays small («такси», «обед»). «Готово» is
+   the field's Enter — a window that takes it goes on — else it puts the keys down. No autocorrect, dictation or emoji: the owner chose so */
 const PAD=matchMedia('(hover:none) and (pointer:coarse)').matches;
 (()=>{if(!PAD)return;
   const root=document.documentElement, SEL='input[inputmode="decimal"]', isPad=x=>!!x?.matches?.('input[data-pad]');
-  const mark=x=>{x.dataset.pad='';x.setAttribute('inputmode','none')};
-  const markIn=n=>{if(n.nodeType!==1)return;if(n.matches(SEL))mark(n);n.querySelectorAll(SEL).forEach(mark)};
+  const TXT='input:not([type]):not([inputmode]),input[type="text"]:not([inputmode]),input[type="search"]:not([inputmode])', NAME='#dName,#oName,#ptName,input[name="who"]';
+  const isTxt=x=>x?.dataset?.pad==='t';
+  const mark=x=>{x.dataset.pad='';x.setAttribute('inputmode','none')}, markT=x=>{if(x.readOnly)return;x.dataset.pad='t';x.setAttribute('inputmode','none')};
+  const markIn=n=>{if(n.nodeType!==1)return;if(n.matches(SEL))mark(n);else if(n.matches(TXT))markT(n);n.querySelectorAll(SEL).forEach(mark);n.querySelectorAll(TXT).forEach(markT)};
   markIn(document.body);
   new MutationObserver(ms=>{for(const m of ms)m.addedNodes.forEach(markIn)}).observe(document.body,{childList:true,subtree:true});
+  const ico=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`, DEL=ico('<path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/>');
+  const SHIFT=ico('<path d="M12 4.5 4.5 12.5H9V18h6v-5.5h4.5z"/><path class="tp-lock" d="M9 21h6"/>');
+  const GLOBE=ico('<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.3 2.4 3.4 5.2 3.4 8.5s-1.1 6.1-3.4 8.5c-2.3-2.4-3.4-5.2-3.4-8.5S9.7 5.9 12 3.5z"/>');
+  const SETS={ru:['йцукенгшщзх','фывапролджэ','ячсмитьбю'],en:['qwertyuiop','asdfghjkl','zxcvbnm'],sym:['1234567890','-/:;()₽&@"',".,?!'%+"]}, ALT={'е':'ё','ь':'ъ'};
+  const fnKey=(k,label,inner,more='')=>`<button type="button" tabindex="-1" class="fn" data-k="${k}" aria-label="${label}"${more}>${inner}</button>`;
+  const sets=Object.entries(SETS).map(([id,rows])=>`<div class="tp-set" data-set="${id}" style="--cols:${rows[0].length}"${id==='ru'?'':' hidden'}>`+rows.map((r,i)=>'<div class="tp-row">'
+    +(i<2?'':id==='sym'?'<i class="tp-gap"></i>':fnKey('shift','Заглавная буква',SHIFT,' aria-pressed="false"'))
+    +[...r].map(c=>`<button type="button" tabindex="-1" class="l" data-k="${esc(c)}">${esc(c)}</button>`).join('')
+    +(i<2?'':fnKey('del','Стереть',DEL))+'</div>').join('')+'</div>').join('');
   const pad=document.createElement('div');pad.id=pad.className='numpad';pad.setAttribute('role','group');pad.setAttribute('aria-label','Цифры');
   pad.innerHTML='<i class="numpad-grab" aria-hidden="true"></i><div class="numpad-keys">'+['1','2','3','4','5','6','7','8','9',',','0','del'].map(k=>
-    k==='del'?'<button type="button" tabindex="-1" class="fn" data-k="del" aria-label="Стереть"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/></svg></button>'
-    :`<button type="button" tabindex="-1" data-k="${k}"${k===','?' class="fn" aria-label="Запятая"':''}>${k}</button>`).join('')+'</div>';
+    k==='del'?fnKey('del','Стереть',DEL)
+    :`<button type="button" tabindex="-1" data-k="${k}"${k===','?' class="fn" aria-label="Запятая"':''}>${k}</button>`).join('')+'</div>'
+    +'<div class="tp">'+sets+'<div class="tp-row tp-bottom">'+fnKey('sym','Цифры и знаки','123').replace('class="fn"','class="fn tp-mode"')+fnKey('lang','Другой язык',GLOBE)
+    +'<button type="button" tabindex="-1" class="tp-space" data-k=" " aria-label="Пробел">русский</button><button type="button" tabindex="-1" class="tp-go" data-k="go">Готово</button></div></div>'
+    +'<i class="tp-pop" aria-hidden="true"></i>';
   document.body.append(pad);
   let field=null, pressing=false, holdT=0;
+  const tp=pad.querySelector('.tp'), pop=pad.querySelector('.tp-pop');
+  let lang='ru', sym=false, shift=0, shiftAt=0, held=null, rptT=0;
+  const shown=k=>!sym&&shift?k.toUpperCase():k;
+  const sync=()=>{const s=sym?'sym':lang;tp.querySelectorAll('.tp-set').forEach(x=>{x.hidden=x.dataset.set!==s});pad.classList.toggle('up',!sym&&shift>0);
+    tp.querySelectorAll('[data-k="shift"]').forEach(b=>{b.setAttribute('aria-pressed',String(shift>0));b.classList.toggle('lock',shift===2)});
+    const m=tp.querySelector('.tp-mode');m.textContent=sym?(lang==='ru'?'АБВ':'ABC'):'123';m.setAttribute('aria-label',sym?'Буквы':'Цифры и знаки');
+    tp.querySelector('.tp-space').textContent=lang==='ru'?'русский':'english'};
+  /* the capital by itself: at a name's start and after a space in it */
+  const auto=()=>{if(sym||shift===2||!isTxt(field))return;const v=field.value.slice(0,field.selectionStart??field.value.length);shift=field.matches(NAME)&&(!v.trim()||/\s$/.test(v))?1:0};
+  const write=c=>{const x=field;if(!x||x.readOnly||x.disabled)return;const v=x.value;let s=x.selectionStart??v.length, e=x.selectionEnd??v.length;
+    if(c==='del'){if(s===e){if(!s)return;s-=s>1&&/[\uDC00-\uDFFF]/.test(v[s-1])?2:1}}
+    else if(x.maxLength>0&&v.length-(e-s)+c.length>x.maxLength)return;
+    x.setRangeText(c==='del'?'':c,s,e,'end');x.dispatchEvent(new Event('input',{bubbles:true}));
+    const was=shift;if(c!=='del'&&shift===1)shift=0;auto();if(shift!==was)sync()};
+  const popAt=(b,t)=>{const r=b.getBoundingClientRect(), p=pad.getBoundingClientRect(), w=Math.max(r.width+14,46);pop.textContent=t;pop.style.width=w+'px';
+    pop.style.left=Math.min(p.width-w-2,Math.max(2,r.left-p.left+(r.width-w)/2))+'px';pop.style.top=(r.top-p.top-62)+'px';pop.classList.add('on')};
+  /* the finger lifted sets the held letter (a cancelled touch sets nothing) */
+  const lift=set=>{clearTimeout(holdT);clearInterval(rptT);const b=held;held=null;pop.classList.remove('on');if(!b)return;
+    const k=b.dataset.k, alt='alt' in b.dataset;delete b.dataset.alt;if(set&&k.length===1)write(shown(alt?ALT[k]:k))};
+  const pressT=b=>{lift(true);held=b;const k=b.dataset.k;
+    if(k.length===1){if(k!==' ')popAt(b,shown(k));if(ALT[k])holdT=setTimeout(()=>{if(held===b){b.dataset.alt='';popAt(b,shown(ALT[k]))}},420);return}
+    if(k==='del'){write('del');holdT=setTimeout(()=>{rptT=setInterval(()=>write('del'),75)},450);return}
+    if(k==='shift'){const t=Date.now();shift=shift===2?0:shift===1?(t-shiftAt<320?2:0):1;shiftAt=t;sync();return}
+    if(k==='sym'){sym=!sym;if(!sym)auto();sync();return}
+    if(k==='lang'){lang=lang==='ru'?'en':'ru';sym=false;auto();sync();return}
+    if(k==='go'){const x=field;if(!x)return;const ev=new KeyboardEvent('keydown',{key:'Enter',code:'Enter',bubbles:true,cancelable:true});x.dispatchEvent(ev);
+      if(!ev.defaultPrevented&&field===x){pressing=false;x.blur()}}};
   const scrollerOf=el=>{for(let p=el.parentElement;p&&p!==document.body;p=p.parentElement){const o=getComputedStyle(p).overflowY;if((o==='auto'||o==='scroll')&&p.scrollHeight>p.clientHeight)return p}return null};
   const reveal=x=>{if(field!==x)return;
     const sat=parseFloat(getComputedStyle(document.querySelector('.app')).paddingTop)||0, h=pad.offsetHeight, own=x.id==='amount';
@@ -4656,9 +4727,10 @@ const PAD=matchMedia('(hover:none) and (pointer:coarse)').matches;
     const r=t.getBoundingClientRect(), {sc,top,bottom}=rm;
     const d=r.height>bottom-top?r.top-top:own||r.bottom>bottom?r.bottom-bottom:r.top<top?r.top-top:0;
     if(Math.abs(d)>1)sc.scrollBy({top:d,behavior:'smooth'})};
-  const open=x=>{field=x;pad.classList.add('on');root.classList.add('pad-open');root.style.setProperty('--pad-h',pad.offsetHeight+'px');
+  const open=x=>{field=x;const t=isTxt(x);pad.classList.toggle('txt',t);pad.setAttribute('aria-label',t?'Клавиатура':'Цифры');if(t){sym=false;shift=0;auto();sync()}
+    pad.classList.add('on');root.classList.add('pad-open');root.style.setProperty('--pad-h',pad.offsetHeight+'px');
     requestAnimationFrame(()=>requestAnimationFrame(()=>reveal(x)))};
-  const close=()=>{field=null;pad.classList.remove('on');root.classList.remove('pad-open');root.style.removeProperty('--pad-h')};
+  const close=()=>{lift(false);field=null;pad.classList.remove('on');root.classList.remove('pad-open');root.style.removeProperty('--pad-h')};
   const put=k=>{const x=field;if(!x||x.readOnly||x.disabled)return;const v=x.value;let s=x.selectionStart??v.length, e=x.selectionEnd??v.length;
     if(k==='del'){if(s===e){if(!s)return;s--}x.setRangeText('',s,e,'end')}
     else{const nv=v.slice(0,s)+k+v.slice(e), parts=nv.split(/[.,]/);
@@ -4666,9 +4738,9 @@ const PAD=matchMedia('(hover:none) and (pointer:coarse)').matches;
       if(v==='0'&&s===1&&e===1&&k!==','){x.value=k;x.setSelectionRange(1,1)}else x.setRangeText(k,s,e,'end')}
     x.dispatchEvent(new Event('input',{bubbles:true}))};
   pad.addEventListener('pointerdown',e=>{e.preventDefault();pressing=true;const b=e.target.closest('[data-k]');if(!b)return;
-    b.classList.add('hit');put(b.dataset.k);
+    b.classList.add('hit');if(isTxt(field)){pressT(b);return}put(b.dataset.k);
     if(b.dataset.k==='del'){clearTimeout(holdT);holdT=setTimeout(()=>{const x=field;if(x&&x.value){x.value='';x.dispatchEvent(new Event('input',{bubbles:true}))}},550)}});
-  const up=()=>{clearTimeout(holdT);setTimeout(()=>{pressing=false},0);pad.querySelectorAll('.hit').forEach(b=>b.classList.remove('hit'))};
+  const up=e=>{lift(e.type==='pointerup');clearTimeout(holdT);setTimeout(()=>{pressing=false},0);pad.querySelectorAll('.hit').forEach(b=>b.classList.remove('hit'))};
   addEventListener('pointerup',up);addEventListener('pointercancel',up);
   /* a tap on the keys is never a click on what lies under them, nor a zoom */
   pad.addEventListener('touchend',e=>{if(e.cancelable)e.preventDefault()},{passive:false});
@@ -4676,6 +4748,7 @@ const PAD=matchMedia('(hover:none) and (pointer:coarse)').matches;
   document.addEventListener('focusin',e=>{const x=e.target;
     /* a field made and focused in one go (before the watcher marked it): marked now and focused anew, so no keyboard comes */
     if(x.matches?.(SEL)){mark(x);x.blur();x.focus({preventScroll:true});return}
+    if(x.matches?.(TXT)&&!x.readOnly){markT(x);x.blur();x.focus({preventScroll:true});return}
     if(isPad(x))open(x)});
   document.addEventListener('focusout',e=>{if(e.target!==field)return;setTimeout(()=>{
     if(isPad(document.activeElement))return;
