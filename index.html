@@ -236,9 +236,11 @@ button{cursor:pointer}
 /* Top */
 .top{display:flex;flex-direction:column;gap:14px}
 .monthbar{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2)}
-.monthbar .title{font-family:var(--f-display);font-size:16px;font-weight:500;text-transform:capitalize}
+.monthbar .title{font-family:var(--f-display);font-size:16px;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
 .iconbtn{border:1px solid var(--field-line);background:var(--surface);border-radius:var(--r-md);width:44px;height:44px;display:grid;place-items:center;font-size:18px;line-height:1}
 .iconbtn:disabled{opacity:.4;cursor:default}
+/* the month arrows look alike even when there is no next month to go to: a dimmed "›" read as a darker button (owner, 12.11.2026) */
+.monthbar .iconbtn:disabled{opacity:1}
 .total{display:flex;flex-direction:column;gap:2px}
 .total .lbl{font-size:var(--fs-sm);color:var(--muted)}
 /* the big sum of a tab (Учёт, Деньги, Долги): one look everywhere — the text face, bold (fitBig makes it smaller only while it doesn't fit) */
