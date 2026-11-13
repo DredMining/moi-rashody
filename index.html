@@ -627,14 +627,18 @@ input.num::placeholder{font-family:var(--f-body)}
 #viewLedger .tripline{margin:0;padding:7px 10px;gap:var(--sp-1);border:0;border-radius:var(--r-md);background:var(--inset)}
 #viewLedger .tripline .meter{height:4px}
 /* The month card (owner, 12.11.2026 — design-lab/sumcard.html, «Л»): big, what may still be spent this month; the label over it, the line
-   under it, the bar and a soft glow in the card's corner tell the month's state — the limit untouched, spending as usual, close to it
-   (from the «85%» the ring turned yellow at before), over it; no limit — what is spent, grey. Under the bar: what is spent «из 30 000 ₽»
-   (a tap changes the limit) and «вне лимита»; then the trip money left, with its own bar */
-.sumcard{--st:var(--good);--st-ink:var(--good-ink);background:radial-gradient(120% 120% at 100% 0%,color-mix(in srgb,var(--st) 22%,var(--surface)),var(--surface) 62%)}
-.sumcard[data-st="start"]{--st:var(--accent-btn);--st-ink:var(--accent)}
-.sumcard[data-st="near"]{--st:var(--accent);--st-ink:var(--accent)}
-.sumcard[data-st="over"]{--st:var(--bad);--st-ink:var(--bad)}
-.sumcard[data-st="none"]{--st:var(--muted);--st-ink:var(--muted)}
+   under it, the bar and a soft glow in the card's corner tell how far the month's spending has gone — nine steps (owner, 13.11.2026 —
+   design-lab/sumcard-states.html, «Много ступеней»), each its own colour, the same way in both looks: green → yellow from a quarter →
+   the light wine from 65 % → red at the limit and over it (each step the colour of that point of the smooth scale); no limit — what is
+   spent, grey. Under the bar: what is spent «из 30 000 ₽» (a tap changes the limit) and «вне лимита»; then the trip money left */
+.sumcard{--st:var(--good);--st-ink:var(--st);background:radial-gradient(120% 120% at 100% 0%,color-mix(in srgb,var(--st) 22%,var(--surface)),var(--surface) 62%)}
+.sumcard[data-st="calm"]{--st:color-mix(in oklch,var(--warn) 42%,var(--good))}
+.sumcard[data-st="half"]{--st:color-mix(in oklch,var(--warn) 83%,var(--good))}
+.sumcard[data-st="past"]{--st:color-mix(in oklch,var(--burgundy-light) 20%,var(--warn))}
+.sumcard[data-st="slow"]{--st:color-mix(in oklch,var(--burgundy-light) 80%,var(--warn))}
+.sumcard[data-st="last"]{--st:color-mix(in oklch,var(--bad) 33%,var(--burgundy-light))}
+.sumcard[data-st="zero"],.sumcard[data-st="over"]{--st:var(--bad)}
+.sumcard[data-st="none"]{--st:var(--muted)}
 .sumcard #sumLabel{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;line-height:1.2;color:var(--st-ink);padding-right:calc(var(--h-s) + 2px)}
 .sumcard #total{margin-top:-4px}
 .lmsg{margin-top:-6px;font-size:var(--fs-sm);line-height:1.3;color:var(--muted)}
@@ -2800,9 +2804,11 @@ function renderBudget(spent,out){
     const p=spent/budget, left=r2(budget-spent), pd=left>=0.01&&isCurrentMonth()?perDay(left):'';
     /* «100%» only for the limit spent to the kopeck: 99,98 % reads 99%, over by a kopeck — 101% */
     const pc=left>=0.01?Math.min(99,Math.round(p*100)):left<0?Math.max(101,Math.round(p*100)):100;
-    /* nothing spent in the limit yet, as usual, close to it from the «85%» (where the ring turned yellow before), over it */
-    const st=left<0?'over':spent<0.01?'start':pc>=85?'near':'norm';
-    card.dataset.st=st;lbl.textContent={start:'Бюджет доступен',norm:'Можно потратить',near:'Осталось до лимита',over:'Превышение лимита'}[st];
+    /* how far the month's spending has gone (owner, 13.11.2026 — nine steps): nothing spent in the limit yet, then by the share spent —
+       from 25 %, 50 %, 65 %, 80 %, 90 %; the limit spent to the kopeck, then over it */
+    const q=p*100, st=left<0?'over':spent<0.01?'start':left<0.01?'zero':q>=90?'last':q>=80?'slow':q>=65?'past':q>=50?'half':q>=25?'calm':'ok';
+    card.dataset.st=st;lbl.textContent={start:'Бюджет доступен',ok:'Можно потратить',calm:'Тратишь спокойно',half:'Половина позади',past:'Больше половины позади',
+      slow:'Пора притормозить',last:'Осталось совсем немного',zero:'Лимит исчерпан',over:'Превышение лимита'}[st];
     big.textContent=big._full=(left<0?'−':'')+moneyR(Math.abs(left));msg.textContent=st==='over'?'':pd;
     meter.hidden=false;meter.firstElementChild.style.width=Math.min(100,p*100)+'%';meter.setAttribute('aria-valuenow',Math.min(100,pc));meter.setAttribute('aria-valuetext',`потрачено ${moneyR(spent)} из ${moneyR(budget)}`);
     lo.textContent='из '+moneyR(budget)+(def?' · изменить':'');if(def)lo.removeAttribute('aria-label');else lo.setAttribute('aria-label','Лимит '+moneyR(budget)+' — изменить');
