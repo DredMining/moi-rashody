@@ -808,6 +808,9 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .zrow.zsum>div>span{font-weight:600}
 .zrow.zsum>b{font-weight:600}
 .zrow .zre{align-self:flex-start;margin:-6px -6px -10px}
+/* the limit window: its three lines stand equally tall (owner, 13.11.2026); «Изменить» keeps its 42px to tap but takes a line's height */
+.zcard:has(#limSet) .zrow{min-height:62px}
+.zcard:has(#limSet) .zrow .zre{margin:-14px -6px}
 /* a short sum: the rows it is made of stand close, without a line between them; the line under the last one is the one over the result */
 .zrow.zp{border-bottom:0;padding-bottom:2px}
 .zrow.zp+.zrow{padding-top:2px}
