@@ -734,6 +734,14 @@ input.num::placeholder{font-family:var(--f-body)}
 #wallets .whead b,[data-theme="dark"] #wallets .whead b{background:none;border:0;padding:0;font-size:15px}
 #wallets .wrow .wn{display:flex;align-items:center;gap:8px;color:var(--ink)}
 #wallets .wrow .wn::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--wc,var(--muted))}
+/* every line of a group as tall as an account line, 44px — its heading too; the type a size larger (owner, 14.11.2026) */
+#wallets .wgroup{padding-top:0;padding-bottom:0}
+#wallets .whead{min-height:44px;padding:0 2px}
+#wallets .wrow,#wallets .wrow:last-child{min-height:44px;padding:0 4px}
+#wallets .whead h3{font-size:13px}
+#wallets .whead b,[data-theme="dark"] #wallets .whead b{font-size:16px}
+#wallets .wrow .wn{font-size:14px}
+#wallets .wrow b:not(.none){font-size:15px}
 #viewMoney .zline{padding:8px var(--pad-card);gap:6px}
 #viewMoney .zline .zcols{padding-top:6px}
 .mfoot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:0}
