@@ -1015,7 +1015,8 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dperson .dinner .dtap>.head{display:contents}
 .dperson .dinner .dtap>.head>b{grid-column:1;grid-row:1}
 .dperson .dinner .dtap>.head>.left{grid-column:3;grid-row:1}
-.dperson .dinner .dtap>.meta{grid-column:2;grid-row:1;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* a long note wraps under itself, never cut (owner, 13.11.2026) */
+.dperson .dinner .dtap>.meta{grid-column:2;grid-row:1;display:block;white-space:normal;overflow-wrap:anywhere}
 .dperson .dinner .debt:has(>.dtap){padding:3px 10px}
 .dperson.dg{gap:6px}
 .dperson .dp-repay .acts>.dacc select{min-height:var(--h-m);padding:2px 8px;font-size:var(--fs-field)}
