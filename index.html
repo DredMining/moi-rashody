@@ -5006,13 +5006,14 @@ function dlgSync(){
   const open=dlgOpen(), keys=open.map(d=>d.k), gone=dlgStack.filter(d=>!keys.includes(d.k)), ae=document.activeElement;
   dlgStack=dlgStack.filter(d=>keys.includes(d.k));
   /* a window gone (saved, closed): what lay under it comes up under the finger — the second tap of the same double tap is let go of, as when one opens */
-  if(gone.length)fresh();
+  /* a category window of Итоги (quick) opens and goes with no guard: a wrong row is closed by the next tap on the same spot (owner, 14.11.2026) */
+  if(gone.some(d=>!d.quick))fresh();
   for(const d of open) if(!dlgStack.some(x=>x.k===d.k)){
     /* what opened it: that of the window it replaces (the account window → the check of its sum), else the focused control,
        else the one just tapped (Safari doesn't focus a tapped button) */
     const g=gone.find(x=>x.opener), o=g?.opener||(ae&&ae!==document.body&&!d.el.contains(ae)?ae:lastTap&&performance.now()-lastTap.t<1500&&!d.el.contains(lastTap.el)?lastTap.el:null);
     /* it takes the place of a window that comes back when it goes (a person's window → «Изменить долг»): the control pressed there (at) gets the focus then */
-    dlgStack.push({k:d.k,opener:o,home:d.el.closest('#viewDebts section'),...(g&&g.atK!==d.k&&lastTap&&performance.now()-lastTap.t<1500&&!lastTap.el.isConnected?{at:lastTap.el,atK:g.k}:{})});fresh()}
+    dlgStack.push({k:d.k,opener:o,home:d.el.closest('#viewDebts section'),...(g&&g.atK!==d.k&&lastTap&&performance.now()-lastTap.t<1500&&!lastTap.el.isConnected?{at:lastTap.el,atK:g.k}:{}),quick:d.k==='sheet'&&!!state.catSheet});if(!(d.k==='sheet'&&state.catSheet))fresh()}
   dlgInert.forEach(x=>x.inert=false);dlgInert=[];
   const top=open[open.length-1], gl=gone[gone.length-1], seen=o=>o&&o.getClientRects().length, ba=top&&gl&&top.k===gl.atK?refind(gl.at):null, back=seen(ba)&&top.el.contains(ba)?ba:gl?refind(gl.opener):null;
   if(top){
