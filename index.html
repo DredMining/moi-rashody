@@ -3723,7 +3723,8 @@ function catSheet(c,k,list,pm){
   $('sheet').classList.remove('centered');$('sheet').classList.add('cats');catFill(c,k,list,pm);
   $('sheetBack').style.visibility='hidden';$('sheetBack').onclick=null;
   $('sheet').hidden=false;
-  fresh();dlgSync();$('sheetTitle').focus({preventScroll:true});
+  /* no double-tap guard (fresh) here: on Итоги every tap counts at once (owner, 13.11.2026) */
+  dlgSync();$('sheetTitle').focus({preventScroll:true});
   $('sheetBody').scrollTop=0;
 }
 
@@ -4133,7 +4134,7 @@ const SV=[['out','Расходы'],['in','Доходы'],['broker','Брокер
 const STAT_GAP=12;
 function setStatView(v){
   const index=SV.findIndex(([k])=>k===v),box=$('viewStats');if(index<0||box.dataset.view===v)return;
-  state.statView=v;fresh();renderStatSeg();
+  state.statView=v;renderStatSeg();
 }
 function syncStatsViewport(index=Math.max(0,SV.findIndex(([k])=>k===state.statView))){
   const viewport=$('statsViewport'),pages=[...$('statsTrack').children],active=pages[index];
