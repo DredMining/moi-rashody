@@ -830,6 +830,12 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .zcard:has(#limSet) .zrow .zre{margin:-14px -6px}
 /* a short sum: the rows it is made of stand close, without a line between them; the line under the last one is the one over the result */
 .zrow.zp{border-bottom:0;padding-bottom:2px}
+/* the zakat window's count as a chain (owner, 14.11.2026, variant «Б»): quiet rows, the result at the foot in the accent */
+.zchain .zrow.m>b{color:var(--muted);font-weight:500}
+.zchain .zrow.zsum{border-top:1px solid color-mix(in srgb,var(--accent) 55%,transparent);border-bottom:0}
+.zchain .zrow.zsum>b{font-size:var(--fs-xl);color:var(--accent)}
+.ztwo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ztwo>:only-child{grid-column:1/-1}
 .zrow.zp+.zrow{padding-top:2px}
 /* a word in place of a sum («не задан», «Долгов нет») is text, not a number */
 .zrow .zv{font-family:var(--f-body);font-weight:500}
@@ -3168,7 +3174,7 @@ function bindXfer(){
    one date for everything (money that came in during the year is paid early); 2.5% of all accounts, the broker account at its full value,
    reliable debts owed to him every year; doubtful debts count toward nisab but their zakat is paid when the money comes back, for every year;
    his own debts are not subtracted, unpaid zakat of past years is. All of it lives in settings.zakat and on debts (doubtful) — no record changes. */
-const ZAKAT_RATE=0.025, NISAB_G={silver:595,gold:85}, METAL={silver:'серебра',gold:'золота'}, METAL_BY={silver:'серебру',gold:'золоту'};
+const ZAKAT_PCT='2,5%', ZAKAT_RATE=0.025, NISAB_G={silver:595,gold:85}, METAL={silver:'серебра',gold:'золота'}, METAL_BY={silver:'серебру',gold:'золоту'};
 const ZAKAT_ACCS=['sber','tbank','vtb','pocket','cash','piggy'];
 const zset=()=>state.settings.zakat||{};
 const zMetal=z=>z.metal==='gold'?'gold':'silver';
@@ -3466,11 +3472,11 @@ function renderZakat(){
     else if(L.due>0||L.paid>0) html+=`<div class="zcard">${zRow('Долгов по закяту нет','✓')}</div>`;
     if(z.start) dip=zDip(z,M);
     const ended=dip&&dip.ended;
-    html+=`<div class="zcard">${zRow('Облагается сейчас',money(cur.base))}${zRow('Нисаб',money(nisab),`${NISAB_G[metal]} г ${METAL[metal]} × ${money(+z.price)}`)}
+    html+=`<div class="zcard zchain">${zRow('Облагается сейчас',money(cur.base))}${zRow('Нисаб',money(nisab),`${NISAB_G[metal]} г ${METAL[metal]} × ${money(+z.price)}`,'m')}
       ${!z.start||ended?'':cur.below?zRow('Закят к сроку','—','сейчас ниже нисаба — закята не будет')
         /* given early: the year's zakat, minus what was given, what is left by the due date — short rows, not one long sentence */
-        :(ea>=0.01?zRow('Закят за год',money(cur.amount),'','zp')+zRow('Отдано досрочно',money(-ea))+zRow('Осталось отдать',money(rest),'к сроку '+gDate(end),'zsum')
-        :zRow('Закят к сроку',money(cur.amount),gDate(end)))+'<p class="zfoot">Прогноз: сумма меняется вместе с остатками</p>'}</div>`;
+        :(ea>=0.01?zRow('Закят за год',money(cur.amount),ZAKAT_PCT+' от облагаемого')+zRow('Отдано досрочно',money(-ea),'','m')+zRow('Осталось отдать',money(rest),'к сроку '+gDate(end),'zsum')
+        :zRow('Закят к сроку',money(cur.amount),gDate(end),'zsum'))+'<p class="zfoot">Прогноз: сумма меняется вместе с остатками</p>'}</div>`;
     if(z.start){
       html+=ended
         ?`<div class="zwarn"><p><b>Срок наступил ${bothDates(end)}</b>, но за год сумма опускалась ниже нисаба — решите ниже, как быть с этим годом.</p></div>`
@@ -3513,9 +3519,8 @@ function renderZakat(){
       ${miss.length?`<div class="zhint">Не вписаны на вкладке «Деньги»: ${miss.join(', ')} — они не учтены.${bMiss?' Стоимость брокерского счёта можно указать в настройках закята.':''}</div>`:''}
       <div class="zhint"><b>Как считается</b><span>Ставка 2,5% со всей суммы, а не только сверх нисаба.</span><span>Деньги, пришедшие в этом году, тоже входят — с них закят отдаётся досрочно, это допустимо.</span><span>Свои долги не вычитаются (шафиитский мазхаб).</span><span>Жильё, машина и вещи не облагаются.</span></div>`;
     const why=sub;
-    html+=`<button type="button" class="zgo" data-zview="why"><span>Почему столько</span><span aria-hidden="true">›</span></button>`;
-    if(z.priceAt&&Date.now()-z.priceAt>30*864e5) html+=`<div class="zhint">Цена ${METAL[metal]} вписана ${gDate(iso(new Date(z.priceAt)))} — обновите её перед сроком.</div>`;
-    html+=histGo;
+        if(z.priceAt&&Date.now()-z.priceAt>30*864e5) html+=`<div class="zhint">Цена ${METAL[metal]} вписана ${gDate(iso(new Date(z.priceAt)))} — обновите её перед сроком.</div>`;
+    html+=`<div class="ztwo"><button type="button" class="zgo" data-zview="why"><span>Почему столько</span><span aria-hidden="true">›</span></button>${histGo.replace('История по годам','История')}</div>`;
     /* «Почему столько» and «История» open as their own page inside the window, with «‹ Назад» */
     if(state.zView==='why') html='<div class="zk">'+why;
     else if(state.zView==='hist'&&histHtml) html='<div class="zk">'+histHtml;
