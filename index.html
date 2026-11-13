@@ -1069,6 +1069,29 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .debt .acts select,.dg>.acts select{width:auto;flex:1 1 140px;min-width:0}
 .debt .dacc,.dg .dacc{display:flex;align-items:center;gap:var(--sp-2);flex:1 1 100%;min-width:0;font-size:var(--fs-sm);color:var(--muted)}
 .debt .acts>.inline-edit,.dg>.acts>.inline-edit{flex:1 1 100%}
+/* a person's debt window on one scale (owner, 14.11.2026): 10px between its blocks, 12px inside each; the name 18, a sum 22,
+   lines of text 14–15, captions and section names 12–13; fields and buttons 40px tall, the action tiles too */
+.wmodal .dperson.dg{gap:10px;padding:16px}
+.wmodal .dperson .dp-t b{font-size:18px;line-height:1.25}
+.wmodal .dperson .dp-t small{font-size:13px;margin-top:2px}
+.wmodal .dperson .dp-sum{align-items:center;padding:12px;font-size:14px}
+.wmodal .dperson .dp-sum b{font-size:22px;font-weight:600;line-height:1.2}
+.wmodal .dperson .dp-repay{gap:10px;padding:12px}
+.wmodal .dperson .dp-section-title,.wmodal .dperson .dinner-head{font-size:12px;line-height:1.3;letter-spacing:.06em}
+.wmodal .dperson .dinner-head{padding:2px 12px 0;border-top:0}
+.wmodal .dperson .dp-repay .acts{gap:8px}
+.wmodal .dperson .dp-repay .acts>.dacc{font-size:14px;gap:10px}
+.wmodal .dperson .dp-repay .acts>.dacc select{min-height:40px;padding:4px 10px;font-size:15px}
+.wmodal .dperson .dp-repay .acts>button{min-height:40px;font-size:14px}
+.wmodal .dperson .dinner{gap:8px}
+.wmodal .dperson .dinner>.debt:last-child{border-bottom:1px solid transparent}
+.wmodal .dperson .dinner>.debt:last-child:not(:has(>.dtap)){padding-bottom:12px}
+.wmodal .dperson .dinner .debt:not(:has(>.dtap)){gap:4px;padding:12px}
+.wmodal .dperson .dinner .debt:not(:has(>.dtap)) .head b,.wmodal .dperson .dinner .debt:not(:has(>.dtap)) .head .left{font-size:15px;font-weight:600}
+.wmodal .dperson .dinner .debt:not(:has(>.dtap)) .meta{font-size:13px}
+.wmodal .dperson .dinner .debt:not(:has(>.dtap)) .acts{margin-top:8px;padding-top:0;border-top:0}
+.wmodal .dperson .dinner .debt-manage{gap:8px;padding-top:0}
+.wmodal .dperson .dinner .debt-manage>.linkbtn,.wmodal .dperson .dinner .debt-manage>.del{min-height:40px;padding:6px;font-size:14px}
 .debt .acts>.inline-edit input,.dg>.acts>.inline-edit input{flex:1 1 120px;width:auto}
 .item .what b{font-weight:500;display:block;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto}
 /* the line under the name (its own span, not the «командировка» tag inside the name) */
