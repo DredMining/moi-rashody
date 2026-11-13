@@ -958,6 +958,9 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 /* every window's ✕ (and the step sheet's ‹): one round 40px button on a soft fill; its tap area reaches 44px */
 .dp-x,.sheet-head .iconbtn,.zsheet-head .iconbtn{position:relative;width:40px;height:40px;flex:none;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--muted);font-size:17px;line-height:1;cursor:pointer}
 .dp-x::after,.sheet-head .iconbtn::after,.zsheet-head .iconbtn::after{content:'';position:absolute;inset:-2px}
+/* the ✕ is drawn, not typed: the glyph comes from a fallback font and sits a pixel off its circle (owner, 13.11.2026) */
+.dp-x,.sheet-head .iconbtn[data-close],.zsheet-head .iconbtn[data-zx]{font-size:0}
+.dp-x::before,.sheet-head .iconbtn[data-close]::before,.zsheet-head .iconbtn[data-zx]::before{content:'';width:13px;height:13px;transform:rotate(45deg);background:linear-gradient(currentColor,currentColor) center/100% 1.6px no-repeat,linear-gradient(currentColor,currentColor) center/1.6px 100% no-repeat}
 .dp-sum{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-3);padding:5px 8px;border:1px solid transparent;border-radius:var(--r-md);background:var(--inset);font-size:var(--fs-sm);color:var(--muted)}
 /* the sum keeps its one line (its label wraps instead; a <wbr> would break even under nowrap); narrower than 320px it may split
    between digit groups (moneyW), see below */
@@ -976,10 +979,10 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dinner>.debt:last-child{border-bottom:1px solid var(--line);padding-bottom:6px}
 /* a loan's buttons in the person's window: close together, a few to a line */
 .dperson .debt{gap:6px;padding:8px 10px;border:1px solid transparent;border-radius:var(--r-md);background:var(--inset)}
-.dperson .debt .acts{gap:6px 8px;margin-top:6px;padding-top:8px;border-top:1px solid var(--line)}
+.dperson .debt .acts{gap:6px 8px;margin-top:6px;padding-top:8px}
 .dperson .debt-return,.dperson .debt-manage{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;width:100%}
 .dperson .debt-return{row-gap:6px;padding:6px;border-radius:var(--r-md);background:var(--raised)}
-.dperson .debt-manage{padding-top:6px;border-top:1px dashed var(--line)}
+.dperson .debt-manage{padding-top:6px}
 /* in a debt's own window («Я должен») its «Другие действия» stand right in the window, in line with the blocks above */
 .dperson>.debt-manage{padding:6px 8px 0}
 .dperson .debt-actions-label{flex:1 1 100%;font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
