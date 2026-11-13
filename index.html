@@ -1081,7 +1081,12 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dcard-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .dcard-t{display:flex;flex-direction:column;min-width:0}
 .dcard-t>span{font-size:var(--fs-xs);color:var(--muted);line-height:1.3}
-.dcard-head .dp-x{width:30px;height:30px;min-height:30px;flex:none}
+.dperson .dp-x,#debtAddModal .dp-x,#oweAddModal .dp-x,[data-debt-editor] .dp-x,.dcard-head .dp-x{width:36px;height:36px;min-height:36px;flex:none}
+/* вкладка «Долги»: на сетку 12/14/16/18/22 и высот 36/44 */
+#viewDebts h2{font-size:12px}
+#debtTotal{font-size:22px}
+.debt-add-trigger{padding-top:0;padding-bottom:0}
+.debt-add-trigger::after{line-height:0}
 .dcard-sum{font-size:22px;font-weight:700;line-height:1.15}
 .dperson .dcard .acts{margin-top:4px;padding-top:6px;gap:6px}
 .dperson .dcard .debt-return{padding:4px}
