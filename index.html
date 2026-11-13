@@ -951,7 +951,7 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 #debtList details summary,#oweList details summary{padding-block:8px}
 /* «Закрытые»: a size larger; shut and last, it has no empty strip under it — the panel's own edge is room enough (owner, 13.11.2026) */
 #debtList details>summary,#oweList details>summary{font-size:var(--fs-base)}
-#debtList>details:last-child:not([open])>summary,#oweList>details:last-child:not([open])>summary{min-height:0;padding-block:8px 0}
+#debtList>details:last-child:not([open])>summary,#oweList>details:last-child:not([open])>summary{min-height:0;padding-block:12px 0;margin-bottom:-4px}
 .dgroup.closed b,.dgroup.closed .sumv{color:var(--muted);font-weight:500}
 /* the person's window: «Вернул всё» / «Вернул часть» for all of it, then each loan with its buttons */
 .dg{display:flex;flex-direction:column;gap:10px}
@@ -966,7 +966,7 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dp-x::after,.sheet-head .iconbtn::after,.zsheet-head .iconbtn::after{content:'';position:absolute;inset:-2px}
 /* the ✕ is drawn, not typed: the glyph comes from a fallback font and sits a pixel off its circle (owner, 13.11.2026) */
 .dp-x,.sheet-head .iconbtn[data-close],.zsheet-head .iconbtn[data-zx]{font-size:0}
-.dp-x::before,.sheet-head .iconbtn[data-close]::before,.zsheet-head .iconbtn[data-zx]::before{content:'';width:13px;height:13px;transform:rotate(45deg);background:linear-gradient(currentColor,currentColor) center/100% 1.6px no-repeat,linear-gradient(currentColor,currentColor) center/1.6px 100% no-repeat}
+.dp-x::before,.sheet-head .iconbtn[data-close]::before,.zsheet-head .iconbtn[data-zx]::before{content:'';width:14px;height:14px;transform:rotate(45deg);background:linear-gradient(currentColor,currentColor) center/100% 2px no-repeat,linear-gradient(currentColor,currentColor) center/2px 100% no-repeat}
 .dp-sum{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-3);padding:5px 8px;border:1px solid transparent;border-radius:var(--r-md);background:var(--inset);font-size:var(--fs-sm);color:var(--muted)}
 /* the sum keeps its one line (its label wraps instead; a <wbr> would break even under nowrap); narrower than 320px it may split
    between digit groups (moneyW), see below */
@@ -1150,8 +1150,8 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
 .sheet{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center}
 .sheet.centered{align-items:center;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
 /* a window in the middle comes up where it stands (as the zakat card), not from the bottom; the safe area is the backdrop's, not its own */
-.sheet.centered .sheet-panel{width:min(520px,100%);max-height:calc(100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px);max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px);border-bottom:1px solid var(--line);border-radius:var(--r-xl);padding-bottom:20px;animation-name:zpop}
-.sheet.centered .sheet-go{bottom:-20px;margin-bottom:-20px;padding-bottom:20px}
+.sheet.centered .sheet-panel{width:min(520px,100%);max-height:calc(100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px);max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px);border-bottom:1px solid var(--line);border-radius:var(--r-xl);padding-bottom:28px;animation-name:zpop}
+.sheet.centered .sheet-go{bottom:-28px;margin-bottom:-28px;padding-bottom:28px}
 .sheet-bg{position:absolute;inset:0;background:var(--scrim)}
 .sheet-panel{position:relative;width:min(720px,100%);max-height:85vh;overflow-y:auto;overscroll-behavior:contain;background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:var(--r-xl) var(--r-xl) 0 0;padding:12px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;animation:up .18s ease-out}
 @keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
