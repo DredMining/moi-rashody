@@ -260,7 +260,7 @@ button{cursor:pointer}
 .stat{background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
 .stat>span{font-size:var(--fs-xs);color:var(--muted)}
 .stat b{font-family:var(--f-num);font-weight:500;font-size:var(--fs-lg);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-.stat small{font-size:var(--fs-2xs);color:var(--muted)}
+.stat small{font-size:12px;color:var(--muted)}
 .stat.wide{grid-column:1/-1}
 .panel.mcard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px;background:var(--surface);border-radius:var(--r)}
 .mcard .mcol{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;padding:8px 4px;border:1px solid transparent;border-radius:var(--r-md);background:var(--inset);text-align:center}
@@ -287,8 +287,9 @@ button{cursor:pointer}
 .bdwrap .bd{gap:6px}
 #breakdown .bd h3,#incomeBreakdown>h2,[data-sv="broker"] .bd h3,#tripCard>h2{margin:0 0 0 2px;font-size:var(--fs-xs);line-height:1.2}
 .bdwrap .bars{gap:0;background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);overflow:hidden}
-.bdwrap .bar{min-height:var(--h-m);padding:5px var(--pad-card) 6px;row-gap:4px;border-bottom:1px solid var(--line)}
-.bdwrap .bar .name,.bdwrap .bar .val{font-size:var(--fs-xs)}
+.bdwrap .bar{min-height:var(--h-l);padding:5px var(--pad-card) 6px;row-gap:4px;border-bottom:1px solid var(--line)}
+.bdwrap .bar .name,.bdwrap .bar .val{font-size:14px}
+.bdwrap .bar .val small{font-size:12px}
 .bdwrap .bar .track{height:3px}
 .bdwrap .bar:last-child{border-bottom:0}
 .bdwrap .bar:active{background:var(--accent-soft)}
@@ -297,8 +298,8 @@ button{cursor:pointer}
 #tripCard .stat{border:0;background:none;padding:0}
 /* on «Итоги» the trip card is as small as the category cards above it: tight padding, its links are S buttons (32px, --h-s) */
 #tripPanel{padding:10px var(--pad-card) 6px;gap:var(--sp-1)}
-#tripCard .stat b{font-size:var(--fs-md)}
-#tripStat .tacts .linkbtn{font-size:var(--fs-xs);min-height:var(--h-s)}
+#tripCard .stat b{font-size:16px}
+#tripStat .tacts .linkbtn{font-size:12px;min-height:var(--h-m)}
 /* the trip window's field is one line high (in .wallet-edit a field normally stands in a row) */
 #tripWinHost .wmodal input{flex:none}
 /* The stats panels move like a horizontal gallery; vertical page scrolling stays native. */
@@ -306,11 +307,12 @@ button{cursor:pointer}
 #statsViewport{width:100%;min-width:0;overflow:hidden;transition:height .28s cubic-bezier(.22,.61,.36,1)}
 #statsTrack{display:flex;align-items:flex-start;gap:0;width:500%;will-change:transform;transition:transform .3s cubic-bezier(.22,.61,.36,1)}
 #statsTrack.is-dragging{transition:none;user-select:none;-webkit-user-select:none}
-.stats-page{flex:0 0 20%;width:20%;min-width:0;margin-inline-end:12px;display:flex;flex-direction:column;gap:var(--gap-stack)}
+.stats-page{flex:0 0 20%;width:20%;min-width:0;margin-inline-end:12px;display:flex;flex-direction:column;gap:10px}
+#viewStats{gap:10px}
 .stats-page>[data-sv]{width:100%;max-width:100%}
 #cmpBox>summary{display:none}
 #cmpBox>.morebody{padding-top:var(--pad-card)}
-.sv-empty{margin:0;padding:16px;text-align:center;font-size:var(--fs-md);color:var(--muted);background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r)}
+.sv-empty{margin:0;padding:16px;text-align:center;font-size:16px;color:var(--muted);background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r)}
 /* the trip links: 32px buttons (--h-s), the rows touch: «Сверить» / «+ Пришли командировочные» on the first line, «Командировка началась»
    (once begun — «Командировка закончилась» in its place) on the second, «Отчёт по прошлой командировке» on the third (owner's order, 24.10.2026).
    The words of the first line sit at the bottom of their 32px, those of the last at the top: the lines of text stand close,
@@ -325,12 +327,12 @@ button{cursor:pointer}
 #tripStat>span{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 #tripCard #tripStat>b{font-size:22px;font-weight:500;line-height:1.25}
 #tripStat .trows{display:flex;flex-direction:column;margin-top:8px}
-#tripStat .tr2{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:40px;border-top:1px solid var(--line);font-size:14px}
+#tripStat .tr2{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:36px;border-top:1px solid var(--line);font-size:14px}
 #tripStat .tr2>span{color:var(--muted)}
-#tripStat .tr2>b{font-size:15px;font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums}
+#tripStat .tr2>b{font-size:14px;font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums}
 #tripStat .tacts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:10px 0 6px}
-#tripStat .tacts .linkbtn,#tripStat .tacts #tEdit,#tripStat .tacts #tAllow,#tripStat .tacts #tEnd,#tripStat .tacts #tRep,#tripStat .tacts #tBegin{min-height:38px;margin:0;padding:6px;border-radius:10px;flex-basis:auto;
-  font-size:13px;font-weight:500;text-align:center;color:var(--ink);background:rgb(255 255 255 / .06);background:color-mix(in srgb,var(--ink) 6%,var(--inset))}
+#tripStat .tacts .linkbtn,#tripStat .tacts #tEdit,#tripStat .tacts #tAllow,#tripStat .tacts #tEnd,#tripStat .tacts #tRep,#tripStat .tacts #tBegin{min-height:36px;margin:0;padding:6px;border-radius:10px;flex-basis:auto;
+  font-size:14px;font-weight:500;text-align:center;color:var(--ink);background:rgb(255 255 255 / .06);background:color-mix(in srgb,var(--ink) 6%,var(--inset))}
 #tripStat .tacts #tEnd,#tripStat .tacts #tBegin{background:var(--accent-btn);color:var(--accent-ink);font-weight:600}
 #tripStat .tacts>:last-child:nth-child(odd){grid-column:1/-1}
 .wallets{display:flex;flex-direction:column;gap:var(--gap-stack)}
@@ -483,7 +485,7 @@ input.num::placeholder{font-family:var(--f-body)}
 /* Five sections in «Итоги»: each button as wide as its word or more (no word is broken — «Командировка» whole),
    the rest of the line shared out evenly (.seg: flex 1 1 0, min-width:max-content) */
 #statSeg{padding:2px;gap:2px}
-#statSeg button{min-height:var(--h-m);padding:4px 3px;font-size:clamp(var(--fs-2xs),2.9vw,12px);line-height:1.1;white-space:nowrap}
+#statSeg button{min-height:36px;padding:4px 3px;font-size:clamp(var(--fs-2xs),2.9vw,12px);line-height:1.1;white-space:nowrap}
 /* the one place under 11px: on a 320px phone the five words share a line only at 10px; narrower than that a button goes onto a second line */
 @media (max-width:359px){#statSeg button{font-size:10px;padding-inline:1px}}
 /* in the black look the five are drawn as the tab bar is (owner, 12.11.2026): a pill of glass with a light rim and a sheen, the picked one
@@ -601,12 +603,12 @@ input.num::placeholder{font-family:var(--f-body)}
 .cmp-sel{display:flex;gap:6px;align-items:center}
 /* a month: its whole name a size smaller (13px) in a box; the list itself lies over the box, see-through and at 16px (a smaller one
    makes the iPhone zoom in when it is tapped) — a tap or the keyboard opens the phone's own list, the focus ring is drawn on the box */
-.cmp-pick{position:relative;flex:1 1 0;min-width:0;display:flex;align-items:center;min-height:var(--h-m);padding:0 24px 0 10px;border:1px solid var(--field-line);border-radius:var(--r-sm);background:var(--inset);color:var(--ink);font-size:var(--fs-sm);font-weight:500;line-height:1.2}
+.cmp-pick{position:relative;flex:1 1 0;min-width:0;display:flex;align-items:center;min-height:var(--h-m);padding:0 24px 0 10px;border:1px solid var(--field-line);border-radius:var(--r-sm);background:var(--inset);color:var(--ink);font-size:14px;font-weight:500;line-height:1.2}
 .cmp-pick::after{content:'';position:absolute;right:10px;top:50%;width:6px;height:6px;margin-top:-5px;border:solid var(--muted);border-width:0 1.5px 1.5px 0;transform:rotate(45deg);pointer-events:none}
 .cmp-pv{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .cmp-pick select{position:absolute;inset:0;width:100%;height:100%;min-height:0;margin:0;padding:0;border:0;opacity:0;font-size:var(--fs-field);cursor:pointer}
 .cmp-pick:has(select:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
-.cmp-and{color:var(--muted);font-size:var(--fs-sm)}
+.cmp-and{color:var(--muted);font-size:14px}
 @media (max-width:359px){.cmp-pick{padding:0 20px 0 8px;font-size:var(--fs-xs)}.cmp-pick::after{right:8px}}
 .cmp{display:flex;flex-direction:column;gap:0}
 .cmp-head,.cmp-row{display:grid;grid-template-columns:minmax(0,1.25fr) repeat(3,minmax(0,1fr));gap:var(--sp-1);align-items:center;min-width:0}
@@ -614,7 +616,7 @@ input.num::placeholder{font-family:var(--f-body)}
   .cmp{display:grid;grid-template-columns:minmax(0,1.9fr) repeat(3,minmax(max-content,1fr));column-gap:8px}
   .cmp-head,.cmp-row{grid-column:1/-1;grid-template-columns:subgrid;column-gap:normal}
 }
-.cmp-head{padding:2px 5px;color:var(--muted);font-size:var(--fs-2xs);line-height:1.15}
+.cmp-head{padding:2px 5px;color:var(--muted);font-size:12px;line-height:1.15}
 .cmp-head>span:not(:first-child){text-align:right}
 .cmp-row{padding:2px 5px;border-bottom:1px solid var(--line)}
 .cmp-row.t{margin-block:2px;padding:3px 5px;border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));border-radius:var(--r-sm);background:color-mix(in srgb,var(--accent) 5%,var(--inset))}
@@ -895,14 +897,14 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 #viewStats [data-sv="broker"] .rule{gap:var(--sp-2);background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);padding:0 var(--pad-card)}
 #viewStats [data-sv="broker"] .rule:has(>form){padding-block:var(--pad-card)}
 #viewStats .zcard{padding:0;border:0;border-radius:0;background:none}
-#viewStats .zrow{min-height:var(--h-m);gap:var(--sp-2);padding:5px 0;font-size:var(--fs-sm);line-height:1.2}
+#viewStats .zrow{min-height:var(--h-m);gap:var(--sp-2);padding:5px 0;font-size:14px;line-height:1.2}
 #viewStats .zrow.zhd{font-size:var(--fs-xs)}
-#viewStats .zrow small{font-size:var(--fs-2xs);line-height:1.2}
-#viewStats .zrow.zhd .linkbtn,#viewStats .zrow .zre{min-height:var(--h-s);margin:0 -4px;padding:0 4px;font-size:var(--fs-xs);line-height:1}
+#viewStats .zrow small{font-size:12px;line-height:1.2}
+#viewStats .zrow.zhd .linkbtn,#viewStats .zrow .zre{min-height:var(--h-m);margin:0 -4px;padding:0 4px;font-size:14px;line-height:1}
 #viewStats .zrow .zre{align-self:flex-start}
 /* every row a line of its own, as in «Расходы» (elsewhere «Положено» and «Отложено» stand together) */
 #viewStats .zrow.zp{border-bottom:1px solid var(--line)}
-#viewStats .zfoot{padding:5px 0 7px;font-size:var(--fs-2xs);line-height:1.3}
+#viewStats .zfoot{padding:5px 0 7px;font-size:12px;line-height:1.3}
 /* the trip report: what was spent by category, set in under «Потрачено»; «Поделиться» and «Закрыть» side by side under the card,
    one under the other when they don't fit (a page zoomed to 200 %) */
 .zcats{display:flex;flex-direction:column;padding:0 0 8px 12px;border-bottom:1px solid var(--line)}
@@ -1263,7 +1265,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
 /* a bar on Итоги: its records of the month — the title and ✕ stay in place, a long list scrolls inside the window */
 #sheet.cats .sheet-panel{overflow:hidden}
 #sheet.cats .sheet-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin:0 -16px;padding:0 16px;gap:2px}
-.ccount{margin:0;font-size:var(--fs-sm);color:var(--muted)}
+.ccount{margin:0;font-size:14px;color:var(--muted)}
 .clist{display:flex;flex-direction:column}
 .crow{display:grid;grid-template-columns:minmax(3.7em,max-content) minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line);line-height:1.35}
 .crow:last-child{border-bottom:0}
