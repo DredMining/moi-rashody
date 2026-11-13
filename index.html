@@ -529,8 +529,10 @@ input.num::placeholder{font-family:var(--f-body)}
 #recent .item>.ic{width:24px;height:24px;font-size:12px}
 #recent .item .what>span{font-size:var(--fs-2xs)}
 #recent .item .amt{min-height:var(--h-m);margin-block:-4px}
-.recs .day{background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);padding:2px var(--pad-card) 0}
-.recs .dayhead{align-items:center;font-size:var(--fs-md);font-weight:700;color:var(--ink);padding-block:8px 6px}
+.recs .day{gap:6px}
+/* the day's date stands above its card, like a heading on the page (owner, 14.11.2026: variant «Д») */
+.recs .dayitems{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);padding:2px var(--pad-card) 0}
+.recs .dayhead{align-items:center;font-size:var(--fs-md);font-weight:700;color:var(--ink);padding:4px 4px 0;border-bottom:0}
 /* the day is a heading (h3) for a screen reader; it looks like the rest of its line */
 .dayhead>h3{font:inherit;letter-spacing:normal;text-transform:none;color:inherit}
 .recs .dayhead>h3::first-letter{text-transform:uppercase}
@@ -4031,7 +4033,7 @@ function listHtml(shown,af){
     /* the day's sums are exactly the signed rows shown: personal ones, then trip ones in the trip colour */
     const tot=(p,tr)=>r2(arr.filter(i=>isTrip(i)===tr).reduce((a,i)=>{const v=rowDelta(i,af);return a+(p?Math.max(v,0):Math.max(-v,0))},0)),
       chip=(v,s,c,tr)=>v?`<span class="${c}"${tr?' title="командировка" aria-label="командировка '+s+money(v)+'"':''}>${s}${money(v)}</span>`:'';
-    return `<div class="day"><div class="dayhead"><h3>${dayName.format(isoToDate(d))}</h3><span class="num"${afT}>${chip(tot(1,false),'+','pos')}${chip(tot(0,false),'−','out')}${chip(tot(1,true),'+','trip',1)}${chip(tot(0,true),'−','trip',1)}</span></div>${rgRuns(arr).map(x=>Array.isArray(x)?rgRow(x,false,af):itemRow(x,false,af)).join('')}</div>`;
+    return `<div class="day"><div class="dayhead"><h3>${dayName.format(isoToDate(d))}</h3><span class="num"${afT}>${chip(tot(1,false),'+','pos')}${chip(tot(0,false),'−','out')}${chip(tot(1,true),'+','trip',1)}${chip(tot(0,true),'−','trip',1)}</span></div><div class="dayitems">${rgRuns(arr).map(x=>Array.isArray(x)?rgRow(x,false,af):itemRow(x,false,af)).join('')}</div></div>`;
   }).join('');
 }
 /* the month's records the list was last drawn from: the one beside it (histPeek) is drawn from them too */
