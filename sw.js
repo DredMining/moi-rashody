@@ -1,10 +1,10 @@
-﻿// Opens instantly from the saved copy, then quietly fetches the fresh version for next launch.
+// Opens instantly from the saved copy, then quietly fetches the fresh version for next launch.
 const CACHE = 'moi-rashody-v285';
 // the fonts are the app's own files: saved with the page at install, so offline every one of them is at hand
 const FONTS = ['GolosText-cyrillic-q5uCsoe9Lv', 'GolosText-latin-q5uCsoe9Lv', 'Unbounded-cyrillic-Yq6W-LOTXC', 'Unbounded-latin-Yq6W-LOTXC',
-  // в‚Ѕ for each face (it is in neither the Latin nor the Cyrillic file)
+  // ₽ for each face (it is in neither the Latin nor the Cyrillic file)
   'GolosText-rub400-2626f3c1', 'GolosText-rub500-1ffbb4e5', 'GolosText-rub600-48126017', 'Unbounded-rub500-fd96e1a7', 'Unbounded-rub700-56dd8e8b'].map(f => `./fonts/${f}.woff2`);
-// the launch screens of the home-screen app (a 440Г—956 pt screen: black for the phone's dark appearance, night-blue for the light one) are kept with it too
+// the launch screens of the home-screen app (a 440×956 pt screen: black for the phone's dark appearance, night-blue for the light one) are kept with it too
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-tree-192.png', './icon-tree-512.png', './icon-tree-maskable-512.png', './apple-touch-icon-tree.png', './splash-1320x2868-black.png', './splash-1320x2868-dark.png', ...FONTS];
 // the page under both its names: whichever is fetched, both saved copies get it
 const PAGE = [new URL('./', location).href, new URL('./index.html', location).href];
