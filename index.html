@@ -1056,6 +1056,8 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dperson .dcard-bg{position:absolute;inset:0;border-radius:inherit;background:rgb(0 0 0 / .82)}
 /* the whole app behind it as dark as the window (owner, 14.11.2026), not the window alone */
 .wmodal:has(.dcard-wrap)>.sheet-bg{background:rgb(0 0 0 / .82);transition:background .16s}
+/* the person's window itself dims the app as much (owner, 14.11.2026): one darkness, so nothing changes when a debt opens over it */
+.wmodal:has(>.dperson)>.sheet-bg{background:rgb(0 0 0 / .82)}
 .dperson .dcard-wrap>.dcard{position:relative;width:100%;max-height:100%;overflow-y:auto;margin:0;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-modal);animation:zpop .16s ease-out}
 .dcard-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .dcard-t{display:flex;flex-direction:column;min-width:0}
@@ -4485,6 +4487,8 @@ const debtPeople=list=>new Set(list.map(d=>nk(d.name))).size;
    and the zakat it brought go, the debt is as it was before (d) */
 const debtUndo=(d,rid)=>{const was={returned:+d.returned||0,forgiven:+d.forgiven||0,closedAt:d.closedAt||0};
   return ()=>store.batch(o=>{if(rid){const z=o.settings().zakat||{};o.remove(rid);if((z.extra||[]).some(x=>x.rec===rid))o.patchSettings({zakat:{...z,extra:z.extra.filter(x=>x.rec!==rid)}})}o.updateDebt(d.id,was)})};
+/* the person's window drawn again while it stays open (a debt picked or closed, a button pressed): it stands still — no rising again, the same scroll */
+let dpSeen=null;
 function renderDebts(){
   renderOwe();
   const debts=state.debts.filter(d=>!d.mine);
@@ -4560,8 +4564,10 @@ function renderDebts(){
   const cBox=()=>`<details data-cbox="closedOpen"${state.closedOpen?' open':''}><summary>Закрытые (${cgroups.length} ${plural(cgroups.length,'человек','человека','человек')})</summary>${cgroups.map(cgHtml).join('')}</details>`;
   const og=groups.find(g=>g.k===state.openDebt), oc=cgroups.find(g=>'x:'+g.k===state.openDebt);if(!og&&!oc)state.openDebt=null;
   const editD=state.editing?.startsWith('de-')?state.debts.find(d=>'de-'+d.id===state.editing):null;
+  const dpTop=list.querySelector('.wmodal:has(>.dperson)')?.scrollTop||0;
   list.innerHTML=(open.length?groups.map(groupHtml).join(''):`<div class="empty"><p>Здесь будут люди, которые должны вам деньги. Нажмите «+ Дал в долг».</p></div>`)
     +(closed.length?cBox():'')+(editD&&!editD.mine?debtEditModal(editD):og?gModal(og):oc?cModal(oc):'');
+  {const p=list.querySelector('.wmodal>.dperson'), k=p?state.openDebt:null;if(p&&k===dpSeen){p.style.animation='none';p.parentElement.scrollTop=dpTop}dpSeen=k}
   bindClosedBox(list);
   const dpClose=()=>{fresh();state.openDebt=null;state.openDebtItem=null;state.editing=null;render()};
   list.querySelectorAll('[data-dpclose]').forEach(b=>b.onclick=dpClose);
