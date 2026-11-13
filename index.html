@@ -384,7 +384,7 @@ button{cursor:pointer}
 /* a window's head, as .dp-head: the title and its note on the left, ✕ on the right, no line under it */
 .debt-add-head{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);margin-bottom:10px}
 .debt-add-head>div{display:flex;flex-direction:column;gap:2px;min-width:0}
-.debt-add-head b{font-size:var(--fs-lg);font-weight:600}
+.debt-add-head b{font-size:18px;font-weight:600}
 .debt-add-head span{font-size:var(--fs-xs);color:var(--muted)}
 /* «Добавить долг» and «Взял в долг»: two fields a line, a label over each */
 .debt-add-modal .form{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-2)}
@@ -1001,7 +1001,7 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 #debtList .dgroup small,#oweList .dgroup small{font-size:var(--fs-2xs)}
 #debtList details summary,#oweList details summary{padding-block:8px}
 /* «Закрытые»: a size larger; shut and last, it has no empty strip under it — the panel's own edge is room enough (owner, 13.11.2026) */
-#debtList details>summary,#oweList details>summary{font-size:var(--fs-base)}
+#debtList details>summary,#oweList details>summary{font-size:16px}
 #debtList>details:last-child:not([open])>summary,#oweList>details:last-child:not([open])>summary{min-height:0;padding-block:12px 0;margin-bottom:-4px}
 .dgroup.closed b,.dgroup.closed .sumv{color:var(--muted);font-weight:500}
 /* the person's window: «Вернул всё» / «Вернул часть» for all of it, then each loan with its buttons */
@@ -1010,7 +1010,7 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 /* a window's head: its title (17px) and what it is about, ✕ on the right */
 .dp-head{display:grid;grid-template-columns:minmax(0,1fr) 40px;align-items:center;gap:var(--sp-2)}
 .dp-t{display:flex;flex-direction:column;min-width:0}
-.dp-t b{font-size:var(--fs-lg);font-weight:600;overflow-wrap:anywhere}
+.dp-t b{font-size:18px;font-weight:600;overflow-wrap:anywhere}
 .dp-t small{font-size:var(--fs-xs);color:var(--muted)}
 /* every window's ✕ (and the step sheet's ‹): one round 40px button on a soft fill; its tap area reaches 44px */
 .dp-x,.sheet-head .iconbtn,.zsheet-head .iconbtn{position:relative;width:40px;height:40px;flex:none;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--muted);font-size:17px;line-height:1;cursor:pointer}
@@ -1018,10 +1018,10 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 /* the ✕ is drawn, not typed: the glyph comes from a fallback font and sits a pixel off its circle (owner, 13.11.2026) */
 .dp-x,.sheet-head .iconbtn[data-close],.zsheet-head .iconbtn[data-zx]{font-size:0}
 .dp-x::before,.sheet-head .iconbtn[data-close]::before,.zsheet-head .iconbtn[data-zx]::before{content:'';position:absolute;inset:0;margin:auto;width:14px;height:14px;transform:rotate(45deg);background:linear-gradient(currentColor,currentColor) center/100% 2px no-repeat,linear-gradient(currentColor,currentColor) center/2px 100% no-repeat}
-.dp-sum{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-3);padding:5px 8px;border:1px solid transparent;border-radius:var(--r-md);background:var(--inset);font-size:var(--fs-sm);color:var(--muted)}
+.dp-sum{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-3);padding:5px 8px;border:1px solid transparent;border-radius:var(--r-md);background:var(--inset);font-size:14px;color:var(--muted)}
 /* the sum keeps its one line (its label wraps instead; a <wbr> would break even under nowrap); narrower than 320px it may split
    between digit groups (moneyW), see below */
-.dp-sum b{font-family:var(--f-num);font-size:var(--fs-xl);font-weight:500;color:var(--ink);flex-shrink:0}
+.dp-sum b{font-family:var(--f-num);font-size:22px;font-weight:500;color:var(--ink);flex-shrink:0}
 .dp-repay{display:flex;flex-direction:column;gap:var(--sp-1);padding:4px 8px 6px;border:1px solid transparent;border-radius:var(--r-md);background:var(--inset)}
 .dp-section-title,.dinner-head{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 /* the account on its own line, 6px under it «Вернул всё» on the left half and «Вернул часть» on the right (the same for «Отдал всё / часть»);
@@ -1030,7 +1030,7 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dp-repay .acts>.inline-edit{grid-column:1/-1}
 .dperson .dp-repay .acts>.dacc{grid-column:1/-1;display:grid;grid-template-columns:auto max-content;justify-content:start;align-items:center;gap:var(--sp-2)}
 /* «Вернул всё» / «Вернул часть»: the app's own primary and outline buttons, M size — as the same buttons of each loan below */
-.dperson .dp-repay .acts>button{font-size:var(--fs-sm);min-height:var(--h-m);padding:4px 12px}
+.dperson .dp-repay .acts>button{font-size:14px;min-height:var(--h-m);padding:4px 12px}
 .dinner{display:flex;flex-direction:column;gap:5px;padding:0;border-top:0}
 .dinner-head{padding:5px 8px 0;border-top:1px solid var(--line)}
 .dinner>.debt:last-child{border-bottom:1px solid var(--line);padding-bottom:6px}
@@ -1043,7 +1043,7 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 /* in a debt's own window («Я должен») its «Другие действия» stand right in the window, in line with the blocks above */
 .dperson>.debt-manage{padding:6px 8px 0}
 .dperson .debt-actions-label{flex:1 1 100%;font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.dperson .debt-manage>.linkbtn,.dperson .debt-manage>.del{min-height:var(--h-m);padding:6px 0;margin:0;font-size:var(--fs-sm)}
+.dperson .debt-manage>.linkbtn,.dperson .debt-manage>.del{min-height:var(--h-m);padding:6px 0;margin:0;font-size:14px}
 /* «Другие действия»: tiles two by two, words only (owner, 13.11.2026 — design «Б», version 1): plates a little lighter than the debt's
    card, the words in its ink, «Удалить» in red; a last one alone in its row takes the whole row. The second tap of «Простить» and
    «Удалить» still asks first */
@@ -1069,7 +1069,7 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dcard-t{display:flex;flex-direction:column;min-width:0}
 .dcard-t>span{font-size:var(--fs-xs);color:var(--muted);line-height:1.3}
 .dcard-head .dp-x{width:30px;height:30px;min-height:30px;flex:none}
-.dcard-sum{font-size:var(--fs-xl);font-weight:700;line-height:1.15}
+.dcard-sum{font-size:22px;font-weight:700;line-height:1.15}
 .dperson .dcard .acts{margin-top:4px;padding-top:6px;gap:6px}
 .dperson .dcard .debt-return{padding:4px}
 .dperson .dcard .debt-manage{gap:6px;padding-top:4px}
@@ -1077,7 +1077,7 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 /* tighter still (owner, 13.11.2026): no «Другие действия» over the tiles (a screen reader still hears it), the return's field and buttons 34px */
 .dperson .dcard .debt-actions-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .dperson .dcard .debt-manage{padding-top:2px}
-.dperson .dcard .debt-return select,.dperson .dcard .debt-return .primary,.dperson .dcard .debt-return .ghost{min-height:34px}
+.dperson .dcard .debt-return select,.dperson .dcard .debt-return .primary,.dperson .dcard .debt-return .ghost{min-height:36px}
 /* a person with one loan: its row in the list gets the same tight actions as the card (owner, 13.11.2026) */
 .dperson .dinner .debt-manage{gap:6px;padding-top:2px}
 .dperson .dinner .debt-manage>.linkbtn,.dperson .dinner .debt-manage>.del{min-height:36px;padding:6px}
@@ -1092,7 +1092,7 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dperson .dinner .debt:has(>.dtap){padding:3px 10px}
 .dperson.dg{gap:6px}
 .dperson .dp-repay .acts>.dacc select{min-height:var(--h-m);padding:2px 8px;font-size:var(--fs-field)}
-.dperson .debt .head b,.dperson .debt .head .left{font-size:var(--fs-base)}
+.dperson .debt .head b,.dperson .debt .head .left{font-size:16px}
 .dperson .debt .meta{font-size:var(--fs-xs)}
 .dperson .debt .acts>.linkbtn,.dperson .debt .acts>.del{font-size:var(--fs-xs)}
 .dperson .dacc{font-size:var(--fs-xs)}
@@ -1102,30 +1102,30 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dtap .left::after{content:'›';content:'›'/'';display:inline-block;margin-left:6px;color:var(--muted);font-family:var(--f-body);transition:transform .15s}
 .dtap[aria-expanded="true"] .left::after{transform:rotate(90deg)}
 .dperson .debt:has(.dtap){gap:3px;padding:5px 8px}
-.dperson .debt-return>.primary,.dperson .debt-return>.ghost{flex:1 1 0;min-width:0;font-size:var(--fs-sm);min-height:var(--h-m);padding:5px 8px}
+.dperson .debt-return>.primary,.dperson .debt-return>.ghost{flex:1 1 0;min-width:0;font-size:14px;min-height:var(--h-m);padding:5px 8px}
 .dperson .dacc select{min-height:var(--h-m);padding-block:4px}
 #cmp{display:flex;flex-direction:column;gap:var(--sp-2)}
 .recon{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--warn);border-radius:12px;padding:12px}
 .recon p{margin:0;font-size:var(--fs-base)}
 .recon .row{display:flex;gap:var(--sp-2);flex-wrap:wrap;align-items:center}
 .debt .acts select,.dg>.acts select{width:auto;flex:1 1 140px;min-width:0}
-.debt .dacc,.dg .dacc{display:flex;align-items:center;gap:var(--sp-2);flex:1 1 100%;min-width:0;font-size:var(--fs-sm);color:var(--muted)}
+.debt .dacc,.dg .dacc{display:flex;align-items:center;gap:var(--sp-2);flex:1 1 100%;min-width:0;font-size:14px;color:var(--muted)}
 .debt .acts>.inline-edit,.dg>.acts>.inline-edit{flex:1 1 100%}
 /* a person's debt window on one scale (owner, 14.11.2026): 8px between its blocks, 10–12px inside each (owner: «компактнее»); the name 18, the sum 18 (owner),
    lines of text 14–15, captions and section names 12–13; fields, buttons and the action tiles 36px tall */
 .wmodal .dperson.dg{gap:8px;padding:14px 14px 12px}
 .wmodal .dperson .dp-t b{font-size:18px;line-height:1.25}
-.wmodal .dperson .dp-t small{font-size:13px;margin-top:2px}
+.wmodal .dperson .dp-t small{font-size:14px;margin-top:2px}
 .wmodal .dperson .dp-sum{align-items:center;padding:8px 12px;font-size:14px}
 .wmodal .dperson .dp-sum b{font-size:18px;font-weight:600;line-height:1.2}
 .wmodal .dperson .dp-repay{gap:8px;padding:10px 12px 12px}
 .wmodal .dperson .dp-section-title,.wmodal .dperson .dinner-head{font-size:12px;line-height:1.3;letter-spacing:.06em}
 .wmodal .dperson .dinner-head{padding:2px 12px 0;border-top:0}
 .wmodal .dperson .dp-repay .acts{gap:6px 8px}
-.wmodal .dperson .dp-repay .acts>.dacc{font-size:15px;gap:10px}
+.wmodal .dperson .dp-repay .acts>.dacc{font-size:16px;gap:10px}
 /* the account's caption as big as the list beside it (owner, 14.11.2026) */
-.dperson .debt .dacc{font-size:var(--fs-base)}
-.wmodal .dperson .dp-repay .acts>.dacc select{min-height:36px;padding:2px 10px;font-size:15px}
+.dperson .debt .dacc{font-size:16px}
+.wmodal .dperson .dp-repay .acts>.dacc select{min-height:36px;padding:2px 10px;font-size:16px}
 /* the account to return to: only as wide as its names, not stretched over the row (owner, 14.11.2026) */
 .dperson .dacc select{flex:0 1 auto}
 .wmodal .dperson .dp-repay .acts>button{min-height:36px;font-size:14px}
@@ -1133,8 +1133,8 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .wmodal .dperson .dinner>.debt:last-child{border-bottom:1px solid transparent}
 .wmodal .dperson .dinner>.debt:last-child:not(:has(>.dtap)){padding-bottom:10px}
 .wmodal .dperson .dinner .debt:not(:has(>.dtap)){gap:2px;padding:10px 12px}
-.wmodal .dperson .dinner .debt:not(:has(>.dtap)) .head b,.wmodal .dperson .dinner .debt:not(:has(>.dtap)) .head .left{font-size:15px;font-weight:600}
-.wmodal .dperson .dinner .debt:not(:has(>.dtap)) .meta{font-size:13px}
+.wmodal .dperson .dinner .debt:not(:has(>.dtap)) .head b,.wmodal .dperson .dinner .debt:not(:has(>.dtap)) .head .left{font-size:16px;font-weight:600}
+.wmodal .dperson .dinner .debt:not(:has(>.dtap)) .meta{font-size:14px}
 .wmodal .dperson .dinner .debt:not(:has(>.dtap)) .acts{margin-top:6px;padding-top:0;border-top:0}
 .wmodal .dperson .dinner .debt-manage{gap:6px;padding-top:0}
 .wmodal .dperson .dinner .debt-manage>.linkbtn,.wmodal .dperson .dinner .debt-manage>.del{min-height:36px;padding:6px;font-size:14px}
@@ -1174,7 +1174,7 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .debt .head .left{font-family:var(--f-num);font-weight:500;font-size:var(--fs-md)}
 /* a loan row inside a person's group opens its buttons: a 44px row */
 .debt .head[data-di]{min-height:var(--h-l);align-content:center}
-.debt .meta{font-size:var(--fs-sm);color:var(--muted);overflow-wrap:anywhere}
+.debt .meta{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
 .debt .acts,.dg>.acts{display:flex;gap:var(--sp-2);flex-wrap:wrap;align-items:center}
 .dedit{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)}
 .dedit label{display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--fs-xs);color:var(--muted);min-width:0}
@@ -1422,7 +1422,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   :root h2{font-size:13px;font-weight:600;line-height:1.2;letter-spacing:.06em;color:var(--muted)}
   :root .sumcard #sumLabel{font-size:13px}
   /* the capitals over the big sums of «Деньги» and «Долги» («Всего денег», «Мне должны» / «Я должен») — 13px too (owner, 12.11.2026; 12px before) */
-  :root .mtot .lbl,:root .debt-overview-head .lbl{font-size:13px}
+  :root .mtot .lbl{font-size:13px}
+  :root .debt-overview-head .lbl{font-size:14px}
   /* the month's three sums on Итоги are bold, as the big sum of a tab */
   :root .mcard .mcol>b{font-weight:700}
   /* a day's spending badge on Записи is wine, so the minus reads at a glance (the rows' sums stay plain): its ground and edge from the
