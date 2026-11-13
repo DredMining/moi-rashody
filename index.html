@@ -320,6 +320,19 @@ button{cursor:pointer}
 #tripStat .tacts #tEdit,#tripStat .tacts #tAllow{padding-block:8px 0}
 #tripStat .tacts #tEnd,#tripStat .tacts #tRep,#tripStat .tacts #tBegin{flex-basis:100%;margin:0 0 0 -6px}
 #tripStat .tacts #tBegin:has(+#tRep),#tripStat .tacts #tEnd:has(+#tRep){padding-block:0}
+/* the trip card of Итоги, variant A (owner, 14.11.2026): what is left large, «Выдано / Потрачено» as lines (as the accounts on «Деньги»),
+   the four actions as 2×2 tiles (as a debt's), the end or start of the trip filled with the accent */
+#tripStat>span{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+#tripCard #tripStat>b{font-size:22px;font-weight:500;line-height:1.25}
+#tripStat .trows{display:flex;flex-direction:column;margin-top:8px}
+#tripStat .tr2{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:40px;border-top:1px solid var(--line);font-size:14px}
+#tripStat .tr2>span{color:var(--muted)}
+#tripStat .tr2>b{font-size:15px;font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums}
+#tripStat .tacts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:10px 0 6px}
+#tripStat .tacts .linkbtn,#tripStat .tacts #tEdit,#tripStat .tacts #tAllow,#tripStat .tacts #tEnd,#tripStat .tacts #tRep,#tripStat .tacts #tBegin{min-height:38px;margin:0;padding:6px;border-radius:10px;flex-basis:auto;
+  font-size:13px;font-weight:500;text-align:center;color:var(--ink);background:rgb(255 255 255 / .06);background:color-mix(in srgb,var(--ink) 6%,var(--inset))}
+#tripStat .tacts #tEnd,#tripStat .tacts #tBegin{background:var(--accent-btn);color:var(--accent-ink);font-weight:600}
+#tripStat .tacts>:last-child:nth-child(odd){grid-column:1/-1}
 .wallets{display:flex;flex-direction:column;gap:var(--gap-stack)}
 .wgroup{display:flex;flex-direction:column;gap:var(--sp-2)}
 /* «Деньги»: each group (Карты, Наличные, Накопления) is a card, its name and sum on top, its accounts as small blocks inside it */
@@ -2669,7 +2682,7 @@ function renderTrip(trip){
      it closes once the card is drawn anew, so the focus goes back to the link drawn there */
   if(state.repSheet&&!$('sheet').hidden){const r=repList().find(x=>x.at===state.repSheet.at);if(r)repFill(r);else queueMicrotask(()=>{if(state.repSheet&&!repList().some(x=>x.at===state.repSheet.at))closeSheet()})}
   /* «Отчёт по прошлой командировке»: the last finished trip, in the same window as when it ended */
-  const rl=repList().pop(), rb=rl?'<button class="linkbtn" id="tRep" aria-haspopup="dialog">Отчёт по прошлой командировке</button>':'', rOn=()=>{if($('tRep'))$('tRep').onclick=()=>repSheet(rl)};
+  const rl=repList().pop(), rb=rl?'<button class="linkbtn" id="tRep" aria-haspopup="dialog" aria-label="Отчёт по прошлой командировке">Прошлый отчёт</button>':'', rOn=()=>{if($('tRep'))$('tRep').onclick=()=>repSheet(rl)};
   /* a past month on Итоги: only what came and went in that month — the balance left and the buttons are about today */
   if(!isCurrentMonth()){
     box.innerHTML=(mIn||mOut?`<span>Потрачено в командировке за месяц</span><b>${moneyR(mOut)}</b>${mIn?`<small>пришло командировочных ${moneyR(mIn)}</small>`:''}`:'<span>В этом месяце записей по командировке нет</span>')+(rb?`<div class="acts tacts">${rb}</div>`:'');
@@ -2681,8 +2694,8 @@ function renderTrip(trip){
   const {avail,spent,got}=tripNow(), on=tripOn(), none=!(avail>0)&&!(spent>0)&&!got&&!tripPre().length;
   box.innerHTML=`${!got&&spent>0?`<span>Потрачено в командировке</span><b>${moneyR(spent)}</b><small>командировочные не внесены</small>`
     :bal<0?`<span>Перерасход командировочных</span><b class="neg">${moneyR(-bal)}</b>`:`<span>Осталось командировочных</span><b>${any?moneyR(bal):'—'}</b>`}
-    ${avail>0&&spent>0?`<small>выдано\u00a0${moneyR(avail)}\u00a0· потрачено\u00a0${moneyR(spent)}</small>`:''}${on?`<small>идёт с ${dayText(anchorDay({at:on}))}</small>`:''}
-    <div class="acts tacts"><button class="linkbtn" id="tEdit" aria-haspopup="dialog">${st?'Сверить':'Указать остаток'}</button><button class="linkbtn" id="tAllow" aria-haspopup="dialog">+ Пришли командировочные</button>${on?'<button class="linkbtn" id="tEnd">Командировка закончилась</button>':'<button class="linkbtn" id="tBegin">Командировка началась</button>'}${rb}</div>`;
+    ${on?`<small>идёт с ${dayText(anchorDay({at:on}))}</small>`:''}${avail>0&&spent>0?`<div class="trows"><div class="tr2"><span>Выдано</span><b>${moneyR(avail)}</b></div><div class="tr2"><span>Потрачено</span><b>${moneyR(spent)}</b></div></div>`:''}
+    <div class="acts tacts"><button class="linkbtn" id="tEdit" aria-haspopup="dialog">${st?'Сверить':'Указать остаток'}</button><button class="linkbtn" id="tAllow" aria-haspopup="dialog" aria-label="Пришли командировочные">+ Пришли</button>${on?'<button class="linkbtn" id="tEnd" aria-label="Командировка закончилась">Закончилась</button>':'<button class="linkbtn" id="tBegin" aria-label="Командировка началась">Началась</button>'}${rb}</div>`;
   rOn();
   /* a field gets the cursor only when he opens its form with a tap (never on a redraw), and the page doesn't move for it */
   $('tEdit').onclick=()=>{fresh();state.editing='trip';render();$('tInput')?.focus({preventScroll:true})};
