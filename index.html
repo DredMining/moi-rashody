@@ -1078,6 +1078,9 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
 .rg-chev{display:inline-block;margin-left:8px;color:var(--muted);font-weight:400;transition:transform .2s}
 .rgrp:has([aria-expanded="true"]) .rg-chev{transform:rotate(90deg)}
 .rgrp-in{padding-left:38px}
+/* the line under such a row: under its last return while open, none when shut at the day's end */
+.rgrp-in:not(:last-child)>.item:last-child{border-bottom:1px solid var(--line)}
+.rgrp:has(+.rgrp-in[hidden]:last-child){border-bottom:0}
 .rgrp-in>.item{grid-template-columns:minmax(0,1fr) minmax(0,auto)}
 .rgrp-in>.item>.ic{display:none}
 .rgrp-in>.item .what b{font-weight:400;color:var(--muted)}
@@ -3910,13 +3913,15 @@ const byNewest=(a,b)=>b.date.localeCompare(a.date)||(b.created||0)-(a.created||0
 const RG=new Set();
 function rgRuns(arr){const out=[];
   for(const i of arr){const p=out[out.length-1], last=Array.isArray(p)?p[p.length-1]:p;
-    const same=last&&typeOf(i)==='debt'&&typeOf(last)==='debt'&&(i.dir==='back'||i.dir==='pay')&&i.dir===last.dir&&i.label===last.label&&i.date===last.date
+    /* the name as «Долги» take it (nk): «Анна» and «анна» are one person */
+    const same=last&&typeOf(i)==='debt'&&typeOf(last)==='debt'&&(i.dir==='back'||i.dir==='pay')&&i.dir===last.dir&&nk(i.label)===nk(last.label)&&i.date===last.date
       &&i.acc===last.acc&&+i.created>0&&+last.created>0&&Math.abs(+i.created-+last.created)<=100;
     if(!same)out.push(i);else if(Array.isArray(p))p.push(i);else out[out.length-1]=[last,i]}
   return out}
 /* the row of such a run, and its returns under it (hidden till it is opened; open while one of them is being changed) */
 function rgRow(g,showDate,af){
-  const i0=g[0], n=g.length, k='rg'+i0.id, open=RG.has(k)||g.some(i=>i.id===state.actItem||i.id===state.editItem), pos=i0.dir==='back';
+  /* opened, every return of it is kept in RG: a row whose first return is deleted stays open */
+  const i0=g[0], n=g.length, k='rg'+i0.id, open=g.some(i=>RG.has('rg'+i.id)||i.id===state.actItem||i.id===state.editItem), pos=i0.dir==='back';
   let amt=(pos?'+':'−')+money(r2(g.reduce((s,i)=>s+(+i.amount||0),0))), acls=pos?'pos':'spend';
   const dv=af?r2(g.reduce((s,i)=>s+walletDelta(i,af),0)):0;if(dv){amt=(dv>0?'+':'−')+money(Math.abs(dv));acls=dv>0?'pos':'spend'}
   const shut=g.filter(i=>{const d=recDebt(i);return d&&debtLeft(d)<0.005}).length, nd=`${n} ${plural(n,'долг','долга','долгов')}`;
@@ -3924,12 +3929,13 @@ function rgRow(g,showDate,af){
   const sub=[dd,accTag(i0.acc)||'—',nd+(shut===n?' закрыто':'')].filter(Boolean).join(' · ');
   const kids=g.map(i=>{const d=recDebt(i);return itemRow(i,false,af,false,[d&&d.date?'Долг от '+esc(dayText(d.date)):'Долг',d&&d.note?esc(d.note):''])}).join('');
   return `<div class="item tr rgrp" data-rg="${esc(k)}"><span class="ic" aria-hidden="true">🤝</span><div class="what"><b>${esc(i0.label||'Долг')}</b><span${dd?' class="dd"':''}>${sub}</span></div>
-    <button type="button" class="amt ${acls}" aria-expanded="${open}" aria-label="${esc(i0.label||'Долг')}: ${nd}, ${esc(amt)}${dd?', '+dd:''}. ${open?'Свернуть':'Показать по долгам'}">${amt}<span class="rg-chev" aria-hidden="true">›</span></button></div>
+    <button type="button" class="amt ${acls}" data-rgb="${esc(k)}" aria-expanded="${open}" aria-label="${esc(i0.label||'Долг')}: ${nd}, ${esc(amt)}${dd?', '+dd:''}. ${open?'Свернуть':'Показать по долгам'}">${amt}<span class="rg-chev" aria-hidden="true">›</span></button></div>
     <div class="rgrp-in"${open?'':' hidden'}>${kids}</div>`;
 }
 /* a tap on such a row opens or closes it; closed, none of its returns stays picked */
 function rgBind(root){root.querySelectorAll('[data-rg]').forEach(r=>r.onclick=()=>{fresh();const k=r.dataset.rg, kids=r.nextElementSibling;
-  if(kids&&!kids.hidden){RG.delete(k);if(kids.querySelector(`[data-act="${CSS.escape(state.actItem||'')}"],[data-edit="${CSS.escape(state.editItem||'')}"]`)){state.actItem=null;state.editItem=null}}else RG.add(k);
+  const ids=kids?[...kids.querySelectorAll('[data-act]')].map(x=>'rg'+x.dataset.act):[];
+  if(kids&&!kids.hidden){RG.delete(k);ids.forEach(x=>RG.delete(x));if(kids.querySelector(`[data-act="${CSS.escape(state.actItem||'')}"],[data-edit="${CSS.escape(state.editItem||'')}"]`)){state.actItem=null;state.editItem=null}}else{RG.add(k);ids.forEach(x=>RG.add(x))}
   render();inView(onScreen(`[data-rg="${CSS.escape(k)}"]`))})}
 /* last seven records under the entry form, to check and undo right away */
 function renderRecent(){
@@ -4194,7 +4200,8 @@ function segDrag(seg,pick){let drag=null, eat=false;
   const mid=b=>{const p=segBox(seg,b);return p.x+p.w/2};
   const near=x=>btns().reduce((a,b)=>Math.abs(mid(b)-x)<Math.abs(mid(a)-x)?b:a);
   const off=()=>{seg.classList.remove('sv-drag');btns().forEach(b=>b.classList.remove('sv-hot'))};
-  seg.addEventListener('pointerdown',e=>{if(!e.isPrimary||e.button>0||!e.target.closest('button')||!seg.querySelector('.sv-cap')?.offsetWidth)return;
+  /* a new press: the click of the move before it has come or will not come — this one is a tap of its own */
+  seg.addEventListener('pointerdown',e=>{eat=false;if(!e.isPrimary||e.button>0||!e.target.closest('button')||!seg.querySelector('.sv-cap')?.offsetWidth)return;
     drag={id:e.pointerId,x0:e.clientX,left:seg.getBoundingClientRect().left+seg.clientLeft,moved:false}});
   seg.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;
     if(!drag.moved){if(Math.abs(e.clientX-drag.x0)<6)return;drag.moved=true;try{seg.setPointerCapture(e.pointerId)}catch(x){}seg.classList.add('sv-drag')}
@@ -4203,7 +4210,8 @@ function segDrag(seg,pick){let drag=null, eat=false;
     cap.style.width=w+'px';cap.style.transform=`translate3d(${L}px,0,0)`;all.forEach(b=>b.classList.toggle('sv-hot',b===cur));
     if(e.cancelable)e.preventDefault()});
   const end=e=>{if(!drag||e.pointerId!==drag.id)return;const d=drag;drag=null;
-    if(!d.moved)return;eat=true;setTimeout(()=>{eat=false},400);const b=near(e.clientX-d.left);off();fresh();pick(b);segCap(seg)};
+    /* the double-tap guard (fresh) is kept where the finger was lifted, not where the move began: a tap there goes through at once */
+    if(!d.moved)return;eat=true;setTimeout(()=>{eat=false},400);const b=near(e.clientX-d.left);off();tapX=e.clientX;tapY=e.clientY;fresh();pick(b);segCap(seg)};
   seg.addEventListener('pointerup',end);
   seg.addEventListener('pointercancel',e=>{if(!drag||e.pointerId!==drag.id)return;drag=null;off();segCap(seg)});
   /* the click that ends a move is no tap */
@@ -4780,8 +4788,10 @@ const PAD=matchMedia('(hover:none) and (pointer:coarse)').matches;
     if(k==='shift'){const t=Date.now();shift=shift===2?0:shift===1?(t-shiftAt<320?2:0):1;shiftAt=t;sync();return}
     if(k==='sym'){sym=!sym;if(!sym)auto();sync();return}
     if(k==='lang'){lang=lang==='ru'?'en':'ru';sym=false;auto();sync();return}
-    if(k==='go'){const x=field;if(!x)return;const ev=new KeyboardEvent('keydown',{key:'Enter',code:'Enter',bubbles:true,cancelable:true});x.dispatchEvent(ev);
-      if(!ev.defaultPrevented&&field===x){pressing=false;x.blur()}}};
+    /* «Готово»: the field's Enter; the focus it moves on (to «Записать», to the next field) is let go — not taken back as under a key */
+    if(k==='go'){const x=field;if(!x)return;if(!x.isConnected||document.activeElement!==x){close();return}
+      const ev=new KeyboardEvent('keydown',{key:'Enter',code:'Enter',bubbles:true,cancelable:true});pressing=false;x.dispatchEvent(ev);
+      if(!ev.defaultPrevented&&field===x)x.blur()}};
   const scrollerOf=el=>{for(let p=el.parentElement;p&&p!==document.body;p=p.parentElement){const o=getComputedStyle(p).overflowY;if((o==='auto'||o==='scroll')&&p.scrollHeight>p.clientHeight)return p}return null};
   const reveal=x=>{if(field!==x)return;
     const sat=parseFloat(getComputedStyle(document.querySelector('.app')).paddingTop)||0, h=pad.offsetHeight, own=x.id==='amount';
@@ -4797,17 +4807,24 @@ const PAD=matchMedia('(hover:none) and (pointer:coarse)').matches;
   const close=()=>{lift(false);field=null;pad.classList.remove('on');root.classList.remove('pad-open');root.style.removeProperty('--pad-h')};
   const put=k=>{const x=field;if(!x||x.readOnly||x.disabled)return;const v=x.value;let s=x.selectionStart??v.length, e=x.selectionEnd??v.length;
     if(k==='del'){if(s===e){if(!s)return;s--}x.setRangeText('',s,e,'end')}
-    else{const nv=v.slice(0,s)+k+v.slice(e), parts=nv.split(/[.,]/);
+    else{if(k===','&&!v.slice(0,s).trim())k='0,'; /* a sum begun with the comma: «0,» */
+      const nv=v.slice(0,s)+k+v.slice(e), parts=nv.split(/[.,]/);
       if(parts.length>2||(parts[1]||'').replace(/\D/g,'').length>2)return;
       if(v==='0'&&s===1&&e===1&&k!==','){x.value=k;x.setSelectionRange(1,1)}else x.setRangeText(k,s,e,'end')}
     x.dispatchEvent(new Event('input',{bubbles:true}))};
   pad.addEventListener('pointerdown',e=>{e.preventDefault();pressing=true;const b=e.target.closest('[data-k]');if(!b)return;
+    /* the field gone or let go meanwhile (its window closed by another tab): the keys just go down */
+    if(field&&(!field.isConnected||document.activeElement!==field)){pressing=false;close();return}
     b.classList.add('hit');if(isTxt(field)){pressT(b);return}
     /* ✓ «Готово»: the keys go down, the sum stays as typed */
     if(b.dataset.k==='done'){const x=field;pressing=false;x?.blur();close();return}
     put(b.dataset.k);
     if(b.dataset.k==='del'){clearTimeout(holdT);holdT=setTimeout(()=>{const x=field;if(x&&x.value){x.value='';x.dispatchEvent(new Event('input',{bubbles:true}))}},550)}});
-  const up=e=>{lift(e.type==='pointerup');clearTimeout(holdT);setTimeout(()=>{pressing=false},0);pad.querySelectorAll('.hit').forEach(b=>b.classList.remove('hit'))};
+  /* a mouse or a trackpad takes the focus off the field as it is pressed (a finger only with its click): the keys stay up till it is let go,
+     else the window would slide down under it and its click be lost */
+  let downOut=false;
+  addEventListener('pointerdown',e=>{downOut=e.pointerType!=='touch'&&!pad.contains(e.target)},true);
+  const up=e=>{lift(e.type==='pointerup');clearTimeout(holdT);setTimeout(()=>{pressing=false;downOut=false},0);pad.querySelectorAll('.hit').forEach(b=>b.classList.remove('hit'))};
   addEventListener('pointerup',up);addEventListener('pointercancel',up);
   /* a tap on the keys is never a click on what lies under them, nor a zoom */
   pad.addEventListener('touchend',e=>{if(e.cancelable)e.preventDefault()},{passive:false});
@@ -4821,10 +4838,18 @@ const PAD=matchMedia('(hover:none) and (pointer:coarse)').matches;
     if(isPad(document.activeElement))return;
     /* lost under a press on the keys: taken back — unless the field is gone (its window closed) */
     if(pressing&&field&&field.isConnected){field.focus({preventScroll:true});if(document.activeElement===field)return}
+    if(downOut){const f=field, go=()=>setTimeout(()=>{if(field===f&&!isPad(document.activeElement))close()},0);
+      addEventListener('pointerup',go,{once:true,capture:true});addEventListener('pointercancel',go,{once:true,capture:true});return}
     close()},0)});
+  /* the field gone with its window (the record deleted in another tab): the keys go too */
+  new MutationObserver(()=>{if(field&&!field.isConnected)close()}).observe(document.body,{childList:true,subtree:true});
   /* a tap elsewhere puts the keys down (a scroll doesn't: no click comes after it); a tap on the field, its own label or what holds it
      keeps them (the tap that focused a field in a window comes as a click on its form) */
-  document.addEventListener('click',e=>{const x=field;if(!x||pad.contains(e.target)||e.target.contains?.(x)||e.target.closest?.('label')?.contains(x))return;
+  document.addEventListener('click',e=>{const x=field;if(!x||pad.contains(e.target))return;
+    if(!x.isConnected||document.activeElement!==x){if(!isPad(document.activeElement))close();return}
+    /* a click not of a finger or a mouse (Enter sending the form) leaves the field as it is: a second Enter still reaches it */
+    if(!e.detail){setTimeout(()=>{const f=field;if(f&&(!f.isConnected||!f.getClientRects().length||document.activeElement!==f))close()},0);return}
+    if(e.target.contains?.(x)||e.target.closest?.('label')?.contains(x))return;
     if(!isPad(e.target))x.blur()},true);
 })();
 /* «Новая запись» over the keyboard (a finger's tap on the sum): the phone is not left to push the page up till the field sits right on
