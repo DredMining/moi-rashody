@@ -505,7 +505,7 @@ input.num::placeholder{font-family:var(--f-body)}
 .dayhead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--sp-2);font-size:var(--fs-sm);color:var(--muted);padding-block:10px 6px;border-bottom:1px solid var(--line)}
 /* Записи: each day is its own card, the date stands out */
 .recs{display:flex;flex-direction:column;gap:var(--sp-3);min-width:0}
-.recs #list,.hist-peek{display:flex;flex-direction:column;gap:6px}
+.recs #list,.hist-peek{display:flex;flex-direction:column;gap:var(--gap-stack)}
 /* Все / Личное / Командировка go by as the pages of Итоги: the list follows the finger, the chosen one stands beside it, 12px apart,
    for the time of the move only (hist-peek); up and down stays the page's own scrolling. The row of accounts scrolls sideways itself:
    no touch-action over it */
