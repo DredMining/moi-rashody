@@ -986,9 +986,15 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dperson>.debt-manage{padding:6px 8px 0}
 .dperson .debt-actions-label{flex:1 1 100%;font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .dperson .debt-manage>.linkbtn,.dperson .debt-manage>.del{min-height:var(--h-m);padding:6px 0;margin:0;font-size:var(--fs-sm)}
-/* «Удалить» stands apart, at the right edge: a finger aiming at «Изменить» does not land on it */
-.dperson .debt-manage{column-gap:var(--sp-4)}
-.dperson .debt-manage>.del{margin-left:auto}
+/* «Другие действия»: tiles two by two, words only (owner, 13.11.2026 — design «Б», version 1): plates a little lighter than the debt's
+   card, the words in its ink, «Удалить» in red; a last one alone in its row takes the whole row. The second tap of «Простить» and
+   «Удалить» still asks first */
+.dperson .debt-manage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.dperson .debt-manage>.debt-actions-label{grid-column:1/-1}
+.dperson .debt-manage>.linkbtn,.dperson .debt-manage>.del{min-height:44px;margin:0;padding:8px 6px;border-radius:12px;color:var(--ink);font-weight:500;text-align:center;
+  background:rgb(255 255 255 / .06);background:color-mix(in srgb,var(--ink) 6%,var(--inset))}
+.dperson .debt-manage>.del{color:var(--bad)}
+.dperson .debt-manage>.del:nth-child(even){grid-column:1/-1}
 .dperson.dg{gap:6px}
 .dperson .dp-repay .acts>.dacc select{min-height:var(--h-m);padding:2px 8px;font-size:var(--fs-field)}
 .dperson .debt .head b,.dperson .debt .head .left{font-size:var(--fs-base)}
