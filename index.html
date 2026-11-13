@@ -4415,8 +4415,9 @@ function renderDebts(){
   const one=(d,isOpen,inGroup,solo)=>{
     const left=debtLeft(d), ret=+d.returned||0, when=d.date?dayText(d.date):'';
     const how=!isOpen&&inGroup?(+d.forgiven>0?'прощён':'возвращён'):'';
-    const meta=[inGroup?'':when,how,ret>0&&isOpen?`вернули ${moneyR(ret)} из ${moneyR(+d.amount||0)}`:'',d.note?esc(d.note):''].filter(Boolean).join(' · ');
     const fold=inGroup&&!solo;
+    /* in a person's one-line row «вернули 5 000 ₽» only: «из 20 000 ₽» is in the card, and with it the note is no longer cut off (owner, 13.11.2026) */
+    const meta=[inGroup?'':when,how,ret>0&&isOpen?`вернули ${moneyR(ret)}${fold?'':` из ${moneyR(+d.amount||0)}`}`:'',d.note?esc(d.note):''].filter(Boolean).join(' · ');
     const top=`<span class="head"><b>${esc(inGroup?(when||'Без даты'):d.name)}${d.doubtful&&isOpen?'<span class="tag">сомнительный</span>':''}</b><span class="left">${isOpen?moneyR(left):inGroup?moneyR(+d.amount||0):(+d.forgiven>0?'прощён':'возвращён')}</span></span>
       ${meta?`<span class="meta">${meta}</span>`:''}`;
     /* in a person's list a loan stays one row (the picked one marked); its buttons are in its card under the list (cardOf) */
