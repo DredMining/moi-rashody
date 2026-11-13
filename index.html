@@ -949,6 +949,9 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 #debtList .dgroup,#oweList .dgroup{padding-block:5px;line-height:1.2}
 #debtList .dgroup small,#oweList .dgroup small{font-size:var(--fs-2xs)}
 #debtList details summary,#oweList details summary{padding-block:8px}
+/* «Закрытые»: a size larger; shut and last, it has no empty strip under it — the panel's own edge is room enough (owner, 13.11.2026) */
+#debtList details>summary,#oweList details>summary{font-size:var(--fs-base)}
+#debtList>details:last-child:not([open])>summary,#oweList>details:last-child:not([open])>summary{min-height:0;padding-block:8px 0}
 .dgroup.closed b,.dgroup.closed .sumv{color:var(--muted);font-weight:500}
 /* the person's window: «Вернул всё» / «Вернул часть» for all of it, then each loan with its buttons */
 .dg{display:flex;flex-direction:column;gap:10px}
