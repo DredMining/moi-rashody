@@ -966,7 +966,7 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dp-x::after,.sheet-head .iconbtn::after,.zsheet-head .iconbtn::after{content:'';position:absolute;inset:-2px}
 /* the ✕ is drawn, not typed: the glyph comes from a fallback font and sits a pixel off its circle (owner, 13.11.2026) */
 .dp-x,.sheet-head .iconbtn[data-close],.zsheet-head .iconbtn[data-zx]{font-size:0}
-.dp-x::before,.sheet-head .iconbtn[data-close]::before,.zsheet-head .iconbtn[data-zx]::before{content:'';width:14px;height:14px;transform:rotate(45deg);background:linear-gradient(currentColor,currentColor) center/100% 2px no-repeat,linear-gradient(currentColor,currentColor) center/2px 100% no-repeat}
+.dp-x::before,.sheet-head .iconbtn[data-close]::before,.zsheet-head .iconbtn[data-zx]::before{content:'';position:absolute;inset:0;margin:auto;width:14px;height:14px;transform:rotate(45deg);background:linear-gradient(currentColor,currentColor) center/100% 2px no-repeat,linear-gradient(currentColor,currentColor) center/2px 100% no-repeat}
 .dp-sum{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-3);padding:5px 8px;border:1px solid transparent;border-radius:var(--r-md);background:var(--inset);font-size:var(--fs-sm);color:var(--muted)}
 /* the sum keeps its one line (its label wraps instead; a <wbr> would break even under nowrap); narrower than 320px it may split
    between digit groups (moneyW), see below */
