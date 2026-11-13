@@ -4733,7 +4733,7 @@ $('amount').addEventListener('input',()=>{const er=$('formErr');if(!(er.textCont
    keyboard before), another field with its form or label when that fits.
    A text field (a name, a comment, «Другое») gets the same panel with letters (owner, 12.11.2026 — design-lab/keyboard-text.html, «А»):
    the iPhone's Russian and English rows, «123» for figures and signs. A letter is set when the finger is lifted (held on «е» / «ь» it is
-   «ё» / «ъ»); ⌫ held down goes on wiping; a name starts each word with a capital, a comment stays small («такси», «обед»). «Готово» is
+   «ё» / «ъ»); ⌫ held down goes on wiping; every field starts with a capital, a name each word («Такси», «Али Ахмедов»). «Готово» is
    the field's Enter — a window that takes it goes on — else it puts the keys down. No autocorrect, dictation or emoji: the owner chose so */
 const PAD=matchMedia('(hover:none) and (pointer:coarse)').matches;
 (()=>{if(!PAD)return;
@@ -4770,8 +4770,8 @@ const PAD=matchMedia('(hover:none) and (pointer:coarse)').matches;
     tp.querySelectorAll('[data-k="shift"]').forEach(b=>{b.setAttribute('aria-pressed',String(shift>0));b.classList.toggle('lock',shift===2)});
     const m=tp.querySelector('.tp-mode');m.textContent=sym?(lang==='ru'?'АБВ':'ABC'):'123';m.setAttribute('aria-label',sym?'Буквы':'Цифры и знаки');
     tp.querySelector('.tp-space').textContent=lang==='ru'?'русский':'english'};
-  /* the capital by itself: at a name's start and after a space in it */
-  const auto=()=>{if(sym||shift===2||!isTxt(field))return;const v=field.value.slice(0,field.selectionStart??field.value.length);shift=field.matches(NAME)&&(!v.trim()||/\s$/.test(v))?1:0};
+  /* the capital by itself: at the start of any text field (owner, 13.11.2026: «Такси», «Обед»), and in a name after a space too */
+  const auto=()=>{if(sym||shift===2||!isTxt(field))return;const v=field.value.slice(0,field.selectionStart??field.value.length);shift=!v.trim()||field.matches(NAME)&&/\s$/.test(v)?1:0};
   const write=c=>{const x=field;if(!x||x.readOnly||x.disabled)return;const v=x.value;let s=x.selectionStart??v.length, e=x.selectionEnd??v.length;
     if(c==='del'){if(s===e){if(!s)return;s-=s>1&&/[\uDC00-\uDFFF]/.test(v[s-1])?2:1}}
     else if(x.maxLength>0&&v.length-(e-s)+c.length>x.maxLength)return;
