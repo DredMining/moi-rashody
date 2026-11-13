@@ -699,9 +699,7 @@ input.num::placeholder{font-family:var(--f-body)}
 .lparts .kop{font-size:max(var(--fs-2xs),.8em);color:var(--muted)}
 .alerts{display:flex;flex-direction:column;gap:var(--gap-stack)}
 .alerts:empty{display:none}
-/* Учёт: 10px between its blocks — the month card, the notes under it, «Новая запись», «Последние записи» (owner, 12.11.2026; 12 around
-   the notes and 16 elsewhere before); the other tabs keep --gap-stack */
-#viewLedger{gap:10px}
+/* 10px between the blocks of every tab (owner: «Учёт» 12.11.2026, the other tabs 13.11.2026; 16 before) — --gap-stack */
 #alerts{gap:10px;margin-block:0}
 .alert{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);box-shadow:inset 3px 0 0 var(--alert-c,var(--warn));padding:10px var(--pad-card);font-size:var(--fs-base)}
 .alert>span{flex:1 1 10em;min-width:0;overflow-wrap:anywhere}
@@ -1302,7 +1300,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
 /* the big sum of a tab is larger: up to 32px (fitBig still makes it smaller while it doesn't fit) */
   :root{--fs-hero:clamp(30px,10vw,32px);
     /* rounder corners, more room inside cards and between them. Corners: a button / field / block in a card 14, a card 20, a window 28 */
-    --pad-card:16px;--gap-stack:16px;--r-md:14px;--r-lg:20px;--r-xl:28px;
+    --pad-card:16px;--gap-stack:10px;--r-md:14px;--r-lg:20px;--r-xl:28px;
     /* type a step larger: nothing under 12, lists and reminders 15, text and buttons 16 */
     --fs-2xs:12px;--fs-base:15px;--fs-md:16px}
   /* the black look's colours: cards lie flat on the black page, their 1px edge not seen (a window keeps its thin edge — it floats over
