@@ -747,6 +747,12 @@ input.num::placeholder{font-family:var(--f-body)}
 #wallets .whead b,[data-theme="dark"] #wallets .whead b{font-size:16px}
 #wallets .wrow .wn{font-size:14px}
 #wallets .wrow b:not(.none){font-size:15px}
+/* «Деньги», chosen in the simulator (owner, 14.11.2026, «1 + Б»): sums lighter — 500 for the total, the groups and the zakat lines,
+   400 for the accounts; each group's sum on a soft plate of the accent (wine in black, blue in night-blue) */
+#viewMoney .mtot b,#wallets .whead b,#zakatLine .zr2 b{font-weight:500}
+#wallets .wrow b:not(.none){font-weight:400}
+#wallets .whead b,[data-theme="dark"] #wallets .whead b{padding:3px 9px;line-height:1.3;border-radius:8px;background:color-mix(in srgb,var(--accent) 16%,transparent);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+[data-theme="dark"] #wallets .whead b{background:color-mix(in srgb,var(--burgundy) 22%,transparent);border-color:color-mix(in srgb,var(--burgundy) 55%,transparent)}
 #viewMoney .zline{padding:0 var(--pad-card);gap:0}
 /* variant A: lines as the account groups — the heading 44px with the bar, each figure a 44px line, the last one (what is left / owed) a size larger */
 #viewMoney .zline .zh{min-height:42px;align-items:center;flex-wrap:nowrap;font-size:14px;padding:0 2px}
