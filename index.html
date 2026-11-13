@@ -747,12 +747,22 @@ input.num::placeholder{font-family:var(--f-body)}
 #wallets .whead b,[data-theme="dark"] #wallets .whead b{font-size:16px}
 #wallets .wrow .wn{font-size:14px}
 #wallets .wrow b:not(.none){font-size:15px}
-#viewMoney .zline{padding:8px var(--pad-card);gap:6px}
-#viewMoney .zline .zcols{padding-top:6px}
+#viewMoney .zline{padding:0 var(--pad-card);gap:0}
+/* variant A: lines as the account groups — the heading 44px with the bar, each figure a 44px line, the last one (what is left / owed) a size larger */
+#viewMoney .zline .zh{min-height:44px;align-items:center;flex-wrap:nowrap;font-size:14px;padding:0 2px}
+#viewMoney .zline .zt{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+#viewMoney .zline .zt::before{content:"";flex:none;width:3px;height:14px;border-radius:2px;background:var(--accent)}
+#viewMoney .zline .zgt{font-size:18px;font-weight:400;color:var(--muted)}
+#viewMoney .zline .zrows{display:flex;flex-direction:column}
+#viewMoney .zline .zr2{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px;padding:0 2px;border-top:1px solid var(--line)}
+#viewMoney .zline .zr2 small{font-size:14px;color:var(--muted)}
+#viewMoney .zline .zr2 b{font-size:15px;font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums}
+#viewMoney .zline .zr2:last-child b{font-size:16px;font-weight:600}
+#viewMoney .zline .zr2 b.neg{color:var(--bad)}
 .mfoot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:0}
 .mfoot>.moneyacts{margin-left:auto}
 .wmodal>.xfer{position:relative;width:min(440px,100%);border-radius:var(--r-xl);padding:var(--pad-card);box-shadow:var(--shadow-modal);animation:up .18s ease-out}
-#bkOpen,.mfoot #xOpen{font-size:var(--fs-sm);min-height:var(--h-m)}
+#bkOpen,.mfoot #xOpen{font-size:var(--fs-sm);min-height:44px}
 #bkLast{color:var(--muted);font-weight:400}
 #bkLast.old{color:var(--warn-ink)}
 /* a dangerous button («Очистить всё»): the outline one in red */
@@ -3441,9 +3451,10 @@ function zPast(start){let s=start,n=0;const T=iso(now);while(n<3000){const e=haw
 /* one line of the zakat window: name (with a small note under it) on the left, the sum on the right */
 const zRow=(label,value,sub,cls,more)=>`<div class="zrow${cls?' '+cls:''}"><div><span>${label}</span>${sub?`<small>${sub}</small>`:''}${more||''}</div><b>${value}</b></div>`;
 const zDateRow=(label,d,extra)=>`<div class="zrow"><div><span>${label}</span></div><div class="zd"><b>${hijri(d)?NBH(hijri(d)):gDate(d)}</b><small>${hijri(d)?gDate(d):''}${extra?(hijri(d)?' · ':'')+extra:''}</small></div></div>`;
-/* the zakat card on «Деньги»: one short line, or «🌙 Закят ›» over its figures — [label, value, class] each, in equal columns */
-const zLine1=t=>`<span class="zh"><span>🌙 Закят</span><span>${t}<span aria-hidden="true"> ›</span></span></span>`;
-const zLineCols=cols=>`<span class="zh"><span>🌙 Закят<span class="zgt" aria-hidden="true"> ›</span></span></span><span class="zcols">${cols.map(([l,v,c])=>`<span><small>${l}</small><b${c?` class="${c}"`:''}>${v}</b></span>`).join('')}</span>`;
+/* the zakat card on «Деньги» (owner, 14.11.2026, variant A): «ЗАКЯТ» as the account groups above it, then each figure on its own 44px line —
+   [label, value, class] each; or one short line «ЗАКЯТ … настроить ›» */
+const zLine1=t=>`<span class="zh"><span class="zt">Закят</span><span>${t}<span aria-hidden="true"> ›</span></span></span>`;
+const zLineCols=cols=>`<span class="zh"><span class="zt">Закят</span><span class="zgt" aria-hidden="true">›</span></span><span class="zrows">${cols.map(([l,v,c])=>`<span class="zr2"><small>${l}</small><b${c?` class="${c}"`:''}>${v}</b></span>`).join('')}</span>`;
 const zShort=DF({day:'numeric',month:'short',year:'numeric'});
 const zDay=s=>zShort.format(isoToDate(s)).replace(' г.','');
 /* zShown: the year renderZakat showed — «Оплатить» on Учёт offers the sum its line says (memory refused: that year is not saved) */
