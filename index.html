@@ -1012,7 +1012,7 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
    a form («Записать») takes the whole width */
 .dp-repay .acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 8px;margin:0}
 .dp-repay .acts>.inline-edit{grid-column:1/-1}
-.dperson .dp-repay .acts>.dacc{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:var(--sp-2)}
+.dperson .dp-repay .acts>.dacc{grid-column:1/-1;display:grid;grid-template-columns:auto max-content;justify-content:start;align-items:center;gap:var(--sp-2)}
 /* «Вернул всё» / «Вернул часть»: the app's own primary and outline buttons, M size — as the same buttons of each loan below */
 .dperson .dp-repay .acts>button{font-size:var(--fs-sm);min-height:var(--h-m);padding:4px 12px}
 .dinner{display:flex;flex-direction:column;gap:5px;padding:0;border-top:0}
@@ -1104,6 +1104,8 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .wmodal .dperson .dp-repay .acts{gap:6px 8px}
 .wmodal .dperson .dp-repay .acts>.dacc{font-size:14px;gap:10px}
 .wmodal .dperson .dp-repay .acts>.dacc select{min-height:36px;padding:2px 10px;font-size:15px}
+/* the account to return to: only as wide as its names, not stretched over the row (owner, 14.11.2026) */
+.dperson .dacc select{flex:0 1 auto}
 .wmodal .dperson .dp-repay .acts>button{min-height:36px;font-size:14px}
 .wmodal .dperson .dinner{gap:6px}
 .wmodal .dperson .dinner>.debt:last-child{border-bottom:1px solid transparent}
