@@ -835,6 +835,18 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .zchain .zrow.zsum{border-top:1px solid color-mix(in srgb,var(--accent) 55%,transparent);border-bottom:0}
 .zchain .zrow.zsum>b{font-size:var(--fs-xl);color:var(--accent)}
 .ztwo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* the zakat window made simpler (owner, 14.11.2026: «слишком сложно для глаз»): one big sum, the count folded, quiet notes */
+.zok{margin:0;font-size:var(--fs-sm);color:var(--muted)}
+.zhero{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:var(--r-md);padding:14px 14px 12px}
+.zhero .zcap{font-size:var(--fs-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.zhero>b{font-size:34px;line-height:1.15;font-weight:600;color:var(--accent)}
+.zhero small{font-size:var(--fs-xs);color:var(--muted)}
+.zfold summary{list-style:none;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--field-line);border-radius:var(--r-md);background:var(--inset);padding:12px;font-weight:500;cursor:pointer}
+.zfold summary::-webkit-details-marker{display:none}
+.zfold summary::after{content:'⌄';content:'⌄'/'';color:var(--muted)}
+.zfold[open] summary::after{content:'⌃';content:'⌃'/''}
+.zfold[open] summary{margin-bottom:10px}
+.zfold[open]>.zcard+.zcard{margin-top:10px}
 .ztwo>:only-child{grid-column:1/-1}
 .zrow.zp+.zrow{padding-top:2px}
 /* a word in place of a sum («не задан», «Долгов нет») is text, not a number */
@@ -905,7 +917,7 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 #zakatSheet .zdue span{font-size:var(--fs-xs)}
 #zakatSheet .zdue b{font-size:clamp(16px,5.5vw,20px)}
 #zakatSheet .zhint{padding:7px 10px;font-size:var(--fs-xs)}
-#zakatSheet .zk .zfine{font-size:var(--fs-2xs)}
+#zakatSheet .zk .zfine{font-size:var(--fs-2xs);background:none;padding:0 2px;color:var(--muted)}
 #zakatSheet .zs{font-size:var(--fs-xs)}
 #zakatSheet .zfoot{padding:5px 0 7px;font-size:var(--fs-2xs)}
 #zakatSheet .zk .zwarn{font-size:var(--fs-xs)}
@@ -3469,18 +3481,20 @@ function renderZakat(){
     /* zakat given early goes to this year: what is left to give by the due date */
     const ea=cur.below?0:r2(Math.min(cur.adv,cur.amount)), rest=r2(Math.max(0,cur.amount-cur.adv));
     if(due) html+=due;
-    else if(L.due>0||L.paid>0) html+=`<div class="zcard">${zRow('Долгов по закяту нет','✓')}</div>`;
+    else if(L.due>0||L.paid>0) html+=`<p class="zok">Долгов по закяту нет ✓</p>`;
     if(z.start) dip=zDip(z,M);
     const ended=dip&&dip.ended;
+    const hero=!!z.start&&!ended&&!cur.below, heroSum=ea>=0.01?rest:cur.amount;
+    if(hero) html+=`<div class="zhero"><span class="zcap">${ea>=0.01?'Осталось отдать':'Закят к сроку'}</span><b>${money(heroSum)}</b><small>к сроку ${gDate(end)}${days>0?` · через ${days} ${plural(days,'день','дня','дней')}`:''}</small><small>Прогноз: сумма меняется вместе с остатками</small></div><details class="zfold"><summary>Как посчитано</summary>`;
     html+=`<div class="zcard zchain">${zRow('Облагается сейчас',money(cur.base))}${zRow('Нисаб',money(nisab),`${NISAB_G[metal]} г ${METAL[metal]} × ${money(+z.price)}`,'m')}
       ${!z.start||ended?'':cur.below?zRow('Закят к сроку','—','сейчас ниже нисаба — закята не будет')
         /* given early: the year's zakat, minus what was given, what is left by the due date — short rows, not one long sentence */
-        :(ea>=0.01?zRow('Закят за год',money(cur.amount),ZAKAT_PCT+' от облагаемого')+zRow('Отдано досрочно',money(-ea),'','m')+zRow('Осталось отдать',money(rest),'к сроку '+gDate(end),'zsum')
-        :zRow('Закят к сроку',money(cur.amount),gDate(end),'zsum'))+'<p class="zfoot">Прогноз: сумма меняется вместе с остатками</p>'}</div>`;
+        :(ea>=0.01?zRow('Закят за год',money(cur.amount),ZAKAT_PCT+' от облагаемого')+zRow('Отдано досрочно',money(-ea),'','m')+(hero?'':zRow('Осталось отдать',money(rest),'к сроку '+gDate(end),'zsum'))
+        :(hero?zRow('Закят за год',money(cur.amount),ZAKAT_PCT+' от облагаемого'):zRow('Закят к сроку',money(cur.amount),gDate(end),'zsum')))+(hero?'':'<p class="zfoot">Прогноз: сумма меняется вместе с остатками</p>')}</div>`;
     if(z.start){
       html+=ended
         ?`<div class="zwarn"><p><b>Срок наступил ${bothDates(end)}</b>, но за год сумма опускалась ниже нисаба — решите ниже, как быть с этим годом.</p></div>`
-        :`<div class="zcard zdates">${zDateRow('Начало года',z.start)}${zDateRow('Срок',end,days>0?`через ${days} ${plural(days,'день','дня','дней')}`:'')}</div>`;
+        :`<div class="zcard zdates">${zDateRow('Начало года',z.start)}${zDateRow('Срок',end,days>0?`через ${days} ${plural(days,'день','дня','дней')}`:'')}</div>${hero?'</details>':''}`;
       /* the year is over and on the due date the records show less than nisab: «оставить» would only save «закята не было» —
          so the choice is to charge the year anyway (the records are wrong) */
       const endV=ended?r2(zPool(z,M,end)):0, endLow=ended&&!atNisab(endV,nisab), fc=endLow?zCalc(end,z,M):null;
