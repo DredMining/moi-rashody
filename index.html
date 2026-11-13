@@ -2771,6 +2771,8 @@ const limForm=(p,budget)=>{const er=`<p class="err" role="alert" id="${p}Err" hi
   return `<form class="inline-edit" id="${p}Form" novalidate>${p==='lim'?er:''}<input id="${p}Input" class="num" inputmode="decimal" placeholder="Например, 30000" value="${budget?vIn(budget):''}" aria-label="Лимит личных расходов на месяц"><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="${p}Cancel">Отмена</button>${p==='lim'?'':er}</form>`};
 function limFormOn(p,budget,done,then){
   const bf=$(p+'Form'), er=$(p+'Err'), inp=$(p+'Input');
+  /* the limit there is chosen whole on the way in: the first figure typed takes its place (owner, 13.11.2026; was put before it, «530000») */
+  inp.addEventListener('focus',()=>{if(inp.value)inp.select()},{once:true});
   inp.oninput=()=>{delete bf.dataset.armed;er.hidden=true};
   bf.onsubmit=e=>{e.preventDefault();const s=inp.value.trim(), v=s?parseNum(s):0;
     if(isNaN(v)){delete bf.dataset.armed;er.textContent=NUM_ERR+'.';er.hidden=false;fieldErr(inp,er);inp.focus({preventScroll:true});return}
