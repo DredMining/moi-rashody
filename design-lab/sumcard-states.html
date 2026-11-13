@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#000000">
+<title>Макет · карточка по мере трат</title>
+<!-- Макет для Али (13.11.2026): как карточка лимита «Учёта» меняется по мере трат — сейчас (ступени) и три варианта. Ползунок «потрачено»
+     двигает траты от 0 до перерасхода. Основное приложение (index.html) эту страницу не подключает. Суммы — примеры, ничего не сохраняется. -->
+<style>
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:400;font-display:swap;src:url(../fonts/GolosText-cyrillic-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:400;font-display:swap;src:url(../fonts/GolosText-latin-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:500;font-display:swap;src:url(../fonts/GolosText-cyrillic-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:500;font-display:swap;src:url(../fonts/GolosText-latin-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:600;font-display:swap;src:url(../fonts/GolosText-cyrillic-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:600;font-display:swap;src:url(../fonts/GolosText-latin-q5uCsoe9Lv.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:400;font-display:swap;src:url(../fonts/GolosText-rub400-2626f3c1.woff2) format('woff2');unicode-range:U+20BD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:500;font-display:swap;src:url(../fonts/GolosText-rub500-1ffbb4e5.woff2) format('woff2');unicode-range:U+20BD}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:600;font-display:swap;src:url(../fonts/GolosText-rub600-48126017.woff2) format('woff2');unicode-range:U+20BD}
+
+/* цвета — тёмная тема приложения */
+:root{
+  --bg:#000; --surface:#161215; --inset:#221C20; --raised:#3B3237; --ink:#F7F3F4; --muted:#A79DA2; --field-line:#7A6E74; --track:#4A4046; --seg-ring:#958990;
+  --burgundy:#752238; --burgundy-light:#C34E6C; --good:#5AD49B; --warn:#F2B950; --bad:#FF5252; --trip:#7A5A1E;
+  --safe-top:max(env(safe-area-inset-top,0px),var(--simulator-safe-top,0px));
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scrollbar-width:none}
+html::-webkit-scrollbar{display:none}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.5 "Golos Text",system-ui,-apple-system,sans-serif;font-variant-numeric:tabular-nums;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+main{padding:calc(var(--safe-top) + 8px) 16px 40px;display:flex;flex-direction:column;gap:16px}
+body::before{content:"";position:fixed;left:0;right:0;top:0;height:var(--safe-top);background:var(--bg);z-index:15}
+.tag{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--burgundy-light)}
+.seg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;padding:3px;background:var(--inset);border:1px solid var(--field-line);border-radius:14px}
+.seg button{min-height:38px;border-radius:11px;font-size:14px;font-weight:500;color:var(--muted);padding:2px 4px;line-height:1.2}
+.seg button[aria-pressed="true"]{background:var(--raised);color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1.5px var(--seg-ring)}
+.why{font-size:13px;line-height:1.45;color:var(--muted)}
+.why b{color:var(--ink);font-weight:600}
+
+/* карточка — как в приложении (вариант «Л») */
+.sumcard{--st:var(--good);--st-ink:var(--good);position:relative;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px;
+  background:radial-gradient(120% 120% at 100% 0%,color-mix(in srgb,var(--st) 22%,var(--surface)),var(--surface) 62%);transition:background .25s}
+.tt{position:absolute;top:16px;right:16px;width:32px;height:32px;border:1px solid var(--field-line);border-radius:50%;background:var(--inset);font-size:15px;display:grid;place-items:center}
+.lbl{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;line-height:1.2;color:var(--st-ink);padding-right:34px;transition:color .25s}
+.big{font-weight:700;font-size:32px;line-height:1.1;letter-spacing:-.01em;margin-top:-4px}
+.lmsg{margin-top:-6px;font-size:13px;line-height:1.3;color:var(--muted)}
+.lmsg:empty{display:none}
+.meter{height:4px;border-radius:99px;background:var(--track);overflow:hidden}
+.meter i{display:block;height:100%;border-radius:99px;background:var(--st);transition:width .15s,background .25s}
+.lfoot{display:flex;justify-content:space-between;gap:2px 10px;flex-wrap:wrap;font-size:12px;line-height:1.3;color:var(--muted)}
+.lfoot b{font-weight:500;color:var(--ink)}
+.dotted{text-decoration:underline dotted;text-underline-offset:3px}
+
+/* ползунок «потрачено» */
+.ctl{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:20px;background:var(--surface)}
+.ctl .row{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--muted)}
+.ctl .row b{color:var(--ink);font-size:15px;font-weight:600}
+input[type=range]{width:100%;height:36px;accent-color:var(--burgundy-light)}
+.quick{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.quick button{min-height:32px;border-radius:10px;background:var(--inset);font-size:12px;color:var(--muted)}
+.quick button:active{background:var(--raised)}
+/* шкала: где меняется подпись и цвет в выбранном варианте */
+.scale{position:relative;height:16px;border-radius:8px;overflow:hidden;display:flex}
+.scale i{flex:1}
+.marks{position:relative;height:14px;font-size:10px;color:var(--muted)}
+.marks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.sumcard,.lbl,.meter i{transition:none}}
+</style>
+</head>
+<body>
+<main>
+  <span class="tag">Макет · карточка по мере трат</span>
+  <div class="seg" id="vars" role="group" aria-label="Вариант">
+    <button type="button" data-v="now" aria-pressed="true">Сейчас: 4 ступени</button>
+    <button type="button" data-v="smooth" aria-pressed="false">Плавный цвет</button>
+    <button type="button" data-v="steps" aria-pressed="false">Больше ступеней</button>
+    <button type="button" data-v="both" aria-pressed="false">Плавно + ступени</button>
+    <button type="button" data-v="many" aria-pressed="false">Много ступеней</button>
+    <button type="button" data-v="manysm" aria-pressed="false">Много + плавно</button>
+  </div>
+
+  <section class="sumcard" id="card" aria-live="polite">
+    <span class="tt" aria-hidden="true">☀️</span>
+    <span class="lbl" id="lbl"></span>
+    <span class="big" id="big"></span>
+    <span class="lmsg" id="msg"></span>
+    <div class="meter"><i id="bar"></i></div>
+    <div class="lfoot"><span>потрачено <b id="spent"></b> <span class="dotted">из 30&nbsp;000&nbsp;₽</span></span><span>вне лимита <b>1&nbsp;250&nbsp;₽</b></span></div>
+  </section>
+
+  <div class="ctl">
+    <div class="row"><span>Потрачено в лимит</span><b id="val"></b></div>
+    <input type="range" id="rng" min="0" max="36000" step="50" value="0" aria-label="Сколько потрачено">
+    <div class="quick" id="quick">
+      <button type="button" data-p="0">0</button><button type="button" data-p="30">30 %</button><button type="button" data-p="60">60 %</button>
+      <button type="button" data-p="90">90 %</button><button type="button" data-p="100">100 %</button><button type="button" data-p="115">115 %</button>
+    </div>
+    <div class="scale" id="scale" aria-hidden="true"></div>
+    <div class="marks" id="marks" aria-hidden="true"></div>
+  </div>
+  <p class="why" id="why"></p>
+</main>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const LIMIT=30000, sp=' ';
+const now=new Date(), dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(), left=dim-now.getDate()+1;
+const MONTH=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'][now.getMonth()];
+const rub=v=>String(Math.round(Math.abs(v))).replace(/\B(?=(\d{3})+(?!\d))/g,sp)+sp+'₽';
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+/* плавный цвет: зелёный → жёлтый к 60 % → светлый бордовый к 85 % → красный к 100 %, дальше красный */
+const STOPS=[[0,'--good'],[60,'--warn'],[85,'--burgundy-light'],[100,'--bad']];
+function smoothColor(p){
+  if(p<=0)return 'var(--good)';if(p>=100)return 'var(--bad)';
+  for(let i=1;i<STOPS.length;i++){const [a,ca]=STOPS[i-1],[b,cb]=STOPS[i];if(p<=b){const t=(p-a)/(b-a);return `color-mix(in oklch,var(${cb}) ${(t*100).toFixed(1)}%,var(${ca}))`}}
+}
+/* ступени: как сейчас — и больше ступеней */
+const NOW=[[0,'Бюджет доступен','var(--burgundy)','var(--burgundy-light)'],[0.01,'Можно потратить','var(--good)','var(--good)'],[85,'Осталось до лимита','var(--burgundy-light)','var(--burgundy-light)'],[100.01,'Превышение лимита','var(--bad)','var(--bad)']];
+const MORE=[[0,'Бюджет доступен','var(--good)','var(--good)'],[0.01,'Можно потратить','var(--good)','var(--good)'],[50,'Больше половины позади','var(--warn)','var(--warn)'],[85,'Осталось до лимита','var(--burgundy-light)','var(--burgundy-light)'],[100.01,'Превышение лимита','var(--bad)','var(--bad)']];
+/* много ступеней: подпись меняется каждые 10–25 %; цвет ступени — цвет плавной шкалы в её начале */
+const MANY=[[0,'Бюджет доступен'],[0.01,'Можно потратить'],[25,'Тратишь спокойно'],[50,'Половина позади'],[65,'Больше половины позади'],
+  [80,'Пора притормозить'],[90,'Осталось совсем немного'],[99.995,'Лимит исчерпан'],[100.01,'Превышение лимита']].map(([p,l])=>{const c=p<=0.01?'var(--good)':smoothColor(Math.min(p,100));return [p,l,c,c]});
+const step=(T,p)=>{let s=T[0];for(const t of T)if(p>=t[0])s=t;return s};
+const table=()=>v==='many'||v==='manysm'?MANY:v==='steps'||v==='both'?MORE:NOW, smoothOn=()=>v==='smooth'||v==='both'||v==='manysm';
+const WHY={
+  now:'<b>Сейчас.</b> Цвет и подпись меняются трижды за месяц: на первой трате, на 85 % и при перерасходе. Между ними меняются только цифры и длина полосы.',
+  smooth:'<b>Плавный цвет.</b> Подсветка, полоса и подпись понемногу меняют цвет с каждой тратой: зелёный → жёлтый к 60 % → бордовый к 85 % → красный к 100 %. Подписи — как сейчас.',
+  steps:'<b>Больше ступеней.</b> Цвет и подпись меняются чаще: на первой трате, на половине («Больше половины позади», жёлтый), на 85 % и при перерасходе.',
+  both:'<b>Плавно + ступени.</b> Цвет перетекает с каждой тратой, а подписи — пять ступеней, как в «Больше ступеней».',
+  many:'<b>Много ступеней.</b> Девять подписей: «Бюджет доступен» → «Можно потратить» → с 25 % «Тратишь спокойно» → с 50 % «Половина позади» → с 65 % «Больше половины позади» → с 80 % «Пора притормозить» → с 90 % «Осталось совсем немного» → ровно 100 % «Лимит исчерпан» → «Превышение лимита». Цвет меняется вместе с подписью.',
+  manysm:'<b>Много + плавно.</b> Те же девять подписей, а цвет ещё и перетекает с каждой тратой между ними.'};
+let v='now';
+function draw(){
+  const s=+$('rng').value, p=s/LIMIT*100, rest=LIMIT-s, card=$('card');
+  const T=table(), st=step(T,p);
+  let glow=st[2], ink=st[3];
+  if(smoothOn())glow=ink=smoothColor(p);
+  card.style.setProperty('--st',glow);card.style.setProperty('--st-ink',ink);
+  $('lbl').textContent=st[1];
+  $('big').textContent=(rest<0?'−':'')+rub(rest);
+  const pd=rest>0?Math.floor(rest/left):0;
+  $('msg').textContent=rest<0?'':pd>=1?`≈${sp}${rub(pd)} в день до ${dim}${sp}${MONTH}`:'';
+  $('bar').style.width=Math.min(100,p)+'%';
+  $('spent').textContent=rub(s);$('val').textContent=rub(s)+' · '+Math.round(p)+' %';
+}
+/* шкала под ползунком: цвет на каждом проценте и точки смены подписи в выбранном варианте */
+function scale(){
+  const T=table();let h='';
+  for(let p=0;p<=120;p+=2){const c=smoothOn()?smoothColor(p):step(T,p)[2];h+=`<i style="background:${c}"></i>`}
+  $('scale').innerHTML=h;
+  const seen=new Set();
+  $('marks').innerHTML=T.filter(t=>t[0]>0).map(t=>Math.round(t[0])).filter(r=>!seen.has(r)&&seen.add(r)).map(r=>`<span style="left:${r/120*100}%">${r===0?'1-я':r+'%'}</span>`).join('');
+}
+function pick(n){v=n;$('vars').querySelectorAll('[data-v]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===n)));$('why').innerHTML=WHY[n];scale();draw()}
+$('vars').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b)pick(b.dataset.v)});
+$('rng').addEventListener('input',draw);
+$('quick').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(!b)return;$('rng').value=Math.round(LIMIT*b.dataset.p/100);draw()});
+pick('now');
+</script>
+</body>
+</html>
