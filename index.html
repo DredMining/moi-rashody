@@ -540,6 +540,12 @@ input.num::placeholder{font-family:var(--f-body)}
 .recs .itemacts{padding-top:0;gap:0 12px}
 .recs .itemacts .linkbtn,.recs .itemacts .del{min-height:var(--h-m)}
 .recs .itemacts .del{padding-block:6px}
+/* Записи: сетка шрифтов 12/14/16/18/22 и высот 36/44 (Али, 14.11.2026) */
+:root #viewHistory .monthbar .title{font-size:18px}
+:root #viewHistory #scopeFilter button{min-height:36px}
+#accFilter .chip{min-height:36px;font-size:14px;padding:4px 12px}
+.recs .item{font-size:14px;min-height:44px;box-sizing:border-box;padding-block:2px}
+.recs .itemacts .linkbtn,.recs .itemacts .del{font-size:14px}
 #recent .item{font-size:var(--fs-sm);gap:var(--sp-2);padding-block:3px}
 #recent .item>.ic{width:24px;height:24px;font-size:12px}
 #recent .item .what>span{font-size:var(--fs-2xs)}
@@ -1083,7 +1089,12 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dcard-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .dcard-t{display:flex;flex-direction:column;min-width:0}
 .dcard-t>span{font-size:var(--fs-xs);color:var(--muted);line-height:1.3}
-.dcard-head .dp-x{width:30px;height:30px;min-height:30px;flex:none}
+.dperson .dp-x,#debtAddModal .dp-x,#oweAddModal .dp-x,[data-debt-editor] .dp-x,.dcard-head .dp-x{width:36px;height:36px;min-height:36px;flex:none}
+/* вкладка «Долги»: на сетку 12/14/16/18/22 и высот 36/44 */
+#viewDebts h2{font-size:12px}
+#debtTotal{font-size:22px}
+.debt-add-trigger{padding-top:0;padding-bottom:0}
+.debt-add-trigger::after{line-height:0}
 .dcard-sum{font-size:22px;font-weight:700;line-height:1.15}
 .dperson .dcard .acts{margin-top:4px;padding-top:6px;gap:6px}
 .dperson .dcard .debt-return{padding:4px}
