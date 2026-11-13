@@ -2607,7 +2607,7 @@ function renderTrip(trip){
     /* an overspend (his own money, counted in the limit) doesn't vanish with a typed balance: said here, and kept as «Докинул на командировку» */
     const ov=got&&bal<0?r2(-bal):0;
     host.insertAdjacentHTML('beforeend',win('t','Сколько сейчас осталось командировочных',`<input id="tInput" class="num" inputmode="decimal" placeholder="Например, 12000" value="${st&&bal>=0?vIn(bal):''}" aria-label="Остаток командировочных">`,'Сохранить',(ov?`Сейчас перерасход ${money(ov)} — он запишется вашим расходом «${CAT.trip_extra.name}» и останется в лимите месяца. `:'')+'Дальше к этой сумме прибавятся новые командировочные и вычтутся траты в командировке.'));
-    $('tInput').oninput=()=>$('tErr').hidden=true;
+    $('tInput').oninput=()=>$('tErr').hidden=true;selIn($('tInput'));
     $('tForm').onsubmit=async e=>{e.preventDefault();const day=today(), raw=$('tInput').value, v=parseNum(raw);if(!(v>=0)||v>MAX_ENTRY){const er=$('tErr');er.textContent=v>MAX_ENTRY?BIG_ERR():NUM_ERR+'.';er.hidden=false;fieldErr($('tInput'),er);$('tInput').focus({preventScroll:true});return}state.editing=null;
       const t=tripNow(), over=t.got&&t.left<0?r2(-t.left):0, od=overDay(day), at=Date.now(), st0=state.settings.tripStart||null;
       if(!over){if(await saveSettings({tripStart:{amount:v,at}})) toast('Остаток командировочных: '+money(v));else reopen('trip','#tInput',raw);return}
@@ -2623,7 +2623,7 @@ function renderTrip(trip){
     const {px,p0}=lateTrip();
     host.insertAdjacentHTML('beforeend',win('a','Пришли командировочные на Т\u2011Банк',`<input id="aInput" class="num" inputmode="decimal" value="${TRIP_ALLOWANCE}" aria-label="Сумма командировочных">`
       +(px?`<label class="echk"><input type="checkbox" id="aPast"${p0?' checked':''}>Это за прошлую командировку: закончилась ${dayText(anchorDay({at:+state.settings.tripEnd}))}, докинули из своих ${money(+px.amount)}</label>`:''),'Записать'));
-    $('aInput').oninput=()=>$('aErr').hidden=true;
+    $('aInput').oninput=()=>$('aErr').hidden=true;selIn($('aInput'));
     $('aForm').onsubmit=async e=>{e.preventDefault();const day=today(), raw=$('aInput').value, v=parseNum(raw);if(!(v>0)||v>MAX_ENTRY){const er=$('aErr');er.textContent=v>MAX_ENTRY?BIG_ERR():raw.trim()&&isNaN(v)?NUM_ERR+'.':'Введите сумму больше нуля.';er.hidden=false;fieldErr($('aInput'),er);$('aInput').focus({preventScroll:true});return}
       const r0={type:'in',amount:Math.round(v*100)/100,cat:'t_allow',scope:'trip',acc:TRIP_ACC,date:day,note:'',created:Date.now()};
       /* that trip takes it as a record dated back into it does (pastTrip): its result and report follow in the same write —
@@ -2686,7 +2686,7 @@ function renderBroker(inc,out){
       if(!await saveSettings({brokerPct:v,brokerPctHist:h},true)){reopen('pct','#pInput',raw);const x=$('pErr');if(x){x.textContent=saveErr(saveSettings.err);x.hidden=false}else toast(saveErr(saveSettings.err));return}
       toast(v?`На брокер ${fmt.format(v)}% — с новых доходов`:'Процент на брокер — 0: с новых доходов ничего не откладывается');back('pSet')};
     $('pCancel').onclick=()=>{state.editing=null;render();back('pSet')};
-    $('pInput').oninput=()=>$('pErr').hidden=true;
+    $('pInput').oninput=()=>$('pErr').hidden=true;selIn($('pInput'));
     return '';
   }
   if(state.editing==='owed'){
@@ -2699,7 +2699,7 @@ function renderBroker(inc,out){
       if(!(v>=0)||v>MAX_ENTRY){er.textContent=v>MAX_ENTRY?BIG_ERR():NUM_ERR+'.';er.hidden=false;fieldErr($('oInput'),er);$('oInput').focus({preventScroll:true});return}
       state.editing=null;if(!await saveSettings({brokerOwed:{amount:v,at:Date.now()}},true)){reopen('owed','#oInput',s);const x=$('oErr');if(x){x.textContent=saveErr(saveSettings.err);x.hidden=false}else toast(saveErr(saveSettings.err));return}toast('Долг себе на брокер: '+money(v));back('oSet')};
     $('oCancel').onclick=()=>{state.editing=null;render();back('oSet')};
-    $('oInput').oninput=()=>$('oErr').hidden=true;
+    $('oInput').oninput=()=>$('oErr').hidden=true;selIn($('oInput'));
     return '';
   }
   /* a card of short rows: the % (its link on the right), the month — положено, отложено, what is left to put aside — and the debt to himself */
@@ -2767,12 +2767,14 @@ function perDay(left){
    (not the same quick double tap). done: the form closes (before the save draws the screen again); then: after it is drawn.
    The limit window stands on the screen's bottom: there its message goes above the field — what grows moves up only what is above it,
    so «Сохранить» stays under the finger for the second tap */
+/* a number already in a field (the limit, %, «Долг себе», what's left of the trip money, an account) is chosen whole on the way in:
+   the first figure typed takes its place (owner, 13.11.2026; was put before it, «530000») */
+function selIn(x){if(x)x.addEventListener('focus',()=>{if(x.value)x.select()},{once:true})}
 const limForm=(p,budget)=>{const er=`<p class="err" role="alert" id="${p}Err" hidden></p>`;
   return `<form class="inline-edit" id="${p}Form" novalidate>${p==='lim'?er:''}<input id="${p}Input" class="num" inputmode="decimal" placeholder="Например, 30000" value="${budget?vIn(budget):''}" aria-label="Лимит личных расходов на месяц"><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="${p}Cancel">Отмена</button>${p==='lim'?'':er}</form>`};
 function limFormOn(p,budget,done,then){
   const bf=$(p+'Form'), er=$(p+'Err'), inp=$(p+'Input');
-  /* the limit there is chosen whole on the way in: the first figure typed takes its place (owner, 13.11.2026; was put before it, «530000») */
-  inp.addEventListener('focus',()=>{if(inp.value)inp.select()},{once:true});
+  selIn(inp);
   inp.oninput=()=>{delete bf.dataset.armed;er.hidden=true};
   bf.onsubmit=e=>{e.preventDefault();const s=inp.value.trim(), v=s?parseNum(s):0;
     if(isNaN(v)){delete bf.dataset.armed;er.textContent=NUM_ERR+'.';er.hidden=false;fieldErr(inp,er);inp.focus({preventScroll:true});return}
@@ -3024,7 +3026,7 @@ function renderWallets(){
       else{reopen('w-'+ed.id,'#wInput',raw);const er=$('wErr');if(er){er.textContent=saveErr(saveSettings.err);er.hidden=false}else toast(saveErr(saveSettings.err))}};
     $('wCancel').onclick=()=>{fresh();state.editing=null;render()};
     /* typing the sum again takes the old message away, as in the main form */
-    $('wInput').oninput=()=>{$('wErr').hidden=true;$('wInput').setAttribute('aria-invalid',false)};
+    $('wInput').oninput=()=>{$('wErr').hidden=true;$('wInput').setAttribute('aria-invalid',false)};selIn($('wInput'));
   }
 }
 
