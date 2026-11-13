@@ -1341,7 +1341,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   :root #addBox .amount input{min-height:46px;font-size:24px;font-weight:600}
   :root #addBox .amount span{font-size:var(--fs-xl)}
   :root #addBox .seg{padding:3px;gap:3px}
-  :root #addBox .seg button{font-size:var(--fs-base);min-height:36px}
+  :root #addBox .seg button{font-size:14px;min-height:36px}
   /* «Новая запись»: the two switches are glass with a gliding capsule too (owner, 12.11.2026), 3px inside the rim; the capsule keeps the
      picked one's ring — «Расход» wine, «Доход» green (both at 55%), «Командировка» gold, «Личное» the plate's own light edge */
   :root #addBox .seg .sv-cap{top:3px;bottom:3px}
@@ -1360,6 +1360,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
      stay as tall as the other tiles of the window);
      a second button beside the main one (two of them side by side wrap on a narrower phone) */
   @media (min-width:360px){:root #statSeg button{font-size:clamp(11px,2.9vw,12px)}}
+  /* the owner: 14px in every glass switch (13.11.2026); the five words of Итоги fit it from a 430px-wide phone, narrower ones keep 11–12px */
+  @media (min-width:430px){:root #statSeg button{font-size:14px;padding-inline:2px}}
   @media (min-width:430px){:root .tiles:not(.accs):has(>.tile:nth-child(5):last-child)>.tile{font-size:11px;min-height:calc(53px + 2.4 * var(--fs-2xs))}}
   :root .ghost{font-size:var(--fs-base)}
   /* the sums of the zakat card on Деньги stand three in a row: at 15px they run into the card's padding on a 375–390px phone */
