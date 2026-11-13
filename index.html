@@ -111,7 +111,7 @@ img{max-width:100%}
   /* the icons of the tabs not picked: the interface's own grey here (owner, 12.11.2026) */
   --tab-ico:var(--muted);
   /* the bar's place: its height, its gap to the screen's edge (over the home indicator on an iPhone), the room the page keeps under itself for it */
-  --tabbar-h:50px; --tabbar-gap:max(10px,calc(env(safe-area-inset-bottom,0px) - 15px),calc(var(--simulator-safe-bottom,0px) - 15px));
+  --tabbar-h:60px; --tabbar-gap:max(10px,calc(env(safe-area-inset-bottom,0px) - 15px),calc(var(--simulator-safe-bottom,0px) - 15px));
   --tabbar-room:calc(var(--tabbar-h) + var(--tabbar-gap) + 6px);
   color-scheme:dark;
 }
@@ -215,7 +215,7 @@ button{cursor:pointer}
 /* The bar itself takes the touch — no scroll, no text picking, no callout */
 .tabs,.tabs *{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .tabs button{position:relative;z-index:1;border:0;background:transparent;padding:2px 0 1px;min-width:0;min-height:calc(var(--tabbar-h) - 12px);display:flex;flex-direction:column;align-items:center;gap:0;color:var(--muted);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent;outline-offset:-3px;border-radius:26px}
-.tabs .ico{position:relative;width:min(56px,100%);height:22px;border-radius:11px;display:grid;place-items:center;margin-bottom:-1px}
+.tabs .ico{position:relative;width:min(56px,100%);height:28px;border-radius:14px;display:grid;place-items:center;margin-bottom:-1px}
 .tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
 /* the icons of the tabs not picked (--tab-ico): grey in «Чёрный и бордо», a lighter accent in the night-blue look; at full strength,
    the names stay grey */
