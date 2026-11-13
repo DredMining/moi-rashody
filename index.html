@@ -1462,9 +1462,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
      the first thing typed; its switches 38px in a 3px groove, its chips 36px. The picked half of a switch follows the corner of its groove */
   :root .submit{min-height:52px}
   /* «Новая запись» set its own sizes (owner, 12.11.2026): switches 44px, the sum 46px, its button 48px */
-  :root #addBox .submit{min-height:48px}
-  :root #addBox .amount input{min-height:46px;font-size:24px;font-weight:600}
-  :root #addBox .amount span{font-size:var(--fs-xl)}
+  :root #addBox .submit{min-height:44px}
+  :root #addBox .amount input{min-height:44px;font-size:22px;font-weight:600}
+  :root #addBox .amount span{font-size:18px}
   :root #addBox .seg{padding:3px;gap:3px}
   :root #addBox .seg button{font-size:14px;min-height:36px}
   /* «Новая запись»: the two switches are glass with a gliding capsule too (owner, 12.11.2026), 3px inside the rim; the capsule keeps the
@@ -1478,7 +1478,15 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   [data-theme="light"] #addBox .seg:has(#tIn[aria-pressed="true"]) .sv-cap{background:var(--seg-in)}
   [data-theme="light"] #addBox .seg:has(#sOwn[aria-pressed="true"]) .sv-cap{background:var(--seg-own)}
   [data-theme="light"] #addBox .seg:has(#sTrip[aria-pressed="true"]) .sv-cap{background:var(--seg-trip)}
-  :root #addBox .chipbtn{font-size:var(--fs-sm);min-height:var(--h-m);padding:4px 14px}
+  :root #addBox .chipbtn{font-size:14px;min-height:var(--h-m);padding:4px 14px}
+  /* «Учёт»: единая сетка шрифтов 12/14/16/18/22 (крупное число карточки — 32, решение Али 14.11.2026) и высот 36/44, как на «Долгах» */
+  :root #viewLedger h2,:root .sumcard #sumLabel{font-size:12px}
+  :root .sumcard .lmsg{font-size:14px}
+  :root .sumcard .theme-toggle{width:var(--h-m);height:var(--h-m);font-size:16px}
+  :root #toHistory{font-size:14px}
+  :root #viewLedger .alert .primary,:root #viewLedger .alert .ghost{font-size:14px}
+  :root #recent .item{font-size:14px;min-height:44px;box-sizing:border-box;padding-block:2px}
+  :root .zcard:has(#limSet) .zrow .zre{font-size:14px;min-height:44px;box-sizing:border-box}
   :root .seg button{border-radius:calc(var(--r-md) - 3px)}
   /* where the larger type would not fit, the size stays as it was: the five words of the Итоги switch (11–12px by the screen's width,
      as before; under 360px its own rule above still holds); five tiles in one row («Копильник» keeps its 7px to spare; the tiles
