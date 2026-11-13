@@ -34,7 +34,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 main{padding:calc(var(--safe-top) + 8px) 16px 40px;display:flex;flex-direction:column;gap:16px}
 body::before{content:"";position:fixed;left:0;right:0;top:0;height:var(--safe-top);background:var(--bg);z-index:15}
 .tag{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--burgundy-light)}
-.seg{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px;background:var(--inset);border:1px solid var(--field-line);border-radius:14px}
+.seg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;padding:3px;background:var(--inset);border:1px solid var(--field-line);border-radius:14px}
 .seg button{min-height:38px;border-radius:11px;font-size:14px;font-weight:500;color:var(--muted);padding:2px 4px;line-height:1.2}
 .seg button[aria-pressed="true"]{background:var(--raised);color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1.5px var(--seg-ring)}
 .why{font-size:13px;line-height:1.45;color:var(--muted)}
@@ -78,6 +78,8 @@ input[type=range]{width:100%;height:36px;accent-color:var(--burgundy-light)}
     <button type="button" data-v="smooth" aria-pressed="false">Плавный цвет</button>
     <button type="button" data-v="steps" aria-pressed="false">Больше ступеней</button>
     <button type="button" data-v="both" aria-pressed="false">Плавно + ступени</button>
+    <button type="button" data-v="many" aria-pressed="false">Много ступеней</button>
+    <button type="button" data-v="manysm" aria-pressed="false">Много + плавно</button>
   </div>
 
   <section class="sumcard" id="card" aria-live="polite">
@@ -119,18 +121,24 @@ function smoothColor(p){
 /* ступени: как сейчас — и больше ступеней */
 const NOW=[[0,'Бюджет доступен','var(--burgundy)','var(--burgundy-light)'],[0.01,'Можно потратить','var(--good)','var(--good)'],[85,'Осталось до лимита','var(--burgundy-light)','var(--burgundy-light)'],[100.01,'Превышение лимита','var(--bad)','var(--bad)']];
 const MORE=[[0,'Бюджет доступен','var(--good)','var(--good)'],[0.01,'Можно потратить','var(--good)','var(--good)'],[50,'Больше половины позади','var(--warn)','var(--warn)'],[85,'Осталось до лимита','var(--burgundy-light)','var(--burgundy-light)'],[100.01,'Превышение лимита','var(--bad)','var(--bad)']];
+/* много ступеней: подпись меняется каждые 10–25 %; цвет ступени — цвет плавной шкалы в её начале */
+const MANY=[[0,'Бюджет доступен'],[0.01,'Можно потратить'],[25,'Тратишь спокойно'],[50,'Половина позади'],[65,'Больше половины позади'],
+  [80,'Пора притормозить'],[90,'Осталось совсем немного'],[99.995,'Лимит исчерпан'],[100.01,'Превышение лимита']].map(([p,l])=>{const c=p<=0.01?'var(--good)':smoothColor(Math.min(p,100));return [p,l,c,c]});
 const step=(T,p)=>{let s=T[0];for(const t of T)if(p>=t[0])s=t;return s};
+const table=()=>v==='many'||v==='manysm'?MANY:v==='steps'||v==='both'?MORE:NOW, smoothOn=()=>v==='smooth'||v==='both'||v==='manysm';
 const WHY={
   now:'<b>Сейчас.</b> Цвет и подпись меняются трижды за месяц: на первой трате, на 85 % и при перерасходе. Между ними меняются только цифры и длина полосы.',
   smooth:'<b>Плавный цвет.</b> Подсветка, полоса и подпись понемногу меняют цвет с каждой тратой: зелёный → жёлтый к 60 % → бордовый к 85 % → красный к 100 %. Подписи — как сейчас.',
   steps:'<b>Больше ступеней.</b> Цвет и подпись меняются чаще: на первой трате, на половине («Больше половины позади», жёлтый), на 85 % и при перерасходе.',
-  both:'<b>Плавно + ступени.</b> Цвет перетекает с каждой тратой, а подписи — пять ступеней, как в «Больше ступеней».'};
+  both:'<b>Плавно + ступени.</b> Цвет перетекает с каждой тратой, а подписи — пять ступеней, как в «Больше ступеней».',
+  many:'<b>Много ступеней.</b> Девять подписей: «Бюджет доступен» → «Можно потратить» → с 25 % «Тратишь спокойно» → с 50 % «Половина позади» → с 65 % «Больше половины позади» → с 80 % «Пора притормозить» → с 90 % «Осталось совсем немного» → ровно 100 % «Лимит исчерпан» → «Превышение лимита». Цвет меняется вместе с подписью.',
+  manysm:'<b>Много + плавно.</b> Те же девять подписей, а цвет ещё и перетекает с каждой тратой между ними.'};
 let v='now';
 function draw(){
   const s=+$('rng').value, p=s/LIMIT*100, rest=LIMIT-s, card=$('card');
-  const T=v==='steps'||v==='both'?MORE:NOW, st=step(T,p);
+  const T=table(), st=step(T,p);
   let glow=st[2], ink=st[3];
-  if(v==='smooth'||v==='both'){glow=ink=smoothColor(p);if(p===0&&v==='smooth'){glow='var(--good)';ink='var(--good)'}}
+  if(smoothOn())glow=ink=smoothColor(p);
   card.style.setProperty('--st',glow);card.style.setProperty('--st-ink',ink);
   $('lbl').textContent=st[1];
   $('big').textContent=(rest<0?'−':'')+rub(rest);
@@ -141,10 +149,11 @@ function draw(){
 }
 /* шкала под ползунком: цвет на каждом проценте и точки смены подписи в выбранном варианте */
 function scale(){
-  const T=v==='steps'||v==='both'?MORE:NOW;let h='';
-  for(let p=0;p<=120;p+=2){const c=v==='smooth'||v==='both'?smoothColor(p):step(T,p)[2];h+=`<i style="background:${c}"></i>`}
+  const T=table();let h='';
+  for(let p=0;p<=120;p+=2){const c=smoothOn()?smoothColor(p):step(T,p)[2];h+=`<i style="background:${c}"></i>`}
   $('scale').innerHTML=h;
-  $('marks').innerHTML=T.filter(t=>t[0]>0).map(t=>`<span style="left:${Math.min(100,Math.round(t[0])/120*100)}%">${Math.round(t[0])===0?'1-я трата':Math.round(t[0])+' %'}</span>`).join('');
+  const seen=new Set();
+  $('marks').innerHTML=T.filter(t=>t[0]>0).map(t=>Math.round(t[0])).filter(r=>!seen.has(r)&&seen.add(r)).map(r=>`<span style="left:${r/120*100}%">${r===0?'1-я':r+'%'}</span>`).join('');
 }
 function pick(n){v=n;$('vars').querySelectorAll('[data-v]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===n)));$('why').innerHTML=WHY[n];scale();draw()}
 $('vars').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b)pick(b.dataset.v)});
