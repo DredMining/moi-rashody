@@ -997,10 +997,17 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dperson .debt-manage>.del:nth-child(even){grid-column:1/-1}
 /* the loan picked in a person's list: its row marked, its own card under the list (cardOf) — day and ✕, the sum large, then its buttons */
 .dperson .debt:has(>.dtap[aria-expanded="true"]){border-color:var(--burgundy-light)}
-.dperson .dcard{margin-top:10px;padding:10px 12px 12px;border-color:var(--line)}
-.dcard-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:var(--fs-sm);color:var(--muted)}
-.dcard-head .dp-x{width:32px;height:32px;min-height:32px;flex:none}
-.dcard-sum{font-size:var(--fs-xl);font-weight:700;line-height:1.2}
+/* kept tight (owner, 13.11.2026): the day small over the sum, both beside ✕; less room between the parts; tiles 40px */
+.dperson .dcard{margin-top:8px;padding:8px 10px 10px;gap:4px;border-color:var(--line)}
+.dcard-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.dcard-t{display:flex;flex-direction:column;min-width:0}
+.dcard-t>span{font-size:var(--fs-xs);color:var(--muted);line-height:1.3}
+.dcard-head .dp-x{width:30px;height:30px;min-height:30px;flex:none}
+.dcard-sum{font-size:var(--fs-xl);font-weight:700;line-height:1.15}
+.dperson .dcard .acts{margin-top:4px;padding-top:6px;gap:6px}
+.dperson .dcard .debt-return{padding:4px}
+.dperson .dcard .debt-manage{gap:6px;padding-top:4px}
+.dperson .dcard .debt-manage>.linkbtn,.dperson .dcard .debt-manage>.del{min-height:40px;padding:6px}
 .dperson.dg{gap:6px}
 .dperson .dp-repay .acts>.dacc select{min-height:var(--h-m);padding:2px 8px;font-size:var(--fs-field)}
 .dperson .debt .head b,.dperson .debt .head .left{font-size:var(--fs-base)}
@@ -4414,8 +4421,8 @@ function renderDebts(){
   const cardOf=(list,isOpen)=>{const d=list.find(showActs);if(!d)return '';
     const t=d.date?'Долг от '+dayText(d.date):'Долг без даты', ret=+d.returned||0;
     const meta=[isOpen?(ret>0?`вернули ${moneyR(ret)} из ${moneyR(+d.amount||0)}`:''):(+d.forgiven>0?'прощён':'возвращён'),d.note?esc(d.note):''].filter(Boolean).join(' · ');
-    return `<div class="debt dcard ${isOpen?'':'closed'}"><div class="dcard-head"><span>${esc(t)}${d.doubtful&&isOpen?'<span class="tag">сомнительный</span>':''}</span><button type="button" class="dp-x" data-di="${esc(d.id)}" aria-expanded="true" aria-label="Закрыть: ${esc(t)}">✕</button></div>
-      <b class="dcard-sum">${moneyR(isOpen?debtLeft(d):+d.amount||0)}</b>${meta?`<span class="meta">${meta}</span>`:''}${actsOf(d,isOpen,false)}</div>`};
+    return `<div class="debt dcard ${isOpen?'':'closed'}"><div class="dcard-head"><div class="dcard-t"><span>${esc(t)}${d.doubtful&&isOpen?'<span class="tag">сомнительный</span>':''}</span><b class="dcard-sum">${moneyR(isOpen?debtLeft(d):+d.amount||0)}</b></div><button type="button" class="dp-x" data-di="${esc(d.id)}" aria-expanded="true" aria-label="Закрыть: ${esc(t)}">✕</button></div>
+      ${meta?`<span class="meta">${meta}</span>`:''}${actsOf(d,isOpen,false)}</div>`};
   const list=$('debtList');
   if(!state.ready){list.innerHTML='<div class="empty"><p>Загружаю…</p></div>';return}
   /* one line per person, named as the newest loan spells it (from a capital letter); tap — a window with each loan and its buttons */
