@@ -1489,6 +1489,24 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   :root .ghost{font-size:var(--fs-base)}
   /* the sums of the zakat card on Деньги stand three in a row: at 15px they run into the card's padding on a 375–390px phone */
   :root .zline .zcols b{font-size:14px}
+  /* «Деньги» on one grid (owner, 14.11.2026, as «Долги»): type 12/14/16/18/22, heights 36 (tight buttons) and 44 (rows that are tapped), 10px between blocks, 8px inside windows */
+  :root .mtot .lbl{font-size:12px}
+  #wallets .whead .kop,#wallets .wrow .kop{font-size:12px}
+  #wallets .wrow b:not(.none){font-size:16px}
+  #wallets .whead,#wallets .wrow,#wallets .wrow:last-child,#viewMoney .zline .zh,#viewMoney .zline .zr2{min-height:44px}
+  #viewMoney .zline .zr2 b{font-size:16px}
+  #bkOpen,.mfoot #xOpen,#wForm .linkbtn,#xForm .linkbtn,#zakatBox .linkbtn,#zakatSheet .zback{font-size:14px}
+  .xfer .xswap{font-size:16px}
+  .bkpanel .bkgrid>button{font-size:14px}
+  #wForm,.bkpanel{gap:8px}
+  .zsheet-head b{font-size:18px}
+  #zakatSheet .zrow,#zakatSheet .zrow.zhd,#zakatSheet .zdates .zd b,#zakatSheet .zgo,#zakatBox .ghost,#zakatBox .primary{font-size:14px}
+  #zakatSheet .zrow small{font-size:12px}
+  #zakatSheet .zfoot{font-size:12px}
+  #zakatSheet .zgo{min-height:44px}
+  #zakatSheet .zgo span:last-child{font-size:18px}
+  #zakatBox #zSet{min-height:36px}
+  #zakatBox #zRe{min-height:44px}
 /* «reduce motion» on the phone: nothing slides or fades, the windows included */
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}
   /* a tab's page: a quick fade in place of the rise (the capsule is simply put on the tab, no spring, no lens) */
