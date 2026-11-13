@@ -1010,6 +1010,10 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dperson .dcard .debt-actions-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .dperson .dcard .debt-manage{padding-top:2px}
 .dperson .dcard .debt-return select,.dperson .dcard .debt-return .primary,.dperson .dcard .debt-return .ghost{min-height:34px}
+/* a person with one loan: its row in the list gets the same tight actions as the card (owner, 13.11.2026) */
+.dperson .dinner .debt-manage{gap:6px;padding-top:2px}
+.dperson .dinner .debt-manage>.linkbtn,.dperson .dinner .debt-manage>.del{min-height:36px;padding:6px}
+.dperson .dinner .debt-actions-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* a person's list: each loan one line — its day, its note small after it (cut short), its sum and › (owner, 13.11.2026) */
 .dperson .dinner .dtap{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:baseline;align-content:center;column-gap:8px}
 .dperson .dinner .dtap>.head{display:contents}
