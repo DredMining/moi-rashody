@@ -1465,9 +1465,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
      the first thing typed; its switches 38px in a 3px groove, its chips 36px. The picked half of a switch follows the corner of its groove */
   :root .submit{min-height:52px}
   /* «Новая запись» set its own sizes (owner, 12.11.2026): switches 44px, the sum 46px, its button 48px */
-  :root #addBox .submit{min-height:48px}
-  :root #addBox .amount input{min-height:46px;font-size:24px;font-weight:600}
-  :root #addBox .amount span{font-size:var(--fs-xl)}
+  :root #addBox .submit{min-height:44px}
+  :root #addBox .amount input{min-height:44px;font-size:22px;font-weight:600}
+  :root #addBox .amount span{font-size:18px}
   :root #addBox .seg{padding:3px;gap:3px}
   :root #addBox .seg button{font-size:14px;min-height:36px}
   /* «Новая запись»: the two switches are glass with a gliding capsule too (owner, 12.11.2026), 3px inside the rim; the capsule keeps the
@@ -1481,7 +1481,15 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   [data-theme="light"] #addBox .seg:has(#tIn[aria-pressed="true"]) .sv-cap{background:var(--seg-in)}
   [data-theme="light"] #addBox .seg:has(#sOwn[aria-pressed="true"]) .sv-cap{background:var(--seg-own)}
   [data-theme="light"] #addBox .seg:has(#sTrip[aria-pressed="true"]) .sv-cap{background:var(--seg-trip)}
-  :root #addBox .chipbtn{font-size:var(--fs-sm);min-height:var(--h-m);padding:4px 14px}
+  :root #addBox .chipbtn{font-size:14px;min-height:var(--h-m);padding:4px 14px}
+  /* «Учёт»: единая сетка шрифтов 12/14/16/18/22 (крупное число карточки — 32, решение Али 14.11.2026) и высот 36/44, как на «Долгах» */
+  :root #viewLedger h2,:root .sumcard #sumLabel{font-size:12px}
+  :root .sumcard .lmsg{font-size:14px}
+  :root .sumcard .theme-toggle{width:var(--h-m);height:var(--h-m);font-size:16px}
+  :root #toHistory{font-size:14px}
+  :root #viewLedger .alert .primary,:root #viewLedger .alert .ghost{font-size:14px}
+  :root #recent .item{font-size:14px;min-height:44px;box-sizing:border-box;padding-block:2px}
+  :root .zcard:has(#limSet) .zrow .zre{font-size:14px;min-height:44px;box-sizing:border-box}
   :root .seg button{border-radius:calc(var(--r-md) - 3px)}
   /* where the larger type would not fit, the size stays as it was: the five words of the Итоги switch (11–12px by the screen's width,
      as before; under 360px its own rule above still holds); five tiles in one row («Копильник» keeps its 7px to spare; the tiles
@@ -1492,6 +1500,24 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   :root .ghost{font-size:var(--fs-base)}
   /* the sums of the zakat card on Деньги stand three in a row: at 15px they run into the card's padding on a 375–390px phone */
   :root .zline .zcols b{font-size:14px}
+  /* «Деньги» on one grid (owner, 14.11.2026, as «Долги»): type 12/14/16/18/22, heights 36 (tight buttons) and 44 (rows that are tapped), 10px between blocks, 8px inside windows */
+  :root .mtot .lbl{font-size:12px}
+  #wallets .whead .kop,#wallets .wrow .kop{font-size:12px}
+  #wallets .wrow b:not(.none){font-size:16px}
+  #wallets .whead,#wallets .wrow,#wallets .wrow:last-child,#viewMoney .zline .zh,#viewMoney .zline .zr2{min-height:44px}
+  #viewMoney .zline .zr2 b{font-size:16px}
+  #bkOpen,.mfoot #xOpen,#wForm .linkbtn,#xForm .linkbtn,#zakatBox .linkbtn,#zakatSheet .zback{font-size:14px}
+  .xfer .xswap{font-size:16px}
+  .bkpanel .bkgrid>button{font-size:14px}
+  #wForm,.bkpanel{gap:8px}
+  .zsheet-head b{font-size:18px}
+  #zakatSheet .zrow,#zakatSheet .zrow.zhd,#zakatSheet .zdates .zd b,#zakatSheet .zgo,#zakatBox .ghost,#zakatBox .primary{font-size:14px}
+  #zakatSheet .zrow small{font-size:12px}
+  #zakatSheet .zfoot{font-size:12px}
+  #zakatSheet .zgo{min-height:44px}
+  #zakatSheet .zgo span:last-child{font-size:18px}
+  #zakatBox #zSet{min-height:36px}
+  #zakatBox #zRe{min-height:44px}
 /* «reduce motion» on the phone: nothing slides or fades, the windows included */
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}
   /* a tab's page: a quick fade in place of the rise (the capsule is simply put on the tab, no spring, no lens) */
