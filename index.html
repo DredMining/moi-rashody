@@ -1054,6 +1054,8 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 /* a debt picked in a person's list opens over the window, in its middle, on a dimmed ground; a tap on the ground closes it (owner, 14.11.2026) */
 .dperson .dcard-wrap{position:absolute;inset:0;z-index:5;display:flex;align-items:center;padding:12px;border-radius:inherit}
 .dperson .dcard-bg{position:absolute;inset:0;border-radius:inherit;background:rgb(0 0 0 / .82)}
+/* the whole app behind it as dark as the window (owner, 14.11.2026), not the window alone */
+.wmodal:has(.dcard-wrap)>.sheet-bg{background:rgb(0 0 0 / .82);transition:background .16s}
 .dperson .dcard-wrap>.dcard{position:relative;width:100%;max-height:100%;overflow-y:auto;margin:0;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-modal);animation:zpop .16s ease-out}
 .dcard-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .dcard-t{display:flex;flex-direction:column;min-width:0}
