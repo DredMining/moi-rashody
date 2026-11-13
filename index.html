@@ -1007,7 +1007,18 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dperson .dcard .acts{margin-top:4px;padding-top:6px;gap:6px}
 .dperson .dcard .debt-return{padding:4px}
 .dperson .dcard .debt-manage{gap:6px;padding-top:4px}
-.dperson .dcard .debt-manage>.linkbtn,.dperson .dcard .debt-manage>.del{min-height:40px;padding:6px}
+.dperson .dcard .debt-manage>.linkbtn,.dperson .dcard .debt-manage>.del{min-height:36px;padding:6px}
+/* tighter still (owner, 13.11.2026): no «Другие действия» over the tiles (a screen reader still hears it), the return's field and buttons 34px */
+.dperson .dcard .debt-actions-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.dperson .dcard .debt-manage{padding-top:2px}
+.dperson .dcard .debt-return select,.dperson .dcard .debt-return .primary,.dperson .dcard .debt-return .ghost{min-height:34px}
+/* a person's list: each loan one line — its day, its note small after it (cut short), its sum and › (owner, 13.11.2026) */
+.dperson .dinner .dtap{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:baseline;align-content:center;column-gap:8px}
+.dperson .dinner .dtap>.head{display:contents}
+.dperson .dinner .dtap>.head>b{grid-column:1;grid-row:1}
+.dperson .dinner .dtap>.head>.left{grid-column:3;grid-row:1}
+.dperson .dinner .dtap>.meta{grid-column:2;grid-row:1;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dperson .dinner .debt:has(>.dtap){padding:3px 10px}
 .dperson.dg{gap:6px}
 .dperson .dp-repay .acts>.dacc select{min-height:var(--h-m);padding:2px 8px;font-size:var(--fs-field)}
 .dperson .debt .head b,.dperson .debt .head .left{font-size:var(--fs-base)}
