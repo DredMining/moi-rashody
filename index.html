@@ -1560,6 +1560,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   #zakatSheet .zhero>b{font-size:28px;line-height:1.2;font-weight:500;color:var(--ink)}
   #zakatSheet .zgo{color:var(--ink)}
   #zakatSheet .zgo span:last-child{color:var(--accent)}
+  #zakatSheet .zsheet-head{border-bottom:0}
   #zakatSheet .zgo span:last-child{font-size:18px}
   #zakatBox #zSet{min-height:36px}
   #zakatBox #zRe{min-height:44px}
@@ -1824,7 +1825,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
 <div class="zsheet" id="zakatSheet" hidden role="dialog" aria-modal="true" aria-labelledby="zakatSheetT">
   <div class="sheet-bg" data-zx></div>
   <div class="zsheet-panel">
-    <div class="zsheet-head"><button type="button" class="zback" id="zBack" hidden aria-label="Назад к закяту">‹ Назад</button><b id="zakatSheetT" tabindex="-1">🌙 Закят</b><button type="button" class="iconbtn" data-zx aria-label="Закрыть">✕</button></div>
+    <div class="zsheet-head"><button type="button" class="zback" id="zBack" hidden aria-label="Назад к закяту">‹ Назад</button><b id="zakatSheetT" tabindex="-1">Закят</b><button type="button" class="iconbtn" data-zx aria-label="Закрыть">✕</button></div>
     <section id="zakatBox" aria-labelledby="zakatSheetT"></section>
   </div>
 </div>
@@ -3711,7 +3712,7 @@ function renderZakat(){
   const zv=(state.zView==='hist'&&histHtml)||(state.zView==='why'&&!setup&&M)||(state.zView==='how'&&how)?state.zView:null;
   if(!zv) html+=`<div class="zhint zfine"><b>Расчёт ориентировочный</b><span>Шафиитский мазхаб, нисаб по ${metal==='gold'?'золоту (Муфтият ЧР считает по серебру)':'серебру, как у Муфтията ЧР'}.</span><span>По спорным вопросам уточните у имама.</span></div>`;
   html+='</div>';
-  $('zakatSheetT').textContent=zv==='how'?'Как посчитано':zv==='why'?'Почему столько':zv==='hist'?'История по годам':'🌙 Закят';
+  $('zakatSheetT').textContent=zv==='how'?'Как посчитано':zv==='why'?'Почему столько':zv==='hist'?'История по годам':'Закят';
   $('zBack').hidden=!zv;
   box.innerHTML=html;
   $('zakatForm').innerHTML=state.editing==='zakat'?zForm(z):'';
