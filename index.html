@@ -3757,7 +3757,7 @@ function zForm(z){
   return `<div class="wmodal" role="dialog" aria-modal="true" aria-labelledby="zFormT"><div class="sheet-bg" data-zclose></div><form class="wallet-edit zform" id="zForm" novalidate><div class="dp-head"><div class="dp-t"><b id="zFormT" tabindex="-1">Настройки закята</b></div><button type="button" class="dp-x" data-zclose aria-label="Закрыть">✕</button></div>
     <label>Нисаб считать по (Муфтият ЧР — по серебру)<select id="zMetal"><option value="silver" ${metal==='silver'?'selected':''}>серебру — 595 г</option><option value="gold" ${metal==='gold'?'selected':''}>золоту — 85 г</option></select></label>
     <label><span id="zPriceL">Цена грамма ${METAL[metal]}, ₽</span><input id="zPrice" class="num" inputmode="decimal" placeholder="Например, 215" value="${+z.price>0?esc(String(+z.price).replace('.',',')):''}"></label>
-    <div class="zhint"><span>Учётная цена ЦБ: cbr.ru → «Драгоценные металлы»</span><span>Нисаб: <b id="zNis">${z.price?money(zNisab(z)):'—'}</b></span></div>
+    <div class="zhint"><span>Нисаб: <b id="zNis">${z.price?money(zNisab(z)):'—'}</b></span></div>
     <label>Когда ваши деньги дошли до нисаба<input id="zStart" type="date" min="1900-01-01" max="${iso(now)}" value="${isoOk(z.start)?z.start:''}"></label>
     <p id="zStartH">${zStartHint(z.start)}</p>
     <div id="zPastBox"></div>
