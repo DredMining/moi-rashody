@@ -928,6 +928,8 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 /* the debt to himself: its «Сверить» stands in the line of the words, not under them — every row of the card is one line tall (owner, 14.11.2026) */
 #brokerBox .zrow>div:has(>.zre){flex-direction:row;align-items:center;gap:10px}
 #brokerBox .zrow>div>.zre{align-self:center}
+/* the card's head line in capitals, as the labels over the cards (owner, 14.11.2026) */
+#brokerBox .zrow.zhd>div>span{text-transform:uppercase;letter-spacing:.06em}
 /* every row a line of its own, as in «Расходы» (elsewhere «Положено» and «Отложено» stand together) */
 #viewStats .zrow.zp{border-bottom:1px solid var(--line)}
 #viewStats .zfoot{padding:5px 0 7px;font-size:12px;line-height:1.3}
