@@ -554,6 +554,11 @@ input.num::placeholder{font-family:var(--f-body)}
 #accFilter .chip{min-height:32px;font-size:14px;padding:4px 10px}
 .recs .item{font-size:14px;min-height:44px;box-sizing:border-box;padding-block:2px}
 .recs .itemacts .linkbtn,.recs .itemacts .del{font-size:14px}
+/* «Изменить» и «Удалить» — две плитки на всю ширину, как в листе категории (Али, 14.11.2026) */
+.recs .itemacts{flex-wrap:nowrap;gap:8px;padding-block:6px;justify-content:stretch}
+.recs .itemacts>button{flex:1 1 0;min-width:0;min-height:36px;margin:0;padding:0;display:grid;place-items:center;text-align:center;font-size:14px;font-weight:500;border-radius:10px;text-decoration:none}
+.recs .itemacts .linkbtn{color:var(--accent);background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+.recs .itemacts .del{color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent);border:1px solid color-mix(in srgb,var(--bad) 35%,transparent)}
 #recent .item{font-size:var(--fs-sm);gap:var(--sp-2);padding-block:3px}
 #recent .item>.ic{width:24px;height:24px;font-size:12px}
 #recent .item .what>span{font-size:var(--fs-2xs)}
