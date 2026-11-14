@@ -98,11 +98,11 @@ h1{font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 </div></div>
 
 <script>
-const T={now:'Как сейчас: три плитки, суммы 16, на узком экране ужимаются.',
-a:'А (плотнее). Одна полоса, три колонки с разделителями, суммы 16, высота около 48.',
-b:'Б (плотнее). Разница 20 в первой строке, доходы и расходы в одной строке под ней, высота около 66.',
-c:'В (плотнее). Три строки по 30–34, разница последней, высота около 94.',
-d:'Г (плотнее). Плитки без лишнего воздуха: отступы 6, высота около 52.'};
+const T={now:'Как сейчас: высота 76, суммы 16.',
+a:'А (плотнее). Одна полоса, три колонки с разделителями, суммы 16, высота 52.',
+b:'Б (плотнее). Разница 20 в первой строке, доходы и расходы в одной строке под ней, высота 71.',
+c:'В (плотнее). Три строки по 30–34, разница последней, высота 96.',
+d:'Г (плотнее). Плитки без лишнего воздуха: отступы 6, высота 62.'};
 const chips=[...document.querySelectorAll('#chips [data-v]')];
 function show(v){chips.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));document.querySelectorAll('.v').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));document.getElementById('note').textContent=T[v]}
 chips.forEach(b=>b.onclick=()=>show(b.dataset.v));show('now');
