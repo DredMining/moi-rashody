@@ -1552,6 +1552,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   #zakatSheet .zrow small{font-size:12px}
   #zakatSheet .zfoot{font-size:12px}
   #zakatSheet .zgo{min-height:44px}
+  #zakatSheet .ztwo{grid-template-columns:1fr}
+  #zakatSheet .zk{gap:10px}
   #zakatSheet .zgo span:last-child{font-size:18px}
   #zakatBox #zSet{min-height:36px}
   #zakatBox #zRe{min-height:44px}
@@ -3604,7 +3606,7 @@ function renderZakat(){
   /* memory refused (nothing is saved): the year moved on is still what is shown — a due date long past never shows as one to come */
   const z=store?.status&&next||zset(), M=M0, T=iso(now), nisab=zNisab(z), L=zLedger(z), metal=zMetal(z);
   const owed=L.owed;let dip=null, line='';zShown=z;
-  let html='<div class="zk">';
+  let html='<div class="zk">', how='';
   const setup=!(z.price>0)||!(z.start||z.wait);
   /* what is owed and «История по годам» show also while the price or the balances are not in (as «Закят к оплате» on Учёт does);
      «Пересчитать» there only once they are — a year can't be counted without them */
@@ -3635,7 +3637,7 @@ function renderZakat(){
     if(z.start) dip=zDip(z,M);
     const ended=dip&&dip.ended;
     const hero=!!z.start&&!ended&&!cur.below, heroSum=ea>=0.01?rest:cur.amount;
-    if(hero) html+=`<div class="zhero"><span class="zcap">${ea>=0.01?'Осталось отдать':'Закят к сроку'}</span><b>${money(heroSum)}</b><small>к сроку ${gDate(end)}${days>0?` · через ${days} ${plural(days,'день','дня','дней')}`:''}</small><small>Прогноз: сумма меняется вместе с остатками</small></div><details class="zfold"><summary>Как посчитано</summary>`;
+    if(hero) html+=`<div class="zhero"><span class="zcap">${ea>=0.01?'Осталось отдать':'Закят к сроку'}</span><b>${money(heroSum)}</b><small>к сроку ${gDate(end)}${days>0?` · через ${days} ${plural(days,'день','дня','дней')}`:''}</small><small>Прогноз: сумма меняется вместе с остатками</small></div><!--HOW-->`;
     html+=`<div class="zcard zchain">${zRow('Облагается сейчас',money(cur.base))}${zRow('Нисаб',money(nisab),`${NISAB_G[metal]} г ${METAL[metal]} × ${money(+z.price)}`,'m')}
       ${!z.start||ended?'':cur.below?zRow('Закят к сроку','—','сейчас ниже нисаба — закята не будет')
         /* given early: the year's zakat, minus what was given, what is left by the due date — short rows, not one long sentence */
@@ -3644,7 +3646,7 @@ function renderZakat(){
     if(z.start){
       html+=ended
         ?`<div class="zwarn"><p><b>Срок наступил ${bothDates(end)}</b>, но за год сумма опускалась ниже нисаба — решите ниже, как быть с этим годом.</p></div>`
-        :`<div class="zcard zdates">${zDateRow('Начало года',z.start)}${zDateRow('Срок',end,days>0?`через ${days} ${plural(days,'день','дня','дней')}`:'')}</div>${hero?'</details>':''}`;
+        :`<div class="zcard zdates">${zDateRow('Начало года',z.start)}${zDateRow('Срок',end,days>0?`через ${days} ${plural(days,'день','дня','дней')}`:'')}</div>${hero?'<!--/HOW-->':''}`;
       /* the year is over and on the due date the records show less than nisab: «оставить» would only save «закята не было» —
          so the choice is to charge the year anyway (the records are wrong) */
       const endV=ended?r2(zPool(z,M,end)):0, endLow=ended&&!atNisab(endV,nisab), fc=endLow?zCalc(end,z,M):null;
@@ -3684,9 +3686,11 @@ function renderZakat(){
       <div class="zhint"><b>Как считается</b><span>Ставка 2,5% со всей суммы, а не только сверх нисаба.</span><span>Деньги, пришедшие в этом году, тоже входят — с них закят отдаётся досрочно, это допустимо.</span><span>Свои долги не вычитаются (шафиитский мазхаб).</span><span>Жильё, машина и вещи не облагаются.</span></div>`;
     const why=sub;
         if(z.priceAt&&Date.now()-z.priceAt>30*864e5) html+=`<div class="zhint">Цена ${METAL[metal]} вписана ${gDate(iso(new Date(z.priceAt)))} — обновите её перед сроком.</div>`;
-    html+=`<div class="ztwo"><button type="button" class="zgo" data-zview="why"><span>Почему столько</span><span aria-hidden="true">›</span></button>${histGo.replace('История по годам','История')}</div>`;
+    const h0=html.indexOf('<!--HOW-->'), h1=html.indexOf('<!--/HOW-->');if(h0>=0&&h1>h0){how=html.slice(h0+10,h1);html=html.slice(0,h0)+html.slice(h1+11)}
+    html+=`<div class="ztwo">${how?'<button type="button" class="zgo" data-zview="how"><span>Как посчитано</span><span aria-hidden="true">›</span></button>':''}<button type="button" class="zgo" data-zview="why"><span>Почему столько</span><span aria-hidden="true">›</span></button>${histGo.replace('История по годам','История')}</div>`;
     /* «Почему столько» and «История» open as their own page inside the window, with «‹ Назад» */
-    if(state.zView==='why') html='<div class="zk">'+why;
+    if(state.zView==='how'&&how) html='<div class="zk">'+how;
+    else if(state.zView==='why') html='<div class="zk">'+why;
     else if(state.zView==='hist'&&histHtml) html='<div class="zk">'+histHtml;
     const lastY=(z.years||[]).slice().sort((a,b)=>b.due.localeCompare(a.due))[0];
     /* the last finished year can be counted again at any time (records fixed after the due date); every year — under «История по годам» */
@@ -3694,10 +3698,10 @@ function renderZakat(){
   }
   /* not counted yet (no price, no balances): its years can still be looked at */
   if((setup||!M)&&state.zView==='hist'&&histHtml) html='<div class="zk">'+histHtml;
-  const zv=state.zView==='hist'&&histHtml||state.zView==='why'&&!setup&&M?state.zView:null;
+  const zv=(state.zView==='hist'&&histHtml)||(state.zView==='why'&&!setup&&M)||(state.zView==='how'&&how)?state.zView:null;
   if(!zv) html+=`<div class="zhint zfine"><b>Расчёт ориентировочный</b><span>Шафиитский мазхаб, нисаб по ${metal==='gold'?'золоту (Муфтият ЧР считает по серебру)':'серебру, как у Муфтията ЧР'}.</span><span>По спорным вопросам уточните у имама.</span></div>`;
   html+='</div>';
-  $('zakatSheetT').textContent=zv==='why'?'Почему столько':zv==='hist'?'История по годам':'🌙 Закят';
+  $('zakatSheetT').textContent=zv==='how'?'Как посчитано':zv==='why'?'Почему столько':zv==='hist'?'История по годам':'🌙 Закят';
   $('zBack').hidden=!zv;
   box.innerHTML=html;
   $('zakatForm').innerHTML=state.editing==='zakat'?zForm(z):'';
