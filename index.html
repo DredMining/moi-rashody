@@ -1571,7 +1571,11 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   #zForm{padding:12px 16px 14px;gap:8px}
   #zForm .dp-head{margin-bottom:0}
   #zForm label{gap:2px;line-height:16px}
-  #zForm .zhint{padding:6px 10px}
+  /* no empty box: «Нисаб» is a line of its own like «По хиджре», the empty block for past years takes no room */
+  #zForm .zhint{padding:0;background:none;color:var(--muted);margin-top:-2px}
+  #zForm .zhint b{color:var(--ink)}
+  #zForm #zStartH{margin-top:-4px}
+  #zForm #zPastBox:empty{display:none}
   #zForm p{line-height:16px;margin:0}
   #zForm label{text-transform:uppercase;letter-spacing:.04em}
   #zForm label input,#zForm label select{text-transform:none;letter-spacing:normal}
