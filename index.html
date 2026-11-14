@@ -3690,8 +3690,8 @@ function renderZakat(){
     const ng=Object.fromEntries(M.neg(T).map(x=>[x.id,x.v])), negSub=ids=>{const l=ids.filter(id=>id in ng);
       return l.length?`${l.map(id=>`${WNAME[id]} ${money(ng[id])}`).join(', ')} в минусе — ${l.length>1?'считаются':'считается'} как 0: свои долги не вычитаются`:''};
     let sub='';
-    sub+=`<div class="zcard">${cards.length||Math.abs(cur.cash-(pg||0))>=0.01?zRow('Карты и наличные',money(r2(cur.cash-(pg||0))),[cards.map(id=>WNAME[id]).join(', '),negSub(cards)].filter(Boolean).join(' · '),tl>=0.01?'zp':'')+(tl>=0.01?zRow('из них командировочные',money(tv),tl-tv>=0.01?`на «Итогах» ${money(tl)} — больше, чем на счетах: остаток командировочных не сверен`:''):''):''}${pg===null?'':zRow('Копильник',money(pg),negSub(['piggy']))}
-      ${bMiss?'':zRow('Брокерский счёт',money(cur.broker),negSub(['broker'])||'сумма с вкладки «Деньги»')}
+    sub+=`<div class="zcard">${cards.length||Math.abs(cur.cash-(pg||0))>=0.01?zRow('Карты и наличные',money(r2(cur.cash-(pg||0))),negSub(cards),tl>=0.01?'zp':'')+(tl>=0.01?zRow('из них командировочные',money(tv),tl-tv>=0.01?`на «Итогах» ${money(tl)} — больше, чем на счетах: остаток командировочных не сверен`:''):''):''}${pg===null?'':zRow('Копильник',money(pg),negSub(['piggy']))}
+      ${bMiss?'':zRow('Брокерский счёт',money(cur.broker),negSub(['broker']))}
       ${cur.rel?zRow('Вам должны',money(cur.rel),'надёжные долги'):''}
       ${cur.doubt?zRow('Сомнительные долги',money(cur.doubt),'только для нисаба, закят — когда вернут'):''}
       ${cur.owedPrev?zRow('Неоплаченный закят','−'+money(cur.owedPrev)):''}
