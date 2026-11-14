@@ -3762,7 +3762,6 @@ function zForm(z){
     <p id="zStartH">${zStartHint(z.start)}</p>
     <div id="zPastBox"></div>
     <label>Брокерский счёт сейчас (бумаги + свободные деньги), ₽<input id="zBroker" class="num" inputmode="decimal" placeholder="${bNow===null?'Например, 150 000':'Сейчас: '+money(bNow)}" value=""></label>
-    <p>Это та же сумма, что у брокерского счёта на вкладке «Деньги»: новая заменит её и там. Акции считаются по полной стоимости. Пусто — останется как есть.</p>
     <p class="err" role="alert" id="zErr" hidden></p>
     <div class="row"><button class="primary" type="submit">Сохранить</button><button class="linkbtn" type="button" data-zclose>Отмена</button></div></form></div>`;
 }
