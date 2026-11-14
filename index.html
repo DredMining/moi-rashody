@@ -1518,6 +1518,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   #zakatSheet .zgo span:last-child{font-size:18px}
   #zakatBox #zSet{min-height:36px}
   #zakatBox #zRe{min-height:44px}
+  /* «Перевод между счетами», variant В (owner, 14.11.2026): «Откуда ⇄ Куда» on one line, every field 36px, «Отмена» left and «Перевести» (150px) right */
+  #xForm{grid-template-columns:minmax(0,1fr) 30px minmax(0,1fr);gap:10px 4px}
+  #xForm select,#xForm input{height:36px;min-height:36px;padding-block:0}
+  #xForm select{text-overflow:ellipsis;padding-inline:6px 0}
+  #xForm .xswap{width:30px;height:36px;min-height:36px;align-self:end;grid-row:auto;padding:0;font-size:16px}
+  #xForm .row{flex-wrap:nowrap;justify-content:space-between}
+  #xForm .row .primary{flex:none;width:150px;min-height:36px;padding-block:0}
 /* «reduce motion» on the phone: nothing slides or fades, the windows included */
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}
   /* a tab's page: a quick fade in place of the rise (the capsule is simply put on the tab, no spring, no lens) */
@@ -3228,7 +3235,7 @@ function xferForm(){
     <label class="full">Сумма<input id="xAmount" class="num" inputmode="decimal" placeholder="0" autocomplete="off" value="${esc(state.xfer.amount||'')}"></label>
     <label class="full">Комментарий<input id="xNote" maxlength="80" placeholder="Необязательно" autocomplete="off" value="${esc(state.xfer.note||'')}"></label>
     <p class="err full" role="alert" id="xErr" hidden></p>
-    <div class="row"><button class="primary" type="submit">Перевести</button><button class="linkbtn" type="button" id="xCancel">Отмена</button></div>
+    <div class="row"><button class="linkbtn" type="button" id="xCancel">Отмена</button><button class="primary" type="submit">Перевести</button></div>
     </form>`;
 }
 function bindXfer(){
