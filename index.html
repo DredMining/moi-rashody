@@ -93,7 +93,7 @@ img{max-width:100%}
   /* type that stays outside the scale: 14 — dense text (rows, alerts), 16 — a field (never smaller: the iPhone zooms in) */
   --fs-base:14px; --fs-field:16px;
   /* white text on a coloured fill; the veil under a window */
-  --on-fill:#FFFFFF; --scrim:rgb(0 0 0 / .55);
+  --on-fill:#FFFFFF; --scrim:rgb(0 0 0 / .8);
   /* small shadows: the round «+», a message box, a picked segment, a switch's knob */
   --shadow-fab:0 4px 14px rgb(0 0 0 / .28); --shadow-toast:0 8px 24px rgb(0 0 0 / .3); --shadow-seg:0 1px 2px rgb(0 0 0 / .12); --shadow-knob:0 1px 3px rgb(0 0 0 / .35);
   /* roles the two looks fill differently: a block inside a card (a field, a small plate), the fill of a picked «Расход / Доход / Личное / Командировка»
@@ -556,7 +556,7 @@ input.num::placeholder{font-family:var(--f-body)}
 .recs .itemacts .del{padding-block:6px}
 /* Записи: сетка шрифтов 12/14/16/18/22 и высот 36/44 (Али, 14.11.2026) */
 :root #viewHistory .monthbar .title{font-size:18px}
-:root #viewHistory #scopeFilter button{min-height:36px}
+:root #viewHistory #scopeFilter button{min-height:32px}
 #accFilter .chip{min-height:28px;font-size:13px;padding:2px 10px}
 .recs .item{font-size:14px;min-height:44px;box-sizing:border-box;padding-block:2px}
 .recs .itemacts .linkbtn,.recs .itemacts .del{font-size:14px}
@@ -1115,11 +1115,11 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dperson .dcard{margin-top:8px;padding:8px 10px 10px;gap:4px;border-color:var(--line)}
 /* a debt picked in a person's list opens over the window, in its middle, on a dimmed ground; a tap on the ground closes it (owner, 14.11.2026) */
 .dperson .dcard-wrap{position:absolute;inset:0;z-index:5;display:flex;align-items:center;padding:12px;border-radius:inherit}
-.dperson .dcard-bg{position:absolute;inset:0;border-radius:inherit;background:rgb(0 0 0 / .82)}
+.dperson .dcard-bg{position:absolute;inset:0;border-radius:inherit;background:rgb(0 0 0 / .8)}
 /* the whole app behind it as dark as the window (owner, 14.11.2026), not the window alone */
-.wmodal:has(.dcard-wrap)>.sheet-bg{background:rgb(0 0 0 / .82);transition:background .16s}
+.wmodal:has(.dcard-wrap)>.sheet-bg{background:rgb(0 0 0 / .8);transition:background .16s}
 /* the person's window itself dims the app as much (owner, 14.11.2026): one darkness, so nothing changes when a debt opens over it */
-.wmodal:has(>.dperson)>.sheet-bg{background:rgb(0 0 0 / .82)}
+.wmodal:has(>.dperson)>.sheet-bg{background:rgb(0 0 0 / .8)}
 .dperson .dcard-wrap>.dcard{position:relative;width:100%;max-height:100%;overflow-y:auto;margin:0;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-modal);animation:zpop .16s ease-out}
 .dcard-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .dcard-t{display:flex;flex-direction:column;min-width:0}
@@ -1478,7 +1478,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   :root .zdue,:root #zakatSheet .zdue{padding-left:16px}
   /* a card with a glow («Мне должны», «Всего денег»): the glow is drawn from the card's very edge — under an edge that is not seen
      the picture would otherwise start again, a 1px line of the far side's colour */
-  :root .debt-overview,:root .total.mtot{background-origin:border-box}
+  :root .debt-overview,:root .total.mtot,:root .sumcard{background-origin:border-box}
   /* a section's title looks as the month card's label: semibold, capitals, .06em, muted (owner, 10.11.2026); both 13px (owner,
      12.11.2026; 14px before). One face: the month's title of «Записи» and «Итоги» is set in the text face too */
   :root{--f-display:var(--f-body)}
@@ -3030,7 +3030,11 @@ function perDay(left){
    the first figure typed takes its place (owner, 13.11.2026; was put before it, «530000») */
 /* a window that opens on a figure already in the field puts no cursor in it (no keyboard, nothing chosen): the figure is chosen whole by the tap on the field (selIn), and the first digit typed takes its place (owner, 14.11.2026). A field that opens empty still gets the cursor at once */
 const focusEmpty=x=>{if(x&&!x.value)x.focus({preventScroll:true})};
-function selIn(x){if(x)x.addEventListener('focus',()=>{if(x.value)x.select()},{once:true})}
+/* the whole number is selected when a field is entered (owner, 13–14.11.2026). On a phone the finger's lift puts the caret in after the focus,
+   which un-selects it: so the selection is set again a moment later, and the lift right after the focus is not let to move the caret */
+function selIn(x){if(!x)return;let t=0;const go=()=>{if(x.value&&document.activeElement===x)try{x.select()}catch(e){}};
+  x.addEventListener('focus',()=>{t=Date.now();go();requestAnimationFrame(go);setTimeout(go,60);setTimeout(go,200)});
+  for(const ev of ['mouseup','touchend'])x.addEventListener(ev,e=>{if(Date.now()-t<350&&e.cancelable){e.preventDefault();go()}})}
 const limForm=(p,budget)=>{const er=`<p class="err" role="alert" id="${p}Err" hidden></p>`;
   return `<form class="inline-edit" id="${p}Form" novalidate>${p==='lim'?er:''}<input id="${p}Input" class="num" inputmode="decimal" placeholder="Например, 30000" value="${budget?vIn(budget):''}" aria-label="Лимит личных расходов на месяц"><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="${p}Cancel">Отмена</button>${p==='lim'?'':er}</form>`};
 function limFormOn(p,budget,done,then){
