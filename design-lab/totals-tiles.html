@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Design Lab · Доходы / Разница / Расходы</title>
+<!-- Отдельная лаборатория. Основное приложение (index.html) эту страницу не подключает. Суммы условные. -->
+<link rel="stylesheet" href="assets/fonts.css">
+<style>
+*{box-sizing:border-box}
+:root{--bg:#0D1320;--surface:#151E30;--inset:#0D1320;--ink:#E6ECF7;--muted:#8E9AB3;--line:#2A3550;--good:#5EDB94;--warn:#FFC94D;--bad:#FF7A7A;--chip:#1B2A4A}
+:root[data-theme="dark"]{--bg:#000;--surface:#161215;--inset:#0e0b0d;--ink:#F7F3F4;--muted:#A79DA2;--line:#383035;--good:#5EDB94;--warn:#FFC94D;--bad:#E0607E;--chip:#2a1d22}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+body{padding:16px;max-width:440px;margin:0 auto;font-variant-numeric:tabular-nums}
+h1{font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:4px 0 12px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.chips button{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);font:inherit;font-size:14px;font-weight:500}
+.chips button[aria-pressed="true"]{background:var(--chip);color:var(--ink);border-color:var(--muted)}
+.note{font-size:12px;line-height:1.4;color:var(--muted);margin:0 0 12px;min-height:34px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px}
+.lbl{font-size:12px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:4px;justify-content:center}
+.lbl::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c,var(--good))}
+.in{--c:var(--good)}.df{--c:var(--warn)}.out{--c:var(--bad)}
+.num{font-weight:500;white-space:nowrap}
+.pos{color:var(--good)}.neg{color:var(--bad)}
+.v{display:none}.v.on{display:block}
+/* Сейчас */
+.now{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px}
+.now>div{background:var(--inset);border-radius:10px;padding:8px 4px;text-align:center;display:flex;flex-direction:column;gap:5px}
+.now b{font-size:16px;font-weight:500}
+/* А */
+.a{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:10px 0}
+.a>div{padding:2px 6px;text-align:center;display:flex;flex-direction:column;gap:4px}
+.a>div+div{border-left:1px solid var(--line)}
+.a b{font-size:18px;font-weight:500}
+.a .df b{color:var(--warn)}
+/* Б */
+.b{padding:12px 16px 12px;text-align:center}
+.b .big{font-size:22px;font-weight:600;margin:2px 0 8px}
+.b .row{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);padding-top:8px}
+.b .row span{display:block;font-size:12px;color:var(--muted)}
+.b .row b{font-size:14px;font-weight:500}
+/* В */
+.c{padding:0 16px}
+.c .r{display:flex;justify-content:space-between;align-items:center;min-height:36px;border-bottom:1px solid var(--line);font-size:14px}
+.c .r:last-child{border-bottom:0;min-height:44px}
+.c .r span{display:flex;align-items:center;gap:8px}
+.c .r span::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c)}
+.c .r:last-child b{font-size:16px;font-weight:600}
+/* Г */
+.d{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:10px}
+.d>div{background:var(--inset);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center;display:flex;flex-direction:column;gap:6px}
+.d b{font-size:16px;font-weight:500;overflow-wrap:anywhere;white-space:normal}
+</style>
+</head>
+<body>
+<h1>Доходы · Разница · Расходы</h1>
+<div class="chips" id="chips" role="group" aria-label="Вариант">
+  <button type="button" data-v="now" aria-pressed="true">Сейчас</button>
+  <button type="button" data-v="a" aria-pressed="false">А</button>
+  <button type="button" data-v="b" aria-pressed="false">Б</button>
+  <button type="button" data-v="c" aria-pressed="false">В</button>
+  <button type="button" data-v="d" aria-pressed="false">Г</button>
+  <button type="button" id="theme" aria-pressed="false">Чёрный вид</button>
+</div>
+<p class="note" id="note"></p>
+
+<div class="card v on" id="v-now"><div class="now">
+  <div class="in"><span class="lbl">Доходы</span><b class="pos">100 000 ₽</b></div>
+  <div class="df"><span class="lbl">Разница</span><b class="pos">+70 000 ₽</b></div>
+  <div class="out"><span class="lbl">Расходы</span><b class="neg">30 000 ₽</b></div>
+</div></div>
+
+<div class="card v" id="v-a"><div class="a">
+  <div class="in"><span class="lbl">Доходы</span><b class="pos">100 000 ₽</b></div>
+  <div class="df"><span class="lbl">Разница</span><b>+70 000 ₽</b></div>
+  <div class="out"><span class="lbl">Расходы</span><b class="neg">30 000 ₽</b></div>
+</div></div>
+
+<div class="card v" id="v-b"><div class="b">
+  <span class="lbl df">Разница</span>
+  <div class="big pos">+70 000 ₽</div>
+  <div class="row"><div class="in"><span>Доходы</span><b class="pos">100 000 ₽</b></div><div class="out"><span>Расходы</span><b class="neg">30 000 ₽</b></div></div>
+</div></div>
+
+<div class="card v" id="v-c"><div class="c">
+  <div class="r in"><span>Доходы</span><b class="pos">100 000 ₽</b></div>
+  <div class="r out"><span>Расходы</span><b class="neg">30 000 ₽</b></div>
+  <div class="r df"><span>Разница</span><b class="pos">+70 000 ₽</b></div>
+</div></div>
+
+<div class="card v" id="v-d" style="background:transparent;border:0"><div class="d">
+  <div class="in"><span class="lbl">Доходы</span><b class="pos">100 000 ₽</b></div>
+  <div class="df"><span class="lbl">Разница</span><b class="pos">+70 000 ₽</b></div>
+  <div class="out"><span class="lbl">Расходы</span><b class="neg">30 000 ₽</b></div>
+</div></div>
+
+<script>
+const T={now:'Как сейчас: три плитки, суммы 16, на узком экране ужимаются.',
+a:'А. Одна полоса: три колонки с тонкими разделителями, суммы 18. Разница — только цвет точки и цифры.',
+b:'Б. Разница главная: крупно сверху, под ней в строку доходы и расходы.',
+c:'В. Строки списком, как «Выдано / Потрачено»: доходы, расходы, разница под итогом.',
+d:'Г. Плитки по сетке: сумма 16, подпись 12, отступы 10; длинная сумма переносится.'};
+const chips=[...document.querySelectorAll('#chips [data-v]')];
+function show(v){chips.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));document.querySelectorAll('.v').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));document.getElementById('note').textContent=T[v]}
+chips.forEach(b=>b.onclick=()=>show(b.dataset.v));show('now');
+const th=document.getElementById('theme');th.onclick=()=>{const d=document.documentElement.dataset.theme==='dark';document.documentElement.dataset.theme=d?'light':'dark';th.textContent=d?'Чёрный вид':'Синий вид'};
+</script>
+</body>
+</html>
