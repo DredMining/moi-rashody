@@ -1270,8 +1270,8 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
 #recent .item:has(.itemacts){row-gap:2px;padding-block:2px}
 #recent .item:has(.itemacts) .what{line-height:1.35}
 #recent .itemacts{padding-top:0}
-#recent .itemacts .linkbtn,#recent .itemacts .del{min-height:var(--h-m)}
-#recent .itemacts .del{padding-block:6px}
+#recent .itemacts .linkbtn,#recent .itemacts .del{min-height:32px}
+#recent .itemacts .del{padding-block:0}
 /* a long delete question goes onto its own line; «Изменить» stays one word */
 .itemacts .linkbtn{flex:none;white-space:nowrap}
 .itemacts .del{min-width:0;text-align:right}
@@ -1546,8 +1546,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   #sheetBody .itemacts .linkbtn{color:var(--accent);background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
   #sheetBody .itemacts .del{color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent);border:1px solid color-mix(in srgb,var(--bad) 35%,transparent)}
   /* «Последние записи» на «Учёте»: то же — две плитки на всю ширину (Али, 14.11.2026) */
-  #recent .itemacts{flex-wrap:nowrap;gap:8px;padding-top:6px;justify-content:stretch}
-  #recent .itemacts>button{flex:1 1 0;min-width:0;min-height:36px;margin:0;padding:0;display:grid;place-items:center;text-align:center;font-size:14px;font-weight:500;border-radius:10px}
+  #recent .itemacts{flex-wrap:nowrap;gap:8px;padding-block:6px;justify-content:flex-end}
+  #recent .itemacts>button{flex:0 0 104px;min-width:0;min-height:32px;margin:0;padding:0;display:grid;place-items:center;text-align:center;font-size:14px;font-weight:500;border-radius:10px}
   #recent .itemacts .linkbtn{color:var(--accent);background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
   #recent .itemacts .del{color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent);border:1px solid color-mix(in srgb,var(--bad) 35%,transparent)}
   /* тёмный вид (Али, 14.11.2026): «Изменить» серая, «Удалить» бордовая — и под «Последними записями», и в окне категории */
