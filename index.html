@@ -928,11 +928,13 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 #viewStats .zrow.zhd .linkbtn,#viewStats .zrow .zre{min-height:var(--h-m);margin:0 -4px;padding:0 4px;font-size:14px;line-height:1}
 #viewStats .zrow .zre{align-self:flex-start}
 /* the debt to himself: its «Сверить» stands in the line of the words, not under them — every row of the card is one line tall (owner, 14.11.2026) */
-#brokerBox .zrow>div:has(>.zre){flex-direction:row;align-items:center;gap:10px}
-#brokerBox .zrow>div>.zre{align-self:center}
+#brokerBox .zrow>div:has(>.zre),#budgetBox .zrow>div:has(>.zre){flex-direction:row;flex-wrap:wrap;align-items:center;gap:0 10px}
+#budgetBox .zrow>div>small{flex:1 1 100%}
+#brokerBox .zrow:has(.zre),#brokerBox .zrow.zhd,#budgetBox .zrow:has(.zre){padding-block:0}
+#brokerBox .zrow>div>.zre,#budgetBox .zrow>div>.zre{align-self:center}
 /* the card's head line in capitals, as the labels over the cards (owner, 14.11.2026) */
-#brokerBox .zrow>div>span{text-transform:uppercase;letter-spacing:.06em}
-#brokerBox .zrow:not(.zhd)>div>span{font-size:12px;line-height:1.3}
+#brokerBox .zrow>div>span,#budgetBox .zrow>div>span{text-transform:uppercase;letter-spacing:.06em}
+#brokerBox .zrow:not(.zhd)>div>span,#budgetBox .zrow>div>span{font-size:12px;line-height:1.3}
 /* every row a line of its own, as in «Расходы» (elsewhere «Положено» and «Отложено» stand together) */
 #viewStats .zrow.zp{border-bottom:1px solid var(--line)}
 #viewStats .zfoot{padding:5px 0 7px;font-size:12px;line-height:1.3}
