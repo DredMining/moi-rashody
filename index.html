@@ -923,6 +923,9 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 #viewStats .zrow small{font-size:12px;line-height:1.2}
 #viewStats .zrow.zhd .linkbtn,#viewStats .zrow .zre{min-height:var(--h-m);margin:0 -4px;padding:0 4px;font-size:14px;line-height:1}
 #viewStats .zrow .zre{align-self:flex-start}
+/* the debt to himself: its «Сверить» stands in the line of the words, not under them — every row of the card is one line tall (owner, 14.11.2026) */
+#brokerBox .zrow>div:has(>.zre){flex-direction:row;align-items:center;gap:10px}
+#brokerBox .zrow>div>.zre{align-self:center}
 /* every row a line of its own, as in «Расходы» (elsewhere «Положено» and «Отложено» stand together) */
 #viewStats .zrow.zp{border-bottom:1px solid var(--line)}
 #viewStats .zfoot{padding:5px 0 7px;font-size:12px;line-height:1.3}
@@ -2880,7 +2883,7 @@ function brokerRates(inc){
   const rs=[];for(const t of [...inc.filter(i=>typeOf(i)==='in'&&!isTrip(i)&&i.acc!=='broker').map(i=>i.created||0).sort((a,b)=>a-b),Infinity]){
     const r=brokerRate(t);if(!rs.length||rs[rs.length-1].pct!==r.pct) rs.push(r)}
   /* two changes on one day: «с 15 октября — 15 %, затем 0 %», not the same day twice */
-  return {head:`${pctT(rs[0].pct)} с каждого дохода`,note:rs.slice(1).map((r,k)=>{const d=iso(new Date(r.from));return k&&d===iso(new Date(rs[k].from))?`затем ${pctT(r.pct)}`:`с ${dayText(d)} — ${pctT(r.pct)}`}).join(', ')};
+  return {head:`${pctT(rs[0].pct)}`,note:rs.slice(1).map((r,k)=>{const d=iso(new Date(r.from));return k&&d===iso(new Date(rs[k].from))?`затем ${pctT(r.pct)}`:`с ${dayText(d)} — ${pctT(r.pct)}`}).join(', ')};
 }
 /* due to the broker from these records: each personal income at the % of the time it was saved;
    income that came straight to the broker account (dividends) is already there — no % from it */
@@ -2965,9 +2968,9 @@ function renderBroker(inc,out){
       return ov>=0.01?zRow('Переплата',moneyR(ov),dn,'zsum zgood'):`<div class="zrow zsum zgood"><div><span>Отложено всё ✓</span>${dn?`<small>${dn}</small>`:''}</div></div>`};
     /* nothing due this month (no income yet): only what was sent or taken out — «Положено 0 ₽» and «Переплата» would mislead */
     const dd=toOld(r2(done-wd)), dSub=dd?(dd>=r2(done-wd)-0.005?'в счёт долга себе':`из них ${moneyR(dd)} — в счёт долга себе`):'';
-    box.innerHTML=`<div class="zcard">${head(`На брокер · ${R.head}`,'Изменить %',[R.note,inc.some(i=>i.acc==='broker')?'кроме пришедшего прямо на брокерский счёт':''].filter(Boolean).join(' · '))}
-      ${due>0?zRow('Положено за месяц',moneyR(dueR),'','zp')+zRow('Отложено',moneyR(done),'',wd>=0.01?'zp':'')+(wd>=0.01?zRow('Выведено с брокерского счёта',moneyR(wd)):'')+last()
-        :(done>=0.01?zRow('Отложено за месяц',moneyR(done),dSub,wd>=0.01?'zp':''):'')+(wd>=0.01?zRow('Выведено с брокерского счёта',moneyR(wd)):'')}${oRow}</div>`;
+    box.innerHTML=`<div class="zcard">${head(`На брокер · ${R.head}`,'Изменить',[R.note,inc.some(i=>i.acc==='broker')?'кроме пришедшего прямо на брокерский счёт':''].filter(Boolean).join(' · '))}
+      ${due>0?zRow('Положено за месяц',moneyR(dueR),'','zp')+zRow('Отложено',moneyR(done),'',wd>=0.01?'zp':'')+(wd>=0.01?zRow('Выведено со счёта',moneyR(wd)):'')+last()
+        :(done>=0.01?zRow('Отложено за месяц',moneyR(done),dSub,wd>=0.01?'zp':''):'')+(wd>=0.01?zRow('Выведено со счёта',moneyR(wd)):'')}${oRow}</div>`;
   }
   $('pSet').onclick=()=>{fresh();state.editing='pct';render();$('pInput')?.focus({preventScroll:true})};
   if($('oSet')) $('oSet').onclick=()=>{fresh();state.editing='owed';render();$('oInput')?.focus({preventScroll:true})};
