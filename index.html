@@ -932,8 +932,10 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 #budgetBox .zrow>div>small{flex:1 1 100%}
 #brokerBox .zrow:has(.zre),#brokerBox .zrow.zhd,#budgetBox .zrow:has(.zre){padding-block:0}
 /* «Сохранить» of the forms on Итоги: 14px, 36px tall (owner, 14.11.2026) */
-#viewStats .inline-edit .ghost{font-size:14px;min-height:36px;padding:4px 14px;margin-left:auto}
-#viewStats .inline-edit .linkbtn{font-size:14px;min-height:36px;min-width:84px;margin:0;padding:0 8px;text-align:center}
+/* the two buttons as the tiles of a record on «Записи»: 104 x 36, 8 apart, at the right end */
+#viewStats .inline-edit .ghost,#viewStats .inline-edit .linkbtn{flex:0 0 104px;min-width:0;min-height:36px;margin:0;padding:0;display:grid;place-items:center;text-align:center;font-size:14px;font-weight:500;border-radius:10px}
+#viewStats .inline-edit .ghost{margin-left:auto}
+#viewStats .inline-edit .linkbtn{color:var(--ink);background:var(--inset);border:1px solid var(--field-line)}
 /* the % of the broker's form stands inside the field, at its right end (owner, 14.11.2026) */
 #pForm #pInput{padding-right:34px}
 #pForm>span{margin:0 17px 0 -30px;position:relative;z-index:1;pointer-events:none;color:var(--muted)}
