@@ -1524,6 +1524,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   #zakatSheet .zgo span:last-child{font-size:18px}
   #zakatBox #zSet{min-height:36px}
   #zakatBox #zRe{min-height:44px}
+  /* the windows of «Деньги»: everything that was 44px is 42px (owner, 14.11.2026) */
+  #wForm input,#wForm .primary,#wForm .linkbtn,#xForm .linkbtn,.bkpanel .bkgrid>button,.recon .primary,.recon .ghost,.recon .linkbtn,#zakatSheet .zgo,#zakatBox #zRe{min-height:42px}
   /* «Перевод между счетами», variant В (owner, 14.11.2026): «Откуда ⇄ Куда» on one line, every field 36px, «Отмена» left and «Перевести» (150px) right */
   #xForm{grid-template-columns:minmax(0,1fr) 30px minmax(0,1fr);gap:10px 4px}
   #xForm select,#xForm input{height:36px;min-height:36px;padding-block:0}
