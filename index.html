@@ -2942,7 +2942,7 @@ function renderBroker(inc,out){
   const own=inMonth().filter(i=>!isTrip(i)), due=brokerDue(inc), done=brokerIn(own), wd=brokerOutOf(own);
   const head=(t,l,n)=>`<div class="zrow zhd"><div><span>${t}</span>${n?`<small>${n}</small>`:''}</div><button type="button" class="linkbtn" id="pSet">${l}</button></div>`;
   /* 0 now, and nothing was due this month at an older % either */
-  if(!pct&&!(due>0)) box.innerHTML=`<div class="zcard">${head(`На брокер · ${pctT(0)} — ничего не откладывается`,'+ Указать %')}${o!==null&&Math.abs(o)>=0.01?oRow:''}</div>`;
+  if(!pct&&!(due>0)) box.innerHTML=`<div class="zcard">${head(`С заработка · ${pctT(0)} — ничего не откладывается`,'+ Указать %')}${o!==null&&Math.abs(o)>=0.01?oRow:''}</div>`;
   else{
     const R=brokerRates(inc);
     /* the debt to himself the month began with: the debt now without what this month's records and later ones added (a debt typed
@@ -2965,14 +2965,14 @@ function renderBroker(inc,out){
         for(const k of Object.keys(lt).sort()){const d=brokerDue(lt[k])-toBroker(lt[k]);if(d<0){x=Math.max(0,x+d);v=Math.min(v,r2(x))}}
         const cE=r2(rest-e), cN=r2(e-v), ck=(state.settings.brokerOwed?.at||0)>=new Date(state.y,state.m,1).getTime();
         const n=[cE>=0.01?(ck?`по сверке покрыто ${moneyR(cE)}`:`переплата прошлых месяцев покрыла ${moneyR(cE)}`):'',cN>=0.01?`переводы следующих месяцев покрыли ${moneyR(cN)}`:''].filter(Boolean).join(', ');
-        return v>=0.01?zRow('Ещё перевести на брокер',moneyR(v),n,'zsum'):`<div class="zrow zsum zgood"><div><span>Отложено всё ✓</span>${n?`<small>${n}</small>`:''}</div></div>`}
+        return v>=0.01?zRow('Осталось перевести',moneyR(v),n,'zsum'):`<div class="zrow zsum zgood"><div><span>Отложено всё ✓</span>${n?`<small>${n}</small>`:''}</div></div>`}
       const x=-rest, d=toOld(x), ov=r2(x-d), dn=!d?'':ov>=0.01?`ещё ${moneyR(d)} ушло в счёт долга себе`:`и ещё ${moneyR(d)} — в счёт долга себе`;
       return ov>=0.01?zRow('Переплата',moneyR(ov),dn,'zsum zgood'):`<div class="zrow zsum zgood"><div><span>Отложено всё ✓</span>${dn?`<small>${dn}</small>`:''}</div></div>`};
     /* nothing due this month (no income yet): only what was sent or taken out — «Положено 0 ₽» and «Переплата» would mislead */
     const dd=toOld(r2(done-wd)), dSub=dd?(dd>=r2(done-wd)-0.005?'в счёт долга себе':`из них ${moneyR(dd)} — в счёт долга себе`):'';
-    box.innerHTML=`<div class="zcard">${head(`На брокер · ${R.head}`,'Изменить',[R.note,inc.some(i=>i.acc==='broker')?'кроме пришедшего прямо на брокерский счёт':''].filter(Boolean).join(' · '))}
-      ${due>0?zRow('Положено за месяц',moneyR(dueR),'','zp')+zRow('Отложено',moneyR(done),'',wd>=0.01?'zp':'')+(wd>=0.01?zRow('Выведено со счёта',moneyR(wd)):'')+last()
-        :(done>=0.01?zRow('Отложено за месяц',moneyR(done),dSub,wd>=0.01?'zp':''):'')+(wd>=0.01?zRow('Выведено со счёта',moneyR(wd)):'')}${oRow}</div>`;
+    box.innerHTML=`<div class="zcard">${head(`С заработка · ${R.head}`,'Изменить',[R.note,inc.some(i=>i.acc==='broker')?'кроме пришедшего прямо на брокерский счёт':''].filter(Boolean).join(' · '))}
+      ${due>0?zRow('Нужно отложить за месяц',moneyR(dueR),'','zp')+zRow('Уже переведено',moneyR(done),'',wd>=0.01?'zp':'')+(wd>=0.01?zRow('Выведено со счёта',moneyR(wd)):'')+last()
+        :(done>=0.01?zRow('Уже переведено за месяц',moneyR(done),dSub,wd>=0.01?'zp':''):'')+(wd>=0.01?zRow('Выведено со счёта',moneyR(wd)):'')}${oRow}</div>`;
   }
   $('pSet').onclick=()=>{fresh();state.editing='pct';render();$('pInput')?.focus({preventScroll:true})};
   if($('oSet')) $('oSet').onclick=()=>{fresh();state.editing='owed';render();$('oInput')?.focus({preventScroll:true})};
