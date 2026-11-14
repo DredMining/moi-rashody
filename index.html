@@ -2795,7 +2795,7 @@ function renderTrip(trip){
     <div class="acts tacts"><button class="linkbtn" id="tEdit" aria-haspopup="dialog">${st?'Сверить':'Указать остаток'}</button><button class="linkbtn" id="tAllow" aria-haspopup="dialog" aria-label="Пришли командировочные">+ Пришли</button>${on?'<button class="linkbtn" id="tEnd" aria-label="Командировка закончилась">Закончилась</button>':'<button class="linkbtn" id="tBegin" aria-label="Командировка началась">Началась</button>'}${rb}</div>`;
   rOn();
   /* a field gets the cursor only when he opens its form with a tap (never on a redraw), and the page doesn't move for it */
-  $('tEdit').onclick=()=>{fresh();state.editing='trip';render();$('tInput')?.focus({preventScroll:true})};
+  $('tEdit').onclick=()=>{fresh();state.editing='trip';render();focusEmpty($('tInput'))};
   /* trip over: what is left becomes his income (the broker % as with any income); an overspend paid from his own money
      becomes his expense, counted in the monthly limit. The next trip starts from zero; nothing is owed between accounts any more.
      The record keeps the trip as it was (tripPrev): «Отменить» in the toast, or deleting the record, opens the trip again.
@@ -2986,8 +2986,8 @@ function renderBroker(inc,out){
       ${due>0?zRow('Нужно отложить за месяц',moneyR(dueR),'','zp')+zRow('Уже переведено',moneyR(done),'',wd>=0.01?'zp':'')+(wd>=0.01?zRow('Выведено со счёта',moneyR(wd)):'')+last()
         :(done>=0.01?zRow('Уже переведено за месяц',moneyR(done),dSub,wd>=0.01?'zp':''):'')+(wd>=0.01?zRow('Выведено со счёта',moneyR(wd)):'')}${oRow}</div>`;
   }
-  $('pSet').onclick=()=>{fresh();state.editing='pct';render();$('pInput')?.focus({preventScroll:true})};
-  if($('oSet')) $('oSet').onclick=()=>{fresh();state.editing='owed';render();$('oInput')?.focus({preventScroll:true})};
+  $('pSet').onclick=()=>{fresh();state.editing='pct';render();focusEmpty($('pInput'))};
+  if($('oSet')) $('oSet').onclick=()=>{fresh();state.editing='owed';render();focusEmpty($('oInput'))};
   return o!==null&&o>=0.01?`<div class="alert al-ic"><span class="al-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span><span class="al-two"><span>Долг себе на брокер</span><b>${moneyR(o)}</b></span><button class="primary" id="oPay" data-v="${Math.round(o*100)/100}">Перевести</button></div>`:'';
 }
 
@@ -3012,6 +3012,8 @@ function perDay(left){
    so «Сохранить» stays under the finger for the second tap */
 /* a number already in a field (the limit, %, «Долг себе», what's left of the trip money, an account) is chosen whole on the way in:
    the first figure typed takes its place (owner, 13.11.2026; was put before it, «530000») */
+/* a window that opens on a figure already in the field puts no cursor in it (no keyboard, nothing chosen): the figure is chosen whole by the tap on the field (selIn), and the first digit typed takes its place (owner, 14.11.2026). A field that opens empty still gets the cursor at once */
+const focusEmpty=x=>{if(x&&!x.value)x.focus({preventScroll:true})};
 function selIn(x){if(x)x.addEventListener('focus',()=>{if(x.value)x.select()},{once:true})}
 const limForm=(p,budget)=>{const er=`<p class="err" role="alert" id="${p}Err" hidden></p>`;
   return `<form class="inline-edit" id="${p}Form" novalidate>${p==='lim'?er:''}<input id="${p}Input" class="num" inputmode="decimal" placeholder="Например, 30000" value="${budget?vIn(budget):''}" aria-label="Лимит личных расходов на месяц"><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="${p}Cancel">Отмена</button>${p==='lim'?'':er}</form>`};
@@ -3060,7 +3062,7 @@ function renderBudget(spent,out){
   /* Итоги: the limit in the same short rows as the broker */
   if(state.editing==='budget'){box.innerHTML=limForm('b',budget);limFormOn('b',budget,()=>{state.editing=null},()=>$('bSet')?.focus({preventScroll:true}));return}
   box.innerHTML=`<div class="zcard">${zRow('Лимит на месяц',budget?moneyR(budget):'<span class="zv">не задан</span>',def?'стоит по умолчанию — поменяйте под себя':'','',`<button type="button" class="linkbtn zre" id="bSet">${budget?'Изменить':'Задать'}</button>`)}</div>`;
-  $('bSet').onclick=()=>{fresh();state.editing='budget';render();$('bInput')?.focus({preventScroll:true})};
+  $('bSet').onclick=()=>{fresh();state.editing='budget';render();focusEmpty($('bInput'))};
 }
 /* the limit window: the month's limit (changed right here), what is spent in it, what is left or how much it is over, the meter */
 function limFill(spent,budget,def){
@@ -3074,7 +3076,7 @@ function limFill(spent,budget,def){
     ${zRow('Потрачено в лимит',money(spent))}${!budget?'':left>=0?zRow('Осталось',money(left),pd,'zsum'):zRow('Превышен на',money(-left),'','zsum zbad')}</div>
     `;
   if(ed) limFormOn('lim',budget,()=>{state.limSheet.edit=false},()=>$('limSet')?.focus({preventScroll:true}));
-  else $('limSet').onclick=()=>{fresh();toastOff();state.limSheet.edit=true;render();$('limInput')?.focus({preventScroll:true})};
+  else $('limSet').onclick=()=>{fresh();toastOff();state.limSheet.edit=true;render();focusEmpty($('limInput'))};
   /* the window grew or shrank (its field, «Лимит убран»): a message on screen stays above it */
   if(!$('toast').hidden) toastPlace($('toast'));
 }
@@ -3086,7 +3088,7 @@ function limSheet(edit){
   $('sheet').hidden=false;
   /* the redraw fills the window (renderBudget) and puts the focus into it; what opened it gets it back on close */
   fresh();render();
-  if(edit) $('limInput')?.focus({preventScroll:true});
+  if(edit) focusEmpty($('limInput'));
   $('sheet').querySelector('.sheet-panel').scrollTop=0;
 }
 
@@ -3253,7 +3255,7 @@ function renderWallets(){
   if($('xOpen')) $('xOpen').onclick=()=>{fresh();state.xfer.amount=0;state.xfer.note='';state.xferOpen=true;render();$('xAmount')?.focus({preventScroll:true});inView($('xForm'))};
   if(state.xferOpen) bindXfer();
   box.querySelectorAll('[data-wclose]').forEach(b=>b.onclick=()=>{fresh();state.editing=null;state.recon=null;render()});
-  box.querySelectorAll('.wrow').forEach(b=>b.onclick=()=>{fresh();state.editing=state.editing==='w-'+b.dataset.w?null:'w-'+b.dataset.w;render();$('wInput')?.focus({preventScroll:true})});
+  box.querySelectorAll('.wrow').forEach(b=>b.onclick=()=>{fresh();state.editing=state.editing==='w-'+b.dataset.w?null:'w-'+b.dataset.w;render();focusEmpty($('wInput'))});
   if(ed){
     /* the window closes (or the check question opens) and the next account's row comes up under the finger (fresh) */
     $('wForm').onsubmit=async e=>{e.preventDefault();fresh();const raw=$('wInput').value, v=parseNum(raw);
