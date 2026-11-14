@@ -485,7 +485,6 @@ input.num::placeholder{font-family:var(--f-body)}
 /* Five sections in «Итоги»: each button as wide as its word or more (no word is broken — «Командировка» whole),
    the rest of the line shared out evenly (.seg: flex 1 1 0, min-width:max-content) */
 #statSeg{padding:2px;gap:2px}
-:root:root:root #statSeg button{min-height:36px}
 #statSeg button{min-height:36px;padding:4px 3px;font-size:clamp(var(--fs-2xs),2.9vw,12px);line-height:1.1;white-space:nowrap}
 /* the one place under 11px: on a 320px phone the five words share a line only at 10px; narrower than that a button goes onto a second line */
 @media (max-width:359px){#statSeg button{font-size:10px;padding-inline:1px}}
