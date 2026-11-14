@@ -1562,6 +1562,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   #zakatSheet .zgo span:last-child{color:var(--accent)}
   #zakatSheet .zcard:not(.zhist) .zrow>div:first-child>span{text-transform:uppercase;letter-spacing:.04em}
   #zakatSheet .zhint{gap:0}
+  /* «Настройки закята»: on the grid — fields 42 (text stays 16, the iPhone zooms in under it), buttons 42 / 14, notes 12, captions in capitals */
+  #zForm input,#zForm select,#zForm .primary,#zForm .linkbtn{min-height:42px;height:42px}
+  #zForm .primary{font-size:14px}
+  #zForm .linkbtn{font-size:14px}
+  #zForm .zhint,#zForm .zhint b{font-size:12px}
+  #zForm label{text-transform:uppercase;letter-spacing:.04em}
+  #zForm label input,#zForm label select{text-transform:none;letter-spacing:normal}
   #zakatSheet .zsheet-head{border-bottom:0;padding:8px 0 4px;margin-bottom:0}
   /* compact: tighter head, plate and footnote (the rows stay one under another) */
   #zakatSheet .zhero{padding:10px 12px;gap:0}
