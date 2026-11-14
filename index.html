@@ -2922,7 +2922,7 @@ function renderBroker(inc,out){
      not to the page's start, from where the keyboard and a screen reader began again (the rest of D-24) */
   const back=id=>$(id)?.focus({preventScroll:true});
   if(state.editing==='pct'){
-    box.innerHTML=`<form class="inline-edit" id="pForm" novalidate><input id="pInput" class="num" inputmode="decimal" placeholder="Например, 10" value="${vIn(pct)}" aria-label="Процент с дохода на брокер"><span>%</span><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="pCancel">Отмена</button><p class="err" role="alert" id="pErr" hidden></p></form><div class="row"><span>Новый процент — для доходов, записанных с этой минуты; прошлые месяцы не пересчитываются. 0 — ничего не откладывать.</span></div>`;
+    box.innerHTML=`<form class="inline-edit" id="pForm" novalidate><input id="pInput" class="num" inputmode="decimal" placeholder="Например, 10" value="${vIn(pct)}" aria-label="Процент с дохода на брокер"><span>%</span><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="pCancel">Отмена</button><p class="err" role="alert" id="pErr" hidden></p></form>`;
     $('pForm').onsubmit=async e=>{e.preventDefault();const raw=$('pInput').value, v=parseNum(raw.replace('%','')), er=$('pErr');
       if(!(v>=0&&v<=100)){er.textContent=v>100?'Процент — не больше 100.':'Введите процент числом, например 10 (0 — не откладывать).';er.hidden=false;fieldErr($('pInput'),er);$('pInput').focus({preventScroll:true});return}
       state.editing=null;
