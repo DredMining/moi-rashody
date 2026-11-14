@@ -340,6 +340,8 @@ button{cursor:pointer}
   font-size:14px;font-weight:500;text-align:center;color:var(--ink);background:rgb(255 255 255 / .06);background:color-mix(in srgb,var(--ink) 6%,var(--inset))}
 #tripStat .tacts #tEnd,#tripStat .tacts #tBegin{background:var(--accent-btn);color:var(--accent-ink);font-weight:600}
 #tripStat .tacts>:last-child:nth-child(odd){grid-column:1/-1}
+/* the blue look: the plates of the actions are lighter than the card and have a thin edge, else they melt into it (owner, 14.11.2026) */
+:root[data-theme="light"] #tripStat .tacts button:not(#tEnd):not(#tBegin){background:color-mix(in srgb,var(--ink) 13%,var(--surface));box-shadow:inset 0 0 0 1px var(--field-line)}
 .wallets{display:flex;flex-direction:column;gap:var(--gap-stack)}
 .wgroup{display:flex;flex-direction:column;gap:var(--sp-2)}
 /* «Деньги»: each group (Карты, Наличные, Накопления) is a card, its name and sum on top, its accounts as small blocks inside it */
