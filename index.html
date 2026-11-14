@@ -93,7 +93,7 @@ img{max-width:100%}
   /* type that stays outside the scale: 14 — dense text (rows, alerts), 16 — a field (never smaller: the iPhone zooms in) */
   --fs-base:14px; --fs-field:16px;
   /* white text on a coloured fill; the veil under a window */
-  --on-fill:#FFFFFF; --scrim:rgb(0 0 0 / .55);
+  --on-fill:#FFFFFF; --scrim:rgb(0 0 0 / .8);
   /* small shadows: the round «+», a message box, a picked segment, a switch's knob */
   --shadow-fab:0 4px 14px rgb(0 0 0 / .28); --shadow-toast:0 8px 24px rgb(0 0 0 / .3); --shadow-seg:0 1px 2px rgb(0 0 0 / .12); --shadow-knob:0 1px 3px rgb(0 0 0 / .35);
   /* roles the two looks fill differently: a block inside a card (a field, a small plate), the fill of a picked «Расход / Доход / Личное / Командировка»
@@ -1115,11 +1115,11 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dperson .dcard{margin-top:8px;padding:8px 10px 10px;gap:4px;border-color:var(--line)}
 /* a debt picked in a person's list opens over the window, in its middle, on a dimmed ground; a tap on the ground closes it (owner, 14.11.2026) */
 .dperson .dcard-wrap{position:absolute;inset:0;z-index:5;display:flex;align-items:center;padding:12px;border-radius:inherit}
-.dperson .dcard-bg{position:absolute;inset:0;border-radius:inherit;background:rgb(0 0 0 / .82)}
+.dperson .dcard-bg{position:absolute;inset:0;border-radius:inherit;background:rgb(0 0 0 / .8)}
 /* the whole app behind it as dark as the window (owner, 14.11.2026), not the window alone */
-.wmodal:has(.dcard-wrap)>.sheet-bg{background:rgb(0 0 0 / .82);transition:background .16s}
+.wmodal:has(.dcard-wrap)>.sheet-bg{background:rgb(0 0 0 / .8);transition:background .16s}
 /* the person's window itself dims the app as much (owner, 14.11.2026): one darkness, so nothing changes when a debt opens over it */
-.wmodal:has(>.dperson)>.sheet-bg{background:rgb(0 0 0 / .82)}
+.wmodal:has(>.dperson)>.sheet-bg{background:rgb(0 0 0 / .8)}
 .dperson .dcard-wrap>.dcard{position:relative;width:100%;max-height:100%;overflow-y:auto;margin:0;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-modal);animation:zpop .16s ease-out}
 .dcard-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .dcard-t{display:flex;flex-direction:column;min-width:0}
