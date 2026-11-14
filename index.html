@@ -3024,7 +3024,11 @@ function perDay(left){
    the first figure typed takes its place (owner, 13.11.2026; was put before it, «530000») */
 /* a window that opens on a figure already in the field puts no cursor in it (no keyboard, nothing chosen): the figure is chosen whole by the tap on the field (selIn), and the first digit typed takes its place (owner, 14.11.2026). A field that opens empty still gets the cursor at once */
 const focusEmpty=x=>{if(x&&!x.value)x.focus({preventScroll:true})};
-function selIn(x){if(x)x.addEventListener('focus',()=>{if(x.value)x.select()},{once:true})}
+/* the whole number is selected when a field is entered (owner, 13–14.11.2026). On a phone the finger's lift puts the caret in after the focus,
+   which un-selects it: so the selection is set again a moment later, and the lift right after the focus is not let to move the caret */
+function selIn(x){if(!x)return;let t=0;const go=()=>{if(x.value&&document.activeElement===x)try{x.select()}catch(e){}};
+  x.addEventListener('focus',()=>{t=Date.now();go();requestAnimationFrame(go);setTimeout(go,60);setTimeout(go,200)});
+  for(const ev of ['mouseup','touchend'])x.addEventListener(ev,e=>{if(Date.now()-t<350&&e.cancelable){e.preventDefault();go()}})}
 const limForm=(p,budget)=>{const er=`<p class="err" role="alert" id="${p}Err" hidden></p>`;
   return `<form class="inline-edit" id="${p}Form" novalidate>${p==='lim'?er:''}<input id="${p}Input" class="num" inputmode="decimal" placeholder="Например, 30000" value="${budget?vIn(budget):''}" aria-label="Лимит личных расходов на месяц"><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="${p}Cancel">Отмена</button>${p==='lim'?'':er}</form>`};
 function limFormOn(p,budget,done,then){
