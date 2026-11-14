@@ -1554,6 +1554,12 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   #zakatSheet .zgo{min-height:44px}
   #zakatSheet .ztwo{grid-template-columns:1fr}
   #zakatSheet .zk{gap:10px}
+  /* variant Б: the sum in text colour, the accent only in the plate's edge, its caption and the arrows */
+  #zakatSheet .zhero{border:1px solid var(--accent)}
+  #zakatSheet .zhero .zcap{color:var(--accent)}
+  #zakatSheet .zhero>b{font-size:28px;line-height:1.2;font-weight:500;color:var(--ink)}
+  #zakatSheet .zgo{color:var(--ink)}
+  #zakatSheet .zgo span:last-child{color:var(--accent)}
   #zakatSheet .zgo span:last-child{font-size:18px}
   #zakatBox #zSet{min-height:36px}
   #zakatBox #zRe{min-height:44px}
