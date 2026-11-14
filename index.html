@@ -3652,7 +3652,7 @@ function renderZakat(){
     if(z.start) dip=zDip(z,M);
     const ended=dip&&dip.ended;
     const hero=!!z.start&&!ended&&!cur.below, heroSum=ea>=0.01?rest:cur.amount;
-    if(hero) html+=`<div class="zhero"><span class="zcap">${ea>=0.01?'Осталось отдать':'Закят к сроку'}</span><b>${money(heroSum)}</b><small>к сроку ${gDate(end)}${days>0?` · через ${days} ${plural(days,'день','дня','дней')}`:''}</small><small>Прогноз: сумма меняется вместе с остатками</small></div><!--HOW-->`;
+    if(hero) html+=`<div class="zhero"><span class="zcap">${ea>=0.01?'Осталось отдать':'Закят к сроку'}</span><b>${money(heroSum)}</b><small>к сроку ${gDate(end)}${days>0?` · через ${days} ${plural(days,'день','дня','дней')}`:''}</small></div><!--HOW-->`;
     html+=`<div class="zcard zchain">${zRow('Облагается сейчас',money(cur.base))}${zRow('Нисаб',money(nisab),`${NISAB_G[metal]} г ${METAL[metal]} × ${money(+z.price)}`,'m')}
       ${!z.start||ended?'':cur.below?zRow('Закят к сроку','—','сейчас ниже нисаба — закята не будет')
         /* given early: the year's zakat, minus what was given, what is left by the due date — short rows, not one long sentence */
