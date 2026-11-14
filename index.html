@@ -284,8 +284,9 @@ button{cursor:pointer}
    A row is a 36px button (--h-m), its line included: the name and the sum (12px) on one line, the bar under them. The rows touch,
    so the whole card is rows a finger can hit. The trip card's «Командировка» stands over it the same way (owner's choice, 01.11.2026) */
 #incomeBreakdown,#tripCard{gap:6px}
+#tripBreakdown:has(>#bdTrip[hidden]){display:none}
 .bdwrap .bd{gap:6px}
-#breakdown .bd h3,#incomeBreakdown>h2,[data-sv="broker"] .bd h3,#tripCard>h2{margin:0 0 0 2px;font-size:var(--fs-xs);line-height:1.2}
+#breakdown .bd h3,#tripBreakdown .bd h3,#incomeBreakdown>h2,[data-sv="broker"] .bd h3,#tripCard>h2{margin:0 0 0 2px;font-size:var(--fs-xs);line-height:1.2}
 .bdwrap .bars{gap:0;background:var(--surface);border:1px solid var(--card-line);border-radius:var(--r);overflow:hidden}
 .bdwrap .bar{min-height:42px;padding:5px var(--pad-card) 6px;row-gap:4px;border-bottom:1px solid var(--line)}
 .bdwrap .bar .name,.bdwrap .bar .val{font-size:14px}
@@ -1705,7 +1706,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
           <section id="breakdown" data-sv="out" aria-label="Куда ушли деньги" class="bdwrap">
             <div class="bd" id="bdDaily"><h3>Повседневные</h3><div class="bars" id="barsDaily"></div></div>
             <div class="bd" id="bdSep"><h3>Отдельно</h3><div class="bars" id="barsSep"></div></div>
-            <div class="bd" id="bdTrip"><h3>Командировка</h3><div class="bars" id="barsTrip"></div></div>
           </section>
         </div>
         <div class="stats-page" data-stat-page="in">
@@ -1714,16 +1714,19 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
             <div class="bd" id="bdIn"><div class="bars" id="barsIn"></div></div>
           </section>
         </div>
-        <div class="stats-page" data-stat-page="broker">
-          <section class="bdwrap" data-sv="broker" aria-label="Брокер и лимит">
-            <div class="bd"><h3>Брокер</h3><div class="rule" id="brokerBox"></div></div>
-            <div class="bd"><h3>Лимит</h3><div class="rule" id="budgetBox"></div></div>
-          </section>
-        </div>
         <div class="stats-page" data-stat-page="trip">
           <section class="bdwrap" id="tripCard" data-sv="trip" aria-labelledby="tripH">
             <h2 id="tripH">Командировка</h2>
             <div class="panel" id="tripPanel"><div class="stat wide" id="tripStat"></div></div>
+          </section>
+          <section class="bdwrap" id="tripBreakdown" aria-label="Траты в командировке">
+            <div class="bd" id="bdTrip"><h3>Траты в командировке</h3><div class="bars" id="barsTrip"></div></div>
+          </section>
+        </div>
+        <div class="stats-page" data-stat-page="broker">
+          <section class="bdwrap" data-sv="broker" aria-label="Брокер и лимит">
+            <div class="bd"><h3>Брокер</h3><div class="rule" id="brokerBox"></div></div>
+            <div class="bd"><h3>Лимит</h3><div class="rule" id="budgetBox"></div></div>
           </section>
         </div>
         <div class="stats-page" data-stat-page="cmp">
@@ -3841,7 +3844,7 @@ const bdSets=(out,inc,tripOut)=>{const spent=sum(out)||1, po=pctOf(out,sum(out))
 function renderBreakdown(out,inc,tripOut){
   const cs=state.catSheet, open=cs&&!$('sheet').hidden, same=open&&cs.y===state.y&&cs.m===state.m;
   let anyOut=false,anyIn=false;
-  bdSets(out,inc,tripOut).forEach(([k,list,tot,pm0])=>{const pm=pm0||pctOf(list,tot), r=barsHtml(list,tot,pm);$('bars'+k).innerHTML=r.html;$('bd'+k).hidden=!r.n;if(k==='In')anyIn=!!r.n;else anyOut=anyOut||!!r.n;
+  bdSets(out,inc,tripOut).forEach(([k,list,tot,pm0])=>{const pm=pm0||pctOf(list,tot), r=barsHtml(list,tot,pm);$('bars'+k).innerHTML=r.html;$('bd'+k).hidden=!r.n;if(k==='In')anyIn=!!r.n;else if(k!=='Trip')anyOut=anyOut||!!r.n;
     /* a bar opens its records of this month in a window over Итоги (an open one follows a change made in another copy of the app) */
     $('bars'+k).querySelectorAll('.bar').forEach(b=>b.onclick=()=>catSheet(b.dataset.cat,k,list,pm));
     if(same&&cs.k===k) catFill(cs.c,k,list,pm)});
@@ -4280,7 +4283,7 @@ function monthStats(k){
 }
 /* Итоги: Расходы | Доходы | Брокер | Командировка | Сравнение */
 /* each label whole on one line (#statSeg: a button as wide as its word) */
-const SV=[['out','Расходы'],['in','Доходы'],['broker','Брокер'],['trip','Командировка'],['cmp','Сравнение']];
+const SV=[['out','Расходы'],['in','Доходы'],['trip','Командировка'],['broker','Брокер'],['cmp','Сравнение']];
 const STAT_GAP=12;
 function setStatView(v){
   const index=SV.findIndex(([k])=>k===v),box=$('viewStats');if(index<0||box.dataset.view===v)return;
