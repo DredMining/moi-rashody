@@ -327,11 +327,15 @@ button{cursor:pointer}
    the four actions as 2×2 tiles (as a debt's), the end or start of the trip filled with the accent */
 #tripStat>span{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 #tripCard #tripStat>b{font-size:22px;font-weight:500;line-height:1.25}
-#tripStat .trows{display:flex;flex-direction:column;margin-top:8px}
-#tripStat .tr2{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:36px;border-top:1px solid var(--line);font-size:14px}
-#tripStat .tr2>span{color:var(--muted)}
+/* the trip is going on: its words «идёт с …» stand on the label's line, to the right */
+#tripStat:has(#tEnd){display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:baseline}
+#tripStat:has(#tEnd)>b,#tripStat:has(#tEnd)>.trows,#tripStat:has(#tEnd)>.tacts{grid-column:1/-1}
+#tripStat:has(#tEnd)>small{grid-column:2;grid-row:1;white-space:nowrap}
+#tripStat .trows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 10px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
+#tripStat .tr2{display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;gap:0;min-height:0;font-size:14px}
+#tripStat .tr2>span{color:var(--muted);font-size:12px}
 #tripStat .tr2>b{font-size:14px;font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums}
-#tripStat .tacts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:10px 0 6px}
+#tripStat .tacts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:10px 0 4px}
 #tripStat .tacts .linkbtn,#tripStat .tacts #tEdit,#tripStat .tacts #tAllow,#tripStat .tacts #tEnd,#tripStat .tacts #tRep,#tripStat .tacts #tBegin{min-height:36px;margin:0;padding:6px;border-radius:10px;flex-basis:auto;
   font-size:14px;font-weight:500;text-align:center;color:var(--ink);background:rgb(255 255 255 / .06);background:color-mix(in srgb,var(--ink) 6%,var(--inset))}
 #tripStat .tacts #tEnd,#tripStat .tacts #tBegin{background:var(--accent-btn);color:var(--accent-ink);font-weight:600}
@@ -1715,12 +1719,12 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
           </section>
         </div>
         <div class="stats-page" data-stat-page="trip">
+          <section class="bdwrap" id="tripBreakdown" aria-label="Траты в командировке">
+            <div class="bd" id="bdTrip"><h3>Траты в командировке</h3><div class="bars" id="barsTrip"></div></div>
+          </section>
           <section class="bdwrap" id="tripCard" data-sv="trip" aria-labelledby="tripH">
             <h2 id="tripH">Командировка</h2>
             <div class="panel" id="tripPanel"><div class="stat wide" id="tripStat"></div></div>
-          </section>
-          <section class="bdwrap" id="tripBreakdown" aria-label="Траты в командировке">
-            <div class="bd" id="bdTrip"><h3>Траты в командировке</h3><div class="bars" id="barsTrip"></div></div>
           </section>
         </div>
         <div class="stats-page" data-stat-page="broker">
