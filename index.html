@@ -5576,7 +5576,7 @@ function renderDataBox(){
   $('brokenDlBtn').hidden=!store.broken().length&&store.status!=='broken';prevLabel();
   /* three lines: where the records are, what to do once a week, when the last copy was */
   $('bkLast').textContent=lb?' · '+dShort.format(new Date(lb)).replace('.',''):' · копии нет';$('bkLast').className=!lb||Date.now()-lb>7*864e5?'old':'';
-  $('storeNote').innerHTML=`<span>Записи хранятся только на этом телефоне.</span><span>Раз в неделю скачивайте копию: ${BK_SAFE} — так она уцелеет, даже если потерять телефон.</span><span>${lb?'Последняя копия: '+esc(dayText(iso(new Date(lb)))):'Копию вы ещё не скачивали'}</span>`;
+  $('storeNote').innerHTML=`<span>Записи хранятся только на этом телефоне.</span><span>${lb?'Последняя копия: '+esc(dayText(iso(new Date(lb)))):'Копию вы ещё не скачивали'}</span>`;
   /* the reminder is one short line on «Учёт»: the way to keep the copy is spelled out in «Данные и копия» */
   return state.items.length>=10&&!(Date.now()-lb<7*864e5)?`<div class="alert"><span>${lb?'Резервной копии не было больше недели':'Резервной копии ещё нет'} — сохраните её в iCloud Drive</span><button class="primary" id="bkGo">Скачать</button></div>`:'';
 }
