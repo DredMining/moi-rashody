@@ -262,8 +262,9 @@ button{cursor:pointer}
 .stat b{font-family:var(--f-num);font-weight:500;font-size:var(--fs-lg);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .stat small{font-size:12px;color:var(--muted)}
 .stat.wide{grid-column:1/-1}
-.panel.mcard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px;background:var(--surface);border-radius:var(--r)}
-.mcard .mcol{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;padding:8px 4px;border:1px solid transparent;border-radius:var(--r-md);background:var(--inset);text-align:center}
+/* «Доходы / Разница / Расходы»: three plates with no card around them, tight (owner picked «Г», 14.11.2026) */
+.panel.mcard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:0;background:none;border:0;border-radius:0}
+.mcard .mcol{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:0;padding:5px 4px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--inset);text-align:center}
 .mcard .mdiff>span,.mcard .mdiff>b{color:var(--warn-ink)}
 .mcard .mdiff{transition:background-color .22s ease,box-shadow .22s ease}
 /* «Разница» in the colour of its sign: a tint and a thin ring, no glow (a glow blurs the figures) */
