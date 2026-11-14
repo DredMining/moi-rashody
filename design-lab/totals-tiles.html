@@ -36,15 +36,17 @@ h1{font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 .a b{font-size:16px;font-weight:500}
 .a .df b{color:var(--warn)}
 /* Б */
-.b{padding:8px 12px 8px;text-align:center}
-.b .big{font-size:20px;font-weight:600;line-height:1.2;margin:0 0 6px}
-.b .row{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);padding-top:5px}
-.b .row span{display:block;font-size:12px;color:var(--muted)}
+.b{padding:8px 12px 7px}
+.b .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.b .big{font-size:20px;font-weight:600;line-height:1.2}
+.b .row div{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:0 4px}
+.b .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-top:1px solid var(--line);padding-top:5px}
+.b .row span{font-size:12px;color:var(--muted)}
 .b .row b{font-size:14px;font-weight:500}
 /* В */
 .c{padding:0 16px}
-.c .r{display:flex;justify-content:space-between;align-items:center;min-height:32px;border-bottom:1px solid var(--line);font-size:14px}
-.c .r:last-child{border-bottom:0;min-height:36px}
+.c .r{display:flex;justify-content:space-between;align-items:center;min-height:30px;border-bottom:1px solid var(--line);font-size:14px}
+.c .r:last-child{border-bottom:0;min-height:34px}
 .c .r span{display:flex;align-items:center;gap:8px}
 .c .r span::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c)}
 .c .r:last-child b{font-size:16px;font-weight:600}
@@ -79,8 +81,7 @@ h1{font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 </div></div>
 
 <div class="card v" id="v-b"><div class="b">
-  <span class="lbl df">Разница</span>
-  <div class="big pos">+70 000 ₽</div>
+  <div class="top"><span class="lbl df">Разница</span><span class="big pos">+70 000 ₽</span></div>
   <div class="row"><div class="in"><span>Доходы</span><b class="pos">100 000 ₽</b></div><div class="out"><span>Расходы</span><b class="neg">30 000 ₽</b></div></div>
 </div></div>
 
@@ -99,8 +100,8 @@ h1{font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
 <script>
 const T={now:'Как сейчас: три плитки, суммы 16, на узком экране ужимаются.',
 a:'А (плотнее). Одна полоса, три колонки с разделителями, суммы 16, высота около 48.',
-b:'Б (плотнее). Разница 20 сверху, доходы и расходы в строку, высота около 80.',
-c:'В (плотнее). Три строки по 32–36, разница последней, высота около 100.',
+b:'Б (плотнее). Разница 20 в первой строке, доходы и расходы в одной строке под ней, высота около 66.',
+c:'В (плотнее). Три строки по 30–34, разница последней, высота около 94.',
 d:'Г (плотнее). Плитки без лишнего воздуха: отступы 6, высота около 52.'};
 const chips=[...document.querySelectorAll('#chips [data-v]')];
 function show(v){chips.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));document.querySelectorAll('.v').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));document.getElementById('note').textContent=T[v]}
