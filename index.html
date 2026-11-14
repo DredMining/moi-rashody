@@ -326,7 +326,9 @@ button{cursor:pointer}
 /* the trip card of Итоги, variant A (owner, 14.11.2026): what is left large, «Выдано / Потрачено» as lines (as the accounts on «Деньги»),
    the four actions as 2×2 tiles (as a debt's), the end or start of the trip filled with the accent */
 #tripStat>span{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-#tripCard #tripStat>b{font-size:22px;font-weight:500;line-height:1.25}
+/* what is left: on a plate, as the group sums of «Деньги» (Наличные…) — owner, 14.11.2026 */
+#tripCard #tripStat>b{align-self:flex-start;justify-self:start;margin-block:2px;padding:3px 9px;font-size:16px;font-weight:500;line-height:1.3;border-radius:8px;background:color-mix(in srgb,var(--accent) 16%,transparent);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+[data-theme="dark"] #tripCard #tripStat>b{background:color-mix(in srgb,var(--burgundy) 22%,transparent);border-color:color-mix(in srgb,var(--burgundy) 55%,transparent)}
 /* the trip is going on: its words «идёт с …» stand on the label's line, to the right */
 #tripStat:has(#tEnd){display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:baseline}
 #tripStat:has(#tEnd)>b,#tripStat:has(#tEnd)>.trows,#tripStat:has(#tEnd)>.tacts{grid-column:1/-1}
