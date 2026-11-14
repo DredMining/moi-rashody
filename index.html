@@ -3017,7 +3017,7 @@ function renderBudget(spent,out){
   if(state.limSheet&&!$('sheet').hidden) limFill(spent,budget,def);
   /* Итоги: the limit in the same short rows as the broker */
   if(state.editing==='budget'){box.innerHTML=limForm('b',budget);limFormOn('b',budget,()=>{state.editing=null},()=>$('bSet')?.focus({preventScroll:true}));return}
-  box.innerHTML=`<div class="zcard">${zRow('Лимит на месяц',budget?moneyR(budget):'<span class="zv">не задан</span>',def?'стоит по умолчанию — поменяйте под себя':'','',`<button type="button" class="linkbtn zre" id="bSet">${budget?'Изменить':'Задать'}</button>`)}<p class="zfoot">${NOT_IN_TXT}</p></div>`;
+  box.innerHTML=`<div class="zcard">${zRow('Лимит на месяц',budget?moneyR(budget):'<span class="zv">не задан</span>',def?'стоит по умолчанию — поменяйте под себя':'','',`<button type="button" class="linkbtn zre" id="bSet">${budget?'Изменить':'Задать'}</button>`)}<p class="zfoot">${NOT_IN_TXT.replace(". Перерасход",".<br>Перерасход")}</p></div>`;
   $('bSet').onclick=()=>{fresh();state.editing='budget';render();$('bInput')?.focus({preventScroll:true})};
 }
 /* the limit window: the month's limit (changed right here), what is spent in it, what is left or how much it is over, the meter */
