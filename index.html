@@ -1526,6 +1526,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   #zakatSheet .zgo span:last-child{font-size:18px}
   #zakatBox #zSet{min-height:36px}
   #zakatBox #zRe{min-height:44px}
+  /* the windows «счёт» and «Перевод» stand in the middle of the screen, as «Данные и копия» (owner, 14.11.2026); the keypad's room is still taken by html.pad-open */
+  .wmodal:has(#wForm),.wmodal:has(#xForm){padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
+  .wmodal>#wForm,.wmodal>#xForm{margin:auto 0}
+  html.pad-open .wmodal:has(#wForm),html.pad-open .wmodal:has(#xForm){padding-bottom:calc(var(--pad-h,0px) + 16px)}
   /* the windows of «Деньги»: everything that was 44px is 42px (owner, 14.11.2026) */
   #wForm input,#wForm .primary,#wForm .linkbtn,#xForm .linkbtn,.bkpanel .bkgrid>button,.recon .primary,.recon .ghost,.recon .linkbtn,#zakatSheet .zgo,#zakatBox #zRe{min-height:42px}
   /* «Перевод между счетами», variant В (owner, 14.11.2026): «Откуда ⇄ Куда» on one line, every field 36px, «Отмена» left and «Перевести» (150px) right */
