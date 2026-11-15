@@ -15,11 +15,8 @@
       "name": "iphone-simulator",
       "runtimeExecutable": "node",
       "runtimeArgs": [
-        "C:/Users/dredm/Documents/GitHub/moi-rashody/.claude/worktrees/simulator-main/dev-tools/iphone-simulator/server.js",
-        "--no-open",
-        "--follow-main",
-        "30",
-        "--fresh"
+        "dev-tools/iphone-simulator/server.js",
+        "--no-open"
       ],
       "port": 8800
     },
