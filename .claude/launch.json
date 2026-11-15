@@ -4,19 +4,33 @@
     {
       "name": "style-audit",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["audit/tools/serve.js", ".", "8791"],
+      "runtimeArgs": [
+        "audit/tools/serve.js",
+        ".",
+        "8791"
+      ],
       "port": 8791
     },
     {
       "name": "iphone-simulator",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["dev-tools/iphone-simulator/server.js", "--no-open"],
+      "runtimeArgs": [
+        "C:/Users/dredm/Documents/GitHub/moi-rashody/.claude/worktrees/simulator-main/dev-tools/iphone-simulator/server.js",
+        "--no-open",
+        "--follow-main",
+        "30",
+        "--fresh"
+      ],
       "port": 8800
     },
     {
       "name": "design-lab",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["audit/tools/serve.js", "design-lab", "8805"],
+      "runtimeArgs": [
+        "audit/tools/serve.js",
+        "design-lab",
+        "8805"
+      ],
       "port": 8805
     }
   ]
