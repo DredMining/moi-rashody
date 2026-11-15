@@ -1627,6 +1627,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   #zForm .zhint{padding:0;background:none;color:var(--muted);margin-top:-2px}
   #zForm .zhint b{color:var(--ink)}
   #zForm #zStartH{margin-top:-4px}
+  #zForm #zStartH:empty{display:none}
   #zForm #zPastBox:empty{display:none}
   #zForm p{line-height:16px;margin:0}
   #zForm label{text-transform:uppercase;letter-spacing:.04em}
@@ -3795,7 +3796,7 @@ function renderZakat(){
   return (owed>=0.01?`<div class="alert"><span>Закят к оплате: <b>${moneyR(owed)}</b></span><button class="primary" id="zPay">Оплатить</button></div>`:'')
     +(dip?`<div class="alert"><span>${dip.ended?'Срок закята наступил, но сумма за год опускалась ниже нисаба':'Сумма опускалась ниже нисаба — проверьте год закята'}</span><button class="ghost" id="zDipGo">Посмотреть</button></div>`:'');
 }
-const zStartHint=s=>s?'По хиджре: '+NBH(hijri(s)):'Если не помните точно — выберите более раннюю дату: заплатить раньше можно, позже нельзя.';
+const zStartHint=s=>s?'':'Если не помните точно — выберите более раннюю дату: заплатить раньше можно, позже нельзя.';
 function zPastHtml(start,z){
   if(!start||start===z.start) return '';
   const p=zPast(start);
