@@ -173,7 +173,7 @@ button{cursor:pointer}
 @supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
   .tabs{background:var(--sheen),var(--glass);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%)}}
 /* 5px between the glass's rim and the tabs (said here over the phone frame's own padding for the old bar) */
-.app .tabs{padding:4px!important}
+.app .tabs{padding:3px!important}
 /* The picked tab: a second piece of glass inside the bar — one capsule (.tab-cap) that goes from tab to tab (a fifth of the row wide).
    It behaves as the tab bar of Telegram on an iPhone does (its lens, read from its source):
    · at rest it is a quiet plate with a touch of the accent — no glow; the chosen tab's icon and name are what is bright;
@@ -187,8 +187,8 @@ button{cursor:pointer}
    its dark back hides the plain row under it), .cap-fill — the plate, .cap-lens — the cut-out, .cap-unlift — takes the growth back off
    the copy, .cap-rim — the lens's edge. Only transforms and opacities change, nothing is laid out or painted anew.
    The rule here is the capsule's place before the script runs; till the script has filled it, it is not shown. */
-/* the same 5px (1 + 4) from the rim on every side (the capsule's edge and the glass's rim are concentric), as tall as a tab (owner, 14.11.2026) */
-.tab-cap{position:absolute;z-index:2;top:4px;bottom:4px;left:4px;width:calc((100% - 8px) / 5);border-radius:calc(var(--tabbar-h) / 2 - 4px);pointer-events:none;
+/* the same 4px (1 + 3) from the rim on every side (the capsule's edge and the glass's rim are concentric), as tall as a tab (owner, 14.11.2026) */
+.tab-cap{position:absolute;z-index:2;top:3px;bottom:3px;left:3px;width:calc((100% - 6px) / 5);border-radius:calc(var(--tabbar-h) / 2 - 3px);pointer-events:none;
   transform:translate3d(calc(var(--tab-i,2) * 100%),0,0);transform-origin:0 50%;will-change:transform}
 .tab-cap:empty{visibility:hidden}
 .cap-body,.cap-fill,.cap-lens,.cap-unlift,.cap-rim{position:absolute;inset:0;border-radius:inherit}
@@ -205,8 +205,8 @@ button{cursor:pointer}
 .cap-lens{overflow:hidden}
 /* the copy of the row: five cells laid as the tabs are (the same sizes, so at rest it lies exactly over them), in the chosen tab's colours;
    the tabs stand 6px below the glass's rim and the capsule 4px, so the copy is 2px lower than the capsule's top, as tall as a tab */
-.cap-row{position:absolute;left:0;top:0;width:500%;height:calc(var(--tabbar-h) - 10px);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;transform-origin:0 50%;will-change:transform}
-.cap-row b{padding:2px 0 1px;min-width:0;min-height:calc(var(--tabbar-h) - 10px);display:flex;flex-direction:column;align-items:center;gap:0;color:var(--ink);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.cap-row{position:absolute;left:0;top:0;width:500%;height:calc(var(--tabbar-h) - 8px);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;transform-origin:0 50%;will-change:transform}
+.cap-row b{padding:2px 0 1px;min-width:0;min-height:calc(var(--tabbar-h) - 8px);display:flex;flex-direction:column;align-items:center;gap:0;color:var(--ink);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
 .tabs.lift .cap-row b{transform:scale(1.15)}
 .tabs .cap-row .ico{color:var(--ico-on)}
 .tabs .cap-row svg{opacity:1}
@@ -215,7 +215,7 @@ button{cursor:pointer}
 .tabs.lift .cap-rim{opacity:1}
 /* The bar itself takes the touch — no scroll, no text picking, no callout */
 .tabs,.tabs *{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-.tabs button{position:relative;z-index:1;border:0;background:transparent;padding:2px 0 1px;min-width:0;min-height:calc(var(--tabbar-h) - 10px);display:flex;flex-direction:column;align-items:center;gap:0;color:var(--muted);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent;outline-offset:-3px;border-radius:26px}
+.tabs button{position:relative;z-index:1;border:0;background:transparent;padding:2px 0 1px;min-width:0;min-height:calc(var(--tabbar-h) - 8px);display:flex;flex-direction:column;align-items:center;gap:0;color:var(--muted);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent;outline-offset:-3px;border-radius:26px}
 .tabs .ico{position:relative;width:min(56px,100%);height:28px;border-radius:14px;display:grid;place-items:center;margin-bottom:-1px}
 .tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
 /* the icons of the tabs not picked (--tab-ico): grey in «Чёрный и бордо», a lighter accent in the night-blue look; at full strength,
