@@ -1567,6 +1567,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   #zakatSheet .zcard .zrow>div:first-child>span{text-transform:uppercase;letter-spacing:.04em}
   #zakatSheet .zhint{gap:0}
   #zakatSheetT{text-transform:uppercase;letter-spacing:.04em}
+  /* the accent mark before the title, as before «КАРТЫ» on «Деньги» */
+  #zakatSheetT::before{content:"";display:inline-block;width:3px;height:16px;border-radius:2px;background:var(--accent);margin-right:8px;vertical-align:-2px}
   /* «Настройки закята»: on the grid — fields 42 (text stays 16, the iPhone zooms in under it), buttons 42 / 14, notes 12, captions in capitals */
   #zForm input,#zForm select,#zForm .primary,#zForm .linkbtn{min-height:42px;height:42px}
   #zForm .primary{font-size:14px}
