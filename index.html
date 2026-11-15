@@ -1553,14 +1553,18 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   #zakatSheet .zfoot{font-size:12px}
   #zakatSheet .zgo{min-height:44px}
   #zakatSheet .ztwo{grid-template-columns:1fr}
-  #zakatSheet .zk{gap:10px}
+  #zakatSheet .zk{gap:8px}
+  /* compact main page: «Настройки» and «Пересчитать…» in one line, the small note closer */
+  #zakatBox .acts{flex-wrap:nowrap;gap:10px}
+  #zakatBox .acts #zRe{flex:1 1 0;min-width:0;min-height:36px;margin:0;padding:0;text-align:right;line-height:1.25}
+  #zakatSheet .zhint.zfine{padding-top:2px}
   /* variant Б: the sum in text colour, the accent only in the plate's edge, its caption and the arrows */
   #zakatSheet .zhero{border:1px solid var(--accent)}
   #zakatSheet .zhero .zcap{color:var(--accent)}
   #zakatSheet .zhero>b{font-size:28px;line-height:1.2;font-weight:500;color:var(--ink)}
   #zakatSheet .zgo{color:var(--ink)}
   #zakatSheet .zgo span:last-child{color:var(--accent)}
-  #zakatSheet .zcard:not(.zhist) .zrow>div:first-child>span{text-transform:uppercase;letter-spacing:.04em}
+  #zakatSheet .zcard .zrow>div:first-child>span{text-transform:uppercase;letter-spacing:.04em}
   #zakatSheet .zhint{gap:0}
   #zakatSheetT{text-transform:uppercase;letter-spacing:.04em}
   /* «Настройки закята»: on the grid — fields 42 (text stays 16, the iPhone zooms in under it), buttons 42 / 14, notes 12, captions in capitals */
@@ -3650,10 +3654,9 @@ function renderZakat(){
   const hist=zHistory(z);
   const paidSub=r=>r.paid>=r.amount-0.005?'оплачено ✓':`оплачено ${money(r.paid)}`;
   const histHtml=!hist.length?'':`<div class="zcard zhist">${hist.slice().reverse().map(r=>r.y
-    ?zRow(`Срок ${hijri(r.y.due)?NBH(hijri(r.y.due)):gDate(r.y.due)}`,r.y.below?'—':money(r.amount),r.y.below?`${gDate(r.y.due)} · ниже нисаба, закята не было`:`${gDate(r.y.due)} · облагалось ${money(r.y.base)}${r.y.approx?' (примерно)':''}${r.y.forced?' · начислен вручную':''} · ${paidSub(r)}`,'',
+    ?zRow(`Срок ${gDate(r.y.due)}`,r.y.below?'—':money(r.amount),(hijri(r.y.due)?NBH(hijri(r.y.due))+' · ':'')+(r.y.below?'ниже нисаба, закята не было':`облагалось ${money(r.y.base)}${r.y.approx?' (примерно)':''}${r.y.forced?' · начислен вручную':''} · ${paidSub(r)}`),'',
       r.y.settled||setup||!M?'':`<button type="button" class="linkbtn zre" data-zre="${esc(r.y.due)}">Пересчитать</button>`)
-    :zRow(esc(zxLabel(r.x)),money(r.amount),`${gDate(r.x.date)} · ${paidSub(r)}`)).join('')}</div>
-    ${L.paid?`<p class="zs">Всего выплачено: ${money(L.paid)}</p>`:''}`;
+    :zRow(esc(zxLabel(r.x)),money(r.amount),`${gDate(r.x.date)} · ${paidSub(r)}`)).join('')}${L.paid?zRow('Всего выплачено',money(L.paid),'','zsum'):''}</div>`;
   const histGo=hist.length?`<button type="button" class="zgo" data-zview="hist"><span>История по годам</span><span aria-hidden="true">›</span></button>`:'';
   if(setup){
     html+=`${due}<p class="zs">Приложение посчитает закят по всем счетам, напомнит о сроке и запишет выплаты. Нужно один раз указать цену грамма ${METAL[metal]} и примерную дату, когда ваши деньги дошли до нисаба.</p>
