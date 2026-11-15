@@ -1537,6 +1537,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   :root .ghost{font-size:var(--fs-base)}
   /* the sums of the zakat card on Деньги stand three in a row: at 15px they run into the card's padding on a 375–390px phone */
   :root .zline .zcols b{font-size:14px}
+  /* окно «На что?» ровнее (Али, 15.11.2026): один промежуток 6px между плитками и по вертикали, «Другое» высотой 44, «ОТДЕЛЬНО» с равными отступами */
+  :root #sheet .tiles:not(.accs){gap:6px}
+  :root #sheet .tiles:not(.accs)>.tile:last-child:nth-child(4n+1):nth-child(n+6){min-height:44px;padding-block:0}
+  :root #sheet .tiles:not(.accs)+h3{margin-block:12px 0}
   /* «Деньги» on one grid (owner, 14.11.2026, as «Долги»): type 12/14/16/18/22, heights 36 (tight buttons) and 44 (rows that are tapped), 10px between blocks, 8px inside windows */
   :root .mtot .lbl{font-size:12px}
   #moneyAsOf{text-transform:uppercase;letter-spacing:.06em}
