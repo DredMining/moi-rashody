@@ -1457,9 +1457,11 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
   font:400 30px/1 var(--f-body);display:grid;place-items:center;pointer-events:none;box-shadow:0 6px 18px rgb(0 0 0 / .45);opacity:0}
 .tp-pop.on{opacity:1}
 html.pad-open .scroller{padding-bottom:calc(var(--tabbar-room) + var(--pad-h,0px))}
-html.pad-open .sheet{padding-bottom:var(--pad-h,0px)}
+html.pad-open .sheet:where(:not(.centered)){padding-bottom:var(--pad-h,0px)}
 html.pad-open .sheet-panel{max-height:calc(100% - env(safe-area-inset-top,0px) - 16px);padding-bottom:16px}
-html.pad-open .sheet.centered,html.pad-open .zsheet,html.pad-open .wmodal{padding-bottom:calc(var(--pad-h,0px) + 16px)}
+/* a window in the middle stays where it is when the keys don't reach it, and goes up only as far as they cover it (the script: fitWin);
+   one too tall for the room over the keys (.pad-tall) gets that room at its end and scrolls, as before (owner, 15.11.2026) */
+html.pad-open :is(.sheet.centered,.zsheet,.wmodal).pad-tall{padding-bottom:calc(var(--pad-h,0px) + 16px)}
 @media (prefers-reduced-motion:reduce){.numpad,.numpad.on,.numpad button{transition:none}}
 /* hidden: empty and see-through, but still there — a screen reader hears each new message in it */
 .toast[hidden]{display:flex!important;opacity:0;pointer-events:none;padding:0;box-shadow:none}
@@ -1648,7 +1650,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   /* the windows «счёт» and «Перевод» stand in the middle of the screen, as «Данные и копия» (owner, 14.11.2026); the keypad's room is still taken by html.pad-open */
   .wmodal:has(#wForm),.wmodal:has(#xForm){padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
   .wmodal>#wForm,.wmodal>#xForm{margin:auto 0}
-  html.pad-open .wmodal:has(#wForm),html.pad-open .wmodal:has(#xForm){padding-bottom:calc(var(--pad-h,0px) + 16px)}
+  html.pad-open .wmodal.pad-tall:has(#wForm),html.pad-open .wmodal.pad-tall:has(#xForm){padding-bottom:calc(var(--pad-h,0px) + 16px)}
   /* the windows of «Деньги»: everything that was 44px is 42px (owner, 14.11.2026) */
   #wForm input,#wForm .primary,#wForm .linkbtn,#xForm .linkbtn,.bkpanel .bkgrid>button,.recon .primary,.recon .ghost,.recon .linkbtn,#zakatSheet .zgo,#zakatBox #zRe{min-height:42px}
   /* «Перевод между счетами», variant В (owner, 14.11.2026): «Откуда ⇄ Куда» on one line, every field 36px, «Отмена» left and «Перевести» (150px) right */
@@ -5162,8 +5164,30 @@ const PAD=matchMedia('(hover:none) and (pointer:coarse)').matches;
     if(Math.abs(d)>1)sc.scrollBy({top:d,behavior:'smooth'})};
   const open=x=>{field=x;const t=isTxt(x);pad.classList.toggle('txt',t);pad.setAttribute('aria-label',t?'Клавиатура':'Цифры');if(t){sym=false;shift=0;auto();sync()}
     pad.classList.add('on');root.classList.add('pad-open');root.style.setProperty('--pad-h',pad.offsetHeight+'px');
-    requestAnimationFrame(()=>requestAnimationFrame(()=>reveal(x)))};
-  const close=()=>{lift(false);field=null;pad.classList.remove('on');root.classList.remove('pad-open');root.style.removeProperty('--pad-h')};
+    /* a window that moved goes on for the keys' .25s: the field is shown when it has come */
+    if(fitWin(x))setTimeout(()=>reveal(x),270);else requestAnimationFrame(()=>requestAnimationFrame(()=>reveal(x)))};
+  /* A window in the middle of the screen (owner, 15.11.2026): it is not put up by the whole height of the keys, as it was for the iPhone's
+     keyboard — it stays where it is while they don't reach it, and goes up only by as much as they would cover it, 16px over them. One that
+     can't fit over them so (its top would go under the top of the screen) is .pad-tall: it gets their room at its end and scrolls, as before.
+     Its place is read without its own moves (offsetTop, offsetHeight: no transforms, no translate), it is moved by translate (its opening
+     animation, a transform, goes on under it), and read again when it changes size (a message under a field) */
+  let held2=null;
+  const EASE='cubic-bezier(.2,.8,.2,1)', still=matchMedia('(prefers-reduced-motion: reduce)');
+  const slide=(p,from,to)=>{p.style.translate=to;if(from!==to&&!still.matches)p.animate([{translate:from||'0 0'},{translate:to||'0 0'}],{duration:250,easing:EASE})};
+  const winPlace=()=>{const w=held2;if(!w||w.box.classList.contains('pad-tall'))return false;
+    const {box,p}=w, sat=parseFloat(getComputedStyle(document.querySelector('.app')).paddingTop)||0;
+    const top=box.getBoundingClientRect().top+p.offsetTop-box.scrollTop, bottom=top+p.offsetHeight, room=innerHeight-pad.offsetHeight-16;
+    let L=Math.max(0,Math.ceil(bottom-room));
+    if(L&&top-L<sat+16){box.classList.add('pad-tall');L=0}
+    const was=p.style.translate, to=L?`0 ${-L}px`:'';if(was===to)return false;slide(p,was,to);return true};
+  const unfit=()=>{const w=held2;held2=null;if(!w)return;w.ro.disconnect();w.box.classList.remove('pad-tall');
+    if(w.p.isConnected)slide(w.p,w.p.style.translate,'');else w.p.style.translate=''};
+  const fitWin=x=>{const box=x.closest('.sheet.centered,.zsheet,.wmodal');
+    if(held2&&held2.box!==box)unfit();if(!box)return false;
+    if(!held2){const p=[...box.children].find(c=>!c.matches('.sheet-bg')&&c.getClientRects().length);if(!p)return false;
+      held2={box,p,ro:new ResizeObserver(()=>{if(held2?.p===p&&field)winPlace()})};held2.ro.observe(p)}
+    return winPlace()};
+  const close=()=>{lift(false);field=null;unfit();pad.classList.remove('on');root.classList.remove('pad-open');root.style.removeProperty('--pad-h')};
   const put=k=>{const x=field;if(!x||x.readOnly||x.disabled)return;const v=x.value;let s=x.selectionStart??v.length, e=x.selectionEnd??v.length;
     if(k==='del'){if(s===e){if(!s)return;s--}x.setRangeText('',s,e,'end')}
     else{if(k===','&&!v.slice(0,s).trim())k='0,'; /* a sum begun with the comma: «0,» */
