@@ -560,8 +560,14 @@ input.num::placeholder{font-family:var(--f-body)}
 .recs .itemacts .del{padding-block:6px}
 /* Записи: сетка шрифтов 12/14/16/18/22 и высот 36/44 (Али, 14.11.2026) */
 :root #viewHistory .monthbar .title{font-size:18px}
-:root #viewHistory #scopeFilter button{min-height:32px}
-#accFilter .chip{min-height:28px;font-size:13px;padding:2px 10px}
+:root #viewHistory #scopeFilter button{min-height:30px;padding-block:0}
+:root #viewHistory #scopeFilter{padding:3px}
+:root #viewHistory #scopeFilter .sv-cap{top:3px;bottom:3px}
+/* переключатель — как нижняя панель: одна рамка, без вторых линий внутри; пластина без своей обводки */
+:root #viewHistory #scopeFilter{background:linear-gradient(180deg,rgb(255 255 255 / .08),rgb(255 255 255 / 0) 55%),var(--glass-solid);box-shadow:0 12px 32px rgb(0 0 0 / .5),0 2px 8px rgb(0 0 0 / .35)}
+:root #viewHistory #scopeFilter .sv-cap{box-shadow:none}
+:root #viewHistory #scopeFilter button[aria-pressed="true"]{box-shadow:none}
+#accFilter .chip{min-height:30px;font-size:13px;padding:2px 10px}
 .recs .item{font-size:14px;min-height:44px;box-sizing:border-box;padding-block:2px}
 .recs .itemacts .linkbtn,.recs .itemacts .del{font-size:14px}
 /* «Изменить» и «Удалить» — две плитки на всю ширину, как в листе категории (Али, 14.11.2026) */
