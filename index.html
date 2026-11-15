@@ -3654,7 +3654,7 @@ function renderZakat(){
   const hist=zHistory(z);
   const paidSub=r=>r.paid>=r.amount-0.005?'оплачено ✓':`оплачено ${money(r.paid)}`;
   const histHtml=!hist.length?'':`<div class="zcard zhist">${hist.slice().reverse().map(r=>r.y
-    ?zRow(`Срок ${gDate(r.y.due)}`,r.y.below?'—':money(r.amount),(hijri(r.y.due)?NBH(hijri(r.y.due))+' · ':'')+(r.y.below?'ниже нисаба, закята не было':`облагалось ${money(r.y.base)}${r.y.approx?' (примерно)':''}${r.y.forced?' · начислен вручную':''} · ${paidSub(r)}`),'',
+    ?zRow(`Срок ${gDate(r.y.due)}`,r.y.below?'—':money(r.amount),(hijri(r.y.due)?NBH(hijri(r.y.due))+'<br>':'')+(r.y.below?'ниже нисаба, закята не было':`облагалось ${money(r.y.base)}${r.y.approx?' (примерно)':''}${r.y.forced?' · начислен вручную':''}<br>${paidSub(r)}`),'',
       r.y.settled||setup||!M?'':`<button type="button" class="linkbtn zre" data-zre="${esc(r.y.due)}">Пересчитать</button>`)
     :zRow(esc(zxLabel(r.x)),money(r.amount),`${gDate(r.x.date)} · ${paidSub(r)}`)).join('')}${L.paid?zRow('Всего выплачено',money(L.paid),'','zsum'):''}</div>`;
   const histGo=hist.length?`<button type="button" class="zgo" data-zview="hist"><span>История по годам</span><span aria-hidden="true">›</span></button>`:'';
