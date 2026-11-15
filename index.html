@@ -3816,7 +3816,7 @@ function zForm(z){
     <label>Когда ваши деньги дошли до нисаба<input id="zStart" type="date" min="1900-01-01" max="${iso(now)}" value="${isoOk(z.start)?z.start:''}"></label>
     <p id="zStartH">${zStartHint(z.start)}</p>
     <div id="zPastBox"></div>
-    <label>Брокерский счёт сейчас<input id="zBroker" class="num" inputmode="decimal" placeholder="${bNow===null?'Например, 150 000':'Сейчас: '+money(bNow)}" value=""></label>
+    <label>Брокерский счёт<input id="zBroker" class="num" inputmode="decimal" placeholder="${bNow===null?'Например, 150 000':'Сейчас: '+money(bNow)}" value=""></label>
     <p class="err" role="alert" id="zErr" hidden></p>
     <div class="row"><button class="primary" type="submit">Сохранить</button><button class="linkbtn" type="button" data-zclose>Отмена</button></div></form></div>`;
 }
