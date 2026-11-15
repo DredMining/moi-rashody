@@ -1542,6 +1542,11 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   :root #sheet .tiles:not(.accs)>.tile:last-child:nth-child(4n+1):nth-child(n+6){min-height:44px;padding-block:0}
   :root #sheet .tiles:not(.accs)+h3{margin-block:8px -4px}
   :root #sheet:has(.tiles:not(.accs)) .sheet-panel{padding-bottom:20px}
+  /* на 393px «Развлечение» ломалось «Развлечени/е»: сетка выходит за поля окна на 10px (было 8), у плиток нет боковых отступов */
+  :root #sheet .tiles:not(.accs){margin-inline:-10px}
+  :root #sheet .tiles:not(.accs)+h3{margin-inline:-10px}
+  :root #sheet .tiles:not(.accs)>.tile{padding-inline:0}
+  @media (max-width:380px){:root #sheet .tiles:not(.accs)>.tile{letter-spacing:-.02em}}
   /* иконки категорий крупнее (Али, 15.11.2026): круг 38px, значок 20px; плитка выше на 6px */
   :root #sheet .tiles:not(.accs)>.tile .ic{width:38px;height:38px;font-size:20px}
   :root #sheet .tiles:not(.accs)>.tile{min-height:calc(59px + 2.4em);justify-content:flex-start;padding-top:9px}
