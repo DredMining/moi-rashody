@@ -75,6 +75,13 @@ export function createAppFrame({ frame, settings, onChange }) {
     return '';
   }
 
+  // --fresh: сервер не держит service worker приложения, а у этого браузера он мог остаться с прошлых запусков (со своим кэшем):
+  // перед открытием приложения забываем его — иначе рамка зависает на «Подключение…» или показывает старую версию
+  async function dropSavedCopy() {
+    try { for (const registration of await navigator.serviceWorker.getRegistrations()) await registration.unregister(); } catch { /* нет доступа */ }
+    try { for (const key of await caches.keys()) await caches.delete(key); } catch { /* нет доступа */ }
+  }
+
   // у приложения есть сохранённая копия (service worker): оно откроется и при остановленном сервере
   const savedCopy = async url => {
     try { return !!(await navigator.serviceWorker.getRegistration(url))?.active; } catch { return false; }
@@ -89,6 +96,8 @@ export function createAppFrame({ frame, settings, onChange }) {
     if (mine !== attempt) return;
     if (!url) return fail(manual ? 'bad-url' : 'not-found', '');
     const sameOrigin = new URL(url).origin === location.origin;
+    if (server?.fresh && sameOrigin) await dropSavedCopy();
+    if (mine !== attempt) return;
     const up = await reachable(url);
     if (mine !== attempt) return;
     if (!up && !(sameOrigin && await savedCopy(url))) return fail('no-answer', url);

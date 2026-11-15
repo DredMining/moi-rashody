@@ -142,7 +142,7 @@ const server = http.createServer((req, res) => {
   if (pathname === '/app') return res.writeHead(302, { Location: '/app/' }).end();
   if (pathname === '/__sim/info') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
-    return res.end(JSON.stringify({ name: 'iphone-simulator', boot: BOOT, app: '/app/' }));
+    return res.end(JSON.stringify({ name: 'iphone-simulator', boot: BOOT, app: '/app/', fresh: FRESH }));
   }
   if (pathname === '/__sim/events') return openStream(req, res);
   if (FRESH && pathname === '/app/sw.js') {
