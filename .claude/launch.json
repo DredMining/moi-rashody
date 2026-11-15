@@ -4,19 +4,30 @@
     {
       "name": "style-audit",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["audit/tools/serve.js", ".", "8791"],
+      "runtimeArgs": [
+        "audit/tools/serve.js",
+        ".",
+        "8791"
+      ],
       "port": 8791
     },
     {
       "name": "iphone-simulator",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["dev-tools/iphone-simulator/server.js", "--no-open"],
+      "runtimeArgs": [
+        "dev-tools/iphone-simulator/server.js",
+        "--no-open"
+      ],
       "port": 8800
     },
     {
       "name": "design-lab",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["audit/tools/serve.js", "design-lab", "8805"],
+      "runtimeArgs": [
+        "audit/tools/serve.js",
+        "design-lab",
+        "8805"
+      ],
       "port": 8805
     }
   ]

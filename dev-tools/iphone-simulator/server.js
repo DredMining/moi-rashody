@@ -8,6 +8,10 @@
  *     --no-open       ничего не открывать (адрес печатается в консоль)
  *     --port 8800     другой порт
  *     --root <папка>  показать приложение из другой папки (по умолчанию — корень проекта)
+ *     --follow-main [секунды]  папка приложения — отдельная копия репозитория: раз в N секунд (по умолчанию 30)
+ *                     подтягивать в неё origin/main (fetch + checkout --detach), если в ней нет своих правок;
+ *                     изменённые файлы сами перезагружают приложение в рамке
+ *     --fresh         не держать service worker приложения: в рамке всегда то, что отдаёт сервер (без отставания на одну загрузку)
  *
  *   /app/…        файлы приложения, только чтение
  *   /simulator/…  страница симулятора (эта папка)
@@ -34,6 +38,10 @@ const HOST = '127.0.0.1'; // только этот компьютер: из се
 const BOOT = Date.now().toString(36); // по нему страница узнаёт, что сервер перезапускали
 const MOUNTS = [['/app/', APP_DIR], ['/simulator/', SIM_DIR]];
 const HOSTS = new Set([`localhost:${PORT}`, `127.0.0.1:${PORT}`]);
+const FRESH = has('--fresh');
+const FOLLOW = has('--follow-main') ? (Number(value('--follow-main', 30)) || 30) : 0;
+// вместо service worker приложения: сразу забывает кэши и снимает себя, страница каждый раз берётся с сервера
+const SW_STUB = "self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.map(n=>caches.delete(n)))).then(()=>self.registration.unregister())));";
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
@@ -134,9 +142,13 @@ const server = http.createServer((req, res) => {
   if (pathname === '/app') return res.writeHead(302, { Location: '/app/' }).end();
   if (pathname === '/__sim/info') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
-    return res.end(JSON.stringify({ name: 'iphone-simulator', boot: BOOT, app: '/app/' }));
+    return res.end(JSON.stringify({ name: 'iphone-simulator', boot: BOOT, app: '/app/', fresh: FRESH }));
   }
   if (pathname === '/__sim/events') return openStream(req, res);
+  if (FRESH && pathname === '/app/sw.js') {
+    res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-store' });
+    return res.end(req.method === 'HEAD' ? undefined : SW_STUB);
+  }
   for (const [prefix, base] of MOUNTS) {
     if (!pathname.startsWith(prefix)) continue;
     const file = locate(base, pathname.slice(prefix.length));
@@ -144,6 +156,22 @@ const server = http.createServer((req, res) => {
   }
   sendText(res, 404, 'Не найдено');
 });
+
+// ---- --follow-main: свежий main в папке приложения ----
+// Папка должна быть отдельной (git worktree в detached HEAD), в ней никто не правит файлы: если в ней появилось своё изменение, сервер её не трогает.
+if (FOLLOW) {
+  const { execFile } = require('child_process');
+  const git = (args, done) => execFile('git', ['-C', APP_DIR, ...args], { windowsHide: true }, done);
+  let warned = false;
+  const sync = () => git(['status', '--porcelain'], (err, out) => {
+    if (err) return;
+    if (out.trim()) { if (!warned) console.warn('--follow-main: в папке приложения есть свои изменения, main не подтягивается'); warned = true; return; }
+    warned = false;
+    git(['fetch', '-q', 'origin', 'main'], fetchErr => { if (!fetchErr) git(['checkout', '-q', '--detach', 'origin/main'], () => {}); });
+  });
+  sync();
+  setInterval(sync, FOLLOW * 1000).unref();
+}
 
 // ---- окно с симулятором ----
 function findChrome() {
@@ -183,6 +211,8 @@ server.listen(PORT, HOST, () => {
     '  iPhone 18 Pro Max — симулятор',
     `  Симулятор:   ${address}`,
     `  Приложение:  http://localhost:${PORT}/app/   (папка ${APP_DIR})`,
+    ...(FOLLOW ? [`  main подтягивается каждые ${FOLLOW} с`] : []),
+    ...(FRESH ? ['  service worker приложения отключён (--fresh)'] : []),
     '  Сохрани файл приложения — оно перезагрузится в телефоне само.',
     '  Остановить: Ctrl+C',
     '',

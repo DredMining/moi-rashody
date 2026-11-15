@@ -93,7 +93,7 @@ img{max-width:100%}
   /* type that stays outside the scale: 14 — dense text (rows, alerts), 16 — a field (never smaller: the iPhone zooms in) */
   --fs-base:14px; --fs-field:16px;
   /* white text on a coloured fill; the veil under a window */
-  --on-fill:#FFFFFF; --scrim:rgb(0 0 0 / .55);
+  --on-fill:#FFFFFF; --scrim:rgb(0 0 0 / .8);
   /* small shadows: the round «+», a message box, a picked segment, a switch's knob */
   --shadow-fab:0 4px 14px rgb(0 0 0 / .28); --shadow-toast:0 8px 24px rgb(0 0 0 / .3); --shadow-seg:0 1px 2px rgb(0 0 0 / .12); --shadow-knob:0 1px 3px rgb(0 0 0 / .35);
   /* roles the two looks fill differently: a block inside a card (a field, a small plate), the fill of a picked «Расход / Доход / Личное / Командировка»
@@ -173,7 +173,7 @@ button{cursor:pointer}
 @supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
   .tabs{background:var(--sheen),var(--glass);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%)}}
 /* 5px between the glass's rim and the tabs (said here over the phone frame's own padding for the old bar) */
-.app .tabs{padding:5px!important}
+.app .tabs{padding:3px!important}
 /* The picked tab: a second piece of glass inside the bar — one capsule (.tab-cap) that goes from tab to tab (a fifth of the row wide).
    It behaves as the tab bar of Telegram on an iPhone does (its lens, read from its source):
    · at rest it is a quiet plate with a touch of the accent — no glow; the chosen tab's icon and name are what is bright;
@@ -187,8 +187,8 @@ button{cursor:pointer}
    its dark back hides the plain row under it), .cap-fill — the plate, .cap-lens — the cut-out, .cap-unlift — takes the growth back off
    the copy, .cap-rim — the lens's edge. Only transforms and opacities change, nothing is laid out or painted anew.
    The rule here is the capsule's place before the script runs; till the script has filled it, it is not shown. */
-/* the same 6px (1 + 5) from the rim on every side (the capsule's edge and the glass's rim are concentric), as tall as a tab (owner, 14.11.2026) */
-.tab-cap{position:absolute;z-index:2;top:5px;bottom:5px;left:5px;width:calc((100% - 10px) / 5);border-radius:calc(var(--tabbar-h) / 2 - 5px);pointer-events:none;
+/* the same 4px (1 + 3) from the rim on every side (the capsule's edge and the glass's rim are concentric), as tall as a tab (owner, 14.11.2026) */
+.tab-cap{position:absolute;z-index:2;top:3px;bottom:3px;left:3px;width:calc((100% - 6px) / 5);border-radius:calc(var(--tabbar-h) / 2 - 3px);pointer-events:none;
   transform:translate3d(calc(var(--tab-i,2) * 100%),0,0);transform-origin:0 50%;will-change:transform}
 .tab-cap:empty{visibility:hidden}
 .cap-body,.cap-fill,.cap-lens,.cap-unlift,.cap-rim{position:absolute;inset:0;border-radius:inherit}
@@ -205,8 +205,8 @@ button{cursor:pointer}
 .cap-lens{overflow:hidden}
 /* the copy of the row: five cells laid as the tabs are (the same sizes, so at rest it lies exactly over them), in the chosen tab's colours;
    the tabs stand 6px below the glass's rim and the capsule 4px, so the copy is 2px lower than the capsule's top, as tall as a tab */
-.cap-row{position:absolute;left:0;top:0;width:500%;height:calc(var(--tabbar-h) - 12px);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;transform-origin:0 50%;will-change:transform}
-.cap-row b{padding:2px 0 1px;min-width:0;min-height:calc(var(--tabbar-h) - 12px);display:flex;flex-direction:column;align-items:center;gap:0;color:var(--ink);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.cap-row{position:absolute;left:0;top:0;width:500%;height:calc(var(--tabbar-h) - 8px);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;transform-origin:0 50%;will-change:transform}
+.cap-row b{padding:2px 0 1px;min-width:0;min-height:calc(var(--tabbar-h) - 8px);display:flex;flex-direction:column;align-items:center;gap:0;color:var(--ink);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
 .tabs.lift .cap-row b{transform:scale(1.15)}
 .tabs .cap-row .ico{color:var(--ico-on)}
 .tabs .cap-row svg{opacity:1}
@@ -215,7 +215,7 @@ button{cursor:pointer}
 .tabs.lift .cap-rim{opacity:1}
 /* The bar itself takes the touch — no scroll, no text picking, no callout */
 .tabs,.tabs *{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-.tabs button{position:relative;z-index:1;border:0;background:transparent;padding:2px 0 1px;min-width:0;min-height:calc(var(--tabbar-h) - 12px);display:flex;flex-direction:column;align-items:center;gap:0;color:var(--muted);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent;outline-offset:-3px;border-radius:26px}
+.tabs button{position:relative;z-index:1;border:0;background:transparent;padding:2px 0 1px;min-width:0;min-height:calc(var(--tabbar-h) - 8px);display:flex;flex-direction:column;align-items:center;gap:0;color:var(--muted);font-size:var(--fs-xs);font-weight:500;line-height:1.1;letter-spacing:.01em;-webkit-tap-highlight-color:transparent;outline-offset:-3px;border-radius:26px}
 .tabs .ico{position:relative;width:min(56px,100%);height:28px;border-radius:14px;display:grid;place-items:center;margin-bottom:-1px}
 .tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
 /* the icons of the tabs not picked (--tab-ico): grey in «Чёрный и бордо», a lighter accent in the night-blue look; at full strength,
@@ -230,7 +230,7 @@ button{cursor:pointer}
 @keyframes viewOut{to{opacity:0}}
 @keyframes viewFade{from{opacity:.4}to{opacity:1}}
 /* «Учёт» in the middle is a tab like the other four: the same plain «+» icon, no round button */
-.tabs .badge{position:absolute;top:0;right:8px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--warn);color:var(--badge-ink);font-family:var(--f-num);font-size:var(--fs-2xs);font-weight:600;line-height:17px;text-align:center;box-shadow:0 0 0 2px var(--surface)}
+.tabs .badge{position:absolute;top:6px;right:6px;min-width:15px;height:15px;padding:0 3px;border-radius:8px;background:var(--warn);color:var(--badge-ink);font-family:var(--f-num);font-size:var(--fs-2xs);font-weight:600;line-height:15px;text-align:center;box-shadow:0 0 0 2px var(--surface)}
 .tabs .badge:empty{display:none}
 
 /* Top */
@@ -254,7 +254,7 @@ button{cursor:pointer}
 .debt-overview-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 /* the hero's label, as «Всего денег» */
 .debt-overview-head .lbl{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
-.debt-overview-meta{display:flex;align-items:center;gap:var(--sp-2);min-width:0;padding-top:8px;border-top:1px solid var(--line)}
+.debt-overview-meta{display:flex;align-items:center;gap:var(--sp-2);min-width:0;padding-top:var(--pad-card);border-top:1px solid var(--line)}
 .debt-overview-people{width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:var(--r-sm);background:var(--inset);color:var(--accent)}
 .debt-overview-people svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .debt-overview .sub{min-width:0;font-size:var(--fs-xs);font-weight:500;line-height:1.3;overflow-wrap:anywhere}
@@ -556,7 +556,7 @@ input.num::placeholder{font-family:var(--f-body)}
 .recs .itemacts .del{padding-block:6px}
 /* Записи: сетка шрифтов 12/14/16/18/22 и высот 36/44 (Али, 14.11.2026) */
 :root #viewHistory .monthbar .title{font-size:18px}
-:root #viewHistory #scopeFilter button{min-height:36px}
+:root #viewHistory #scopeFilter button{min-height:32px}
 #accFilter .chip{min-height:28px;font-size:13px;padding:2px 10px}
 .recs .item{font-size:14px;min-height:44px;box-sizing:border-box;padding-block:2px}
 .recs .itemacts .linkbtn,.recs .itemacts .del{font-size:14px}
@@ -1116,11 +1116,11 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 .dperson .dcard{margin-top:8px;padding:8px 10px 10px;gap:4px;border-color:var(--line)}
 /* a debt picked in a person's list opens over the window, in its middle, on a dimmed ground; a tap on the ground closes it (owner, 14.11.2026) */
 .dperson .dcard-wrap{position:absolute;inset:0;z-index:5;display:flex;align-items:center;padding:12px;border-radius:inherit}
-.dperson .dcard-bg{position:absolute;inset:0;border-radius:inherit;background:rgb(0 0 0 / .82)}
+.dperson .dcard-bg{position:absolute;inset:0;border-radius:inherit;background:rgb(0 0 0 / .8)}
 /* the whole app behind it as dark as the window (owner, 14.11.2026), not the window alone */
-.wmodal:has(.dcard-wrap)>.sheet-bg{background:rgb(0 0 0 / .82);transition:background .16s}
+.wmodal:has(.dcard-wrap)>.sheet-bg{background:rgb(0 0 0 / .8);transition:background .16s}
 /* the person's window itself dims the app as much (owner, 14.11.2026): one darkness, so nothing changes when a debt opens over it */
-.wmodal:has(>.dperson)>.sheet-bg{background:rgb(0 0 0 / .82)}
+.wmodal:has(>.dperson)>.sheet-bg{background:rgb(0 0 0 / .8)}
 .dperson .dcard-wrap>.dcard{position:relative;width:100%;max-height:100%;overflow-y:auto;margin:0;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-modal);animation:zpop .16s ease-out}
 .dcard-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .dcard-t{display:flex;flex-direction:column;min-width:0}
@@ -1131,6 +1131,7 @@ details.more{background:var(--surface);border:1px solid var(--card-line);border-
 #debtTotal{font-size:22px}
 .debt-add-trigger{padding-top:0;padding-bottom:0}
 .debt-add-trigger::after{line-height:0}
+#debtSub{text-transform:uppercase;letter-spacing:.06em}
 #debtList .dgroup,#oweList .dgroup{padding-block:0;align-content:center}
 #debtAddModal .submit,#oweAddModal .submit,[data-debt-editor] .submit{height:var(--h-l);min-height:var(--h-l);padding-block:0}
 .dcard-sum{font-size:22px;font-weight:700;line-height:1.15}
@@ -1479,7 +1480,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   :root .zdue,:root #zakatSheet .zdue{padding-left:16px}
   /* a card with a glow («Мне должны», «Всего денег»): the glow is drawn from the card's very edge — under an edge that is not seen
      the picture would otherwise start again, a 1px line of the far side's colour */
-  :root .debt-overview,:root .total.mtot{background-origin:border-box}
+  :root .debt-overview,:root .total.mtot,:root .sumcard{background-origin:border-box}
   /* a section's title looks as the month card's label: semibold, capitals, .06em, muted (owner, 10.11.2026); both 13px (owner,
      12.11.2026; 14px before). One face: the month's title of «Записи» and «Итоги» is set in the text face too */
   :root{--f-display:var(--f-body)}
@@ -1537,6 +1538,20 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   :root .ghost{font-size:var(--fs-base)}
   /* the sums of the zakat card on Деньги stand three in a row: at 15px they run into the card's padding on a 375–390px phone */
   :root .zline .zcols b{font-size:14px}
+  /* окно «На что?» ровнее (Али, 15.11.2026): один промежуток 6px между плитками и по вертикали, «Другое» высотой 44, «ОТДЕЛЬНО» с равными отступами */
+  :root #sheet .tiles:not(.accs){gap:6px}
+  :root #sheet .tiles:not(.accs)>.tile:last-child:nth-child(4n+1):nth-child(n+6){min-height:44px;padding-block:0}
+  :root #sheet .tiles:not(.accs)+h3{margin-block:8px -4px}
+  :root #sheet:has(.tiles:not(.accs)) .sheet-panel{padding-bottom:20px}
+  /* на 393px «Развлечение» ломалось «Развлечени/е»: сетка выходит за поля окна на 10px (было 8), у плиток нет боковых отступов */
+  :root #sheet .tiles:not(.accs){margin-inline:-10px}
+  :root #sheet .tiles:not(.accs)+h3{margin-inline:-10px}
+  :root #sheet .tiles:not(.accs)>.tile{padding-inline:0}
+  @media (max-width:380px){:root #sheet .tiles:not(.accs)>.tile{letter-spacing:-.02em}}
+  /* иконки категорий крупнее (Али, 15.11.2026): круг 38px, значок 20px; плитка выше на 6px */
+  :root #sheet .tiles:not(.accs)>.tile .ic{width:38px;height:38px;font-size:20px}
+  :root #sheet .tiles:not(.accs)>.tile{min-height:calc(59px + 2.4em);justify-content:flex-start;padding-top:9px}
+  :root #sheet .tiles:not(.accs)>.tile:last-child:nth-child(4n+1):nth-child(n+6){min-height:44px;justify-content:center;padding-top:0}
   /* «Деньги» on one grid (owner, 14.11.2026, as «Долги»): type 12/14/16/18/22, heights 36 (tight buttons) and 44 (rows that are tapped), 10px between blocks, 8px inside windows */
   :root .mtot .lbl{font-size:12px}
   #moneyAsOf{text-transform:uppercase;letter-spacing:.06em}
@@ -1553,6 +1568,45 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   #zakatSheet .zrow small{font-size:12px}
   #zakatSheet .zfoot{font-size:12px}
   #zakatSheet .zgo{min-height:44px}
+  #zakatSheet .ztwo{grid-template-columns:1fr}
+  #zakatSheet .zk{gap:8px}
+  /* compact main page: «Настройки» and «Пересчитать…» in one line, the small note closer */
+  #zakatBox .acts{flex-wrap:nowrap;gap:10px}
+  #zakatBox .acts #zRe{flex:1 1 0;min-width:0;min-height:36px;margin:0;padding:0;text-align:right;line-height:1.25}
+  #zakatSheet .zhint.zfine{padding-top:2px}
+  /* variant Б: the sum in text colour, the accent only in the plate's edge, its caption and the arrows */
+  #zakatSheet .zhero{border:1px solid var(--accent)}
+  #zakatSheet .zhero .zcap{color:var(--accent)}
+  #zakatSheet .zhero>b{font-size:28px;line-height:1.2;font-weight:500;color:var(--ink)}
+  #zakatSheet .zgo{color:var(--ink)}
+  #zakatSheet .zgo span:last-child{color:var(--accent)}
+  #zakatSheet .zcard .zrow>div:first-child>span{text-transform:uppercase;letter-spacing:.04em}
+  #zakatSheet .zhint{gap:0}
+  #zakatSheetT{text-transform:uppercase;letter-spacing:.04em}
+  /* the accent mark before the title, as before «КАРТЫ» on «Деньги» */
+  #zakatSheetT::before{content:"";display:inline-block;width:3px;height:16px;border-radius:2px;background:var(--accent);margin-right:8px;vertical-align:-2px}
+  /* «Настройки закята»: on the grid — fields 42 (text stays 16, the iPhone zooms in under it), buttons 42 / 14, notes 12, captions in capitals */
+  #zForm input,#zForm select,#zForm .primary,#zForm .linkbtn{min-height:42px;height:42px}
+  #zForm .primary{font-size:14px}
+  #zForm .linkbtn{font-size:14px}
+  #zForm .zhint,#zForm .zhint b{font-size:12px}
+  /* compact: tighter window, blocks 8 apart, notes closer to their fields */
+  #zForm{padding:12px 16px 14px;gap:8px}
+  #zForm .dp-head{margin-bottom:0}
+  #zForm label{gap:2px;line-height:16px}
+  /* no empty box: «Нисаб» is a line of its own like «По хиджре», the empty block for past years takes no room */
+  #zForm .zhint{padding:0;background:none;color:var(--muted);margin-top:-2px}
+  #zForm .zhint b{color:var(--ink)}
+  #zForm #zStartH{margin-top:-4px}
+  #zForm #zPastBox:empty{display:none}
+  #zForm p{line-height:16px;margin:0}
+  #zForm label{text-transform:uppercase;letter-spacing:.04em}
+  #zForm label input,#zForm label select{text-transform:none;letter-spacing:normal}
+  #zakatSheet .zsheet-head{border-bottom:0;padding:8px 0 4px;margin-bottom:0}
+  /* compact: tighter head, plate and footnote (the rows stay one under another) */
+  #zakatSheet .zhero{padding:10px 12px;gap:0}
+  #zakatSheet .zsheet-panel{padding-bottom:12px}
+  #zakatSheet .zok,#zakatSheet .zhero small,#zakatSheet .zfine b{text-transform:uppercase;letter-spacing:.04em}
   #zakatSheet .zgo span:last-child{font-size:18px}
   #zakatBox #zSet{min-height:36px}
   #zakatBox #zRe{min-height:44px}
@@ -1817,7 +1871,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
 <div class="zsheet" id="zakatSheet" hidden role="dialog" aria-modal="true" aria-labelledby="zakatSheetT">
   <div class="sheet-bg" data-zx></div>
   <div class="zsheet-panel">
-    <div class="zsheet-head"><button type="button" class="zback" id="zBack" hidden aria-label="Назад к закяту">‹ Назад</button><b id="zakatSheetT" tabindex="-1">🌙 Закят</b><button type="button" class="iconbtn" data-zx aria-label="Закрыть">✕</button></div>
+    <div class="zsheet-head"><button type="button" class="zback" id="zBack" hidden aria-label="Назад к закяту">‹ Назад</button><b id="zakatSheetT" tabindex="-1">Закят</b><button type="button" class="iconbtn" data-zx aria-label="Закрыть">✕</button></div>
     <section id="zakatBox" aria-labelledby="zakatSheetT"></section>
   </div>
 </div>
@@ -3023,7 +3077,11 @@ function perDay(left){
    the first figure typed takes its place (owner, 13.11.2026; was put before it, «530000») */
 /* a window that opens on a figure already in the field puts no cursor in it (no keyboard, nothing chosen): the figure is chosen whole by the tap on the field (selIn), and the first digit typed takes its place (owner, 14.11.2026). A field that opens empty still gets the cursor at once */
 const focusEmpty=x=>{if(x&&!x.value)x.focus({preventScroll:true})};
-function selIn(x){if(x)x.addEventListener('focus',()=>{if(x.value)x.select()},{once:true})}
+/* the whole number is selected when a field is entered (owner, 13–14.11.2026). On a phone the finger's lift puts the caret in after the focus,
+   which un-selects it: so the selection is set again a moment later, and the lift right after the focus is not let to move the caret */
+function selIn(x){if(!x)return;let t=0;const go=()=>{if(x.value&&document.activeElement===x)try{x.select()}catch(e){}};
+  x.addEventListener('focus',()=>{t=Date.now();go();requestAnimationFrame(go);setTimeout(go,60);setTimeout(go,200)});
+  for(const ev of ['mouseup','touchend'])x.addEventListener(ev,e=>{if(Date.now()-t<350&&e.cancelable){e.preventDefault();go()}})}
 const limForm=(p,budget)=>{const er=`<p class="err" role="alert" id="${p}Err" hidden></p>`;
   return `<form class="inline-edit" id="${p}Form" novalidate>${p==='lim'?er:''}<input id="${p}Input" class="num" inputmode="decimal" placeholder="Например, 30000" value="${budget?vIn(budget):''}" aria-label="Лимит личных расходов на месяц"><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="${p}Cancel">Отмена</button>${p==='lim'?'':er}</form>`};
 function limFormOn(p,budget,done,then){
@@ -3605,7 +3663,7 @@ function renderZakat(){
   /* memory refused (nothing is saved): the year moved on is still what is shown — a due date long past never shows as one to come */
   const z=store?.status&&next||zset(), M=M0, T=iso(now), nisab=zNisab(z), L=zLedger(z), metal=zMetal(z);
   const owed=L.owed;let dip=null, line='';zShown=z;
-  let html='<div class="zk">';
+  let html='<div class="zk">', how='';
   const setup=!(z.price>0)||!(z.start||z.wait);
   /* what is owed and «История по годам» show also while the price or the balances are not in (as «Закят к оплате» on Учёт does);
      «Пересчитать» there only once they are — a year can't be counted without them */
@@ -3614,10 +3672,9 @@ function renderZakat(){
   const hist=zHistory(z);
   const paidSub=r=>r.paid>=r.amount-0.005?'оплачено ✓':`оплачено ${money(r.paid)}`;
   const histHtml=!hist.length?'':`<div class="zcard zhist">${hist.slice().reverse().map(r=>r.y
-    ?zRow(`Срок ${hijri(r.y.due)?NBH(hijri(r.y.due)):gDate(r.y.due)}`,r.y.below?'—':money(r.amount),r.y.below?`${gDate(r.y.due)} · ниже нисаба, закята не было`:`${gDate(r.y.due)} · облагалось ${money(r.y.base)}${r.y.approx?' (примерно)':''}${r.y.forced?' · начислен вручную':''} · ${paidSub(r)}`,'',
+    ?zRow(`Срок ${gDate(r.y.due)}`,r.y.below?'—':money(r.amount),(hijri(r.y.due)?NBH(hijri(r.y.due))+'<br>':'')+(r.y.below?'ниже нисаба, закята не было':`облагалось ${money(r.y.base)}${r.y.approx?' (примерно)':''}${r.y.forced?' · начислен вручную':''}<br>${paidSub(r)}`),'',
       r.y.settled||setup||!M?'':`<button type="button" class="linkbtn zre" data-zre="${esc(r.y.due)}">Пересчитать</button>`)
-    :zRow(esc(zxLabel(r.x)),money(r.amount),`${gDate(r.x.date)} · ${paidSub(r)}`)).join('')}</div>
-    ${L.paid?`<p class="zs">Всего выплачено: ${money(L.paid)}</p>`:''}`;
+    :zRow(esc(zxLabel(r.x)),money(r.amount),`${gDate(r.x.date)} · ${paidSub(r)}`)).join('')}${L.paid?zRow('Всего выплачено',money(L.paid),'','zsum'):''}</div>`;
   const histGo=hist.length?`<button type="button" class="zgo" data-zview="hist"><span>История по годам</span><span aria-hidden="true">›</span></button>`:'';
   if(setup){
     html+=`${due}<p class="zs">Приложение посчитает закят по всем счетам, напомнит о сроке и запишет выплаты. Нужно один раз указать цену грамма ${METAL[metal]} и примерную дату, когда ваши деньги дошли до нисаба.</p>
@@ -3636,7 +3693,7 @@ function renderZakat(){
     if(z.start) dip=zDip(z,M);
     const ended=dip&&dip.ended;
     const hero=!!z.start&&!ended&&!cur.below, heroSum=ea>=0.01?rest:cur.amount;
-    if(hero) html+=`<div class="zhero"><span class="zcap">${ea>=0.01?'Осталось отдать':'Закят к сроку'}</span><b>${money(heroSum)}</b><small>к сроку ${gDate(end)}${days>0?` · через ${days} ${plural(days,'день','дня','дней')}`:''}</small><small>Прогноз: сумма меняется вместе с остатками</small></div><details class="zfold"><summary>Как посчитано</summary>`;
+    if(hero) html+=`<div class="zhero"><span class="zcap">${ea>=0.01?'Осталось отдать':'Закят к сроку'}</span><b>${money(heroSum)}</b><small>к сроку ${gDate(end)}${days>0?` · через ${days} ${plural(days,'день','дня','дней')}`:''}</small></div><!--HOW-->`;
     html+=`<div class="zcard zchain">${zRow('Облагается сейчас',money(cur.base))}${zRow('Нисаб',money(nisab),`${NISAB_G[metal]} г ${METAL[metal]} × ${money(+z.price)}`,'m')}
       ${!z.start||ended?'':cur.below?zRow('Закят к сроку','—','сейчас ниже нисаба — закята не будет')
         /* given early: the year's zakat, minus what was given, what is left by the due date — short rows, not one long sentence */
@@ -3645,7 +3702,7 @@ function renderZakat(){
     if(z.start){
       html+=ended
         ?`<div class="zwarn"><p><b>Срок наступил ${bothDates(end)}</b>, но за год сумма опускалась ниже нисаба — решите ниже, как быть с этим годом.</p></div>`
-        :`<div class="zcard zdates">${zDateRow('Начало года',z.start)}${zDateRow('Срок',end,days>0?`через ${days} ${plural(days,'день','дня','дней')}`:'')}</div>${hero?'</details>':''}`;
+        :`<div class="zcard zdates">${zDateRow('Начало года',z.start)}${zDateRow('Срок',end,days>0?`через ${days} ${plural(days,'день','дня','дней')}`:'')}</div>${hero?'<!--/HOW-->':''}`;
       /* the year is over and on the due date the records show less than nisab: «оставить» would only save «закята не было» —
          so the choice is to charge the year anyway (the records are wrong) */
       const endV=ended?r2(zPool(z,M,end)):0, endLow=ended&&!atNisab(endV,nisab), fc=endLow?zCalc(end,z,M):null;
@@ -3673,8 +3730,8 @@ function renderZakat(){
     const ng=Object.fromEntries(M.neg(T).map(x=>[x.id,x.v])), negSub=ids=>{const l=ids.filter(id=>id in ng);
       return l.length?`${l.map(id=>`${WNAME[id]} ${money(ng[id])}`).join(', ')} в минусе — ${l.length>1?'считаются':'считается'} как 0: свои долги не вычитаются`:''};
     let sub='';
-    sub+=`<div class="zcard">${cards.length||Math.abs(cur.cash-(pg||0))>=0.01?zRow('Карты и наличные',money(r2(cur.cash-(pg||0))),[cards.map(id=>WNAME[id]).join(', '),negSub(cards)].filter(Boolean).join(' · '),tl>=0.01?'zp':'')+(tl>=0.01?zRow('из них командировочные',money(tv),tl-tv>=0.01?`на «Итогах» ${money(tl)} — больше, чем на счетах: остаток командировочных не сверен`:''):''):''}${pg===null?'':zRow('Копильник',money(pg),negSub(['piggy']))}
-      ${bMiss?'':zRow('Брокерский счёт',money(cur.broker),negSub(['broker'])||'сумма с вкладки «Деньги»')}
+    sub+=`<div class="zcard">${cards.length||Math.abs(cur.cash-(pg||0))>=0.01?zRow('Карты и наличные',money(r2(cur.cash-(pg||0))),negSub(cards),tl>=0.01?'zp':'')+(tl>=0.01?zRow('из них командировочные',money(tv),tl-tv>=0.01?`на «Итогах» ${money(tl)} — больше, чем на счетах: остаток командировочных не сверен`:''):''):''}${pg===null?'':zRow('Копильник',money(pg),negSub(['piggy']))}
+      ${bMiss?'':zRow('Брокерский счёт',money(cur.broker),negSub(['broker']))}
       ${cur.rel?zRow('Вам должны',money(cur.rel),'надёжные долги'):''}
       ${cur.doubt?zRow('Сомнительные долги',money(cur.doubt),'только для нисаба, закят — когда вернут'):''}
       ${cur.owedPrev?zRow('Неоплаченный закят','−'+money(cur.owedPrev)):''}
@@ -3685,9 +3742,11 @@ function renderZakat(){
       <div class="zhint"><b>Как считается</b><span>Ставка 2,5% со всей суммы, а не только сверх нисаба.</span><span>Деньги, пришедшие в этом году, тоже входят — с них закят отдаётся досрочно, это допустимо.</span><span>Свои долги не вычитаются (шафиитский мазхаб).</span><span>Жильё, машина и вещи не облагаются.</span></div>`;
     const why=sub;
         if(z.priceAt&&Date.now()-z.priceAt>30*864e5) html+=`<div class="zhint">Цена ${METAL[metal]} вписана ${gDate(iso(new Date(z.priceAt)))} — обновите её перед сроком.</div>`;
-    html+=`<div class="ztwo"><button type="button" class="zgo" data-zview="why"><span>Почему столько</span><span aria-hidden="true">›</span></button>${histGo.replace('История по годам','История')}</div>`;
+    const h0=html.indexOf('<!--HOW-->'), h1=html.indexOf('<!--/HOW-->');if(h0>=0&&h1>h0){how=html.slice(h0+10,h1);html=html.slice(0,h0)+html.slice(h1+11)}
+    html+=`<div class="ztwo">${how?'<button type="button" class="zgo" data-zview="how"><span>Как посчитано</span><span aria-hidden="true">›</span></button>':''}<button type="button" class="zgo" data-zview="why"><span>Почему столько</span><span aria-hidden="true">›</span></button>${histGo.replace('История по годам','История')}</div>`;
     /* «Почему столько» and «История» open as their own page inside the window, with «‹ Назад» */
-    if(state.zView==='why') html='<div class="zk">'+why;
+    if(state.zView==='how'&&how) html='<div class="zk">'+how;
+    else if(state.zView==='why') html='<div class="zk">'+why;
     else if(state.zView==='hist'&&histHtml) html='<div class="zk">'+histHtml;
     const lastY=(z.years||[]).slice().sort((a,b)=>b.due.localeCompare(a.due))[0];
     /* the last finished year can be counted again at any time (records fixed after the due date); every year — under «История по годам» */
@@ -3695,10 +3754,10 @@ function renderZakat(){
   }
   /* not counted yet (no price, no balances): its years can still be looked at */
   if((setup||!M)&&state.zView==='hist'&&histHtml) html='<div class="zk">'+histHtml;
-  const zv=state.zView==='hist'&&histHtml||state.zView==='why'&&!setup&&M?state.zView:null;
+  const zv=(state.zView==='hist'&&histHtml)||(state.zView==='why'&&!setup&&M)||(state.zView==='how'&&how)?state.zView:null;
   if(!zv) html+=`<div class="zhint zfine"><b>Расчёт ориентировочный</b><span>Шафиитский мазхаб, нисаб по ${metal==='gold'?'золоту (Муфтият ЧР считает по серебру)':'серебру, как у Муфтията ЧР'}.</span><span>По спорным вопросам уточните у имама.</span></div>`;
   html+='</div>';
-  $('zakatSheetT').textContent=zv==='why'?'Почему столько':zv==='hist'?'История по годам':'🌙 Закят';
+  $('zakatSheetT').textContent=zv==='how'?'Как посчитано':zv==='why'?'Почему столько':zv==='hist'?'История по годам':'Закят';
   $('zBack').hidden=!zv;
   box.innerHTML=html;
   $('zakatForm').innerHTML=state.editing==='zakat'?zForm(z):'';
@@ -3724,12 +3783,11 @@ function zForm(z){
   return `<div class="wmodal" role="dialog" aria-modal="true" aria-labelledby="zFormT"><div class="sheet-bg" data-zclose></div><form class="wallet-edit zform" id="zForm" novalidate><div class="dp-head"><div class="dp-t"><b id="zFormT" tabindex="-1">Настройки закята</b></div><button type="button" class="dp-x" data-zclose aria-label="Закрыть">✕</button></div>
     <label>Нисаб считать по (Муфтият ЧР — по серебру)<select id="zMetal"><option value="silver" ${metal==='silver'?'selected':''}>серебру — 595 г</option><option value="gold" ${metal==='gold'?'selected':''}>золоту — 85 г</option></select></label>
     <label><span id="zPriceL">Цена грамма ${METAL[metal]}, ₽</span><input id="zPrice" class="num" inputmode="decimal" placeholder="Например, 215" value="${+z.price>0?esc(String(+z.price).replace('.',',')):''}"></label>
-    <div class="zhint"><span>Учётная цена ЦБ: cbr.ru → «Драгоценные металлы»</span><span>Нисаб: <b id="zNis">${z.price?money(zNisab(z)):'—'}</b></span></div>
+    <div class="zhint"><span>Нисаб: <b id="zNis">${z.price?money(zNisab(z)):'—'}</b></span></div>
     <label>Когда ваши деньги дошли до нисаба<input id="zStart" type="date" min="1900-01-01" max="${iso(now)}" value="${isoOk(z.start)?z.start:''}"></label>
     <p id="zStartH">${zStartHint(z.start)}</p>
     <div id="zPastBox"></div>
-    <label>Брокерский счёт сейчас (бумаги + свободные деньги), ₽<input id="zBroker" class="num" inputmode="decimal" placeholder="${bNow===null?'Например, 150 000':'Сейчас: '+money(bNow)}" value=""></label>
-    <p>Это та же сумма, что у брокерского счёта на вкладке «Деньги»: новая заменит её и там. Акции считаются по полной стоимости. Пусто — останется как есть.</p>
+    <label>Брокерский счёт сейчас<br>(бумаги + свободные деньги), ₽<input id="zBroker" class="num" inputmode="decimal" placeholder="${bNow===null?'Например, 150 000':'Сейчас: '+money(bNow)}" value=""></label>
     <p class="err" role="alert" id="zErr" hidden></p>
     <div class="row"><button class="primary" type="submit">Сохранить</button><button class="linkbtn" type="button" data-zclose>Отмена</button></div></form></div>`;
 }
@@ -5280,7 +5338,7 @@ function sheetFrame(title,back){
   $('sheet').querySelector('.sheet-panel').scrollTop=0;
 }
 /* a category tile goes straight to the next step: a plain button, not a toggle */
-const tile=c=>`<button type="button" class="tile" data-pick="${c.id}" style="--c:${cvar(c.id)}"><span class="ic" aria-hidden="true">${ICON[c.id]||'•'}</span>${esc(c.custom?(state.pend.type==='in'?'Другой доход':'Другое'):c.name)}</button>`;
+const tile=c=>`<button type="button" class="tile" data-pick="${c.id}" style="--c:${cvar(c.id)}"><span class="ic" aria-hidden="true">${ICON[c.id]||'•'}</span>${esc(c.custom?(state.pend.type==='in'?'Другой доход':'Другое'):c.name).replace(/ и /g,' и ').replace('Связь и подписки','Связь<br>и подписки')}</button>`;
 function stepCat(){
   const p=state.pend;
   const groups=p.scope==='trip'?[['','trip']]:p.type==='in'?[['','in']]:[['','daily'],['Отдельно','sep']];
