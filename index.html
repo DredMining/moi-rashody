@@ -534,6 +534,11 @@ input.num::placeholder{font-family:var(--f-body)}
 :root:root #statSeg{padding:3px}
 :root:root #statSeg .sv-cap{top:3px;bottom:3px}
 :root:root #statSeg .sv-cap{background:radial-gradient(120% 100% at 50% 0%,var(--cap-tint),rgb(255 255 255 / 0) 75%),linear-gradient(180deg,rgb(255 255 255 / .13),rgb(255 255 255 / .07)),var(--glass-solid)}
+/* «Новая запись» on «Учёт»: its two switches with nothing doubled, as the tab bar (owner, 15.11.2026): one rim and the bar's even sheen,
+   no light edges inside the rim; the capsule without its white edge and thin outline — in the black look it keeps its colour rim
+   (wine, green, the trip's), which tells an expense from an income */
+:root #addBox .seg{background:linear-gradient(180deg,rgb(255 255 255 / .08),rgb(255 255 255 / 0) 55%),var(--glass-solid);box-shadow:0 6px 18px rgb(0 0 0 / .35)}
+:root #addBox .seg .sv-cap{box-shadow:none}
 @media (prefers-reduced-motion:reduce){:root :is(#statSeg,#scopeFilter,#addBox .seg) .sv-cap,:root :is(#statSeg,#scopeFilter,#addBox .seg) button{transition:none}}
 .listhead{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-2);flex-wrap:wrap}
 .day{display:flex;flex-direction:column}
