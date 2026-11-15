@@ -275,8 +275,10 @@ export function createAppFrame({ frame, settings, onChange }) {
     if (now) lastSignature = now;
   }
 
+  // Не постоянный поток «файл изменился», а короткая проверка раз в 2,5 с. Браузер держит к одному адресу не больше
+  // 6 соединений, и каждый открытый симулятор (панель каждой сессии) занимал одно навсегда: седьмая страница не могла
+  // загрузить даже шрифты приложения и висела на «Подключение…» (15.11.2026).
   function watch() {
-    if (server) { if (!events) listen(); return; }
     if (!pollTimer) pollTimer = setInterval(poll, 2500);
     emit({ live: info.sameOrigin ? 'poll' : 'off' });
   }
