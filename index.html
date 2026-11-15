@@ -1540,7 +1540,12 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0}
   /* окно «На что?» ровнее (Али, 15.11.2026): один промежуток 6px между плитками и по вертикали, «Другое» высотой 44, «ОТДЕЛЬНО» с равными отступами */
   :root #sheet .tiles:not(.accs){gap:6px}
   :root #sheet .tiles:not(.accs)>.tile:last-child:nth-child(4n+1):nth-child(n+6){min-height:44px;padding-block:0}
-  :root #sheet .tiles:not(.accs)+h3{margin-block:12px 0}
+  :root #sheet .tiles:not(.accs)+h3{margin-block:8px -4px}
+  :root #sheet:has(.tiles:not(.accs)) .sheet-panel{padding-bottom:20px}
+  /* иконки категорий крупнее (Али, 15.11.2026): круг 38px, значок 20px; плитка выше на 6px */
+  :root #sheet .tiles:not(.accs)>.tile .ic{width:38px;height:38px;font-size:20px}
+  :root #sheet .tiles:not(.accs)>.tile{min-height:calc(59px + 2.4em);justify-content:center}
+  :root #sheet .tiles:not(.accs)>.tile:last-child:nth-child(4n+1):nth-child(n+6){min-height:44px}
   /* «Деньги» on one grid (owner, 14.11.2026, as «Долги»): type 12/14/16/18/22, heights 36 (tight buttons) and 44 (rows that are tapped), 10px between blocks, 8px inside windows */
   :root .mtot .lbl{font-size:12px}
   #moneyAsOf{text-transform:uppercase;letter-spacing:.06em}
