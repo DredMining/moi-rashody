@@ -3333,7 +3333,10 @@ function renderWallets(){
   box.innerHTML=html;
   if(rc){
     const d=r2(rc.to-rc.from);
-    if($('rcAdd')) $('rcAdd').onclick=async()=>{fresh();state.recon=null;
+    if($('rcAdd')) $('rcAdd').onclick=async()=>{fresh();
+      /* no record over the limit of one record: a digit too many in the balance would become a huge «неучтённый доход» (owner, 18.11.2026) */
+      if(Math.abs(d)>MAX_ENTRY){toast(`Расхождение больше ${money(MAX_ENTRY)} — проверьте, нет ли лишней цифры. Одной записью его не внести.`,null,6000);return}
+      state.recon=null;
       /* the account was just checked: «сверено …» goes away as after any other check — in the same write as the record.
          Its day is today (past midnight it moves first), never before the day the balance was typed: dated earlier, the balance would hold it already (inAnchor) */
       const w=state.settings.wallets||{}, day=[today(),anchorDay(w[rc.id])].sort().pop(), t=Date.now();
@@ -3358,6 +3361,8 @@ function renderWallets(){
     /* the window closes (or the check question opens) and the next account's row comes up under the finger (fresh) */
     $('wForm').onsubmit=async e=>{e.preventDefault();fresh();const raw=$('wInput').value, v=parseNum(raw);
       if(!(v>=0)){const er=$('wErr');er.textContent=NUM_ERR+'.';er.hidden=false;$('wInput').setAttribute('aria-invalid',true);$('wInput').focus({preventScroll:true});return}
+      /* the same limit as one record: a balance with a digit too many is said under the field, nothing saved (owner, 18.11.2026) */
+      if(v>MAX_ENTRY){const er=$('wErr');er.textContent=BIG_ERR();er.hidden=false;$('wInput').setAttribute('aria-invalid',true);$('wInput').focus({preventScroll:true});return}
       const cur=walletValue(ed.id), w0=ws[ed.id];
       state.editing=null;
       /* zeros left by «Очистить всё» in older versions were never typed: the first real amount just becomes the balance */
@@ -3938,6 +3943,7 @@ function bindZakat(z,M){
     /* a year typed wrong (0203): such a date isn't counted right — the years after it are written without leading zeros */
     if(early(start)) return bad(EARLY_ERR,$('zStart'));
     if(bv&&!(b>=0)) return bad('Брокерский счёт — числом, например 150000.',$('zBroker'));
+    if(bv&&b>MAX_ENTRY) return bad(BIG_ERR(),$('zBroker'));
     const nz={...z,metal,price:r2(price)};
     /* a new price or metal — or the same price saved once «обновите её» is shown (he checked it): the reminder starts over.
        Saved within those 30 days for the date or the broker only, it is not taken for a check */
