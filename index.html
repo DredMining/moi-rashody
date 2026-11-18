@@ -3832,6 +3832,8 @@ function zPaySheet(amount){
     <p class="err" role="alert" id="zAmtErr" hidden></p>
     ${accPicker('zPayGo','Оплатить','<p class="zs">Намерение — закят. Можно частями: остаток останется в напоминании.</p>')}`;
   const zv=()=>parseNum($('zAmt').value), er=$('zAmtErr'), say=t=>{er.textContent=t;er.hidden=!t;$('zAmt').setAttribute('aria-invalid',!!t)};
+  /* the sum to pay is chosen whole by the tap: a part typed takes its place (owner, 18.11.2026) */
+  selIn($('zAmt'));
   /* the button always says the sum in the field; empty or zero — nothing to pay; a sum that doesn't read, or one over the limit
      (a digit too many, as in every form), is said under the field and the button waits */
   const ok=v=>v>0&&v<=MAX_ENTRY;
@@ -4090,6 +4092,8 @@ function renderItemEditor(){
   </div>`:'';
   host.querySelectorAll('[data-itemeditclose]').forEach(b=>b.onclick=closeItemEditor);
   bindEdits(host);armDeletes(host,delItem,'Запись удалена',delAsk);
+  /* the sum is chosen whole by the tap, the first digit typed takes its place — as in every other edit window (owner, 18.11.2026) */
+  selIn(host.querySelector('form[data-edit] input[name="amount"]'));
   /* et0/es0: the record's own kind — a pick differs from it */
   const f=host.querySelector('form[data-edit]');if(f){f.dataset.et0=f.dataset.et||'';f.dataset.es0=f.dataset.es||'';pk.forEach(([k,v])=>{if(f.dataset[k]!==v)f.querySelector(`button[data-${k}="${v}"]`)?.onclick()});if(fb)f.querySelector(`button[data-${fb[0]}="${fb[1]}"]`)?.focus({preventScroll:true})}
 }
@@ -4945,7 +4949,9 @@ function debtEditModal(d){
 }
 function bindDebtEdit(list){
   list.querySelectorAll('[data-debteditclose]').forEach(b=>b.onclick=()=>{fresh();state.editing=null;render()});
-  list.querySelectorAll('[data-dedit]').forEach(b=>b.onclick=()=>{fresh();state.editing='de-'+b.dataset.dedit;render();const f=list.querySelector('form[data-deform]'),x=f?.elements.amount;x?.focus({preventScroll:true});inView(f?.closest('.debt-add-modal'))});
+  list.querySelectorAll('[data-dedit]').forEach(b=>b.onclick=()=>{fresh();state.editing='de-'+b.dataset.dedit;render();const f=list.querySelector('form[data-deform]');inView(f?.closest('.debt-add-modal'))});
+  /* the window opens with no cursor (as every edit window with a figure in it); a tap on the sum chooses it whole (owner, 18.11.2026) */
+  list.querySelectorAll('form[data-deform] input[name="amount"]').forEach(selIn);
   list.querySelectorAll('form[data-deform]').forEach(f=>{
     /* the form goes and the debt's «Вернули всё» / «Отдал всё» comes up under the finger (fresh) */
     f.querySelector('[data-decancel]').onclick=()=>{fresh();state.editing=null;render()};
@@ -5511,6 +5517,8 @@ function stepAcc(){
     if(pt.on&&!pt.name.trim())$('ptName').focus({preventScroll:true})};
   $('ptName').oninput=e=>{pt.name=e.target.value;e.target.setAttribute('aria-invalid',false);if(er.textContent===NAME_ERR)say1(partErr())};
   $('ptPart').oninput=e=>{pt.part=e.target.value;sync()};
+  /* his part, filled in at half: a tap chooses it whole, the first digit typed takes its place (owner, 18.11.2026) */
+  selIn($('ptPart'));
   sync();
 }
 /* keepForm: paying from a reminder (zakat) leaves whatever is typed in the entry form alone */
