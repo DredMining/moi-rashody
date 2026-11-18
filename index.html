@@ -337,6 +337,8 @@ button{cursor:pointer}
 #tripStat:has(#tEnd)>small{grid-column:1;grid-row:2;align-self:start;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 #tripStat:has(#tEnd)>b{grid-column:2;grid-row:1/3;justify-self:center;margin-inline:6px}
 #tripStat:has(#tEnd)>.trows,#tripStat:has(#tEnd)>.tacts{grid-column:1/-1}
+/* the rows across the card never widen its columns: the question of «Закончилась» wraps inside the card, not past the screen (owner, 18.11.2026) */
+#tripStat:has(#tEnd)>.trows,#tripStat:has(#tEnd)>.tacts{contain:inline-size}
 #tripStat .trows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin-top:8px;min-height:58px;padding-top:2px;align-items:center;border-top:1px solid var(--line)}
 #tripStat .tr2{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;text-align:center;gap:0;min-height:0;font-size:14px}
 #tripStat .tr2>span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
@@ -2898,7 +2900,9 @@ function renderTrip(trip){
   if($('tEnd')) $('tEnd').onclick=async e=>{
     const b=e.currentTarget, v=r2(bal), z=Math.abs(v)<0.005;
     if(!b.dataset.armed){b.dataset.armed=Date.now();b.textContent=none?'Командировочных и трат не было — отметка начала снимется. Нажмите ещё раз':z?'Командировочные потрачены ровно. Закрыть — нажмите ещё раз':v>0?`Остаток ${money(v)} станет вашим доходом. Нажмите ещё раз`:!got?`Командировочные ещё не внесены — закрыть, и ${money(-v)} станут вашим расходом? Нажмите ещё раз`:`Перерасход ${money(-v)} — записать как ваш расход. Нажмите ещё раз`;b.style.color='var(--bad)';say(b.textContent);
-      setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent='Командировка закончилась';b.style.color=''}},5000);return}
+      /* the question is two or three lines: the window of the Итоги pages takes the card's new height (it was cut at the bottom; owner, 18.11.2026) */
+      syncStatsViewport();
+      setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent='Закончилась';b.style.color='';syncStatsViewport()}},5000);return}
     /* a quick double tap is not a confirmation */
     if(Date.now()-b.dataset.armed<600) return;
     /* only its start was marked — no trip money, nothing spent: the mark goes, with no record and no report («Отменить» puts it back);
