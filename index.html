@@ -640,6 +640,21 @@ input.num::placeholder{font-family:var(--f-body)}
 .item-editor-panel .item-edit .seg{gap:2px;padding:2px}
 .item-editor-panel .item-edit .seg button{min-height:var(--h-m);padding:4px}
 .item-editor-panel .item-edit .eseg{gap:6px}
+/* the edit window's «Расход / Доход» and «Личное / Командировка» look as «Новая запись»'s (owner, 19.11.2026): one glass groove and the
+   picked half one plate — no light ring inside the rim; the dark look rings it in its colour, the night-blue one fills it */
+:root .item-edit .eseg .seg{border:1px solid var(--glass-rim);border-radius:999px;padding:3px;gap:3px;
+  background:linear-gradient(180deg,rgb(255 255 255 / .08),rgb(255 255 255 / 0) 55%),var(--glass-solid);box-shadow:inset 0 1px 0 rgb(255 255 255 / .2),inset 0 -1px 0 rgb(255 255 255 / .05)}
+:root .item-edit .eseg .seg button{border-radius:999px;color:var(--muted);background:transparent;box-shadow:none}
+:root .item-edit .eseg .seg button[aria-pressed="true"]{color:var(--ink);font-weight:600;
+  background:radial-gradient(120% 100% at 50% 0%,var(--cap-tint),rgb(255 255 255 / 0) 75%),linear-gradient(180deg,rgb(255 255 255 / .13),rgb(255 255 255 / .07));
+  box-shadow:inset 0 1px 0 rgb(255 255 255 / .22),inset 0 0 0 1px rgb(255 255 255 / .07)}
+[data-theme="dark"] .item-edit .eseg .seg [data-et="out"][aria-pressed="true"]{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--burgundy-light) 55%,transparent)}
+[data-theme="dark"] .item-edit .eseg .seg [data-et="in"][aria-pressed="true"]{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--good) 55%,transparent)}
+[data-theme="dark"] .item-edit .eseg .seg [data-es="trip"][aria-pressed="true"]{box-shadow:inset 0 0 0 1.5px var(--trip)}
+[data-theme="light"] .item-edit .eseg .seg [data-et="out"][aria-pressed="true"]{background:var(--seg-out)}
+[data-theme="light"] .item-edit .eseg .seg [data-et="in"][aria-pressed="true"]{background:var(--seg-in)}
+[data-theme="light"] .item-edit .eseg .seg [data-es="own"][aria-pressed="true"]{background:var(--seg-own)}
+[data-theme="light"] .item-edit .eseg .seg [data-es="trip"][aria-pressed="true"]{background:var(--seg-trip)}
 .item-editor-panel .item-edit .row{gap:var(--sp-2)}
 .item-editor-panel .item-edit .row button{min-height:var(--h-m);padding-block:4px}
 /* the comparison: a name and three sums a row (on a phone the sums at 11px). One grid for the whole table, each row a subgrid of it:
