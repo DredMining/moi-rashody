@@ -627,6 +627,8 @@ input.num::placeholder{font-family:var(--f-body)}
 /* a record of a trip that already ended: what it changes and the offer to fix the trip result */
 .item-edit .ewarn{margin:0;font-size:var(--fs-sm);color:var(--ink);border-left:3px solid var(--warn);padding-left:8px}
 .item-edit label.echk{flex-direction:row;align-items:center;gap:var(--sp-2);font-size:var(--fs-sm);color:var(--ink);min-height:var(--h-l)}
+/* the box of «Поправить итог на разницу» and its kin in the app's own colour, not the browser's blue (owner, 18.11.2026) */
+.echk input{accent-color:var(--accent)}
 .item-edit .echk input{width:auto;flex:none;min-height:0}
 .wmodal.item-editor-modal{z-index:80;align-items:center;padding:calc(max(env(safe-area-inset-top,0px),var(--simulator-safe-top,0px)) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
 .item-editor-panel{position:relative;width:min(440px,100%);max-height:calc(100vh - max(env(safe-area-inset-top,0px),var(--simulator-safe-top,0px)) - env(safe-area-inset-bottom,0px) - 32px);max-height:calc(100dvh - max(env(safe-area-inset-top,0px),var(--simulator-safe-top,0px)) - env(safe-area-inset-bottom,0px) - 32px);overflow-y:auto;overscroll-behavior:contain;padding:var(--pad-card);border:1px solid var(--line);border-radius:var(--r-xl);background:var(--surface);box-shadow:var(--shadow-modal);animation:up .18s ease-out}
@@ -1317,6 +1319,10 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
 #recent .itemacts .del{padding-block:0}
 /* a long delete question goes onto its own line; «Изменить» stays one word */
 .itemacts .linkbtn{flex:none;white-space:nowrap}
+/* a long question with a second answer («Удалится и долг: … Точно?» + «Только трату»): one wide line over the row's buttons, not a
+   narrow plate of four lines between them (owner, 18.11.2026) */
+.itemacts:has(>.del.armed.wide),#recent .itemacts:has(>.del.armed.wide){flex-wrap:wrap;row-gap:8px}
+.itemacts>.del.armed.wide,#recent .itemacts>.del.armed.wide{flex:1 1 100%;order:-1;padding:6px 10px}
 .itemacts .del{min-width:0;text-align:right}
 /* a very narrow column (text at 200 %, a 195 px window): the sum gets its own line under the row instead of squeezing the name to nothing */
 #recent,.recs .day{container-type:inline-size}
@@ -1386,7 +1392,8 @@ details summary{cursor:pointer;color:var(--muted);font-size:var(--fs-sm);font-we
 .accsel .am.big{width:44px;height:44px}
 /* «Записать» stays on screen at the bottom of the sheet however low the screen is; content scrolls under it.
    Its own padding covers the gap above and the sheet's bottom padding, so nothing scrolled under it can be tapped */
-.sheet-go{position:sticky;bottom:calc(-20px - env(safe-area-inset-bottom,0px));z-index:1;display:flex;flex-direction:column;gap:var(--sp-2);background:var(--surface);margin:-12px 0 calc(-20px - env(safe-area-inset-bottom,0px));padding:12px 0 calc(20px + env(safe-area-inset-bottom,0px))}
+.sheet-go{position:sticky;bottom:calc(-20px - env(safe-area-inset-bottom,0px));z-index:1;display:flex;flex-direction:column;gap:var(--sp-2);background:var(--surface);margin:-8px 0 calc(-20px - env(safe-area-inset-bottom,0px));padding:12px 0 calc(20px + env(safe-area-inset-bottom,0px))}
+/* -8px, not -12px: the focus ring of the field just above (2px + 2px out) is not covered by this bar (owner, 18.11.2026) */
 .accsel b{font-size:18px;font-weight:600}
 .accsel-empty{color:var(--muted);font-size:var(--fs-base)}
 /* «Заплатил и за напарника» (the account step of a trip expense): a switch row; on — the partner's name and his part under it */
@@ -3118,7 +3125,7 @@ function selIn(x){if(!x)return;let t=0;const go=()=>{if(x.value&&document.active
   x.addEventListener('focus',()=>{t=Date.now();go();requestAnimationFrame(go);setTimeout(go,60);setTimeout(go,200)});
   for(const ev of ['mouseup','touchend'])x.addEventListener(ev,e=>{if(Date.now()-t<350&&e.cancelable){e.preventDefault();go()}})}
 const limForm=(p,budget)=>{const er=`<p class="err" role="alert" id="${p}Err" hidden></p>`;
-  return `<form class="inline-edit" id="${p}Form" novalidate>${p==='lim'?er:''}<input id="${p}Input" class="num" inputmode="decimal" placeholder="Например, 30000" value="${budget?vIn(budget):''}" aria-label="Лимит личных расходов на месяц"><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="${p}Cancel">Отмена</button>${p==='lim'?'':er}</form>`};
+  return `<form class="inline-edit" id="${p}Form" novalidate>${p==='lim'?er:''}<input id="${p}Input" class="num" inputmode="decimal" placeholder="30 000" value="${budget?vIn(budget):''}" aria-label="Лимит личных расходов на месяц"><button class="ghost" type="submit">Сохранить</button><button class="linkbtn" type="button" id="${p}Cancel">Отмена</button>${p==='lim'?'':er}</form>`};
 function limFormOn(p,budget,done,then){
   const bf=$(p+'Form'), er=$(p+'Err'), inp=$(p+'Input');
   selIn(inp);
@@ -4047,7 +4054,7 @@ const SCOPE_TWIN={taxi:'t_taxi',grocery:'t_grocery',fuel:'t_fuel',other:'t_other
 function catOpts(type,scope,sel){
   const pool=poolFor(type,scope).filter(c=>!c.auto||c.id===sel), on=pool.some(c=>c.id===sel)?sel:pool.find(c=>c.id===SCOPE_TWIN[sel])?.id||'';
   const o=c=>`<option value="${c.id}" ${c.id===on?'selected':''}>${esc(c.name)}</option>`, sep=pool.filter(c=>c.g==='sep');
-  return (on?'':'<option value="" selected disabled>Выберите категорию</option>')+pool.filter(c=>c.g!=='sep').sort((a,b)=>!!a.custom-!!b.custom).map(o).join('')
+  return (on?'':'<option value="" selected disabled>Выберите</option>')+pool.filter(c=>c.g!=='sep').sort((a,b)=>!!a.custom-!!b.custom).map(o).join('')
     +(sep.length?`<optgroup label="Отдельно">${[...SEP_ORDER,...sep.map(c=>c.id)].filter((id,n,a)=>a.indexOf(id)===n&&sep.some(c=>c.id===id)).map(id=>o(CAT[id])).join('')}</optgroup>`:'');
 }
 function editRow(i){
@@ -4638,11 +4645,11 @@ function armDeletes(root,fn,done,ask){
   root.querySelectorAll('.del').forEach(b=>{let x=null;b.onclick=async()=>{
     /* the question is the button's name while armed (its aria-label would hide it) and is read out by a screen reader */
     if(!b.classList.contains('armed')){const t=b.textContent, al=b.getAttribute('aria-label'), a=ask?.(b.dataset.id), [q,alt]=Array.isArray(a)?a:[a||'Точно?'];b.classList.add('armed');b.dataset.at=Date.now();b.textContent=q;b.removeAttribute('aria-label');
-      if(alt){x=Object.assign(document.createElement('button'),{type:'button',className:'linkbtn',textContent:alt[0]});if(alt[2])x.setAttribute('aria-label',alt[0]+': '+alt[2]);b.after(x);
+      if(alt){b.classList.add('wide');x=Object.assign(document.createElement('button'),{type:'button',className:'linkbtn',textContent:alt[0]});if(alt[2])x.setAttribute('aria-label',alt[0]+': '+alt[2]);b.after(x);
         /* a quick double tap is not an answer here either */
         x.onclick=()=>{if(Date.now()-b.dataset.at>=600)go(alt[1],b.dataset.id,[b,x])}}
       say(q.replace(/[^.?!]$/,'$&.')+(alt?` Или «${alt[0]}»${alt[2]?': '+alt[2]:''}.`:''));
-      setTimeout(()=>{if(b.isConnected){b.classList.remove('armed');b.textContent=t;if(al)b.setAttribute('aria-label',al);x?.remove();x=null}},q.length>8?(alt?7000:5000):3000);return}
+      setTimeout(()=>{if(b.isConnected){b.classList.remove('armed','wide');b.textContent=t;if(al)b.setAttribute('aria-label',al);x?.remove();x=null}},q.length>8?(alt?7000:5000):3000);return}
     /* a quick double tap is not a confirmation */
     if(Date.now()-b.dataset.at<600) return;
     go(fn,b.dataset.id,x?[b,x]:[b]);
@@ -5425,7 +5432,8 @@ function stepLabel(){
   $('sheetBody').innerHTML=`<form class="inline-edit" id="lblForm" novalidate style="flex-direction:column;align-items:stretch"><input id="lblInput" maxlength="40" placeholder="${p.type==='in'?'Например, продал телефон':'Например, подарок'}" value="${esc((p.label||p.word||'').slice(0,40))}" aria-label="Название" aria-describedby="lblErr"><p class="err" role="alert" id="lblErr" hidden></p><button class="submit" type="submit">Дальше</button></form>`;
   $('lblInput').focus({preventScroll:true});
   /* an empty name is said right under the field, in the sheet */
-  $('lblInput').oninput=()=>{$('lblErr').hidden=true;$('lblInput').setAttribute('aria-invalid',false)};
+  /* what is typed is kept at once: ‹ back to the tiles and «Другое» again brings it back (owner, 18.11.2026) */
+  $('lblInput').oninput=()=>{$('lblErr').hidden=true;$('lblInput').setAttribute('aria-invalid',false);p.label=$('lblInput').value.slice(0,40)};
   $('lblForm').onsubmit=e=>{e.preventDefault();const v=$('lblInput').value.trim();if(!v){const er=$('lblErr');er.textContent=p.type==='in'?'Впишите, что за доход.':'Впишите, на что потратили.';er.hidden=false;$('lblInput').setAttribute('aria-invalid',true);$('lblInput').focus({preventScroll:true});return}p.label=(v.charAt(0).toUpperCase()+v.slice(1)).slice(0,40);afterCat(true)};
 }
 function afterCat(labelDone){
