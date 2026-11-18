@@ -5225,7 +5225,11 @@ const PAD=matchMedia('(hover:none) and (pointer:coarse)').matches;
       if(parts.length>2||(parts[1]||'').replace(/\D/g,'').length>2)return;
       if(v==='0'&&s===1&&e===1&&k!==','){x.value=k;x.setSelectionRange(1,1)}else x.setRangeText(k,s,e,'end')}
     x.dispatchEvent(new Event('input',{bubbles:true}))};
-  pad.addEventListener('pointerdown',e=>{e.preventDefault();pressing=true;const b=e.target.closest('[data-k]');if(!b)return;
+  /* a tap in the gap between keys (a quarter of the letters' area) goes to the nearest key, as on the iPhone's own keyboard — fast typing
+     lost such taps, «the keys don't keep up» (owner, 18.11.2026). No farther than 24px: the panel's edges press nothing */
+  const nearKey=(x,y)=>{let best=null, bd=24*24;for(const k of pad.querySelectorAll('[data-k]')){if(!k.getClientRects().length||k.closest('[hidden]'))continue;
+    const r=k.getBoundingClientRect(), dx=Math.max(r.left-x,0,x-r.right), dy=Math.max(r.top-y,0,y-r.bottom), d=dx*dx+dy*dy;if(d<bd){bd=d;best=k}}return best};
+  pad.addEventListener('pointerdown',e=>{e.preventDefault();pressing=true;const b=e.target.closest('[data-k]')||nearKey(e.clientX,e.clientY);if(!b)return;
     /* the field gone or let go meanwhile (its window closed by another tab): the keys just go down */
     if(field&&(!field.isConnected||document.activeElement!==field)){pressing=false;close();return}
     b.classList.add('hit');if(isTxt(field)){pressT(b);return}
