@@ -1492,6 +1492,10 @@ html.pad-open .sheet-panel{max-height:calc(100% - env(safe-area-inset-top,0px) -
 /* a window in the middle stays where it is when the keys don't reach it, and goes up only as far as they cover it (the script: fitWin);
    one too tall for the room over the keys (.pad-tall) gets that room at its end and scrolls, as before (owner, 15.11.2026) */
 html.pad-open :is(.sheet.centered,.zsheet,.wmodal).pad-tall{padding-bottom:calc(var(--pad-h,0px) + 16px)}
+/* a step of a record too tall for that room (a narrow phone, «Заплатил и за напарника»): the window shrinks into it, not past the top of the
+   screen — its title with ✕ stays at the top, «Записать» over the keys, the middle scrolls (owner, 19.11.2026) */
+html.pad-open .sheet.centered.pad-tall .sheet-panel{max-height:calc(100dvh - var(--pad-h,0px) - 16px - env(safe-area-inset-top,0px) - 16px)}
+html.pad-open .sheet.centered.pad-tall .sheet-head{position:sticky;top:-12px;z-index:2;background:var(--surface);margin-top:-12px;padding-top:12px}
 @media (prefers-reduced-motion:reduce){.numpad,.numpad.on,.numpad button{transition:none}}
 /* hidden: empty and see-through, but still there — a screen reader hears each new message in it */
 .toast[hidden]{display:flex!important;opacity:0;pointer-events:none;padding:0;box-shadow:none}
@@ -5201,7 +5205,11 @@ const PAD=matchMedia('(hover:none) and (pointer:coarse)').matches;
   const scrollerOf=el=>{for(let p=el.parentElement;p&&p!==document.body;p=p.parentElement){const o=getComputedStyle(p).overflowY;if((o==='auto'||o==='scroll')&&p.scrollHeight>p.clientHeight)return p}return null};
   const reveal=x=>{if(field!==x)return;
     const sat=parseFloat(getComputedStyle(document.querySelector('.app')).paddingTop)||0, h=pad.offsetHeight, own=x.id==='amount';
-    const room=t=>{const sc=scrollerOf(t);if(!sc)return null;const sr=sc.getBoundingClientRect();return {sc,top:Math.max(sr.top,sat)+12,bottom:Math.min(sr.bottom,innerHeight-h)-8}};
+    const room=t=>{const sc=scrollerOf(t);if(!sc)return null;const sr=sc.getBoundingClientRect();let top=Math.max(sr.top,sat)+12, bottom=Math.min(sr.bottom,innerHeight-h)-8;
+      /* the window's own bars that stay put while it scrolls (its title, «Записать»): the field is shown between them, not under one (owner, 19.11.2026) */
+      for(const b of sc.querySelectorAll('.sheet-head,.sheet-go')){if(getComputedStyle(b).position!=='sticky')continue;const r=b.getBoundingClientRect();
+        if(b.matches('.sheet-go'))bottom=Math.min(bottom,r.top-8);else top=Math.max(top,r.bottom+8)}
+      return {sc,top,bottom}};
     let t=x, rm=room(x);if(!rm)return;
     for(const c of [own&&$('addBox'),x.closest('form'),x.closest('label')].filter(Boolean)){const r=room(c);if(r&&c.getBoundingClientRect().height<=r.bottom-r.top){t=c;rm=r;break}}
     const r=t.getBoundingClientRect(), {sc,top,bottom}=rm;
